@@ -1,0 +1,28 @@
+{
+  "trash": {
+    "title": "最近删除",
+    "command": "最近删除",
+    "commandDescription": "恢复你删除的请求、文件夹或环境",
+    "commandKeywords": "trash bin restore undo recover 回收站 恢复 撤销",
+    "empty": "最近没有删除任何内容。",
+    "note_other": "已删除的项目会保留 {{count}} 天。机密值不会保留；恢复的机密变量为空。",
+    "listLabel": "已删除的项目",
+    "kinds": {
+      "request": "请求",
+      "folder": "文件夹",
+      "environment": "环境"
+    },
+    "daysLeft_other": "剩余 {{count}} 天",
+    "restore": "恢复",
+    "restored": "已恢复 {{name}}。",
+    "deleteForever": "永久删除",
+    "emptyBin": "清空回收站",
+    "emptyBinTitle": "清空回收站？",
+    "emptyBinMessage": "回收站中的所有内容都将被永久删除。",
+    "emptyBinConfirm": "清空回收站",
+    "readFailed": "无法读取回收站：{{detail}}",
+    "saveFailed": "无法将已删除的项目保留在回收站中：{{detail}}",
+    "restoreFailed": "无法恢复该项目：{{detail}}",
+    "unnamed": "未命名"
+  }
+}

@@ -30,6 +30,7 @@
     "newRequest": "Nova requisição",
     "newSubfolder": "Nova subpasta",
     "runFolder": "Executar pasta",
+    "negativeFolder": "Executar testes negativos",
     "shareFolder": "Compartilhar pasta",
     "delete": "Excluir",
     "emptyImport": "Importar",
@@ -68,7 +69,8 @@
     "deleteManyMessage": "Excluir {{subject}}? Isto não pode ser desfeito.",
     "deleteManyMessageFolders": "Excluir {{subject}}? Tudo o que estiver dentro de uma pasta excluída e que você não selecionou sobe um nível. Isto não pode ser desfeito.",
     "deleteManyFailed": "Não foi possível excluir os itens selecionados",
-    "moreTags": "+{{count}}"
+    "moreTags": "+{{count}}",
+    "more": "Mais"
   },
   "label": {
     "folderTitle": "Cor e tags: {{name}}",
@@ -83,6 +85,8 @@
     "tagColoursNote": "Uma tag mantém sua cor em todo lugar onde é usada. Sem uma escolha, uma cor é escolhida a partir do nome da tag. As cores das tags ficam neste dispositivo.",
     "tagColour": "Cor da tag {{tag}}",
     "removeTag": "Remover a tag {{tag}}",
+    "moveTagUp": "Mover a tag {{tag}} para cima",
+    "moveTagDown": "Mover a tag {{tag}} para baixo",
     "done": "Concluir"
   },
   "tab": {
@@ -93,6 +97,8 @@
     "keepOpen": "Manter aba aberta",
     "revealInTree": "Mostrar na coleção",
     "copyAsCurl": "Copiar como cURL",
+    "showBeside": "Mostrar a resposta ao lado",
+    "hideBeside": "Parar de mostrar a resposta ao lado",
     "moveLeft": "Mover para a esquerda",
     "moveRight": "Mover para a direita",
     "previewHint": "Aba de pré-visualização. Edite ou clique duas vezes para mantê-la aberta.",

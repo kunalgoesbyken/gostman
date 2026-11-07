@@ -29,6 +29,7 @@
     "newRequest": "Neue Anfrage",
     "newSubfolder": "Neuer Unterordner",
     "runFolder": "Ordner ausführen",
+    "negativeFolder": "Negativtests ausführen",
     "shareFolder": "Ordner teilen",
     "delete": "Löschen",
     "emptyImport": "Importieren",
@@ -62,7 +63,8 @@
     "deleteManyMessage": "{{subject}} löschen? Das lässt sich nicht rückgängig machen.",
     "deleteManyMessageFolders": "{{subject}} löschen? Alles in einem gelöschten Ordner, das Sie nicht ausgewählt haben, rückt eine Ebene nach oben. Das lässt sich nicht rückgängig machen.",
     "deleteManyFailed": "Die ausgewählten Elemente konnten nicht gelöscht werden",
-    "moreTags": "+{{count}}"
+    "moreTags": "+{{count}}",
+    "more": "Mehr"
   },
   "label": {
     "folderTitle": "Farbe und Tags: {{name}}",
@@ -77,6 +79,8 @@
     "tagColoursNote": "Ein Tag behält überall dieselbe Farbe. Ohne Auswahl wird die Farbe aus dem Tag-Namen abgeleitet. Tag-Farben werden auf diesem Gerät gespeichert.",
     "tagColour": "Farbe des Tags {{tag}}",
     "removeTag": "Tag {{tag}} entfernen",
+    "moveTagUp": "Tag {{tag}} nach oben verschieben",
+    "moveTagDown": "Tag {{tag}} nach unten verschieben",
     "done": "Fertig"
   },
   "tab": {
@@ -87,6 +91,8 @@
     "keepOpen": "Tab offen halten",
     "revealInTree": "In Sammlung anzeigen",
     "copyAsCurl": "Als cURL kopieren",
+    "showBeside": "Antwort daneben anzeigen",
+    "hideBeside": "Antwort nicht mehr daneben anzeigen",
     "moveLeft": "Nach links",
     "moveRight": "Nach rechts",
     "previewHint": "Vorschau-Tab. Bearbeiten oder doppelklicken, um ihn offen zu halten.",

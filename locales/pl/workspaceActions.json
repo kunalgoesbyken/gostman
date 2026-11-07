@@ -46,6 +46,7 @@
     "clear": "Wyczyść",
     "closeTab": "Zamknij kartę",
     "closeTabMessage": "„{{name}}” ma niezapisane zmiany. Zapisać je przed zamknięciem?",
-    "dontSave": "Nie zapisuj"
+    "dontSave": "Nie zapisuj",
+    "openFirstRequest": "Otwórz pierwsze żądanie"
   }
 }

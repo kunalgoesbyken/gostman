@@ -1,8 +1,55 @@
 {
   "updates": {
+    "installedLabel": "Versione installata",
+    "checkNow": "Controlla ora",
+    "checking": "Controllo in corso…",
+    "neverChecked": "Non ancora controllato.",
+    "checkedAt": "Ultimo controllo {{when}}.",
+    "upToDate": "Questa è la versione più recente.",
+    "checkFailed": "Impossibile raggiungere il server degli aggiornamenti. Controlla la connessione e riprova.",
     "checksLabel": "Cerca nuove versioni",
+    "checksHint": "Una volta al giorno, legge l'ultima release da GitHub e la mostra nella barra di stato.",
+    "autoLabel": "Installa gli aggiornamenti automaticamente",
+    "autoHint": "Scarica le nuove versioni in background e le installa quando Gostman si chiude o si riavvia.",
+    "autoHintInstaller": "Scarica le nuove versioni in background, poi le installa quando riavvii Gostman e Windows chiede l'autorizzazione.",
     "available": "È disponibile la versione {{version}}",
+    "availableDetail": "Gostman la scarica, verifica che sia arrivata integra e la installa al riavvio.",
+    "availableUnverified": "Questa versione non può essere installata automaticamente, quindi scaricala dalla pagina delle release.",
+    "update": "Aggiorna Gostman",
+    "updateHint": "Scarica la versione {{version}}, verificala e installala",
+    "downloading": "Download di {{version}}… {{percent}}",
+    "downloadingDetail": "{{received}} di {{total}}",
+    "verifying": "Verifica che il download sia completo…",
+    "installing": "Installazione…",
+    "ready": "Riavvia per aggiornare",
+    "readyHint": "La versione {{version}} è stata scaricata e verificata. Riavvia Gostman per installarla.",
+    "readyDetail": "La versione {{version}} è stata scaricata e verificata.",
+    "restartNow": "Riavvia ora",
+    "restartTitle": "Riavviare Gostman?",
+    "restartMessage": "Gostman si chiude e si riapre alla versione {{version}}. Le schede aperte e le bozze non salvate vengono mantenute.",
+    "restartMessageInstaller": "Gostman si chiude, Windows chiede l'autorizzazione per installare la versione {{version}} e Gostman si riapre. Le schede aperte e le bozze non salvate vengono mantenute.",
+    "cancel": "Annulla download",
+    "tryAgain": "Riprova",
+    "releaseNotes": "Note di rilascio",
+    "openRelease": "Apri la pagina delle release",
+    "download": "Scarica",
+    "downloadHint": "Apri le note di rilascio e i download su GitHub",
     "dismiss": "Nascondi fino alla prossima versione",
-    "downloadHint": "Apri le note di rilascio e i download su GitHub"
+    "failed": "Aggiornamento non riuscito",
+    "failedHint": "Vedi cosa non ha funzionato in Preferenze, Aggiornamenti",
+    "failures": {
+      "network": "Impossibile raggiungere il server degli aggiornamenti. Controlla la connessione e riprova.",
+      "unsupported": "Non esiste ancora un aggiornamento automatico per questo sistema, quindi scaricalo dalla pagina delle release.",
+      "unverified": "Gostman non ha potuto confermare che questo aggiornamento sia autentico, quindi non è stato installato. Scaricalo dalla pagina delle release.",
+      "mismatch": "Il download non è arrivato correttamente, quindi non è stato installato. Riprova.",
+      "storage": "Gostman non ha potuto salvare il download su questo computer. Libera un po' di spazio e riprova.",
+      "install": "Gostman non ha potuto installare l'aggiornamento. Chiudilo ed esegui il programma di installazione dalla pagina delle release."
+    },
+    "manual": {
+      "scoop": "Installato con Scoop. Aggiornalo con {{command}}.",
+      "homebrew": "Installato con Homebrew. Aggiornalo con {{command}}.",
+      "system": "Installato come pacchetto di sistema, quindi scarica il nuovo pacchetto dalla pagina delle release e installalo.",
+      "other": "Questa copia di Gostman non può aggiornarsi da sola, quindi scarica le nuove versioni dalla pagina delle release."
+    }
   }
 }

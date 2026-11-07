@@ -1,0 +1,54 @@
+{
+  "negative": {
+    "title": "负向测试",
+    "intro": "发送已保存请求的修改副本：缺失或无效的凭据、错误的请求体、边界值和注入字符串。这只是一个基础检查工具，不是渗透测试工具。请针对测试或预发布环境运行。",
+    "scope": "要测试的请求",
+    "allRequests": "所有请求",
+    "hostsTitle": "将接收请求的主机",
+    "noHosts": "无法将这些请求的地址解析为主机。请检查它们使用的环境变量。",
+    "confirm": "我可以向这些主机发送修改后的请求",
+    "rate": "每秒请求数",
+    "limit": "发送多少个请求后停止",
+    "start": "开始",
+    "stop": "停止",
+    "plan_other": "将发送 {{count}} 个请求的修改副本。",
+    "variantsTitle": "修改副本",
+    "progress": "已发送 {{sent}} / {{total}}",
+    "done_other": "已发送 {{sent}} 个请求，{{count}} 个发现项。",
+    "noFindings": "没有发现可疑的应答。",
+    "noFindingsHint": "这并不表示 API 是安全的，只检查了几种常见错误。",
+    "emptyAction": "添加示例集合",
+    "severity": {
+      "high": "高",
+      "medium": "中",
+      "low": "低"
+    },
+    "variant": {
+      "credentialsMissing": "无凭据",
+      "credentialsInvalid": "无效凭据",
+      "bodyTruncated": "截断的 JSON",
+      "fieldRemoved": "删除字段 {{name}}",
+      "fieldWrongType": "字段 {{name}} 类型错误",
+      "fieldValue": "字段 {{name}} = {{value}}",
+      "fieldEmpty": "字段 {{name}} 为空",
+      "fieldLong_other": "字段 {{name}} 含 {{count}} 个字符",
+      "bodyLarge": "1 MB 的请求体",
+      "injectionField": "字段 {{name}} 含 {{injection}} 载荷",
+      "injectionParameter": "参数 {{name}} 含 {{injection}} 载荷"
+    },
+    "injection": {
+      "sql": "SQL 注入",
+      "xss": "脚本",
+      "traversal": "路径遍历",
+      "header": "请求头注入",
+      "expression": "表达式"
+    },
+    "finding": {
+      "accepted": "{{label}}：服务器返回 {{status}}，预期应为拒绝（4xx）",
+      "serverError": "{{label}}：服务器返回 {{status}}",
+      "stackTrace": "{{label}}：响应体中出现堆栈跟踪",
+      "sqlError": "{{label}}：响应体中出现数据库错误",
+      "reflected": "{{label}}：载荷原样出现在响应体中"
+    }
+  }
+}

@@ -44,13 +44,17 @@
       "payloadHash": "Empreinte de la charge utile",
       "extraData": "Données supplémentaires",
       "appId": "ID d’application",
+      "passwordType": "Type de mot de passe",
+      "timestampLifetime": "Durée de validité de l’horodatage",
       "delegation": "Délégation"
     },
     "hints": {
       "generated": "Généré si vide",
       "commaSeparated": "Séparés par des virgules, facultatif",
       "optional": "Facultatif",
-      "expiry": "1h, ou secondes"
+      "expiry": "1h, ou secondes",
+      "jwtExpiry": "Facultatif : ajoute iat et exp, par exemple 1h ou 900",
+      "wsseTimestamp": "Facultatif : ajoute un Timestamp valable 5m, ou un nombre de secondes"
     },
     "options": {
       "authorizationHeader": "En-tête Authorization",
@@ -58,6 +62,7 @@
       "formBody": "Corps de formulaire",
       "plainText": "Texte brut",
       "doNotInclude": "Ne pas inclure",
+      "passwordDigest": "Digest (SHA-1 avec nonce et date de création)",
       "include": "Inclure"
     },
     "notes": {
@@ -68,7 +73,8 @@
       "edgegrid": "Le jeton client, le secret client et le jeton d’accès sont requis pour signer la requête.",
       "jwt": "Le jeton est signé à nouveau à chaque requête, si bien que {{timestamp}} dans la charge utile reste à jour.",
       "asap": "L’émetteur, l’audience, l’ID de clé et la clé privée sont requis. Un nouveau jeton avec ses propres iat, exp et jti est envoyé comme jeton Bearer à chaque requête.",
-      "hawk": "L’ID d’authentification et la clé sont requis pour signer la requête."
+      "hawk": "L’ID d’authentification et la clé sont requis pour signer la requête.",
+      "wssecurity": "Insère un en-tête wsse:Security dans l’enveloppe SOAP du type de corps SOAP. Indiquez un nom d’utilisateur, une durée de validité de l’horodatage ou les deux."
     }
   }
 }

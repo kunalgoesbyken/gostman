@@ -62,7 +62,22 @@
     "views": {
       "pretty": "Formatat",
       "raw": "Brut",
-      "preview": "Previzualizare"
+      "preview": "Previzualizare",
+      "info": "Rezumat",
+      "hex": "Hex",
+      "msgpack": "MessagePack",
+      "cbor": "CBOR"
+    },
+    "hex": {
+      "label": "Vizualizare hexazecimală a corpului",
+      "offset": "Offset",
+      "text": "Text"
+    },
+    "decode": {
+      "working": "Se decodifică…",
+      "failed": "Corpul nu a putut fi citit ca {{format}}: {{reason}}",
+      "timedOut": "Citirea corpului ca {{format}} a durat mai mult de {{seconds}} secunde, deci a fost oprită. Folosiți Hex sau salvați-l într-un fișier.",
+      "tooLarge": "Acest corp are {{size}}. Gostman decodifică până la {{limit}}, deci folosiți Hex sau salvați-l într-un fișier."
     },
     "bodyView": "Vizualizarea corpului",
     "checksPassed": "{{passed}} din {{total}} verificări reușite",
@@ -76,7 +91,8 @@
       "compareParts": "Comparare",
       "comparedWith": "comparat cu",
       "bodyPart": "Corp",
-      "headersPart": "Antete"
+      "headersPart": "Antete",
+      "exportHar": "Exportare ca HAR"
     },
     "columns": {
       "name": "Nume",
@@ -115,6 +131,15 @@
     "treeTrimmed_one": "Se afișează începutul acestui arbore. Încă {{count}} valoare este ascunsă. Folosiți Brut sau filtrul pentru a vedea restul.",
     "treeTrimmed_few": "Se afișează începutul acestui arbore. Încă {{count}} valori sunt ascunse. Folosiți Brut sau filtrul pentru a vedea restul.",
     "treeTrimmed_other": "Se afișează începutul acestui arbore. Încă {{count}} de valori sunt ascunse. Folosiți Brut sau filtrul pentru a vedea restul.",
+    "tree": {
+      "expandAll": "Extindere totală",
+      "collapseAll": "Restrângere totală",
+      "depth": "Adâncimea extinderii",
+      "level": "Nivelul {{count}}",
+      "allLevels": "Toate nivelurile",
+      "remember": "Deschide mereu această cerere la această adâncime",
+      "remembered": "Această cerere se deschide deja la această adâncime"
+    },
     "requestFailed": "Cererea a eșuat",
     "error": "Eroare",
     "milliseconds": "{{value}} ms",

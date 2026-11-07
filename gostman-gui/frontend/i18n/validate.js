@@ -106,7 +106,8 @@ function pluralCategories(language) {
 
 function checkPlaceholders(id, entry, english, where, errors) {
   const allowed = placeholdersOfMessage(english)
-  const required = [...allowed].filter((name) => !(entry.plural && name === COUNT))
+  const everyForm = [...english.forms.values()].map(placeholdersOf)
+  const required = [...allowed].filter((name) => !(entry.plural && name === COUNT) && everyForm.every((names) => names.has(name)))
   entry.forms.forEach((text, category) => {
     if (text === '') return
     const used = placeholdersOf(text)
@@ -200,7 +201,8 @@ function validateLanguage(localesRoot, language, englishMessages, errors, warnin
       else missing += 1
     })
   })
-  return { translated, missing }
+  const absent = Object.keys(englishMessages).filter((namespace) => !present.has(namespace))
+  return { translated, missing, absent }
 }
 
 export function validateCatalogues(localesRoot) {
@@ -208,6 +210,7 @@ export function validateCatalogues(localesRoot) {
   const warnings = []
   const coverage = {}
   const fallbacks = {}
+  const absentFiles = {}
   const englishMessages = {}
   namespaceFiles(join(localesRoot, ENGLISH)).forEach((namespace) => {
     const where = `${ENGLISH}/${namespace}.json`
@@ -219,12 +222,16 @@ export function validateCatalogues(localesRoot) {
   languageDirectories(localesRoot)
     .filter((language) => language !== ENGLISH)
     .forEach((language) => {
-      const { translated, missing } = validateLanguage(localesRoot, language, englishMessages, errors, warnings)
+      const { translated, missing, absent } = validateLanguage(localesRoot, language, englishMessages, errors, warnings)
       coverage[language] = total === 0 ? 0 : translated / total
       fallbacks[language] = missing
+      absent.forEach((namespace) => (absentFiles[namespace] ??= []).push(language))
     })
-  return { errors, warnings, coverage, fallbacks, counts: { messages: total, namespaces: Object.keys(englishMessages).length } }
+  return { errors, warnings, coverage, fallbacks, absentFiles, counts: { messages: total, namespaces: Object.keys(englishMessages).length } }
 }
+
+export const absentFileSummary = ({ absentFiles }) =>
+  Object.entries(absentFiles).map(([namespace, languages]) => `${namespace}.json has no file in ${languages.join(', ')}, so its Weblate component has no translations ("No file mask matches")`)
 
 const withThousands = (value) => value.toLocaleString('en-US')
 

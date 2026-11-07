@@ -44,13 +44,17 @@
       "payloadHash": "载荷哈希",
       "extraData": "额外数据",
       "appId": "应用 ID",
+      "passwordType": "密码类型",
+      "timestampLifetime": "时间戳有效期",
       "delegation": "委托（Delegation）"
     },
     "hints": {
       "generated": "为空时自动生成",
       "commaSeparated": "以逗号分隔，可选",
       "optional": "可选",
-      "expiry": "1h，或秒数"
+      "expiry": "1h，或秒数",
+      "jwtExpiry": "可选：添加 iat 和 exp，例如 1h 或 900",
+      "wsseTimestamp": "可选：添加有效期为 5m 或指定秒数的 Timestamp"
     },
     "options": {
       "authorizationHeader": "Authorization 请求头",
@@ -58,6 +62,7 @@
       "formBody": "表单请求体",
       "plainText": "纯文本",
       "doNotInclude": "不包含",
+      "passwordDigest": "Digest（SHA-1，含 nonce 和创建时间）",
       "include": "包含"
     },
     "notes": {
@@ -68,7 +73,8 @@
       "edgegrid": "签名请求需要客户端令牌、客户端机密和访问令牌。",
       "jwt": "每次发送请求时都会重新签发令牌，因此载荷中的 {{timestamp}} 始终保持最新。",
       "asap": "需要签发者、受众、密钥 ID 和私钥。每次请求都会以 Bearer 令牌发送一个带有独立 iat、exp 和 jti 的新令牌。",
-      "hawk": "签名请求需要 Auth ID 和密钥。"
+      "hawk": "签名请求需要 Auth ID 和密钥。",
+      "wssecurity": "在 SOAP 请求体类型的 SOAP 信封中插入 wsse:Security 请求头。请填写用户名、时间戳有效期，或两者都填。"
     }
   }
 }

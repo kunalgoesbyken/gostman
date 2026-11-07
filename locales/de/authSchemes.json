@@ -44,13 +44,17 @@
       "payloadHash": "Payload-Hash",
       "extraData": "Zusatzdaten",
       "appId": "App-ID",
+      "passwordType": "Passworttyp",
+      "timestampLifetime": "Gültigkeit des Zeitstempels",
       "delegation": "Delegation"
     },
     "hints": {
       "generated": "Wird erzeugt, wenn leer",
       "commaSeparated": "Kommagetrennt, optional",
       "optional": "Optional",
-      "expiry": "1h oder Sekunden"
+      "expiry": "1h oder Sekunden",
+      "jwtExpiry": "Optional: fügt iat und exp hinzu, z. B. 1h oder 900",
+      "wsseTimestamp": "Optional: fügt einen Timestamp hinzu, gültig für 5m oder Sekunden"
     },
     "options": {
       "authorizationHeader": "Authorization-Header",
@@ -58,6 +62,7 @@
       "formBody": "Formular-Body",
       "plainText": "Klartext",
       "doNotInclude": "Nicht einbeziehen",
+      "passwordDigest": "Digest (SHA-1 mit Nonce und Erstellungszeit)",
       "include": "Einbeziehen"
     },
     "notes": {
@@ -68,7 +73,8 @@
       "edgegrid": "Client-Token, Client Secret und Zugriffstoken sind zum Signieren der Anfrage erforderlich.",
       "jwt": "Das Token wird für jede Anfrage neu signiert, sodass {{timestamp}} im Payload aktuell bleibt.",
       "asap": "Aussteller, Zielgruppe, Schlüssel-ID und privater Schlüssel sind erforderlich. Mit jeder Anfrage wird ein neues Token mit eigenen iat, exp und jti als Bearer-Token gesendet.",
-      "hawk": "Auth-ID und Schlüssel sind zum Signieren der Anfrage erforderlich."
+      "hawk": "Auth-ID und Schlüssel sind zum Signieren der Anfrage erforderlich.",
+      "wssecurity": "Fügt einen wsse:Security-Header in den SOAP-Umschlag des Body-Typs SOAP ein. Geben Sie einen Benutzernamen, eine Gültigkeit des Zeitstempels oder beides an."
     }
   }
 }

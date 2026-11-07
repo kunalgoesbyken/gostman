@@ -16,12 +16,14 @@
       "body": "请求体",
       "auth": "认证",
       "graphql": "GraphQL",
+      "files": "文件",
       "grpc": "gRPC",
       "mcp": "MCP",
       "websocket": "WebSocket",
       "vars": "变量",
       "extract": "提取",
       "tests": "检查",
+      "notes": "备注",
       "settings": "设置"
     }
   }

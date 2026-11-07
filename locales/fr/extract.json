@@ -24,6 +24,8 @@
     "source": "Source de la valeur",
     "scope": "Où la valeur est conservée",
     "remove": "Supprimer la règle d’extraction",
-    "runNow": "Exécuter"
+    "runNow": "Exécuter",
+    "environmentNamed": "Environnement : {{name}}",
+    "alreadyDefined": "Déjà définie ({{source}}) ; la valeur extraite est conservée dans la portée choisie sur cette ligne."
   }
 }

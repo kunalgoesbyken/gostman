@@ -9,7 +9,8 @@
       "website": "Webサイト",
       "source": "ソースコード",
       "releases": "リリース",
-      "issues": "問題を報告"
+      "issues": "問題を報告",
+      "sponsor": "スポンサー"
     },
     "diagnosticsHint": "診断情報には、バージョン、プラットフォーム、件数のみが含まれます。リクエスト、URL、変数、トークン、シークレットは含まれません。",
     "copyDiagnostics": "診断情報をコピー",

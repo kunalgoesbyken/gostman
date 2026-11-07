@@ -1,8 +1,55 @@
 {
   "updates": {
+    "installedLabel": "Version installée",
+    "checkNow": "Vérifier maintenant",
+    "checking": "Vérification…",
+    "neverChecked": "Pas encore vérifié.",
+    "checkedAt": "Dernière vérification {{when}}.",
+    "upToDate": "Vous avez la dernière version.",
+    "checkFailed": "Impossible de joindre le serveur de mises à jour. Vérifiez votre connexion et réessayez.",
     "checksLabel": "Rechercher de nouvelles versions",
+    "checksHint": "Une fois par jour, lire la dernière version publiée sur GitHub et l’afficher dans la barre d’état.",
+    "autoLabel": "Installer les mises à jour automatiquement",
+    "autoHint": "Télécharger les nouvelles versions en arrière-plan et les installer à la fermeture ou au redémarrage de Gostman.",
+    "autoHintInstaller": "Télécharger les nouvelles versions en arrière-plan, puis les installer quand vous redémarrez Gostman et que Windows demande l’autorisation.",
     "available": "La version {{version}} est disponible",
+    "availableDetail": "Gostman la télécharge, vérifie qu’elle est arrivée intacte et l’installe au redémarrage.",
+    "availableUnverified": "Cette version ne peut pas être installée automatiquement : téléchargez-la depuis la page des versions.",
+    "update": "Mettre à jour Gostman",
+    "updateHint": "Télécharger la version {{version}}, la vérifier et l’installer",
+    "downloading": "Téléchargement de {{version}}… {{percent}}",
+    "downloadingDetail": "{{received}} sur {{total}}",
+    "verifying": "Vérification que le téléchargement est complet…",
+    "installing": "Installation…",
+    "ready": "Redémarrer pour mettre à jour",
+    "readyHint": "La version {{version}} est téléchargée et vérifiée. Redémarrez Gostman pour l’installer.",
+    "readyDetail": "La version {{version}} est téléchargée et vérifiée.",
+    "restartNow": "Redémarrer maintenant",
+    "restartTitle": "Redémarrer Gostman ?",
+    "restartMessage": "Gostman se ferme et se rouvre en version {{version}}. Les onglets ouverts et les brouillons non enregistrés sont conservés.",
+    "restartMessageInstaller": "Gostman se ferme, Windows demande l’autorisation d’installer la version {{version}}, puis Gostman se rouvre. Les onglets ouverts et les brouillons non enregistrés sont conservés.",
+    "cancel": "Annuler le téléchargement",
+    "tryAgain": "Réessayer",
+    "releaseNotes": "Notes de version",
+    "openRelease": "Ouvrir la page des versions",
+    "download": "Télécharger",
+    "downloadHint": "Ouvrir les notes de version et les téléchargements sur GitHub",
     "dismiss": "Masquer jusqu’à la prochaine version",
-    "downloadHint": "Ouvrir les notes de version et les téléchargements sur GitHub"
+    "failed": "La mise à jour a échoué",
+    "failedHint": "Voir ce qui s’est passé dans Préférences, Mises à jour",
+    "failures": {
+      "network": "Impossible de joindre le serveur de mises à jour. Vérifiez votre connexion et réessayez.",
+      "unsupported": "Il n’y a pas encore de mise à jour automatique pour ce système : téléchargez-la depuis la page des versions.",
+      "unverified": "Gostman n’a pas pu confirmer l’authenticité de cette mise à jour : elle n’a pas été installée. Téléchargez-la depuis la page des versions.",
+      "mismatch": "Le téléchargement n’est pas arrivé correctement : il n’a pas été installé. Réessayez.",
+      "storage": "Gostman n’a pas pu enregistrer le téléchargement sur cet ordinateur. Libérez de l’espace et réessayez.",
+      "install": "Gostman n’a pas pu installer la mise à jour. Fermez-le et lancez le programme d’installation depuis la page des versions."
+    },
+    "manual": {
+      "scoop": "Installé avec Scoop. Mettez-le à jour avec {{command}}.",
+      "homebrew": "Installé avec Homebrew. Mettez-le à jour avec {{command}}.",
+      "system": "Installé comme paquet système : téléchargez le nouveau paquet depuis la page des versions et installez-le.",
+      "other": "Cette copie de Gostman ne peut pas se mettre à jour elle-même : téléchargez les nouvelles versions depuis la page des versions."
+    }
   }
 }

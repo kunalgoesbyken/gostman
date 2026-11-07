@@ -14,6 +14,18 @@
     "proxyAddressPlaceholder": "http://user:password@proxy.example.com:8080",
     "bypass": "Ocolire pentru gazde",
     "bypassPlaceholder": "localhost, *.internal.example.com",
+    "resolution": "Rezolvare nume",
+    "resolve": "Suprascrieri de gazde",
+    "resolvePlaceholder": "api.example.com:443:203.0.113.10",
+    "resolveNote": "O suprascriere pe linie, sub forma host:port:address, ca la curl --resolve. Folosiți * pentru orice port. Cererea poartă în continuare numele de gazdă original.",
+    "ipFamily": "Versiune IP",
+    "ipFamilies": {
+      "auto": "Automat",
+      "v4": "Doar IPv4",
+      "v6": "Doar IPv6"
+    },
+    "collectionResolve": "Suprascrieri de gazde",
+    "collectionIpFamily": "Versiune IP",
     "certificates": "Certificate",
     "caCertificate": "Certificat CA",
     "chooseCA": "Alegeți certificatul CA (PEM sau DER)",

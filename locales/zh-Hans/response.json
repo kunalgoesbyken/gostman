@@ -62,7 +62,22 @@
     "views": {
       "pretty": "美化",
       "raw": "原始",
-      "preview": "预览"
+      "preview": "预览",
+      "info": "摘要",
+      "hex": "十六进制",
+      "msgpack": "MessagePack",
+      "cbor": "CBOR"
+    },
+    "hex": {
+      "label": "响应体的十六进制视图",
+      "offset": "偏移",
+      "text": "文本"
+    },
+    "decode": {
+      "working": "正在解码…",
+      "failed": "无法将响应体读取为 {{format}}：{{reason}}",
+      "timedOut": "将响应体读取为 {{format}} 用时超过 {{seconds}} 秒，已被停止。请使用十六进制视图或将其保存到文件。",
+      "tooLarge": "此响应体大小为 {{size}}。Gostman 最多解码 {{limit}}，请使用十六进制视图或将其保存到文件。"
     },
     "bodyView": "响应体视图",
     "checksPassed": "{{total}} 项检查中有 {{passed}} 项通过",
@@ -76,7 +91,8 @@
       "compareParts": "对比",
       "comparedWith": "对比",
       "bodyPart": "响应体",
-      "headersPart": "响应头"
+      "headersPart": "响应头",
+      "exportHar": "导出为 HAR"
     },
     "columns": {
       "name": "名称",
@@ -113,6 +129,15 @@
     "binaryDescription": "{{type}} 无法显示为文本。请下载后用其他程序打开。",
     "previewTitle": "响应预览",
     "treeTrimmed_other": "这里只显示树的开头部分，另有 {{count}} 个值被隐藏。请使用“原始”或筛选查看其余内容。",
+    "tree": {
+      "expandAll": "全部展开",
+      "collapseAll": "全部折叠",
+      "depth": "展开深度",
+      "level": "第 {{count}} 层",
+      "allLevels": "所有层级",
+      "remember": "每次都以此深度打开此请求",
+      "remembered": "此请求已按此深度打开"
+    },
     "requestFailed": "请求失败",
     "error": "错误",
     "milliseconds": "{{value}} ms",

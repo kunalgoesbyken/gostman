@@ -30,6 +30,7 @@
     "newRequest": "Nuova richiesta",
     "newSubfolder": "Nuova sottocartella",
     "runFolder": "Esegui cartella",
+    "negativeFolder": "Esegui test negativi",
     "shareFolder": "Condividi cartella",
     "delete": "Elimina",
     "emptyImport": "Importa",
@@ -68,7 +69,8 @@
     "deleteManyMessage": "Eliminare {{subject}}? L'operazione non può essere annullata.",
     "deleteManyMessageFolders": "Eliminare {{subject}}? Tutto ciò che si trova in una cartella eliminata e che non hai selezionato sale di un livello. L'operazione non può essere annullata.",
     "deleteManyFailed": "Impossibile eliminare gli elementi selezionati",
-    "moreTags": "+{{count}}"
+    "moreTags": "+{{count}}",
+    "more": "Altro"
   },
   "label": {
     "folderTitle": "Colore e tag: {{name}}",
@@ -83,6 +85,8 @@
     "tagColoursNote": "Un tag mantiene il suo colore ovunque venga usato. Se non scegli nulla, un colore viene scelto dal nome del tag. I colori dei tag sono conservati su questo dispositivo.",
     "tagColour": "Colore del tag {{tag}}",
     "removeTag": "Rimuovi il tag {{tag}}",
+    "moveTagUp": "Sposta su il tag {{tag}}",
+    "moveTagDown": "Sposta giù il tag {{tag}}",
     "done": "Fatto"
   },
   "tab": {
@@ -93,6 +97,8 @@
     "keepOpen": "Mantieni aperta la scheda",
     "revealInTree": "Mostra nella raccolta",
     "copyAsCurl": "Copia come cURL",
+    "showBeside": "Mostra la risposta a lato",
+    "hideBeside": "Non mostrare più la risposta a lato",
     "moveLeft": "Sposta a sinistra",
     "moveRight": "Sposta a destra",
     "previewHint": "Scheda anteprima. Modificala o fai doppio clic per mantenerla aperta.",

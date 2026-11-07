@@ -12,7 +12,11 @@
       "folder": "Pasta",
       "request": "Requisição",
       "process": "Arquivo .env",
-      "session": "Sessão"
+      "session": "Sessão",
+      "flowLoop": "Item do loop",
+      "flowSend": "Somente este envio",
+      "flowCall": "Passada ao fluxo chamado",
+      "flowRun": "Variável do fluxo, para esta execução"
     }
   }
 }

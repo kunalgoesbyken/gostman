@@ -24,6 +24,8 @@
     "source": "値の取得元",
     "scope": "値の保持先",
     "remove": "抽出ルールを削除",
-    "runNow": "今すぐ実行"
+    "runNow": "今すぐ実行",
+    "environmentNamed": "環境：{{name}}",
+    "alreadyDefined": "定義済みです（{{source}}）。抽出した値は、この行で選んだスコープに保存されます。"
   }
 }

@@ -1,0 +1,63 @@
+{
+  "negative": {
+    "title": "Testy negatywne",
+    "intro": "Wysyła zmienione kopie zapisanych żądań: brakujące lub nieprawidłowe dane uwierzytelniające, błędne treści, wartości graniczne i ciągi wstrzyknięć. To podstawowe narzędzie sprawdzające, a nie narzędzie do testów penetracyjnych. Uruchamiaj je na środowisku testowym lub przedprodukcyjnym.",
+    "scope": "Żądania do przetestowania",
+    "allRequests": "Wszystkie żądania",
+    "hostsTitle": "Hosty, które otrzymają żądania",
+    "noHosts": "Nie udało się ustalić hosta dla adresów tych żądań. Sprawdź zmienne środowiska, których używają.",
+    "confirm": "Mogę wysyłać zmienione żądania do tych hostów",
+    "rate": "Żądania na sekundę",
+    "limit": "Zatrzymaj po (żądaniach)",
+    "start": "Start",
+    "stop": "Zatrzymaj",
+    "plan_one": "Zostanie wysłana {{count}} zmieniona kopia żądań.",
+    "plan_few": "Zostaną wysłane {{count}} zmienione kopie żądań.",
+    "plan_many": "Zostanie wysłanych {{count}} zmienionych kopii żądań.",
+    "plan_other": "Zostanie wysłane {{count}} zmienionej kopii żądań.",
+    "variantsTitle": "Zmienione kopie",
+    "progress": "Wysłano {{sent}} z {{total}}",
+    "done_one": "Wysłane żądania: {{sent}}, {{count}} wynik.",
+    "done_few": "Wysłane żądania: {{sent}}, {{count}} wyniki.",
+    "done_many": "Wysłane żądania: {{sent}}, {{count}} wyników.",
+    "done_other": "Wysłane żądania: {{sent}}, {{count}} wyniku.",
+    "noFindings": "Nie znaleziono podejrzanych odpowiedzi.",
+    "noFindingsHint": "To nie dowodzi, że API jest bezpieczne. Sprawdzanych jest tylko kilka typowych błędów.",
+    "emptyAction": "Dodaj przykładową kolekcję",
+    "severity": {
+      "high": "Wysoka",
+      "medium": "Średnia",
+      "low": "Niska"
+    },
+    "variant": {
+      "credentialsMissing": "brak danych uwierzytelniających",
+      "credentialsInvalid": "nieprawidłowe dane uwierzytelniające",
+      "bodyTruncated": "obcięty JSON",
+      "fieldRemoved": "usunięte pole {{name}}",
+      "fieldWrongType": "pole {{name}} o niewłaściwym typie",
+      "fieldValue": "pole {{name}} = {{value}}",
+      "fieldEmpty": "puste pole {{name}}",
+      "fieldLong_one": "pole {{name}} z {{count}} znakiem",
+      "fieldLong_few": "pole {{name}} z {{count}} znakami",
+      "fieldLong_many": "pole {{name}} z {{count}} znakami",
+      "fieldLong_other": "pole {{name}} z {{count}} znaku",
+      "bodyLarge": "treść o rozmiarze 1 MB",
+      "injectionField": "pole {{name}} z ładunkiem {{injection}}",
+      "injectionParameter": "parametr {{name}} z ładunkiem {{injection}}"
+    },
+    "injection": {
+      "sql": "SQL injection",
+      "xss": "skrypt",
+      "traversal": "path traversal",
+      "header": "wstrzyknięcie nagłówka",
+      "expression": "wyrażenie"
+    },
+    "finding": {
+      "accepted": "{{label}}: serwer odpowiedział {{status}}, oczekiwano odrzucenia (4xx)",
+      "serverError": "{{label}}: serwer odpowiedział {{status}}",
+      "stackTrace": "{{label}}: treść odpowiedzi zawiera ślad stosu",
+      "sqlError": "{{label}}: treść odpowiedzi zawiera błąd bazy danych",
+      "reflected": "{{label}}: ładunek jest zwracany bez zmian w treści odpowiedzi"
+    }
+  }
+}

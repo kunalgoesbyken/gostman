@@ -9,7 +9,8 @@
       "website": "Sito web",
       "source": "Codice sorgente",
       "releases": "Release",
-      "issues": "Segnala un problema"
+      "issues": "Segnala un problema",
+      "sponsor": "Sostieni il progetto"
     },
     "diagnosticsHint": "La diagnostica riporta solo versione, piattaforma e conteggi. Non include mai richieste, URL, variabili, token o segreti.",
     "copyDiagnostics": "Copia diagnostica",

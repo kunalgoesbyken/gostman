@@ -1,0 +1,60 @@
+{
+  "negative": {
+    "title": "Teste negative",
+    "intro": "Trimite copii modificate ale cererilor salvate: credențiale lipsă sau nevalide, corpuri greșite, valori la limită și șiruri de injecție. Acesta este un verificator de bază, nu un instrument de testare de penetrare. Rulați-l pe un mediu de test sau de staging.",
+    "scope": "Cereri de testat",
+    "allRequests": "Toate cererile",
+    "hostsTitle": "Gazde care vor primi cereri",
+    "noHosts": "Adresele acestor cereri nu au putut fi rezolvate la o gazdă. Verificați variabilele de mediu pe care le folosesc.",
+    "confirm": "Pot trimite cereri modificate către aceste gazde",
+    "rate": "Cereri pe secundă",
+    "limit": "Oprire după (cereri)",
+    "start": "Pornire",
+    "stop": "Oprire",
+    "plan_one": "Va fi trimisă {{count}} copie modificată a cererilor dvs.",
+    "plan_few": "Vor fi trimise {{count}} copii modificate ale cererilor dvs.",
+    "plan_other": "Vor fi trimise {{count}} de copii modificate ale cererilor dvs.",
+    "variantsTitle": "Copii modificate",
+    "progress": "Trimise {{sent}} din {{total}}",
+    "done_one": "Cereri trimise: {{sent}}, {{count}} constatare.",
+    "done_few": "Cereri trimise: {{sent}}, {{count}} constatări.",
+    "done_other": "Cereri trimise: {{sent}}, {{count}} de constatări.",
+    "noFindings": "Nu au fost găsite răspunsuri suspecte.",
+    "noFindingsHint": "Asta nu arată că API-ul este sigur. Verifică doar câteva greșeli frecvente.",
+    "emptyAction": "Adăugare colecție exemplu",
+    "severity": {
+      "high": "Ridicată",
+      "medium": "Medie",
+      "low": "Scăzută"
+    },
+    "variant": {
+      "credentialsMissing": "fără credențiale",
+      "credentialsInvalid": "credențiale nevalide",
+      "bodyTruncated": "JSON trunchiat",
+      "fieldRemoved": "câmpul {{name}} eliminat",
+      "fieldWrongType": "câmpul {{name}} cu tip greșit",
+      "fieldValue": "câmpul {{name}} = {{value}}",
+      "fieldEmpty": "câmpul {{name}} gol",
+      "fieldLong_one": "câmpul {{name}} cu {{count}} caracter",
+      "fieldLong_few": "câmpul {{name}} cu {{count}} caractere",
+      "fieldLong_other": "câmpul {{name}} cu {{count}} de caractere",
+      "bodyLarge": "un corp de 1 MB",
+      "injectionField": "câmpul {{name}} cu o încărcătură {{injection}}",
+      "injectionParameter": "parametrul {{name}} cu o încărcătură {{injection}}"
+    },
+    "injection": {
+      "sql": "injecție SQL",
+      "xss": "script",
+      "traversal": "path traversal",
+      "header": "injecție de antet",
+      "expression": "expresie"
+    },
+    "finding": {
+      "accepted": "{{label}}: serverul a răspuns {{status}}, se aștepta o respingere (4xx)",
+      "serverError": "{{label}}: serverul a răspuns {{status}}",
+      "stackTrace": "{{label}}: corpul răspunsului arată un stack trace",
+      "sqlError": "{{label}}: corpul răspunsului arată o eroare de bază de date",
+      "reflected": "{{label}}: încărcătura este returnată nemodificată în corpul răspunsului"
+    }
+  }
+}

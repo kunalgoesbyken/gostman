@@ -11,7 +11,13 @@
     "postman": "Arquivo do Postman",
     "openapi": "Especificação OpenAPI",
     "gostman": "Exportação do Gostman",
-    "http": "Arquivo .http"
+    "http": "Arquivo .http",
+    "hoppscotch": "Coleção do Hoppscotch",
+    "thunder": "Coleção do Thunder Client",
+    "httpie": "Coleção do HTTPie",
+    "hurl": "Arquivo Hurl",
+    "raml": "Especificação RAML",
+    "blueprint": "API Blueprint"
   },
   "import": {
     "chooseFiles": "Escolher arquivos",
@@ -97,13 +103,22 @@
       "http": {
         "label": "Arquivos .http",
         "description": "Requisições para o REST Client do VS Code e o JetBrains HTTP Client, um arquivo por pasta, com ambientes em http-client.env.json"
+      },
+      "hurl": {
+        "label": "Arquivos Hurl",
+        "description": "Um arquivo .hurl por pasta, com as verificações como [Asserts] e as regras de extração como [Captures]"
       }
     },
     "docs": {
       "titlePlaceholder": "Título (padrão: API documentation)",
       "titleLabel": "Título da documentação",
       "includeExamples": "Incluir respostas de exemplo",
-      "playground": "Incluir um painel Try it"
+      "playground": "Incluir um painel Try it",
+      "accentLabel": "Cor dos links",
+      "accentPlaceholder": "Cor dos links, como #0b6bcb",
+      "logoChoose": "Escolher logotipo",
+      "logoRemove": "Remover logotipo",
+      "logoTooLarge": "O logotipo deve ter menos de 300 KB."
     }
   },
   "transfer": {
@@ -166,12 +181,14 @@
       "scripts": "scripts",
       "oauth": "configurações de OAuth 2.0",
       "commands": "comandos que iniciam servidores MCP locais",
+      "sockets": "requisições TCP, UDP e NATS brutas",
       "files": "leituras de arquivos que enviam arquivos deste computador"
     },
     "titleOne": {
       "scripts": "Importar scripts?",
       "oauth": "Importar configurações de OAuth?",
       "commands": "Importar comandos?",
+      "sockets": "Importar as requisições TCP, UDP e NATS?",
       "files": "Importar leituras de arquivos?"
     },
     "titleMany": "Revise antes de importar",
@@ -179,6 +196,7 @@
       "scripts": "Importar com scripts",
       "oauth": "Importar com configurações de OAuth",
       "commands": "Importar com comandos",
+      "sockets": "Importar com as requisições TCP, UDP e NATS",
       "files": "Importar com leituras de arquivos"
     },
     "withMany": "Importar tudo",
@@ -186,6 +204,7 @@
       "scripts": "Importar sem scripts",
       "oauth": "Importar sem configurações de OAuth",
       "commands": "Importar sem comandos",
+      "sockets": "Importar sem os endereços das requisições TCP, UDP e NATS",
       "files": "Importar sem leituras de arquivos"
     },
     "withoutMany": "Importar sem eles",
@@ -193,6 +212,7 @@
       "scripts": "Os scripts foram deixados de fora.",
       "oauth": "As configurações de OAuth 2.0 foram deixadas de fora.",
       "commands": "Os comandos que iniciam servidores MCP locais foram deixados de fora.",
+      "sockets": "Os endereços das requisições TCP, UDP e NATS brutas foram deixados de fora.",
       "files": "As leituras de arquivos que enviam arquivos deste computador foram deixadas de fora."
     },
     "leftOut": "Foram deixados de fora: {{kinds}}.",

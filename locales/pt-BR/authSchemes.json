@@ -44,13 +44,17 @@
       "payloadHash": "Hash do payload",
       "extraData": "Dados extras",
       "appId": "ID do app",
+      "passwordType": "Tipo de senha",
+      "timestampLifetime": "Validade do timestamp",
       "delegation": "Delegação"
     },
     "hints": {
       "generated": "Gerado quando vazio",
       "commaSeparated": "Separados por vírgula, opcional",
       "optional": "Opcional",
-      "expiry": "1h, ou segundos"
+      "expiry": "1h, ou segundos",
+      "jwtExpiry": "Opcional: adiciona iat e exp, por exemplo 1h ou 900",
+      "wsseTimestamp": "Opcional: adiciona um Timestamp válido por 5m, ou em segundos"
     },
     "options": {
       "authorizationHeader": "Cabeçalho Authorization",
@@ -58,6 +62,7 @@
       "formBody": "Corpo de formulário",
       "plainText": "Texto simples",
       "doNotInclude": "Não incluir",
+      "passwordDigest": "Digest (SHA-1 com nonce e horário de criação)",
       "include": "Incluir"
     },
     "notes": {
@@ -68,7 +73,8 @@
       "edgegrid": "Client token, client secret e token de acesso são necessários para assinar a requisição.",
       "jwt": "O token é assinado novamente a cada requisição, então {{timestamp}} no payload permanece atual.",
       "asap": "Emissor, audiência, ID da chave e chave privada são obrigatórios. Um novo token com seus próprios iat, exp e jti é enviado como Bearer token a cada requisição.",
-      "hawk": "O ID de autenticação e a chave são necessários para assinar a requisição."
+      "hawk": "O ID de autenticação e a chave são necessários para assinar a requisição.",
+      "wssecurity": "Insere um cabeçalho wsse:Security no envelope SOAP do tipo de corpo SOAP. Informe um nome de usuário, uma validade de timestamp ou ambos."
     }
   }
 }

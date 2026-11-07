@@ -1,0 +1,35 @@
+{
+  "variablesPanel": {
+    "type": "Type",
+    "typeLabel": "Type de variable",
+    "value": "Valeur",
+    "valueChoice": "Choisir une valeur",
+    "fieldOptions": "Options du champ",
+    "label": "Libellé",
+    "labelPlaceholder": "Nom affiché dans la vue Variables",
+    "help": "Texte d’aide",
+    "helpPlaceholder": "Affiché sous le champ dans la vue Variables",
+    "placeholder": "Texte indicatif",
+    "placeholderPlaceholder": "Affiché tant que le champ est vide",
+    "choices": "Choix",
+    "choicesPlaceholder": "rouge, vert, bleu",
+    "required": "Obligatoire",
+    "inForm": "Afficher dans la vue Variables",
+    "showInherited": "Afficher les variables héritées",
+    "inheritedTitle": "Héritées",
+    "inheritedHint": "Lecture seule. Elles viennent des portées au-dessus de cette requête. Une variable du même nom définie au-dessus l’emporte ici.",
+    "inheritedNone": "Aucune variable n’est héritée.",
+    "hiddenValue": "Masquée",
+    "typeNote": "Une variable typée arrive dans les scripts avec ce type. Dans une URL, un en-tête ou un corps, elle reste écrite sous forme de texte."
+  },
+  "variablesView": {
+    "switchLabel": "Vue de la requête",
+    "fullEditor": "Éditeur complet",
+    "variables": "Variables",
+    "formLabel": "Variables de la requête",
+    "emptyTitle": "Aucune variable à remplir",
+    "emptyDescription": "Les variables ajoutées dans l’onglet Vars de l’éditeur complet apparaissent ici sous forme de champs de saisie.",
+    "openEditor": "Ouvrir l’éditeur complet",
+    "required": "Obligatoire"
+  }
+}

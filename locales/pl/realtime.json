@@ -2,7 +2,8 @@
   "realtime": {
     "targets": {
       "topic": "Temat",
-      "event": "Zdarzenie"
+      "event": "Zdarzenie",
+      "method": "Metoda"
     },
     "browser": {
       "closed": "Połączenie zamknięte (kod {{code}})",
@@ -22,6 +23,17 @@
       "binary": "Binarne pakiety Socket.IO nie są dekodowane.",
       "noEvent": "Wpisz nazwę zdarzenia do wysłania.",
       "ack": "ack {{id}}"
+    },
+    "signalR": {
+      "badNegotiate": "Odpowiedź negotiate nie zawiera tokenu połączenia.",
+      "negotiateFailed": "Żądanie negotiate SignalR nie powiodło się: {{reason}}",
+      "handshake": "Uzgadnianie SignalR zakończone (protokół JSON)",
+      "handshakeRefused": "Hub odrzucił uzgadnianie: {{reason}}",
+      "streamItem": "strumień {{id}}",
+      "completion": "wynik {{id}}",
+      "closed": "Hub zamknął połączenie",
+      "closedWith": "Hub zamknął połączenie: {{reason}}",
+      "noTarget": "Podaj metodę huba do wywołania."
     },
     "mqtt": {
       "connected": "Połączono z brokerem",

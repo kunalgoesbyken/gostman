@@ -1,0 +1,36 @@
+{
+  "search": {
+    "sidebarTab": "Căutare",
+    "placeholder": "Căutare în cereri, istoric și răspunsuri",
+    "label": "Căutare peste tot",
+    "hint": "Caută în numele, URL-urile, antetele, corpurile și descrierile cererilor, în istoric și în ultimul răspuns al fiecărei file deschise.",
+    "searching": "Se caută…",
+    "none": "Nimic nu se potrivește cu „{{query}}”",
+    "truncated": "Sunt afișate doar primele rezultate. Restrângeți căutarea pentru a vedea mai multe.",
+    "timedOut": "Căutarea a durat prea mult și a fost oprită. Încercați o interogare mai lungă sau mai specifică.",
+    "failed": "Căutarea a eșuat: {{reason}}",
+    "results_one": "{{count}} rezultat",
+    "results_few": "{{count}} rezultate",
+    "results_other": "{{count}} de rezultate",
+    "command": {
+      "label": "Căutare peste tot",
+      "description": "Caută în numele, URL-urile și corpurile cererilor, în istoric și în răspunsurile deschise",
+      "keywords": "găsire căutare globală răspunsuri istoric find global search responses history"
+    },
+    "kinds": {
+      "request": "Cerere",
+      "history": "Istoric",
+      "response": "Răspuns"
+    },
+    "fields": {
+      "name": "Nume",
+      "url": "URL",
+      "body": "Corp",
+      "headers": "Antete",
+      "description": "Descriere",
+      "tags": "Etichete",
+      "responseBody": "Corpul răspunsului",
+      "responseHeaders": "Antetele răspunsului"
+    }
+  }
+}

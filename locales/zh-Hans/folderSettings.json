@@ -14,7 +14,8 @@
       "vars": "变量",
       "script": "脚本",
       "tests": "检查",
-      "docs": "文档"
+      "docs": "文档",
+      "notes": "备注"
     },
     "more": "更多",
     "moreHint": "更多设置",

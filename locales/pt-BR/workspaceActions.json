@@ -43,6 +43,7 @@
     "clear": "Limpar",
     "closeTab": "Fechar aba",
     "closeTabMessage": "\"{{name}}\" tem alterações não salvas. Salvar antes de fechar?",
-    "dontSave": "Não salvar"
+    "dontSave": "Não salvar",
+    "openFirstRequest": "Abrir a primeira requisição"
   }
 }

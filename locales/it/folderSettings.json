@@ -14,7 +14,8 @@
       "vars": "Var",
       "script": "Script",
       "tests": "Controlli",
-      "docs": "Doc"
+      "docs": "Doc",
+      "notes": "Note"
     },
     "more": "Altro",
     "moreHint": "Altre impostazioni",

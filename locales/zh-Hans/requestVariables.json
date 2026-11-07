@@ -1,0 +1,22 @@
+{
+  "requestVariables": {
+    "types": {
+      "none": "任意",
+      "string": "文本",
+      "number": "数字",
+      "integer": "整数",
+      "boolean": "真或假",
+      "json": "JSON",
+      "enum": "列表中的一项"
+    },
+    "problems": {
+      "required": "{{name}} 需要一个值。",
+      "number": "{{name}} 必须是数字。",
+      "integer": "{{name}} 必须是整数。",
+      "boolean": "{{name}} 必须是 true 或 false。",
+      "json": "{{name}} 必须是有效的 JSON。",
+      "enum": "{{name}} 必须是 {{choices}} 之一。"
+    },
+    "blocked": "由于变量的问题，请求未发送。\n{{problems}}"
+  }
+}

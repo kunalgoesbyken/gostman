@@ -10,6 +10,7 @@
       "language": "语言",
       "ai": "AI",
       "privacy": "隐私",
+      "updates": "更新",
       "data": "数据"
     },
     "fields": {
@@ -21,12 +22,14 @@
       "codeFont": "代码字体",
       "density": "密度",
       "responseLayout": "响应面板",
+      "tabPlacement": "打开的标签页",
       "systemTitleBar": "使用系统标题栏",
       "editorFontSize": "编辑器字号",
       "wrapLines": "长行自动换行",
       "requestTimeout": "默认超时",
       "confirmCloseTab": "关闭标签页时，若有未保存的更改，先询问",
       "language": "语言",
+      "authorName": "备注中显示的你的名字",
       "sidebarViews": "侧边栏标签页"
     },
     "themes": {
@@ -54,6 +57,11 @@
       "below": "下方",
       "right": "右侧"
     },
+    "tabPlacements": {
+      "bar": "标签栏",
+      "sidebar": "侧边栏"
+    },
+    "tabPlacementHint": "选择侧边栏时会隐藏标签栏，并在侧边栏中列出打开的标签页，适合小屏幕。",
     "seconds": "秒",
     "pixels": "px",
     "contrastHint": "“更高”会使用更醒目的边框和次要文字。",
@@ -152,6 +160,7 @@
       "lowContrast": "文字可能难以阅读。建议至少达到 {{minimum}}:1。",
       "resetRow": "重置{{name}}"
     },
+    "authorNameHint": "显示在你为请求和文件夹添加的备注上。",
     "timeoutHint_other": "适用于未设置自身超时的请求。0 表示使用内置上限 {{count}} 秒。",
     "languageSystem": "与系统一致（{{language}}）",
     "languageSwitchHint": "Gostman 会重新加载以显示新语言。已打开的标签页和未保存的草稿会保留；标签页中显示的响应会被清除。",
@@ -163,6 +172,8 @@
     "accentAdjusted": "在浅色模式下显示为{{light}}，在深色模式下显示为{{dark}}，以保证此颜色的文字清晰可读。",
     "sidebarViewsHint": "选择侧边栏显示哪些标签页以及它们的顺序。也可以在侧边栏中右键单击标签页来显示或隐藏它们。",
     "moveViewUp": "上移 {{name}}",
-    "moveViewDown": "下移 {{name}}"
+    "moveViewDown": "下移 {{name}}",
+    "textScaleHint": "缩放界面及其输入框。窗口缩放会叠加在此大小之上：基础大小 {{size}} px 在 125% 缩放下显示为 {{zoomed}} px。",
+    "editorFontSizeHint": "代码编辑器字号，单位为像素。它不跟随文字大小，窗口缩放会叠加在其上。"
   }
 }

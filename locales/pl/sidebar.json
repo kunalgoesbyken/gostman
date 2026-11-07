@@ -2,13 +2,17 @@
   "sidebar": {
     "views": "Widok panelu bocznego",
     "collections": "Kolekcje",
+    "openTabs": "Otwarte karty",
     "history": "Historia",
     "newFolder": "Nowy folder",
+    "add": "Dodaj",
     "newRequest": "Nowe żądanie",
     "toggle": "Przełącz panel boczny",
     "close": "Zamknij panel boczny",
     "resize": "Zmień rozmiar panelu bocznego",
     "viewsMenu": "Karty panelu bocznego",
+    "more": "Więcej",
+    "moreHint": "Pokaż pozostałe widoki panelu bocznego",
     "resetViews": "Pokaż wszystkie karty w domyślnej kolejności"
   },
   "history": {
@@ -40,6 +44,25 @@
       "days_many": "wysłano {{count}} dni temu",
       "days_other": "wysłano {{count}} dnia temu",
       "date": "wysłano {{date}}"
+    },
+    "range": "Zakres dat",
+    "folder": "Folder",
+    "tag": "Tag",
+    "allFolders": "Wszystkie foldery",
+    "allTags": "Wszystkie tagi",
+    "groupByDate": "Grupuj według daty",
+    "ranges": {
+      "any": "Dowolny czas",
+      "today": "Dzisiaj",
+      "week": "Ostatnie 7 dni",
+      "month": "Ostatnie 30 dni"
+    },
+    "groups": {
+      "today": "Dzisiaj",
+      "yesterday": "Wczoraj",
+      "week": "Wcześniej w tym tygodniu",
+      "month": "Wcześniej w tym miesiącu",
+      "older": "Starsze"
     }
   }
 }

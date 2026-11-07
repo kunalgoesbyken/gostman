@@ -37,6 +37,11 @@
         "title": "Esegui le tue richieste insieme",
         "hint": "Il runner invia ogni richiesta salvata in ordine e riporta quali controlli sono riusciti.",
         "action": "Apri il runner"
+      },
+      "explore": {
+        "title": "Esplora le funzionalità",
+        "hint": "Cerca ogni funzionalità, provala con un esempio e leggi come funziona.",
+        "action": "Esplora le funzionalità"
       }
     }
   }

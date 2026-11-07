@@ -1,0 +1,16 @@
+{
+  "notes": {
+    "empty": "Nenhuma nota ainda.",
+    "secretHint": "As notas são salvas em texto simples e compartilhadas com o espaço de trabalho. Não cole segredos.",
+    "looksLikeCredential": "Isto parece uma credencial. As notas são salvas em texto simples, nos arquivos da pasta e nas exportações.",
+    "inputLabel": "Nova nota",
+    "inputPlaceholder": "Escreva uma nota para a sua equipe",
+    "add": "Adicionar nota",
+    "anonymous": "Desconhecido",
+    "resolve": "Resolver",
+    "reopen": "Reabrir",
+    "resolved": "Resolvida",
+    "delete": "Excluir nota",
+    "listLabel": "Notas"
+  }
+}

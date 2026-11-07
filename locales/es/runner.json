@@ -12,6 +12,19 @@
     "dataFile": "Archivo de datos (CSV o JSON)",
     "clearData": "Quitar el archivo de datos",
     "report": "Descargar informe HTML",
+    "reportFormat": "Formato del informe",
+    "formats": {
+      "html": "HTML",
+      "junit": "JUnit",
+      "json": "JSON"
+    },
+    "schedule": "Programar esta ejecución",
+    "cliLine": "La misma ejecución en un terminal",
+    "shells": {
+      "posix": "macOS y Linux",
+      "powershell": "PowerShell"
+    },
+    "cliUnsafe": "El nombre de una carpeta o de un archivo de datos tiene un salto de línea, unas comillas dobles, una barra invertida final u otro carácter que no se puede pasar de forma segura en todos los shells, así que no se muestra ningún comando. Cámbiale el nombre para obtener uno.",
     "includeTags": "Solo etiquetas",
     "excludeTags": "Omitir etiquetas",
     "anyTag": "Cualquiera",
@@ -66,6 +79,12 @@
     "progressPassed": "{{count}} superadas",
     "progressFailed": "{{count}} fallidas",
     "progressSkipped": "{{count}} omitidas",
-    "socketSkipped": "Las solicitudes WebSocket no forman parte de una ejecución."
+    "socketSkipped": "Las solicitudes WebSocket no forman parte de una ejecución.",
+    "coverageTitle": "Cobertura de OpenAPI",
+    "coverageOperations": "{{covered}} de {{total}} operaciones ({{percent}} %)",
+    "coverageResponses": "{{covered}} de {{total}} respuestas documentadas ({{percent}} %)",
+    "coverageNotCalled": "no llamada",
+    "coverageMissing": "sin respuesta: {{codes}}",
+    "coverageUndocumented": "estado no documentado: {{codes}}"
   }
 }

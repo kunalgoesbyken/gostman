@@ -2,13 +2,17 @@
   "sidebar": {
     "views": "Affichage de la barre latérale",
     "collections": "Collections",
+    "openTabs": "Onglets ouverts",
     "history": "Historique",
     "newFolder": "Nouveau dossier",
+    "add": "Ajouter",
     "newRequest": "Nouvelle requête",
     "toggle": "Afficher ou masquer la barre latérale",
     "close": "Fermer la barre latérale",
     "resize": "Redimensionner la barre latérale",
     "viewsMenu": "Onglets de la barre latérale",
+    "more": "Plus",
+    "moreHint": "Afficher les autres vues de la barre latérale",
     "resetViews": "Afficher tous les onglets dans l’ordre par défaut"
   },
   "history": {
@@ -37,6 +41,25 @@
       "days_other": "envoyée il y a {{count}} jours",
       "days_many": "envoyée il y a {{count}} de jours",
       "date": "envoyée le {{date}}"
+    },
+    "range": "Période",
+    "folder": "Dossier",
+    "tag": "Tag",
+    "allFolders": "Tous les dossiers",
+    "allTags": "Tous les tags",
+    "groupByDate": "Grouper par date",
+    "ranges": {
+      "any": "N’importe quand",
+      "today": "Aujourd’hui",
+      "week": "7 derniers jours",
+      "month": "30 derniers jours"
+    },
+    "groups": {
+      "today": "Aujourd’hui",
+      "yesterday": "Hier",
+      "week": "Plus tôt cette semaine",
+      "month": "Plus tôt ce mois-ci",
+      "older": "Plus ancien"
     }
   }
 }

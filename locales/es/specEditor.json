@@ -1,0 +1,88 @@
+{
+  "specEditor": {
+    "createFailed": "No se pudo crear la especificación de la API",
+    "saveFailed": "No se pudo guardar la especificación de la API",
+    "deleteFailed": "No se pudo eliminar la especificación de la API",
+    "importFailed": "No se pudo importar la especificación de la API",
+    "convertFailed": "No se pudo convertir la especificación de la API",
+    "mockFailed": "No se pudo iniciar el servidor simulado",
+    "generateFailed": "No se pudieron generar las solicitudes",
+    "saved": "Se guardó «{{name}}».",
+    "renameTitle": "Cambiar el nombre de la especificación de la API",
+    "nameLabel": "Nombre",
+    "deleteTitle": "Eliminar la especificación de la API",
+    "deleteMessage": "¿Eliminar la especificación de la API «{{name}}»? No se puede deshacer.",
+    "closeTitle": "Cerrar la especificación de la API",
+    "closeMessage": "«{{name}}» tiene cambios sin guardar. ¿Guardarlos antes de cerrar?",
+    "dontSave": "No guardar",
+    "save": "Guardar",
+    "copyName": "Copia de {{name}}",
+    "importedName": "API importada",
+    "importAddressTitle": "Importar una especificación de API",
+    "importAddressMessage": "Escribe la dirección de una especificación OpenAPI o Swagger.",
+    "importAddressPlaceholder": "https://example.com/openapi.json",
+    "importAddressConfirm": "Importar",
+    "checkResponsesTitle": "Comprobar respuestas",
+    "generateFirst": "Primero genera solicitudes a partir de esta especificación. Después sus respuestas se comprueban con ella.",
+    "checkingResponses": "Las respuestas de «{{name}}» se comprueban con esta especificación.",
+    "tabLabel": "Especificación de API {{name}}",
+    "templates": {
+      "strategies": {
+        "name": "API de estrategias"
+      },
+      "resource": {
+        "name": "API de elementos"
+      },
+      "blank": {
+        "name": "Nueva API"
+      }
+    }
+  },
+  "specList": {
+    "listLabel": "Especificaciones de API",
+    "emptyTitle": "Diseña una API antes de que exista",
+    "emptyDescription": "Escribe aquí una especificación OpenAPI, con comprobaciones mientras escribes. Después genera solicitudes, inicia un servidor simulado y comprueba respuestas reales con ella.",
+    "count_one": "{{count}} especificación de API",
+    "count_many": "{{count}} de especificaciones de API",
+    "count_other": "{{count}} especificaciones de API",
+    "newSpec": "Nueva especificación de API",
+    "importSpec": "Importar una especificación",
+    "importFile": "Importar desde un archivo",
+    "importAddress": "Importar desde una dirección",
+    "actions": "Acciones de {{name}}",
+    "rename": "Cambiar nombre",
+    "duplicate": "Duplicar",
+    "remove": "Eliminar",
+    "sidebarTab": "Especificaciones"
+  },
+  "specView": {
+    "nameLabel": "Nombre de la especificación de la API",
+    "unsaved": "Cambios sin guardar",
+    "save": "Guardar",
+    "formatLabel": "Formato de archivo",
+    "formatYaml": "YAML",
+    "formatJson": "JSON",
+    "editorLabel": "Especificación OpenAPI",
+    "previewLabel": "Vista previa de la documentación",
+    "showPreview": "Mostrar la vista previa de la documentación",
+    "hidePreview": "Ocultar la vista previa de la documentación",
+    "viewDocs": "Ver documentación",
+    "viewDocsHint": "Abrir la documentación en una ventana más grande.",
+    "generate": "Generar solicitudes",
+    "generateHint": "Crear solicitudes a partir de esta especificación, con un vínculo que las mantiene al día con ella.",
+    "update": "Actualizar solicitudes",
+    "updateHint": "Comparar esta especificación con las solicitudes generadas a partir de ella y aplicar los cambios que elijas.",
+    "mock": "Iniciar simulación",
+    "mockHint": "Servir los ejemplos de esta especificación desde un servidor simulado local.",
+    "check": "Comprobar respuestas",
+    "checkHint": "Comprobar las respuestas de las solicitudes generadas con esta especificación.",
+    "compare": "Comparar",
+    "compareHint": "Comparar esta especificación con otra versión y listar los cambios incompatibles.",
+    "problems_one": "{{count}} problema",
+    "problems_many": "{{count}} de problemas",
+    "problems_other": "{{count}} problemas",
+    "problemsLabel": "Problemas",
+    "checking": "Comprobando la especificación",
+    "cannotRead": "No se puede leer la especificación"
+  }
+}

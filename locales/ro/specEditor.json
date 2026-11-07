@@ -1,0 +1,88 @@
+{
+  "specEditor": {
+    "createFailed": "Specificația API nu a putut fi creată",
+    "saveFailed": "Specificația API nu a putut fi salvată",
+    "deleteFailed": "Specificația API nu a putut fi ștearsă",
+    "importFailed": "Specificația API nu a putut fi importată",
+    "convertFailed": "Specificația API nu a putut fi convertită",
+    "mockFailed": "Serverul mock nu a putut fi pornit",
+    "generateFailed": "Cererile nu au putut fi generate",
+    "saved": "„{{name}}” a fost salvată.",
+    "renameTitle": "Redenumire specificație API",
+    "nameLabel": "Nume",
+    "deleteTitle": "Ștergere specificație API",
+    "deleteMessage": "Ștergeți specificația API „{{name}}”? Acțiunea nu poate fi anulată.",
+    "closeTitle": "Închidere specificație API",
+    "closeMessage": "„{{name}}” are modificări nesalvate. Le salvați înainte de închidere?",
+    "dontSave": "Nu salva",
+    "save": "Salvare",
+    "copyName": "Copie {{name}}",
+    "importedName": "API importat",
+    "importAddressTitle": "Importare specificație API",
+    "importAddressMessage": "Introduceți adresa unei specificații OpenAPI sau Swagger.",
+    "importAddressPlaceholder": "https://example.com/openapi.json",
+    "importAddressConfirm": "Importare",
+    "checkResponsesTitle": "Verificare răspunsuri",
+    "generateFirst": "Generați mai întâi cereri din această specificație. Răspunsurile lor sunt apoi verificate față de ea.",
+    "checkingResponses": "Răspunsurile din „{{name}}” sunt verificate față de această specificație.",
+    "tabLabel": "Specificația API {{name}}",
+    "templates": {
+      "strategies": {
+        "name": "API pentru strategii"
+      },
+      "resource": {
+        "name": "API pentru articole"
+      },
+      "blank": {
+        "name": "API nou"
+      }
+    }
+  },
+  "specList": {
+    "listLabel": "Specificații API",
+    "emptyTitle": "Proiectați un API înainte să existe",
+    "emptyDescription": "Scrieți aici o specificație OpenAPI, cu verificări în timp ce scrieți. Apoi generați cereri, porniți un server mock și verificați răspunsurile reale față de ea.",
+    "count_one": "{{count}} specificație API",
+    "count_few": "{{count}} specificații API",
+    "count_other": "{{count}} de specificații API",
+    "newSpec": "Specificație API nouă",
+    "importSpec": "Importare specificație",
+    "importFile": "Importare din fișier",
+    "importAddress": "Importare de la o adresă",
+    "actions": "Acțiuni pentru {{name}}",
+    "rename": "Redenumire",
+    "duplicate": "Duplicare",
+    "remove": "Ștergere",
+    "sidebarTab": "Specificații"
+  },
+  "specView": {
+    "nameLabel": "Numele specificației API",
+    "unsaved": "Modificări nesalvate",
+    "save": "Salvare",
+    "formatLabel": "Format de fișier",
+    "formatYaml": "YAML",
+    "formatJson": "JSON",
+    "editorLabel": "Specificație OpenAPI",
+    "previewLabel": "Previzualizare documentație",
+    "showPreview": "Afișare previzualizare documentație",
+    "hidePreview": "Ascundere previzualizare documentație",
+    "viewDocs": "Vizualizare documentație",
+    "viewDocsHint": "Deschide documentația într-o fereastră mai mare.",
+    "generate": "Generare cereri",
+    "generateHint": "Creează cereri din această specificație, cu o legătură care le ține sincronizate cu ea.",
+    "update": "Actualizare cereri",
+    "updateHint": "Compară această specificație cu cererile generate din ea și aplică modificările alese.",
+    "mock": "Pornire mock",
+    "mockHint": "Servește exemplele acestei specificații de pe un server mock local.",
+    "check": "Verificare răspunsuri",
+    "checkHint": "Verifică răspunsurile cererilor generate față de această specificație.",
+    "compare": "Comparare",
+    "compareHint": "Compară această specificație cu altă versiune și listează modificările incompatibile.",
+    "problems_one": "{{count}} problemă",
+    "problems_few": "{{count}} probleme",
+    "problems_other": "{{count}} de probleme",
+    "problemsLabel": "Probleme",
+    "checking": "Se verifică specificația",
+    "cannotRead": "Specificația nu poate fi citită"
+  }
+}

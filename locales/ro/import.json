@@ -11,7 +11,13 @@
     "postman": "Fișier Postman",
     "openapi": "Specificație OpenAPI",
     "gostman": "Export Gostman",
-    "http": "Fișier .http"
+    "http": "Fișier .http",
+    "hoppscotch": "Colecție Hoppscotch",
+    "thunder": "Colecție Thunder Client",
+    "httpie": "Colecție HTTPie",
+    "hurl": "Fișier Hurl",
+    "raml": "Specificație RAML",
+    "blueprint": "API Blueprint"
   },
   "import": {
     "chooseFiles": "Alegere fișiere",
@@ -97,13 +103,22 @@
       "http": {
         "label": "Fișiere .http",
         "description": "Cereri pentru VS Code REST Client și JetBrains HTTP Client, un fișier pe dosar, cu medii http-client.env.json"
+      },
+      "hurl": {
+        "label": "Fișiere Hurl",
+        "description": "Un fișier .hurl per dosar, cu verificările ca [Asserts] și regulile de extragere ca [Captures]"
       }
     },
     "docs": {
       "titlePlaceholder": "Titlu (implicit: API documentation)",
       "titleLabel": "Titlul documentației",
       "includeExamples": "Includere exemple de răspuns",
-      "playground": "Includere panou Try it"
+      "playground": "Includere panou Try it",
+      "accentLabel": "Culoarea linkurilor",
+      "accentPlaceholder": "Culoarea linkurilor, de exemplu #0b6bcb",
+      "logoChoose": "Alegere logo",
+      "logoRemove": "Eliminare logo",
+      "logoTooLarge": "Logoul trebuie să fie mai mic de 300 KB."
     }
   },
   "transfer": {
@@ -166,12 +181,14 @@
       "scripts": "scripturi",
       "oauth": "setări OAuth 2.0",
       "commands": "comenzi care pornesc servere MCP locale",
+      "sockets": "cereri brute TCP, UDP și NATS",
       "files": "citiri de fișiere care trimit fișiere de pe acest computer"
     },
     "titleOne": {
       "scripts": "Importați scripturile?",
       "oauth": "Importați setările OAuth?",
       "commands": "Importați comenzile?",
+      "sockets": "Importați cererile TCP, UDP și NATS?",
       "files": "Importați citirile de fișiere?"
     },
     "titleMany": "Verificare înainte de import",
@@ -179,6 +196,7 @@
       "scripts": "Import cu scripturi",
       "oauth": "Import cu setări OAuth",
       "commands": "Import cu comenzi",
+      "sockets": "Importare cu cererile TCP, UDP și NATS",
       "files": "Import cu citiri de fișiere"
     },
     "withMany": "Importare tot",
@@ -186,6 +204,7 @@
       "scripts": "Import fără scripturi",
       "oauth": "Import fără setări OAuth",
       "commands": "Import fără comenzi",
+      "sockets": "Importare fără adresele cererilor TCP, UDP și NATS",
       "files": "Import fără citiri de fișiere"
     },
     "withoutMany": "Import fără ele",
@@ -193,6 +212,7 @@
       "scripts": "Scripturile au fost omise.",
       "oauth": "Setările OAuth 2.0 au fost omise.",
       "commands": "Comenzile care pornesc servere MCP locale au fost omise.",
+      "sockets": "Adresele cererilor brute TCP, UDP și NATS au fost omise.",
       "files": "Citirile de fișiere care trimit fișiere de pe acest computer au fost omise."
     },
     "leftOut": "Au fost omise: {{kinds}}.",

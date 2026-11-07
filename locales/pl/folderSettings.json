@@ -14,7 +14,8 @@
       "vars": "Zmienne",
       "script": "Skrypt",
       "tests": "Sprawdzenia",
-      "docs": "Opis"
+      "docs": "Opis",
+      "notes": "Notatki"
     },
     "more": "Więcej",
     "moreHint": "Więcej ustawień",

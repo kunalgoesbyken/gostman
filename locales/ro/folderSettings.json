@@ -14,7 +14,8 @@
       "vars": "Variabile",
       "script": "Script",
       "tests": "Verificări",
-      "docs": "Docs"
+      "docs": "Docs",
+      "notes": "Note"
     },
     "more": "Mai multe",
     "moreHint": "Mai multe setări",

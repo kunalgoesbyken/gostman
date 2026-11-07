@@ -37,6 +37,11 @@
         "title": "Executar suas requisições em conjunto",
         "hint": "O executor envia todas as requisições salvas em ordem e informa quais verificações passaram.",
         "action": "Abrir o executor"
+      },
+      "explore": {
+        "title": "Explorar recursos",
+        "hint": "Pesquise todos os recursos, experimente com um exemplo e leia como funcionam.",
+        "action": "Explorar recursos"
       }
     }
   }

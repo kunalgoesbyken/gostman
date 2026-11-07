@@ -1,0 +1,54 @@
+{
+  "negative": {
+    "title": "ネガティブテスト",
+    "intro": "保存したリクエストを改変したコピーを送信します：認証情報の欠落や不正、不正なボディ、境界値、インジェクション文字列。これは基本的なチェッカーであり、ペネトレーションテストツールではありません。テスト環境またはステージング環境に対して実行してください。",
+    "scope": "テストするリクエスト",
+    "allRequests": "すべてのリクエスト",
+    "hostsTitle": "リクエストを受け取るホスト",
+    "noHosts": "これらのリクエストのアドレスからホストを特定できませんでした。使用している環境変数を確認してください。",
+    "confirm": "これらのホストに改変したリクエストを送信してもかまいません",
+    "rate": "1秒あたりのリクエスト数",
+    "limit": "停止するまでのリクエスト数",
+    "start": "開始",
+    "stop": "停止",
+    "plan_other": "リクエストを改変したコピーを{{count}}件送信します。",
+    "variantsTitle": "改変したコピー",
+    "progress": "{{total}}件中{{sent}}件を送信",
+    "done_other": "{{sent}}件のリクエストを送信し、{{count}}件の検出結果がありました。",
+    "noFindings": "疑わしい応答は見つかりませんでした。",
+    "noFindingsHint": "これはAPIが安全であることを示すものではありません。よくある誤りをいくつか確認しているだけです。",
+    "emptyAction": "サンプルコレクションを追加",
+    "severity": {
+      "high": "高",
+      "medium": "中",
+      "low": "低"
+    },
+    "variant": {
+      "credentialsMissing": "認証情報なし",
+      "credentialsInvalid": "不正な認証情報",
+      "bodyTruncated": "途中で切れたJSON",
+      "fieldRemoved": "フィールド{{name}}を削除",
+      "fieldWrongType": "フィールド{{name}}の型が不正",
+      "fieldValue": "フィールド{{name}} = {{value}}",
+      "fieldEmpty": "フィールド{{name}}が空",
+      "fieldLong_other": "フィールド{{name}}が{{count}}文字",
+      "bodyLarge": "1 MBのボディ",
+      "injectionField": "フィールド{{name}}に{{injection}}のペイロード",
+      "injectionParameter": "パラメーター{{name}}に{{injection}}のペイロード"
+    },
+    "injection": {
+      "sql": "SQLインジェクション",
+      "xss": "スクリプト",
+      "traversal": "パストラバーサル",
+      "header": "ヘッダーインジェクション",
+      "expression": "式"
+    },
+    "finding": {
+      "accepted": "{{label}}：サーバーは{{status}}を返しました。拒否（4xx）が期待されていました",
+      "serverError": "{{label}}：サーバーは{{status}}を返しました",
+      "stackTrace": "{{label}}：レスポンスボディにスタックトレースが含まれています",
+      "sqlError": "{{label}}：レスポンスボディにデータベースエラーが含まれています",
+      "reflected": "{{label}}：ペイロードがレスポンスボディにそのまま返されています"
+    }
+  }
+}

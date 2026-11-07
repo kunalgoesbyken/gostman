@@ -1,0 +1,679 @@
+{
+  "features": {
+    "title": "Explorarea funcțiilor",
+    "intro": "Căutați ce poate face Gostman, încercați o funcție pe loc și citiți cum funcționează.",
+    "searchLabel": "Căutare funcții",
+    "searchPlaceholder": "Căutați funcții, de exemplu snapshot, mock sau git",
+    "groupsLabel": "Grupuri de funcții",
+    "allGroups": "Toate",
+    "groups": {
+      "requests": "Cereri",
+      "data": "Colecții și date",
+      "variables": "Variabile și secrete",
+      "testing": "Verificări și specificații",
+      "automation": "Automatizare",
+      "mocking": "Mock și captură",
+      "git": "Git",
+      "ai": "AI",
+      "app": "Aplicație"
+    },
+    "tryIt": "Încercare",
+    "tryItLabel": "Încercare {{title}}",
+    "learnMore": "Aflați mai multe",
+    "learnMoreLabel": "Aflați mai multe despre {{title}}",
+    "newBadge": "Nou",
+    "platformDesktop": "Aplicația desktop",
+    "platformCli": "Linie de comandă",
+    "platformWeb": "Aplicația web",
+    "desktopOnlyTitle": "{{title}} necesită aplicația desktop",
+    "desktopOnlyBody": "Browserul nu poate accesa fișiere locale, porturi sau setări de sistem, așa că această funcție există doar în aplicația desktop.",
+    "getDesktop": "Descărcare aplicație desktop",
+    "nothingMatches": "Nicio funcție nu corespunde cu „{{query}}”.",
+    "results_one": "{{count}} funcție",
+    "results_few": "{{count}} funcții",
+    "results_other": "{{count}} de funcții",
+    "close": "Închidere",
+    "commandTitle": "Explorarea funcțiilor",
+    "commandDescription": "Căutați orice funcție, încercați-o și citiți cum funcționează",
+    "commandKeywords": "funcții funcționalități index capabilități descoperire ce poate face gostman ajutor features",
+    "statusLabel": "Explorare",
+    "statusTitle": "Explorarea funcțiilor",
+    "helpHideLabel": "Ascundere indicație despre {{title}}",
+    "whatsNewTitle": "Noutăți",
+    "whatsNewIntro": "Nou în versiunea {{version}}",
+    "whatsNewNothing": "Nu există nimic nou de afișat pentru această versiune.",
+    "whatsNewCommandTitle": "Noutăți",
+    "whatsNewCommandDescription": "Funcții adăugate în cea mai recentă versiune",
+    "whatsNewKeywords": "noutăți note de lansare jurnal modificări actualizări versiune changelog",
+    "whatsNewDot": "Noutăți în versiunea {{version}}",
+    "exploreAll": "Explorarea tuturor funcțiilor",
+    "samplesAdded": "Colecția exemplu a fost adăugată.",
+    "helpMenu": "Ajutor",
+    "exploreHint_one": "Căutați cea {{count}} funcție din Gostman, încercați-o cu un exemplu și citiți cum funcționează.",
+    "exploreHint_few": "Căutați cele {{count}} funcții din Gostman, încercați-le cu un exemplu și citiți cum funcționează.",
+    "exploreHint_other": "Căutați cele {{count}} de funcții din Gostman, încercați-le cu un exemplu și citiți cum funcționează.",
+    "copied": "S-a copiat {{command}}",
+    "copyFailed": "Nu s-a putut copia {{command}}",
+    "toolsMenu": "Instrumente",
+    "toolsMenuHint": "Tot ce poate face Gostman cu cererile dumneavoastră, pe activități",
+    "toolGroups": {
+      "build": "Construire",
+      "test": "Testare",
+      "automate": "Automatizare",
+      "mockCapture": "Mock și captură",
+      "shareGit": "Partajare și Git"
+    },
+    "cliLine": "Într-un terminal"
+  },
+  "featureWords": {
+    "rest": {
+      "title": "Cereri REST și HTTP",
+      "blurb": "Trimiteți orice metodă cu parametri, antete, corp și autentificare și citiți starea, durata și dimensiunea.",
+      "synonyms": "http api get post put delete patch rest cerere request",
+      "tool": "Cerere nouă"
+    },
+    "graphql": {
+      "title": "GraphQL",
+      "blurb": "Scrieți interogări cu un navigator de schemă, un constructor de interogări și variabile. Abonamentele rulează prin WebSocket.",
+      "synonyms": "graphql interogare mutație schemă introspecție abonament query mutation subscription apollo"
+    },
+    "grpc": {
+      "title": "gRPC",
+      "blurb": "Încărcați servicii prin reflecție sau din fișiere .proto și apelați metode unare și cu streaming.",
+      "synonyms": "grpc protobuf proto reflecție reflection stream bloomrpc grpcurl"
+    },
+    "websocket": {
+      "title": "WebSocket, Socket.IO și MQTT",
+      "blurb": "Conectați-vă, trimiteți mesaje salvate și citiți jurnalul de mesaje prin WebSocket, Socket.IO sau MQTT.",
+      "synonyms": "websocket socket.io socketio mqtt timp real realtime ws sse evenimente mesaje"
+    },
+    "mcp": {
+      "title": "Servere MCP",
+      "blurb": "Apelați tool-urile, resursele și prompturile unui server MCP și verificați ce returnează.",
+      "synonyms": "mcp model context protocol tool-uri instrumente tools agent server inspector"
+    },
+    "curl": {
+      "title": "Lipirea unei comenzi curl",
+      "blurb": "Lipiți o comandă curl în bara de adrese și cererea se completează.",
+      "synonyms": "curl lipire comandă linie de comandă import clipboard paste"
+    },
+    "codegen": {
+      "title": "Fragmente de cod",
+      "blurb": "Copiați cererea trimisă ca cURL, Python, Go, JavaScript, Java, C# și altele, inclusiv axios, httpx, OkHttp, RestSharp, Guzzle, HTTPie și wget.",
+      "synonyms": "cod fragment snippet generare curl python javascript fetch go java",
+      "tool": "Cod"
+    },
+    "responseViewer": {
+      "title": "Vizualizator de răspuns",
+      "blurb": "Citiți JSON ca arbore, previzualizați HTML, imagini și PDF, filtrați cu JSONPath și căutați în corp.",
+      "synonyms": "răspuns corp json previzualizare filtru căutare jsonpath cronologie timeline consolă vizualizare response"
+    },
+    "examples": {
+      "title": "Exemple salvate",
+      "blurb": "Păstrați răspunsuri ca exemple cu nume care documentează o cerere și alimentează serverul mock.",
+      "synonyms": "exemplu salvat răspuns mostră documentație example"
+    },
+    "oauth": {
+      "title": "Autentificare și OAuth 2",
+      "blurb": "Basic, bearer, cheie API, OAuth 1 și 2, Digest, AWS SigV4, NTLM, JWT și altele, cu reînnoirea tokenului.",
+      "synonyms": "autentificare auth authentication oauth oauth2 bearer token basic digest sigv4 ntlm hawk apikey cheie"
+    },
+    "cookies": {
+      "title": "Depozit de cookie-uri",
+      "blurb": "Vedeți, editați și ștergeți cookie-urile păstrate pentru fiecare domeniu.",
+      "synonyms": "cookie cookies depozit jar sesiune",
+      "tool": "Cookie-uri"
+    },
+    "requestSettings": {
+      "title": "Setările cererii",
+      "blurb": "Setați timeout-ul, redirecționările și verificarea TLS pentru o singură cerere.",
+      "synonyms": "setări timeout redirecționare redirect tls verificare ssl follow"
+    },
+    "hexView": {
+      "title": "Vizualizare hex",
+      "blurb": "Citiți corpul unui răspuns ca deplasamente, octeți hexazecimali și text.",
+      "synonyms": "hex hexazecimal binar octeți bytes dump"
+    },
+    "msgpackCbor": {
+      "title": "MessagePack și CBOR",
+      "blurb": "Decodați răspunsurile MessagePack și CBOR în text JSON pe care îl puteți căuta și copia.",
+      "synonyms": "msgpack messagepack cbor binar decodare decode"
+    },
+    "certificateViewer": {
+      "title": "Lanțul de certificate și redirecționări",
+      "blurb": "Fila Cronologie listează lanțul de certificate prezentat de server, cu datele de valabilitate, nume și amprente, și un tabel cu pașii de redirecționare.",
+      "synonyms": "certificat tls ssl lanț x509 https redirecționare redirect cronologie timeline expirare"
+    },
+    "jwtSigning": {
+      "title": "Semnare JWT",
+      "blurb": "Semnați un JWT în fila Auth cu o cheie privată JWK și setați când expiră.",
+      "synonyms": "jwt semnare sign jwk token expirare bearer hs256 rs256"
+    },
+    "httpVersion": {
+      "title": "Versiunea HTTP",
+      "blurb": "Alegeți Automat, HTTP/1.1 sau HTTP/2 pentru o cerere. Cronologia arată protocolul folosit.",
+      "synonyms": "http2 http/2 http1 protocol versiune alpn prior knowledge"
+    },
+    "dnsOverride": {
+      "title": "Suprascrieri de gazdă",
+      "blurb": "Trimiteți o gazdă la o adresă fixă, ca curl --resolve, și limitați conexiunile la IPv4 sau IPv6.",
+      "synonyms": "dns resolve gazdă host hosts suprascriere override ip ipv4 ipv6 curl"
+    },
+    "graphqlUpload": {
+      "title": "Încărcare de fișiere GraphQL",
+      "blurb": "Trimiteți fișiere într-o cerere GraphQL după specificația multipart request, din fila Fișiere.",
+      "synonyms": "graphql încărcare upload multipart fișier fișiere file mutație mutation"
+    },
+    "wsSecurity": {
+      "title": "SOAP WS-Security",
+      "blurb": "Adăugați un UsernameToken WS-Security (simplu sau digest) și un Timestamp unei cereri SOAP din fila Auth.",
+      "synonyms": "soap wsse ws-security wsdl xml usernametoken digest securitate"
+    },
+    "grpcWeb": {
+      "title": "gRPC-Web și Connect",
+      "blurb": "Apelați servicii gRPC prin gRPC-Web sau Connect, care funcționează și din aplicația web.",
+      "synonyms": "grpc-web grpcweb connect browser transport"
+    },
+    "signalr": {
+      "title": "SignalR",
+      "blurb": "Negociați cu un hub SignalR, conectați-vă prin WebSocket și apelați metodele sale.",
+      "synonyms": "signalr hub aspnet timp real realtime websocket"
+    },
+    "tcpUdp": {
+      "title": "TCP și UDP",
+      "blurb": "Trimiteți text sau hex prin TCP sau UDP și citiți răspunsul. Aplicația desktop, doar în dosare de încredere.",
+      "synonyms": "tcp udp socket brut raw octeți bytes hex"
+    },
+    "nats": {
+      "title": "NATS",
+      "blurb": "Cerere și răspuns, publicare sau așteptarea unui mesaj pe un subiect NATS. Aplicația desktop, doar în dosare de încredere.",
+      "synonyms": "nats subiect subject publicare publish abonare subscribe cerere răspuns request reply mesagerie broker"
+    },
+    "breakpoints": {
+      "title": "Apeluri reținute",
+      "blurb": "Rețineți o cerere sau un răspuns capturat cu o regulă, editați-l, apoi eliberați-l sau renunțați la el.",
+      "synonyms": "breakpoint breakpoints puncte de oprire pauză reținere interceptare intercept editare eliberare renunțare debug depanare"
+    },
+    "jsonRpc": {
+      "title": "Apeluri JSON-RPC",
+      "blurb": "Adăugați un apel JSON-RPC 2.0 sau un lot unui corp JSON cu un singur buton.",
+      "synonyms": "json-rpc jsonrpc rpc lot batch metodă method params id"
+    },
+    "responseCompare": {
+      "title": "Răspunsuri anterioare",
+      "blurb": "Fiecare filă păstrează ultimele 10 răspunsuri; deschideți unul sau comparați-l cu cel mai recent.",
+      "synonyms": "anterioare precedente răspunsuri comparare diff istoric răspuns previous compare"
+    },
+    "responseHar": {
+      "title": "Exportarea răspunsurilor ca HAR",
+      "blurb": "Salvați răspunsurile păstrate ale unei file ca fișier HAR, cu datele de autentificare mascate.",
+      "synonyms": "har export răspunsuri arhivă"
+    },
+    "splitView": {
+      "title": "Răspuns lângă filă",
+      "blurb": "Afișați cel mai recent răspuns al altei file într-un panou lângă fila deschisă, din meniul cererii din bara laterală.",
+      "synonyms": "split împărțire alăturat lângă panou răspuns comparare side by side"
+    },
+    "globalSearch": {
+      "title": "Căutare peste tot",
+      "blurb": "Căutați în cererile salvate, în istoric și în răspunsurile deschise, într-un singur loc.",
+      "synonyms": "căutare găsire globală peste tot cereri istoric răspunsuri search find"
+    },
+    "dependencyGraph": {
+      "title": "Dependențele variabilelor",
+      "blurb": "Vedeți ce cereri setează o variabilă și care o citesc.",
+      "synonyms": "dependență dependențe graf grafic variabile extragere setare citire dependency"
+    },
+    "openTabs": {
+      "title": "Lista filelor deschise",
+      "blurb": "Afișați filele deschise ca listă în bara laterală și treceți de la una la alta.",
+      "synonyms": "file taburi deschise listă bară laterală comutare tabs"
+    },
+    "history": {
+      "title": "Istoric",
+      "blurb": "Fiecare cerere trimisă este păstrată, cu starea răspunsului, ca să o puteți deschide din nou.",
+      "synonyms": "istoric recente trimise anterioare history"
+    },
+    "collections": {
+      "title": "Colecții și dosare",
+      "blurb": "Grupați cererile în dosare imbricate, trageți-le la locul lor, căutați, etichetați și colorați-le.",
+      "synonyms": "colecție dosar folder arbore bară laterală organizare etichetă tag postman collections"
+    },
+    "folderWorkspace": {
+      "title": "Spații de lucru în dosare",
+      "blurb": "Păstrați o colecție ca fișiere YAML simple lângă codul dumneavoastră și partajați-o prin Git.",
+      "synonyms": "dosar folder spațiu de lucru workspace yaml fișiere git bruno opencollection",
+      "tool": "Spațiu de lucru",
+      "webInstead": "Pe web, colecțiile sunt păstrate în acest browser. Exportați-le pentru a le partaja sau a face copii de rezervă."
+    },
+    "folderSettings": {
+      "title": "Setările dosarului",
+      "blurb": "Setați o singură dată antetele, autentificarea, variabilele, scripturile și verificările pentru toate cererile dintr-un dosar.",
+      "synonyms": "dosar colecție setări moștenire antete autentificare scripturi folder settings inherit",
+      "tool": "Setările colecției"
+    },
+    "import": {
+      "title": "Import",
+      "blurb": "Aduceți Postman, Bruno, Insomnia, OpenAPI, HAR, WSDL, fișiere .http și comenzi curl.",
+      "synonyms": "import importare postman bruno insomnia openapi swagger har wsdl http curl migrare"
+    },
+    "firecampImport": {
+      "title": "Import Firecamp",
+      "blurb": "Importați exporturi de colecții Firecamp: dosare, cereri REST, antete și scripturi.",
+      "synonyms": "firecamp import importare migrare colecție"
+    },
+    "specImporters": {
+      "title": "Mai multe formate de import",
+      "blurb": "Importați fișiere Hoppscotch, Thunder Client, HTTPie, Hurl, RAML și API Blueprint. Hurl este și format de export. Fișierele Paw nu sunt citite.",
+      "synonyms": "hoppscotch thunder client hurl raml blueprint httpie restfox import importare migrare"
+    },
+    "export": {
+      "title": "Export",
+      "blurb": "Scrieți o colecție în Postman, OpenAPI, Markdown, fișiere .http sau o copie de rezervă.",
+      "synonyms": "export exportare postman openapi markdown backup copie de rezervă http"
+    },
+    "share": {
+      "title": "Linkuri de partajare",
+      "blurb": "Trimiteți o colecție ca link sau fișier criptat, fără cont.",
+      "synonyms": "partajare link criptat trimitere echipă colaborare share",
+      "tool": "Partajare"
+    },
+    "versionedDocs": {
+      "title": "Documentație pe versiuni",
+      "blurb": "gostman docs --versions generează documentația pentru fiecare tag Git, iar --logo și --accent stilizează pagina.",
+      "synonyms": "docs documentație html publicare versiune taguri logo accent"
+    },
+    "notes": {
+      "title": "Note",
+      "blurb": "Păstrați un fir de note pe o cerere sau un dosar, salvat în fișierul său, ca să îl revizuiască colegii în Git.",
+      "synonyms": "note comentarii revizuire fir rezolvare notes comments review"
+    },
+    "recentlyDeleted": {
+      "title": "Șterse recent",
+      "blurb": "Restaurați cererile, dosarele și mediile șterse timp de 30 de zile.",
+      "synonyms": "coș gunoi șterse restaurare anulare recuperare trash undo"
+    },
+    "backups": {
+      "title": "Copii de rezervă",
+      "blurb": "Copii de rezervă zilnice și pentru fiecare versiune ale datelor dumneavoastră, cu restaurare.",
+      "synonyms": "backup copie de rezervă restaurare snapshot recuperare"
+    },
+    "environments": {
+      "title": "Medii",
+      "blurb": "Comutați între seturi de variabile pentru local, staging și producție.",
+      "synonyms": "mediu medii variabile dev staging prod producție env environment"
+    },
+    "scopes": {
+      "title": "Domeniile variabilelor",
+      "blurb": "Variabile globale, de colecție, de dosar, de mediu, de sesiune și de cerere, cu o ordine de precedență clară.",
+      "synonyms": "variabile domenii precedență globale colecție dosar cerere vars scopes"
+    },
+    "jsonTreeDepth": {
+      "title": "Adâncimea arborelui JSON",
+      "blurb": "Extindeți sau restrângeți un răspuns JSON la orice nivel și lăsați fiecare cerere să se deschidă la adâncimea preferată.",
+      "synonyms": "json extindere restrângere arbore adâncime nivel pliere depliere vizualizator răspuns expand collapse"
+    },
+    "typedVariables": {
+      "title": "Variabile cu tip",
+      "blurb": "Dați un tip variabilelor cererii, astfel încât scripturile să primească numere, valori booleene și JSON în loc de text, iar valorile greșite să fie detectate înainte de trimitere.",
+      "synonyms": "variabile tip tipizate număr boolean întreg json enum validare obligatoriu typed"
+    },
+    "variablesView": {
+      "title": "Vizualizarea variabilelor",
+      "blurb": "Afișați o cerere ca un formular scurt cu variabilele ei, cu Trimite și răspunsul, pentru cei care doar completează valori.",
+      "synonyms": "variabile vizualizare formular simplu câmpuri utilizatori ocazionali șablon template"
+    },
+    "inheritedVariables": {
+      "title": "Variabile moștenite",
+      "blurb": "Vedeți ce variabile globale, de colecție, de mediu, de dosar și de sesiune preia o cerere, lângă cele proprii.",
+      "synonyms": "moștenite variabile domeniu listă afișare ascundere doar cerere inherited"
+    },
+    "secrets": {
+      "title": "Variabile secrete",
+      "blurb": "Păstrați valorile secrete în keychain-ul sistemului de operare, în afara fișierelor și exporturilor.",
+      "synonyms": "secret keychain parolă token vault seif"
+    },
+    "secretManagers": {
+      "title": "Manageri de secrete",
+      "blurb": "Citiți valori din Vault, AWS, Azure, Google Cloud, 1Password, Bitwarden sau KeePassXC la trimitere.",
+      "synonyms": "vault aws azure gcp 1password bitwarden keepassxc manager de secrete secret manager"
+    },
+    "extract": {
+      "title": "Reguli de extragere",
+      "blurb": "Extrageți o valoare dintr-un răspuns într-o variabilă pentru cererea următoare.",
+      "synonyms": "extragere extract captură înlănțuire variabilă răspuns jsonpath chain"
+    },
+    "network": {
+      "title": "Proxy și certificate",
+      "blurb": "Folosiți un proxy, certificate de client și certificate CA personalizate.",
+      "synonyms": "proxy certificat mtls ca tls rețea network"
+    },
+    "checks": {
+      "title": "Verificări",
+      "blurb": "Verificați starea, antetele, corpul și durata fără să scrieți cod.",
+      "synonyms": "verificări teste aserțiuni assert checks tests postman tests chai"
+    },
+    "scripts": {
+      "title": "Scripturi",
+      "blurb": "Rulați JavaScript înainte și după o cerere, cu API-uri compatibile cu pm, bru și insomnia.",
+      "synonyms": "script pre-cerere post-răspuns pre-request post-response javascript pm bru insomnia"
+    },
+    "contract": {
+      "title": "Verificări de contract",
+      "blurb": "Verificați răspunsurile față de o specificație OpenAPI în rulare și în CI.",
+      "synonyms": "contract openapi schemă validare conformitate dredd"
+    },
+    "snapshotChecks": {
+      "title": "Verificări cu snapshot",
+      "blurb": "Comparați o valoare din răspuns cu un snapshot stocat, omiteți căile care se schimbă și reîmprospătați-l din ultimul răspuns.",
+      "synonyms": "snapshot instantaneu golden diff regresie potrivire ignorare"
+    },
+    "openapiFuzz": {
+      "title": "Fuzzing OpenAPI",
+      "blurb": "Trimiteți intrări valide, de limită și invalide derivate din schemă pentru fiecare operație a unei specificații și raportați răspunsurile 5xx, timeout-urile și încălcările de contract.",
+      "synonyms": "openapi fuzz fuzzing schemathesis bazat pe proprietăți limită intrări invalide swagger"
+    },
+    "negativeTests": {
+      "title": "Teste negative",
+      "blurb": "Trimiteți copii modificate ale cererilor salvate și semnalați un 2xx pentru intrări greșite, un 5xx, un stack trace sau un payload reflectat.",
+      "synonyms": "negative fuzz fuzzing securitate injecție intrări invalide limită schemathesis owasp"
+    },
+    "coverage": {
+      "title": "Acoperire OpenAPI",
+      "blurb": "Vedeți ce operații ale unei specificații OpenAPI legate a apelat o rulare și ce stări documentate nu au revenit niciodată.",
+      "synonyms": "acoperire coverage openapi operații netestate specificație min-coverage"
+    },
+    "pmPackages": {
+      "title": "Pachete și pm.vault",
+      "blurb": "Încărcați cod partajat cu require sau pm.require din dosarul packages al unui spațiu de lucru și citiți secrete cu pm.vault.",
+      "synonyms": "pm pachete packages require bibliotecă library postman vault cod partajat"
+    },
+    "specLint": {
+      "title": "Linter OpenAPI",
+      "blurb": "Verificați o specificație pentru descrieri, exemple și securitate lipsă.",
+      "synonyms": "lint linter openapi spectral swagger",
+      "tool": "Lint pentru specificație"
+    },
+    "specSync": {
+      "title": "Sincronizarea specificației",
+      "blurb": "Păstrați o colecție în acord cu o specificație OpenAPI la distanță.",
+      "synonyms": "sincronizare sync openapi specificație actualizare la distanță remote"
+    },
+    "runner": {
+      "title": "Rulare",
+      "blurb": "Rulați un dosar în ordine cu fișiere de date CSV, JSON sau XLSX, rulări paralele și rapoarte HTML sau JUnit.",
+      "synonyms": "runner rulare colecție postman collection runner newman date csv json xlsx iterație"
+    },
+    "flows": {
+      "title": "Fluxuri",
+      "blurb": "Desenați o secvență de cereri cu ramificații, reîncercări și bucle.",
+      "synonyms": "flux fluxuri flow workflow înlănțuire reîncercare ramificație buclă scenariu"
+    },
+    "loadTest": {
+      "title": "Test de încărcare",
+      "blurb": "Trimiteți multe cereri deodată și citiți percentilele de latență și erorile.",
+      "synonyms": "încărcare performanță stres load stress k6 benchmark latență",
+      "webInstead": "Pe web, rulați colecția cu un fișier de date și citiți duratele fiecărei cereri în rulare."
+    },
+    "loadThresholds": {
+      "title": "Praguri de încărcare",
+      "blurb": "Scrieți praguri precum p95<300 sau errors<1% și citiți rezultatul reușit sau eșuat în testul de încărcare.",
+      "synonyms": "prag praguri threshold slo limită eșec încărcare etape rampă stages ramp"
+    },
+    "scan": {
+      "title": "Scanarea secretelor",
+      "blurb": "Găsiți tokenuri și parole într-o colecție înainte de a o partaja.",
+      "synonyms": "scanare scan secrete scurgere token parolă credențiale gitleaks"
+    },
+    "cli": {
+      "title": "Linie de comandă",
+      "blurb": "Rulare, trimitere, test de încărcare, scanare și lint dintr-un singur executabil, cu coduri de ieșire pentru CI.",
+      "synonyms": "cli linie de comandă terminal consolă newman bruno cli inso"
+    },
+    "ci": {
+      "title": "Integrare CI",
+      "blurb": "Un GitHub Action, o imagine Docker, rețete pentru GitLab, Azure Pipelines, CircleCI, Bitbucket și Jenkins și rapoarte JUnit, HTML și Markdown.",
+      "synonyms": "ci github actions gitlab azure circleci bitbucket jenkins docker pipeline junit"
+    },
+    "ciPrComment": {
+      "title": "Rezultate în pull request",
+      "blurb": "GitHub Action scrie numărătorile și fiecare verificare eșuată în rezumatul jobului și poate menține actualizat un comentariu în pull request.",
+      "synonyms": "pull request comentariu pr verificare rezumat job markdown raport github actions"
+    },
+    "ciStarters": {
+      "title": "Pipeline-uri de pornire CI și pre-commit",
+      "blurb": "gostman init --ci scrie un pipeline de pornire pentru GitHub, GitLab, Azure, CircleCI sau Bitbucket. Hook-urile pre-commit rulează lint, scan și run.",
+      "synonyms": "ci pipeline pornire șablon template pre-commit hook makefile azure circleci bitbucket"
+    },
+    "monitors": {
+      "title": "Monitoare",
+      "blurb": "Rulați un dosar sau un flux la interval cât timp aplicația este deschisă și păstrați rate de reușită, istoric și notificări.",
+      "synonyms": "monitor monitoare monitorizare postman monitor programare cron uptime interval notificare"
+    },
+    "agents": {
+      "title": "Agenți de programare",
+      "blurb": "Un server MCP care permite agenților de programare să trimită cereri, cu ascunderea secretelor și o listă de gazde permise.",
+      "synonyms": "agent agenți mcp claude cursor ai programare coding skill"
+    },
+    "mock": {
+      "title": "Server mock",
+      "blurb": "Serviți local exemple salvate sau o specificație OpenAPI, cu un jurnal live al cererilor.",
+      "synonyms": "mock server stub fals fake wiremock prism exemple simulare",
+      "tool": "Server mock",
+      "webInstead": "Pe web, salvați exemple pe cereri; ele sunt păstrate cu colecția și incluse în exporturi. Pentru a le servi prin HTTP, porniți serverul mock din CLI sau din aplicația desktop."
+    },
+    "mockDataRows": {
+      "title": "Răspunsuri mock dintr-un fișier de date",
+      "blurb": "Răspundeți cu rândul dintr-un fișier CSV, JSON sau XLSX care corespunde unui parametru de cale, unei valori de interogare, unui antet sau unui câmp din corp.",
+      "synonyms": "mock date fișier csv xlsx json rânduri căutare fixture wiremock"
+    },
+    "mockRules": {
+      "title": "Reguli mock",
+      "blurb": "Alegeți un răspuns după interogare, antet sau corp, adăugați întârzieri și injectați erori.",
+      "synonyms": "mock reguli condiții întârziere eroare defect latență fault delay"
+    },
+    "capture": {
+      "title": "Proxy de captură",
+      "blurb": "Redirecționați traficul către un upstream, înregistrați-l și transformați-l în cereri.",
+      "synonyms": "captură capture proxy înregistrare trafic interceptare charles fiddler mitm",
+      "tool": "Proxy de captură",
+      "webInstead": "Pe web, lipiți o comandă curl sau importați un fișier HAR pentru a construi cereri din traficul înregistrat în altă parte."
+    },
+    "captureRules": {
+      "title": "Reguli de captură",
+      "blurb": "Editați antete și corpuri, răspundeți local, injectați eșecuri sau încetiniți apelurile care corespund unei reguli.",
+      "synonyms": "captură reguli rescriere blocare map local throttle limitare lent latență eroare"
+    },
+    "captureHar": {
+      "title": "Captură în HAR",
+      "blurb": "Exportați apelurile capturate ca fișier HAR 1.2 pe care îl citesc alte instrumente.",
+      "synonyms": "har captură export arhivă"
+    },
+    "gitPanel": {
+      "title": "Panoul Git",
+      "blurb": "Diff, commit, push, ramuri, stash și istoric în aplicație.",
+      "synonyms": "git commit push pull ramură branch stash diff control versiuni",
+      "tool": "Git",
+      "webInstead": "Pe web, folosiți Partajare sau Export pentru a muta o colecție. Pentru controlul versiunilor, păstrați un spațiu de lucru în dosar în aplicația desktop sau în CLI."
+    },
+    "gitFieldDiff": {
+      "title": "Diferențe la nivel de câmp",
+      "blurb": "Vedeți ce câmpuri ale unei cereri s-au schimbat, precum URL, antete, autentificare, corp și verificări, și comparați două versiuni ale unui fișier.",
+      "synonyms": "git diff diferențe câmp modificări yaml revizuire comparare versiuni"
+    },
+    "gitCommitGraph": {
+      "title": "Graficul commiturilor",
+      "blurb": "Citiți istoricul cu un grafic pe benzi al ramurilor, îmbinărilor și tagurilor.",
+      "synonyms": "git grafic graph commituri ramuri branches log istoric taguri merge îmbinare"
+    },
+    "conflicts": {
+      "title": "Rezolvarea conflictelor",
+      "blurb": "Rezolvați conflictele de îmbinare dintr-un fișier de cerere cu un editor alăturat.",
+      "synonyms": "îmbinare merge conflict rezolvare git"
+    },
+    "repoCreate": {
+      "title": "Crearea unui depozit GitHub",
+      "blurb": "Creați un depozit GitHub din fila Remote-uri și faceți push în el.",
+      "synonyms": "git init depozit repository github publicare remote creare push"
+    },
+    "ai": {
+      "title": "Asistent AI",
+      "blurb": "Generați cereri, verificări și scripturi și explicați răspunsuri, cu propria cheie.",
+      "synonyms": "ai llm openai anthropic claude generare explicare asistent postbot"
+    },
+    "aiMock": {
+      "title": "Exemple mock cu AI",
+      "blurb": "Generați cu AI un exemplu de răspuns mock pentru o cerere, afișat ca previzualizare pe care o acceptați.",
+      "synonyms": "ai mock generare date fals exemplu răspuns fake"
+    },
+    "aiCommit": {
+      "title": "Mesaje de commit cu AI",
+      "blurb": "Redactați un mesaj de commit din modificările pregătite cu Sugerare mesaj cu AI în panoul Git.",
+      "synonyms": "ai commit mesaj git redactare sugerare"
+    },
+    "aiInline": {
+      "title": "Sugestii inline în scripturi",
+      "blurb": "Sugestii de cod ca text fantomă în editoarele de scripturi, dezactivate până le porniți în setările AI. Apăsați Tab pentru a accepta.",
+      "synonyms": "ai completare automată autocomplete completion copilot text fantomă ghost text script sugestie"
+    },
+    "palette": {
+      "title": "Paleta de comenzi",
+      "blurb": "Găsiți orice comandă, cerere sau funcție după nume.",
+      "synonyms": "paletă comandă căutare deschidere rapidă palette quick open ctrl k"
+    },
+    "shortcuts": {
+      "title": "Comenzi rapide de la tastatură",
+      "blurb": "Vedeți toate comenzile rapide și schimbați-le pe cele dorite.",
+      "synonyms": "tastatură comenzi rapide taste scurtături combinații shortcuts hotkeys keybindings"
+    },
+    "themes": {
+      "title": "Teme și culori",
+      "blurb": "Culori luminoase, întunecate și personalizate pentru fiecare parte a ferestrei.",
+      "synonyms": "temă întunecată luminoasă culoare aspect accent font theme dark light"
+    },
+    "languages": {
+      "title": "Limbi",
+      "blurb": "Folosiți aplicația în altă limbă, inclusiv cu aspect de la dreapta la stânga.",
+      "synonyms": "limbă traducere localizare română i18n locale arabă language"
+    },
+    "desktop": {
+      "title": "Aplicația desktop",
+      "blurb": "Dosarele, Git, serverul mock, captura, proxy-urile și certificatele necesită aplicația desktop.",
+      "synonyms": "desktop descărcare instalare aplicație windows mac linux"
+    },
+    "webApp": {
+      "title": "Aplicația web",
+      "blurb": "Folosiți Gostman în browser, fără cont și fără nimic de instalat.",
+      "synonyms": "web browser online fără instalare pwa"
+    },
+    "pricing": {
+      "title": "Preț",
+      "blurb": "Gratuit și cu licență MIT.",
+      "synonyms": "preț gratuit licență free"
+    },
+    "vscode": {
+      "title": "Extensie VS Code",
+      "blurb": "O extensie VS Code rulează colecții, fluxuri, lint și scanare prin CLI.",
+      "synonyms": "vscode extensie editor"
+    },
+    "vscodeExtension": {
+      "title": "Extensie VS Code",
+      "blurb": "Rulați o colecție, un dosar sau un flux, verificați o specificație cu lint și scanați după secrete din editor. Extensia apelează linia de comandă Gostman, așa că o rulare corespunde cu CI.",
+      "synonyms": "vscode visual studio code extensie editor ide marketplace"
+    },
+    "xlsxData": {
+      "title": "Fișiere de date",
+      "blurb": "Rulați un dosar o dată pentru fiecare rând al unui fișier CSV, JSON sau XLSX, în aplicație sau cu gostman run --data.",
+      "synonyms": "date csv json xlsx excel foaie de calcul iterație rânduri data-driven"
+    },
+    "scheduledRuns": {
+      "title": "Rulări programate",
+      "blurb": "gostman run --every repetă o rulare la interval, păstrează un istoric local și poate notifica un webhook.",
+      "synonyms": "programare cron every interval repetare istoric webhook notificare schedule"
+    },
+    "openapiDiff": {
+      "title": "Diff OpenAPI",
+      "blurb": "Comparați două versiuni ale unei specificații OpenAPI și listați modificările incompatibile în aplicație sau cu gostman diff în CI.",
+      "synonyms": "openapi diff oasdiff modificări incompatibile breaking changes comparare specificație"
+    },
+    "apiDesign": {
+      "title": "Proiectarea API-urilor",
+      "blurb": "Scrieți o specificație OpenAPI înainte să existe backendul, cu verificări pe măsură ce tastați, apoi generați din ea cereri, un mock și verificări ale răspunsurilor.",
+      "synonyms": "openapi swagger proiectare design first contract editor stoplight api specificație spec yaml schemă"
+    },
+    "flowCanvas": {
+      "title": "Planșa fluxului",
+      "blurb": "Vedeți un flux de sus în jos, cu ramificațiile alăturate, buclele încadrate, zoom și deplasare, și calea urmată de o rulare.",
+      "synonyms": "flux diagramă planșă canvas grafic workflow designer zoom deplasare ramificații join"
+    },
+    "flowSwitch": {
+      "title": "Pași de comutare",
+      "blurb": "Trimiteți un flux pe una dintre mai multe căi, fiecare cu propriul set de verificări.",
+      "synonyms": "comutare switch case condiție ramificație tabel de adevăr decizie router"
+    },
+    "flowRepeat": {
+      "title": "Pași de repetare",
+      "blurb": "Repetați mai mulți pași până când trece o verificare sau se atinge un număr de treceri.",
+      "synonyms": "repetare buclă cât timp până când interogare iterare repeat loop while until poll"
+    },
+    "nestedFlows": {
+      "title": "Fluxuri în fluxuri",
+      "blurb": "Rulați un flux salvat ca un pas al altuia, cu propriile valori și propria cale în caz de eșec.",
+      "synonyms": "sub-flux subflux imbricat flux de fluxuri reutilizare apel sub-flow subflow nested"
+    },
+    "flowInputs": {
+      "title": "Valori într-o cerere",
+      "blurb": "Puneți o valoare dintr-un răspuns anterior în antetele, interogarea, corpul JSON, câmpurile de formular sau variabilele cererii următoare.",
+      "synonyms": "înlănțuire răspuns mapare date antet corp formular câmp extragere transmitere valoare chain mapping"
+    },
+    "flowMetrics": {
+      "title": "Metrici de rulare a fluxului",
+      "blurb": "Durata pe pas, pe trecere de buclă și pe flux, plus octeții trimiși și primiți, în aplicație, în rapoarte și în CLI.",
+      "synonyms": "metrici durată timp octeți performanță statistici metrics timing"
+    },
+    "flowParallel": {
+      "title": "Pași paraleli",
+      "blurb": "Trimiteți mai multe cereri sau rulați mai multe fluxuri în același timp și continuați când o condiție asupra rezultatelor este îndeplinită sau expiră o limită de timp.",
+      "synonyms": "paralel concurent simultan în același timp cursă race fan out join așteptare oricare toate timeout Postman Flows"
+    },
+    "flowConditionGroups": {
+      "title": "Condiții grupate",
+      "blurb": "Combinați condiții cu și și sau în grupuri imbricate, precum (A sau (B și C)) și D, într-un singur pas If, Switch, Repeat sau Parallel.",
+      "synonyms": "și sau and or grupuri imbricate logică booleană paranteze condiție complexă tabel de adevăr"
+    },
+    "flowVariables": {
+      "title": "Variabile, intrări și ieșiri ale fluxului",
+      "blurb": "Declarați variabile cu tip care trăiesc pe durata unei rulări, marcați unele ca intrări, returnați valori ca ieșiri și urmăriți-le cum se schimbă în timp ce fluxul rulează.",
+      "synonyms": "variabile tip număr boolean json intrări ieșiri parametri valori returnate domeniu flux inspectare urmărire inputs outputs"
+    }
+  },
+  "featureSamples": {
+    "collection": "Colecție exemplu",
+    "listUsers": "Listarea utilizatorilor",
+    "getUser": "Obținerea unui utilizator",
+    "createUser": "Crearea unui utilizator",
+    "okExample": "200 OK",
+    "createdExample": "201 Created",
+    "flowName": "Flux exemplu",
+    "scanRequest": "Cerere cu un token fals",
+    "graphqlRequest": "Cerere GraphQL",
+    "websocketRequest": "Cerere WebSocket",
+    "grpcRequest": "Cerere gRPC",
+    "mcpRequest": "Cerere MCP",
+    "flowDescription": "Trimite două cereri în același timp, păstrează o variabilă de flux cu tip, alege o cale după o condiție grupată, transmite un nume într-o cerere, repetă un pas până când trece o verificare și returnează o valoare. Fiecare cerere răspunde dintr-un exemplu salvat, așa că rulează offline.",
+    "flowDone": "Gata",
+    "flowListNote": "Răspunde cu exemplul său salvat **200 OK**, așa că nimic nu părăsește acest dispozitiv.",
+    "flowCheckStatus": "Verificarea stării",
+    "flowCreateNote": "`name` provine de la al doilea utilizator din listă și este pus în corpul JSON chiar înainte de trimitere.",
+    "flowWaitForUser": "Citire până când este Ada",
+    "flowStopped": "Oprit",
+    "flowStoppedMessage": "Lista de utilizatori nu a răspuns cu 200 OK.",
+    "binaryRequest": "Răspuns binar",
+    "jwtRequest": "Cerere JWT",
+    "flowFetchTogether": "Preluarea listei și a lui Ada împreună",
+    "flowFetchNote": "Ambele cereri sunt trimise în același timp; fluxul continuă când ambele au reușit.",
+    "flowFirstUser": "Ada",
+    "flowKeepName": "Păstrarea numelui ei",
+    "flowCheckNote": "Trece când starea este 200 și primul sau al doilea utilizator este cel păstrat în `firstName`."
+  }
+}

@@ -2,13 +2,17 @@
   "sidebar": {
     "views": "Vizualizarea barei laterale",
     "collections": "Colecții",
+    "openTabs": "File deschise",
     "history": "Istoric",
     "newFolder": "Dosar nou",
+    "add": "Adăugare",
     "newRequest": "Cerere nouă",
     "toggle": "Comutare bară laterală",
     "close": "Închidere bară laterală",
     "resize": "Redimensionare bară laterală",
     "viewsMenu": "File din bara laterală",
+    "more": "Mai multe",
+    "moreHint": "Afișează celelalte vizualizări ale barei laterale",
     "resetViews": "Afișare toate filele în ordinea implicită"
   },
   "history": {
@@ -37,6 +41,25 @@
       "days_few": "trimisă acum {{count}} zile",
       "days_other": "trimisă acum {{count}} de zile",
       "date": "trimisă la {{date}}"
+    },
+    "range": "Interval de date",
+    "folder": "Dosar",
+    "tag": "Etichetă",
+    "allFolders": "Toate dosarele",
+    "allTags": "Toate etichetele",
+    "groupByDate": "Grupare după dată",
+    "ranges": {
+      "any": "Oricând",
+      "today": "Astăzi",
+      "week": "Ultimele 7 zile",
+      "month": "Ultimele 30 de zile"
+    },
+    "groups": {
+      "today": "Astăzi",
+      "yesterday": "Ieri",
+      "week": "Mai devreme săptămâna aceasta",
+      "month": "Mai devreme luna aceasta",
+      "older": "Mai vechi"
     }
   }
 }

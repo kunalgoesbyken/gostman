@@ -1,0 +1,29 @@
+{
+  "dependencies": {
+    "title": "Dependențele variabilelor",
+    "menuFolder": "Dependențele variabilelor",
+    "scopeAll": "Toate cererile",
+    "scopeFolder": "Dosar: {{name}}",
+    "intro": "Fiecare variabilă stă între cererile care o setează și cererile care o citesc. O cerere setează o variabilă cu o regulă de extragere sau un script și o citește cu {{reference}} în adresă, antete, corp sau autentificare, ori cu un apel din script.",
+    "showInputs": "Afișare variabile care provin doar din medii",
+    "producers": "Setează",
+    "variables": "Variabilă",
+    "consumers": "Citește",
+    "missingTitle": "Citite, dar niciodată setate",
+    "missingDetail": "Aceste variabile sunt citite de o cerere, dar nicio cerere nu le setează și niciun mediu, nicio colecție sau listă globală nu le definește: {{names}}.",
+    "missingMark": "niciodată setată",
+    "none": "Nicio legătură prin variabile între cereri",
+    "noneDescription": "Nicio cerere din acest domeniu nu setează, printr-o regulă de extragere sau un script, o variabilă citită de altă cerere.",
+    "summary_one": "{{count}} variabilă",
+    "summary_few": "{{count}} variabile",
+    "summary_other": "{{count}} de variabile",
+    "graphLabel": "Graful dependențelor variabilelor",
+    "openRequest": "Deschidere {{name}}",
+    "untitled": "Cerere fără titlu",
+    "command": {
+      "label": "Afișare dependențe ale variabilelor",
+      "description": "Desenează ce cereri setează și citesc fiecare variabilă",
+      "keywords": "graf lanț extragere flux produce consumă graph chain extract flow"
+    }
+  }
+}

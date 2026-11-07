@@ -9,7 +9,8 @@
       "website": "Sitio web",
       "source": "Código fuente",
       "releases": "Versiones",
-      "issues": "Informar de un problema"
+      "issues": "Informar de un problema",
+      "sponsor": "Patrocinar"
     },
     "diagnosticsHint": "El diagnóstico solo incluye la versión, la plataforma y recuentos. Nunca incluye solicitudes, URL, variables, tokens ni secretos.",
     "copyDiagnostics": "Copiar diagnóstico",

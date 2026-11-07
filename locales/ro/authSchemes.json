@@ -44,13 +44,17 @@
       "payloadHash": "Hash payload",
       "extraData": "Date suplimentare",
       "appId": "ID aplicație",
+      "passwordType": "Tip de parolă",
+      "timestampLifetime": "Durata de valabilitate a marcajului de timp",
       "delegation": "Delegare"
     },
     "hints": {
       "generated": "Generat dacă e gol",
       "commaSeparated": "Separate prin virgulă, opțional",
       "optional": "Opțional",
-      "expiry": "1h sau secunde"
+      "expiry": "1h sau secunde",
+      "jwtExpiry": "Opțional: adaugă iat și exp, de exemplu 1h sau 900",
+      "wsseTimestamp": "Opțional: adaugă un Timestamp valabil 5m sau un număr de secunde"
     },
     "options": {
       "authorizationHeader": "Antet Authorization",
@@ -58,6 +62,7 @@
       "formBody": "Corp de formular",
       "plainText": "Text simplu",
       "doNotInclude": "Fără includere",
+      "passwordDigest": "Digest (SHA-1 cu nonce și ora creării)",
       "include": "Includere"
     },
     "notes": {
@@ -68,7 +73,8 @@
       "edgegrid": "Tokenul client, secretul client și tokenul de acces sunt necesare pentru a semna cererea.",
       "jwt": "Tokenul este semnat din nou la fiecare cerere, astfel încât {{timestamp}} din payload rămâne actual.",
       "asap": "Sunt necesare emitentul, audience, ID-ul cheii și cheia privată. La fiecare cerere se trimite un token nou, cu iat, exp și jti proprii, ca token Bearer.",
-      "hawk": "ID-ul și cheia de autentificare sunt necesare pentru a semna cererea."
+      "hawk": "ID-ul și cheia de autentificare sunt necesare pentru a semna cererea.",
+      "wssecurity": "Inserează un antet wsse:Security în plicul SOAP al tipului de corp SOAP. Indicați un nume de utilizator, o durată de valabilitate a marcajului de timp sau ambele."
     }
   }
 }

@@ -10,6 +10,18 @@
     "duration": "実行時間（秒）",
     "rateLimit": "毎秒リクエスト数の上限",
     "rateLimitHint": "空欄の場合は上限なし",
+    "stages": "ステージ",
+    "stagesHint": "10s:5,30s:20,10s:0",
+    "stagesNote": "任意。各ステージは期間と到達させるワーカー数です（例：10s:5,30s:20,10s:0）。ステージを指定すると、上のワーカー数と期間は使われません。",
+    "thresholds": "しきい値",
+    "thresholdsHint": "p95<300, errors<1%",
+    "thresholdsNote": "任意。カンマ区切りで指定します。メトリクス：min、avg、med、p50、p90、p95、p99、max（ミリ秒）、errors（パーセント）、failed、rps。",
+    "thresholdsResult": "しきい値",
+    "thresholdPassed": "合格",
+    "thresholdFailed": "不合格",
+    "thresholdObserved": "実測値 {{value}}",
+    "thresholdsPassed": "すべてのしきい値に合格",
+    "thresholdsFailed_other": "{{count}}件のしきい値が不合格",
     "start": "開始",
     "stop": "停止",
     "running": "実行中",
@@ -19,7 +31,8 @@
       "requests": "リクエスト",
       "rate": "リクエスト/秒",
       "p95": "p95",
-      "failed": "失敗"
+      "failed": "失敗",
+      "workers": "ワーカー"
     },
     "summary": {
       "total": "リクエスト",

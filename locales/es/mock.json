@@ -58,7 +58,8 @@
     "fields": {
       "query": "Query",
       "header": "Encabezado",
-      "body": "Cuerpo"
+      "body": "Cuerpo",
+      "param": "Parámetro de ruta"
     },
     "ops": {
       "equals": "es igual a",
@@ -72,6 +73,12 @@
     "headersLabel": "Encabezados (un Nombre: valor por línea)",
     "bodyLabel": "Cuerpo (vacío conserva el cuerpo de la ruta)",
     "bodyHint": "Marcadores: {{placeholders}}",
+    "dataTitle": "Archivo de datos",
+    "dataHint": "Opcional. Una solicitud cuyo valor coincide con una celda de la columna recibe esa fila como JSON, o el cuerpo de arriba usando {{example}}. Sin coincidencia, esta regla no se aplica. CSV, JSON o XLSX, leído de la carpeta del espacio de trabajo.",
+    "dataFile": "Archivo de la carpeta del espacio de trabajo",
+    "dataField": "Coincidir con la solicitud",
+    "dataName": "Nombre o ruta JSON",
+    "dataColumn": "Columna",
     "nth": "Solo la coincidencia n.º",
     "nthPlaceholder": "Todas las coincidencias",
     "behaviorTitle": "Comportamiento",
@@ -107,6 +114,12 @@
       "conflicts": "{{count}} en conflicto",
       "off": "{{count}} desactivadas",
       "skipped": "{{count}} no servidas"
-    }
+    },
+    "importRules": "Importar reglas",
+    "exportRules": "Exportar reglas",
+    "rulesName": "gostman-mock-rules.yaml",
+    "rulesImported_one": "Se importó {{count}} regla, desactivada hasta que la actives.",
+    "rulesImported_many": "Se importaron {{count}} de reglas, desactivadas hasta que las actives.",
+    "rulesImported_other": "Se importaron {{count}} reglas, desactivadas hasta que las actives."
   }
 }

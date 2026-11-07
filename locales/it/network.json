@@ -14,6 +14,18 @@
     "proxyAddressPlaceholder": "http://user:password@proxy.example.com:8080",
     "bypass": "Escludi per gli host",
     "bypassPlaceholder": "localhost, *.internal.example.com",
+    "resolution": "Risoluzione dei nomi",
+    "resolve": "Sostituzioni di host",
+    "resolvePlaceholder": "api.example.com:443:203.0.113.10",
+    "resolveNote": "Una sostituzione per riga nel formato host:porta:indirizzo, come curl --resolve. Usa * per qualsiasi porta. La richiesta porta comunque il nome host originale.",
+    "ipFamily": "Versione IP",
+    "ipFamilies": {
+      "auto": "Automatica",
+      "v4": "Solo IPv4",
+      "v6": "Solo IPv6"
+    },
+    "collectionResolve": "Sostituzioni di host",
+    "collectionIpFamily": "Versione IP",
     "certificates": "Certificati",
     "caCertificate": "Certificato CA",
     "chooseCA": "Scegli il certificato CA (PEM o DER)",

@@ -1,0 +1,88 @@
+{
+  "specEditor": {
+    "createFailed": "Impossible de créer la spécification d’API",
+    "saveFailed": "Impossible d’enregistrer la spécification d’API",
+    "deleteFailed": "Impossible de supprimer la spécification d’API",
+    "importFailed": "Impossible d’importer la spécification d’API",
+    "convertFailed": "Impossible de convertir la spécification d’API",
+    "mockFailed": "Impossible de démarrer le serveur fictif",
+    "generateFailed": "Impossible de générer les requêtes",
+    "saved": "« {{name}} » a été enregistrée.",
+    "renameTitle": "Renommer la spécification d’API",
+    "nameLabel": "Nom",
+    "deleteTitle": "Supprimer la spécification d’API",
+    "deleteMessage": "Supprimer la spécification d’API « {{name}} » ? Cette action est irréversible.",
+    "closeTitle": "Fermer la spécification d’API",
+    "closeMessage": "« {{name}} » contient des modifications non enregistrées. Les enregistrer avant de fermer ?",
+    "dontSave": "Ne pas enregistrer",
+    "save": "Enregistrer",
+    "copyName": "{{name}} copie",
+    "importedName": "API importée",
+    "importAddressTitle": "Importer une spécification d’API",
+    "importAddressMessage": "Saisissez l’adresse d’une spécification OpenAPI ou Swagger.",
+    "importAddressPlaceholder": "https://example.com/openapi.json",
+    "importAddressConfirm": "Importer",
+    "checkResponsesTitle": "Vérifier les réponses",
+    "generateFirst": "Générez d’abord des requêtes à partir de cette spécification. Leurs réponses sont ensuite vérifiées par rapport à elle.",
+    "checkingResponses": "Les réponses de « {{name}} » sont vérifiées par rapport à cette spécification.",
+    "tabLabel": "Spécification d’API {{name}}",
+    "templates": {
+      "strategies": {
+        "name": "API Stratégies"
+      },
+      "resource": {
+        "name": "API Éléments"
+      },
+      "blank": {
+        "name": "Nouvelle API"
+      }
+    }
+  },
+  "specList": {
+    "listLabel": "Spécifications d’API",
+    "emptyTitle": "Concevez une API avant qu’elle existe",
+    "emptyDescription": "Écrivez ici une spécification OpenAPI, vérifiée pendant la saisie. Générez ensuite des requêtes, démarrez un serveur fictif et vérifiez de vraies réponses par rapport à elle.",
+    "count_one": "{{count}} spécification d’API",
+    "count_many": "{{count}} de spécifications d’API",
+    "count_other": "{{count}} spécifications d’API",
+    "newSpec": "Nouvelle spécification d’API",
+    "importSpec": "Importer une spécification",
+    "importFile": "Importer depuis un fichier",
+    "importAddress": "Importer depuis une adresse",
+    "actions": "Actions pour {{name}}",
+    "rename": "Renommer",
+    "duplicate": "Dupliquer",
+    "remove": "Supprimer",
+    "sidebarTab": "Spécifications"
+  },
+  "specView": {
+    "nameLabel": "Nom de la spécification d’API",
+    "unsaved": "Modifications non enregistrées",
+    "save": "Enregistrer",
+    "formatLabel": "Format de fichier",
+    "formatYaml": "YAML",
+    "formatJson": "JSON",
+    "editorLabel": "Spécification OpenAPI",
+    "previewLabel": "Aperçu de la documentation",
+    "showPreview": "Afficher l’aperçu de la documentation",
+    "hidePreview": "Masquer l’aperçu de la documentation",
+    "viewDocs": "Voir la documentation",
+    "viewDocsHint": "Ouvrir la documentation dans une fenêtre plus grande.",
+    "generate": "Générer les requêtes",
+    "generateHint": "Créer des requêtes à partir de cette spécification, avec un lien qui les garde synchronisées avec elle.",
+    "update": "Mettre à jour les requêtes",
+    "updateHint": "Comparer cette spécification aux requêtes générées à partir d’elle et appliquer les changements choisis.",
+    "mock": "Démarrer le serveur fictif",
+    "mockHint": "Servir les exemples de cette spécification depuis un serveur fictif local.",
+    "check": "Vérifier les réponses",
+    "checkHint": "Vérifier les réponses des requêtes générées par rapport à cette spécification.",
+    "compare": "Comparer",
+    "compareHint": "Comparer cette spécification à une autre version et lister les changements incompatibles.",
+    "problems_one": "{{count}} problème",
+    "problems_many": "{{count}} de problèmes",
+    "problems_other": "{{count}} problèmes",
+    "problemsLabel": "Problèmes",
+    "checking": "Vérification de la spécification",
+    "cannotRead": "La spécification ne peut pas être lue"
+  }
+}

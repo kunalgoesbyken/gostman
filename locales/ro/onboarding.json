@@ -37,6 +37,11 @@
         "title": "Rulați cererile împreună",
         "hint": "Runnerul trimite fiecare cerere salvată în ordine și raportează ce verificări au trecut.",
         "action": "Deschidere runner"
+      },
+      "explore": {
+        "title": "Explorare funcții",
+        "hint": "Căutați orice funcție, încercați-o cu un exemplu și citiți cum funcționează.",
+        "action": "Explorare funcții"
       }
     }
   }

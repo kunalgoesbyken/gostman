@@ -1,8 +1,55 @@
 {
   "updates": {
+    "installedLabel": "Zainstalowana wersja",
+    "checkNow": "Sprawdź teraz",
+    "checking": "Sprawdzanie…",
+    "neverChecked": "Jeszcze nie sprawdzono.",
+    "checkedAt": "Ostatnio sprawdzono {{when}}.",
+    "upToDate": "To najnowsza wersja.",
+    "checkFailed": "Nie udało się połączyć z serwerem aktualizacji. Sprawdź połączenie i spróbuj ponownie.",
     "checksLabel": "Sprawdzaj nowe wersje",
+    "checksHint": "Raz dziennie odczytuj najnowsze wydanie z GitHuba i pokazuj je na pasku stanu.",
+    "autoLabel": "Instaluj aktualizacje automatycznie",
+    "autoHint": "Pobieraj nowe wersje w tle i instaluj je, gdy Gostman zostanie zamknięty lub uruchomiony ponownie.",
+    "autoHintInstaller": "Pobieraj nowe wersje w tle, a następnie instaluj je przy ponownym uruchomieniu Gostmana, gdy Windows poprosi o zgodę.",
     "available": "Dostępna jest wersja {{version}}",
+    "availableDetail": "Gostman pobierze ją, sprawdzi, czy dotarła w całości, i zainstaluje przy ponownym uruchomieniu.",
+    "availableUnverified": "Tej wersji nie można zainstalować automatycznie, więc pobierz ją ze strony wydań.",
+    "update": "Zaktualizuj Gostmana",
+    "updateHint": "Pobierz wersję {{version}}, sprawdź ją i zainstaluj",
+    "downloading": "Pobieranie {{version}}… {{percent}}",
+    "downloadingDetail": "{{received}} z {{total}}",
+    "verifying": "Sprawdzanie, czy pobieranie jest kompletne…",
+    "installing": "Instalowanie…",
+    "ready": "Uruchom ponownie, aby zaktualizować",
+    "readyHint": "Wersja {{version}} została pobrana i sprawdzona. Uruchom Gostmana ponownie, aby ją zainstalować.",
+    "readyDetail": "Wersja {{version}} została pobrana i sprawdzona.",
+    "restartNow": "Uruchom ponownie teraz",
+    "restartTitle": "Uruchomić Gostmana ponownie?",
+    "restartMessage": "Gostman zamknie się i otworzy ponownie w wersji {{version}}. Otwarte karty i niezapisane wersje robocze zostaną zachowane.",
+    "restartMessageInstaller": "Gostman zamknie się, Windows poprosi o zgodę na instalację wersji {{version}}, a następnie Gostman otworzy się ponownie. Otwarte karty i niezapisane wersje robocze zostaną zachowane.",
+    "cancel": "Anuluj pobieranie",
+    "tryAgain": "Spróbuj ponownie",
+    "releaseNotes": "Informacje o wydaniu",
+    "openRelease": "Otwórz stronę wydań",
+    "download": "Pobierz",
+    "downloadHint": "Otwórz informacje o wydaniu i pliki do pobrania na GitHubie",
     "dismiss": "Ukryj do następnej wersji",
-    "downloadHint": "Otwórz informacje o wydaniu i pliki do pobrania na GitHubie"
+    "failed": "Aktualizacja nie powiodła się",
+    "failedHint": "Zobacz, co poszło nie tak, w Preferencje, Aktualizacje",
+    "failures": {
+      "network": "Nie udało się połączyć z serwerem aktualizacji. Sprawdź połączenie i spróbuj ponownie.",
+      "unsupported": "Dla tego systemu nie ma jeszcze automatycznych aktualizacji, więc pobierz nową wersję ze strony wydań.",
+      "unverified": "Gostman nie mógł potwierdzić autentyczności tej aktualizacji, więc nie została zainstalowana. Pobierz ją ze strony wydań.",
+      "mismatch": "Pobieranie nie przebiegło poprawnie, więc aktualizacja nie została zainstalowana. Spróbuj ponownie.",
+      "storage": "Gostman nie mógł zapisać pobranego pliku na tym komputerze. Zwolnij trochę miejsca i spróbuj ponownie.",
+      "install": "Gostman nie mógł zainstalować aktualizacji. Zamknij go i uruchom instalator ze strony wydań."
+    },
+    "manual": {
+      "scoop": "Zainstalowano za pomocą Scoop. Zaktualizuj poleceniem {{command}}.",
+      "homebrew": "Zainstalowano za pomocą Homebrew. Zaktualizuj poleceniem {{command}}.",
+      "system": "Zainstalowano jako pakiet systemowy, więc pobierz nowy pakiet ze strony wydań i zainstaluj go.",
+      "other": "Ta kopia Gostmana nie może się sama aktualizować, więc pobieraj nowe wersje ze strony wydań."
+    }
   }
 }

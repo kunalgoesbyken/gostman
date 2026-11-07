@@ -9,7 +9,8 @@
       "website": "官网",
       "source": "源代码",
       "releases": "发布版本",
-      "issues": "报告问题"
+      "issues": "报告问题",
+      "sponsor": "赞助"
     },
     "diagnosticsHint": "诊断信息只包含版本、平台和数量，绝不包含请求、URL、变量、令牌或机密。",
     "copyDiagnostics": "复制诊断信息",

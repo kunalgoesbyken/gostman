@@ -7,7 +7,8 @@
     "window": {
       "minimize": "Minimizar",
       "maximize": "Maximizar",
-      "restore": "Restaurar"
+      "restore": "Restaurar",
+      "resize": "Cambiar el tamaño de la ventana"
     },
     "crash": {
       "title": "Gostman ha encontrado un error",

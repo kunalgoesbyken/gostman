@@ -10,6 +10,7 @@
       "language": "Idioma",
       "ai": "IA",
       "privacy": "Privacidade",
+      "updates": "Atualizações",
       "data": "Dados"
     },
     "fields": {
@@ -21,12 +22,14 @@
       "codeFont": "Fonte do código",
       "density": "Densidade",
       "responseLayout": "Painel de resposta",
+      "tabPlacement": "Abas abertas",
       "systemTitleBar": "Usar a barra de título do sistema",
       "editorFontSize": "Tamanho da fonte do editor",
       "wrapLines": "Quebrar linhas longas",
       "requestTimeout": "Tempo limite padrão",
       "confirmCloseTab": "Perguntar antes de descartar alterações não salvas ao fechar uma aba",
       "language": "Idioma",
+      "authorName": "Seu nome nas notas",
       "sidebarViews": "Abas da barra lateral"
     },
     "themes": {
@@ -54,6 +57,11 @@
       "below": "Abaixo",
       "right": "À direita"
     },
+    "tabPlacements": {
+      "bar": "Barra de abas",
+      "sidebar": "Barra lateral"
+    },
+    "tabPlacementHint": "Barra lateral oculta a barra de abas e lista as abas abertas na barra lateral, o que é melhor para telas pequenas.",
     "seconds": "segundos",
     "pixels": "px",
     "contrastHint": "Maior desenha bordas e textos secundários mais fortes.",
@@ -152,6 +160,7 @@
       "lowContrast": "O texto pode ser difícil de ler. Busque ao menos {{minimum}}:1.",
       "resetRow": "Restaurar {{name}}"
     },
+    "authorNameHint": "Mostrado nas notas que você adiciona a requisições e pastas.",
     "timeoutHint_one": "Vale para requisições que não definem tempo limite próprio. 0 usa o limite interno de {{count}} segundo.",
     "timeoutHint_many": "Vale para requisições que não definem tempo limite próprio. 0 usa o limite interno de {{count}} de segundos.",
     "timeoutHint_other": "Vale para requisições que não definem tempo limite próprio. 0 usa o limite interno de {{count}} segundos.",
@@ -165,6 +174,8 @@
     "accentAdjusted": "Mostrada como {{light}} no modo claro e {{dark}} no modo escuro para que o texto nesta cor continue legível.",
     "sidebarViewsHint": "Escolha quais abas a barra lateral mostra e em que ordem. Clique com o botão direito nas abas da barra lateral para mostrá-las ou ocultá-las ali.",
     "moveViewUp": "Mover {{name}} para cima",
-    "moveViewDown": "Mover {{name}} para baixo"
+    "moveViewDown": "Mover {{name}} para baixo",
+    "textScaleHint": "Ajusta a escala da interface e dos campos de entrada. O zoom da janela é aplicado sobre este tamanho: uma base de {{size}} px aparece como {{zoomed}} px com zoom de 125%.",
+    "editorFontSizeHint": "Editores de código, em pixels. Não segue o Tamanho do texto, e o zoom da janela é aplicado sobre ele."
   }
 }

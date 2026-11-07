@@ -128,6 +128,9 @@
       "status": "Kod statusu",
       "contentType": "Typ zawartości",
       "schema": "Kształt treści jako JSON Schema: typy pól, pola, które wystąpiły, oraz null tam, gdzie widziano null. Pole, które miało null, przyjmuje dowolną wartość.",
+      "snapshot": "Migawka treści: sprawdzenie nie przechodzi, gdy treść różni się od tej odpowiedzi. Wartości pól o nazwach wyglądających na sekrety, tokeny, daty i identyfikatory, które wyglądają na wygenerowane, są pomijane i nie są zapisywane. Pomijane ścieżki edytujesz w sprawdzeniu.",
+      "headersSnapshot": "Migawka nagłówków, bez cookies i danych uwierzytelniających. Nagłówki zmieniające się w każdej odpowiedzi, takie jak date i etag, są pomijane.",
+      "exampleSnapshot": "Migawka zapisanego przykładu „{{name}}”: sprawdzenie nie przechodzi, gdy treść różni się od tego przykładu. Pola wyglądające na sekrety, tokeny, daty i wygenerowane identyfikatory są pomijane i nie są zapisywane.",
       "responseTime": "Limit czasu odpowiedzi {{budget}} ms, czyli dwa razy tyle, ile trwała ta odpowiedź, zaokrąglone w górę."
     },
     "nothingNew": "Karta Sprawdzenia ma już te sprawdzenia.",
@@ -197,6 +200,22 @@
     "filterTimedOut_few": "Filtr działał dłużej niż {{count}} sekundy i został zatrzymany. Sprawdź go pod kątem wolnego wyrażenia regularnego.",
     "filterTimedOut_many": "Filtr działał dłużej niż {{count}} sekund i został zatrzymany. Sprawdź go pod kątem wolnego wyrażenia regularnego.",
     "filterTimedOut_other": "Filtr działał dłużej niż {{count}} sekundy i został zatrzymany. Sprawdź go pod kątem wolnego wyrażenia regularnego."
+  },
+  "snapshot": {
+    "operator": "zgadza się z migawką",
+    "edit": "Edytuj migawkę",
+    "editorTitle": "Edytuj migawkę",
+    "editorHint": "Obiekt JSON. expected to zapisana wartość, ignore wymienia ścieżki JSONPath, które nie są porównywane (na przykład $.id lub $.items[*].createdAt), a ignoreOrder true porównuje tablice bez względu na kolejność ich elementów.",
+    "update": "Zaktualizuj migawkę z ostatniej odpowiedzi",
+    "notice": "Migawki są zwykłym tekstem w żądaniu, a w folderze obszaru roboczego trafiają do Git. Przejrzyj je przed commitem. Pola o nazwach jak dane uwierzytelniające (wraz z całą ich zawartością), wartości wyglądające na tokeny, JWT lub klucze API, daty i wygenerowane identyfikatory oraz wartości pomijanych ścieżek są zastępowane przez (ignored) i nie są zapisywane.",
+    "invalid": "Migawka jest nieprawidłowa: musi być obiektem JSON z wartością expected.",
+    "changed": "{{path}}: oczekiwano {{expected}}, otrzymano {{actual}}",
+    "missing": "{{path}}: oczekiwano {{expected}}, ale brak wartości",
+    "extra": "{{path}}: nie ma w migawce, otrzymano {{actual}}",
+    "more_one": "…i jeszcze {{count}} różnica.",
+    "more_few": "…i jeszcze {{count}} różnice.",
+    "more_many": "…i jeszcze {{count}} różnic.",
+    "more_other": "…i jeszcze {{count}} różnicy."
   },
   "operators": {
     "eq": "jest równe",

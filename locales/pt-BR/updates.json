@@ -1,8 +1,55 @@
 {
   "updates": {
+    "installedLabel": "Versão instalada",
+    "checkNow": "Verificar agora",
+    "checking": "Verificando…",
+    "neverChecked": "Ainda não verificado.",
+    "checkedAt": "Última verificação {{when}}.",
+    "upToDate": "Esta é a versão mais recente.",
+    "checkFailed": "Não foi possível acessar o servidor de atualizações. Verifique sua conexão e tente novamente.",
     "checksLabel": "Verificar novas versões",
+    "checksHint": "Uma vez por dia, lê a versão mais recente no GitHub e a mostra na barra de status.",
+    "autoLabel": "Instalar atualizações automaticamente",
+    "autoHint": "Baixa novas versões em segundo plano e as instala quando o Gostman é fechado ou reiniciado.",
+    "autoHintInstaller": "Baixa novas versões em segundo plano e as instala quando você reinicia o Gostman e o Windows pede permissão.",
     "available": "A versão {{version}} está disponível",
+    "availableDetail": "O Gostman a baixa, confirma que chegou íntegra e a instala quando você reiniciar.",
+    "availableUnverified": "Esta versão não pode ser instalada automaticamente, então baixe-a na página de versões.",
+    "update": "Atualizar o Gostman",
+    "updateHint": "Baixar a versão {{version}}, verificá-la e instalá-la",
+    "downloading": "Baixando {{version}}… {{percent}}",
+    "downloadingDetail": "{{received}} de {{total}}",
+    "verifying": "Confirmando que o download está completo…",
+    "installing": "Instalando…",
+    "ready": "Reiniciar para atualizar",
+    "readyHint": "A versão {{version}} foi baixada e verificada. Reinicie o Gostman para instalá-la.",
+    "readyDetail": "A versão {{version}} foi baixada e verificada.",
+    "restartNow": "Reiniciar agora",
+    "restartTitle": "Reiniciar o Gostman?",
+    "restartMessage": "O Gostman fecha e abre novamente na versão {{version}}. As abas abertas e os rascunhos não salvos são mantidos.",
+    "restartMessageInstaller": "O Gostman fecha, o Windows pede permissão para instalar a versão {{version}} e o Gostman abre novamente. As abas abertas e os rascunhos não salvos são mantidos.",
+    "cancel": "Cancelar download",
+    "tryAgain": "Tentar novamente",
+    "releaseNotes": "Notas da versão",
+    "openRelease": "Abrir a página de versões",
+    "download": "Baixar",
+    "downloadHint": "Abre as notas da versão e os downloads no GitHub",
     "dismiss": "Ocultar até a próxima versão",
-    "downloadHint": "Abre as notas da versão e os downloads no GitHub"
+    "failed": "Falha na atualização",
+    "failedHint": "Veja o que deu errado em Preferências, Atualizações",
+    "failures": {
+      "network": "Não foi possível acessar o servidor de atualizações. Verifique sua conexão e tente novamente.",
+      "unsupported": "Ainda não há atualização automática para este sistema, então baixe-a na página de versões.",
+      "unverified": "O Gostman não conseguiu confirmar que esta atualização é autêntica, então ela não foi instalada. Baixe-a na página de versões.",
+      "mismatch": "O download não chegou corretamente, então não foi instalado. Tente novamente.",
+      "storage": "O Gostman não conseguiu salvar o download neste computador. Libere espaço e tente novamente.",
+      "install": "O Gostman não conseguiu instalar a atualização. Feche-o e execute o instalador da página de versões."
+    },
+    "manual": {
+      "scoop": "Instalado com o Scoop. Atualize-o com {{command}}.",
+      "homebrew": "Instalado com o Homebrew. Atualize-o com {{command}}.",
+      "system": "Instalado como pacote do sistema, então baixe o novo pacote na página de versões e instale-o.",
+      "other": "Esta cópia do Gostman não consegue se atualizar sozinha, então baixe as novas versões na página de versões."
+    }
   }
 }

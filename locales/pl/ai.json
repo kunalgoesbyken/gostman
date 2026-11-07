@@ -76,6 +76,19 @@
         "inputLabel": "Czego szukasz",
         "placeholder": "punkt końcowy, który anuluje zamówienie"
       },
+      "commit": {
+        "label": "Komunikat commita na podstawie zmian",
+        "section": "Komunikat commita",
+        "apply": "Użyj jako komunikatu commita",
+        "nothing": "Nie ma zmian do opisania."
+      },
+      "mock": {
+        "label": "Przykłady mock dla tego żądania",
+        "inputLabel": "Opisz odpowiedzi lub wklej dokument OpenAPI",
+        "placeholder": "Lista zamówień, pusta lista i 404 dla nieznanego zamówienia",
+        "section": "Przykłady udostępniane przez serwer mock",
+        "apply": "Dodaj do przykładów"
+      },
       "schema": {
         "label": "Żądania na podstawie opisu API",
         "inputLabel": "Wklej dokument OpenAPI lub Swagger, schemat GraphQL albo tekst dokumentacji API",
@@ -110,7 +123,8 @@
       "explain": "Wyjaśnij z AI",
       "explainError": "Wyjaśnij ten błąd z AI",
       "document": "Napisz z AI",
-      "documentLabel": "Napisz opis z AI"
+      "documentLabel": "Napisz opis z AI",
+      "commitMessage": "Zaproponuj komunikat z AI"
     },
     "commands": {
       "request": {
@@ -139,6 +153,11 @@
         "description": "Znajdź żądania na podstawie opisu",
         "keywords": "szukaj znajdź"
       },
+      "mock": {
+        "label": "AI: przykłady mock dla tego żądania",
+        "description": "Zaproponuj przykładowe odpowiedzi dla serwera mock na podstawie opisu, dokumentu OpenAPI lub ostatniej odpowiedzi",
+        "keywords": "mock przykłady odpowiedzi examples responses"
+      },
       "schema": {
         "label": "AI: żądania na podstawie opisu API",
         "description": "Dokumenty OpenAPI używają wbudowanego importera; inne opisy trafiają do AI",
@@ -158,6 +177,7 @@
       "consent": "Rozumiem, że po uruchomieniu akcji AI szczegóły żądania lub odpowiedzi pokazane w podglądzie są wysyłane do {{host}}, a rozliczenia odbywają się między mną a dostawcą.",
       "enable": "Włącz funkcje AI",
       "enableAfterConsent": "Włącz funkcje AI (najpierw zaznacz powyższy wiersz)",
+      "inlineCompletion": "Podpowiadaj kod podczas pisania w edytorach skryptów. Po krótkiej przerwie skrypt wokół kursora i nazwy zmiennych, nigdy ich wartości, są wysyłane do {{host}} bez podglądu. Naciśnij Tab, aby przyjąć podpowiedź.",
       "provider": "Dostawca",
       "baseUrl": "Bazowy URL",
       "baseUrlPlaceholder": "https://host/v1",

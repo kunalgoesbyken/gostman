@@ -4,8 +4,26 @@
     "timeoutPlaceholder": "{{milliseconds}} (predeterminado)",
     "followRedirects": "Seguir redirecciones",
     "verifyTls": "Verificar certificados TLS",
+    "httpVersion": "Versión de HTTP",
+    "rpcTransport": "Transporte gRPC",
+    "rpcTransports": {
+      "grpc": "gRPC (HTTP/2)",
+      "grpcWeb": "gRPC-Web",
+      "grpcWebText": "gRPC-Web, texto base64",
+      "connect": "Connect"
+    },
+    "httpVersions": {
+      "auto": "Automática",
+      "http11": "HTTP/1.1",
+      "http2": "HTTP/2"
+    },
     "sendCookies": "Enviar cookies del almacén de cookies",
     "storeCookies": "Guardar las cookies que establece la respuesta",
+    "opensIn": "Se abre en",
+    "opensInFull": "Editor completo",
+    "opensInVariables": "Vista de variables",
+    "jsonDepth": "Expandir respuestas JSON",
+    "jsonDepthDefault": "Valor predeterminado de la app",
     "tags": "Etiquetas",
     "tagsPlaceholder": "humo, regresión",
     "description": "Descripción",

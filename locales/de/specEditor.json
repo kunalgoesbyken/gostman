@@ -1,0 +1,86 @@
+{
+  "specEditor": {
+    "createFailed": "Die API-Spezifikation konnte nicht erstellt werden",
+    "saveFailed": "Die API-Spezifikation konnte nicht gespeichert werden",
+    "deleteFailed": "Die API-Spezifikation konnte nicht gelöscht werden",
+    "importFailed": "Die API-Spezifikation konnte nicht importiert werden",
+    "convertFailed": "Die API-Spezifikation konnte nicht konvertiert werden",
+    "mockFailed": "Der Mock-Server konnte nicht gestartet werden",
+    "generateFailed": "Die Anfragen konnten nicht erzeugt werden",
+    "saved": "„{{name}}“ wurde gespeichert.",
+    "renameTitle": "API-Spezifikation umbenennen",
+    "nameLabel": "Name",
+    "deleteTitle": "API-Spezifikation löschen",
+    "deleteMessage": "API-Spezifikation „{{name}}“ löschen? Dies kann nicht rückgängig gemacht werden.",
+    "closeTitle": "API-Spezifikation schließen",
+    "closeMessage": "„{{name}}“ hat ungespeicherte Änderungen. Vor dem Schließen speichern?",
+    "dontSave": "Nicht speichern",
+    "save": "Speichern",
+    "copyName": "{{name}} Kopie",
+    "importedName": "Importierte API",
+    "importAddressTitle": "API-Spezifikation importieren",
+    "importAddressMessage": "Geben Sie die Adresse einer OpenAPI- oder Swagger-Spezifikation ein.",
+    "importAddressPlaceholder": "https://example.com/openapi.json",
+    "importAddressConfirm": "Importieren",
+    "checkResponsesTitle": "Antworten prüfen",
+    "generateFirst": "Erzeugen Sie zuerst Anfragen aus dieser Spezifikation. Deren Antworten werden dann gegen sie geprüft.",
+    "checkingResponses": "Antworten in „{{name}}“ werden gegen diese Spezifikation geprüft.",
+    "tabLabel": "API-Spezifikation {{name}}",
+    "templates": {
+      "strategies": {
+        "name": "Strategies API"
+      },
+      "resource": {
+        "name": "Items API"
+      },
+      "blank": {
+        "name": "Neue API"
+      }
+    }
+  },
+  "specList": {
+    "listLabel": "API-Spezifikationen",
+    "emptyTitle": "Eine API entwerfen, bevor es sie gibt",
+    "emptyDescription": "Schreiben Sie hier eine OpenAPI-Spezifikation, mit Prüfungen während der Eingabe. Erzeugen Sie dann Anfragen, starten Sie einen Mock-Server und prüfen Sie echte Antworten dagegen.",
+    "count_one": "{{count}} API-Spezifikation",
+    "count_other": "{{count}} API-Spezifikationen",
+    "newSpec": "Neue API-Spezifikation",
+    "importSpec": "Spezifikation importieren",
+    "importFile": "Aus einer Datei importieren",
+    "importAddress": "Von einer Adresse importieren",
+    "actions": "Aktionen für {{name}}",
+    "rename": "Umbenennen",
+    "duplicate": "Duplizieren",
+    "remove": "Löschen",
+    "sidebarTab": "Specs"
+  },
+  "specView": {
+    "nameLabel": "Name der API-Spezifikation",
+    "unsaved": "Ungespeicherte Änderungen",
+    "save": "Speichern",
+    "formatLabel": "Dateiformat",
+    "formatYaml": "YAML",
+    "formatJson": "JSON",
+    "editorLabel": "OpenAPI-Spezifikation",
+    "previewLabel": "Dokumentationsvorschau",
+    "showPreview": "Dokumentationsvorschau anzeigen",
+    "hidePreview": "Dokumentationsvorschau ausblenden",
+    "viewDocs": "Dokumentation ansehen",
+    "viewDocsHint": "Die Dokumentation in einem größeren Fenster öffnen.",
+    "generate": "Anfragen erzeugen",
+    "generateHint": "Anfragen aus dieser Spezifikation erstellen, mit einer Verknüpfung, die sie mit ihr synchron hält.",
+    "update": "Anfragen aktualisieren",
+    "updateHint": "Diese Spezifikation mit den daraus erzeugten Anfragen vergleichen und die gewählten Änderungen anwenden.",
+    "mock": "Mock starten",
+    "mockHint": "Die Beispiele dieser Spezifikation über einen lokalen Mock-Server bereitstellen.",
+    "check": "Antworten prüfen",
+    "checkHint": "Die Antworten der erzeugten Anfragen gegen diese Spezifikation prüfen.",
+    "compare": "Vergleichen",
+    "compareHint": "Diese Spezifikation mit einer anderen Version vergleichen und die inkompatiblen Änderungen auflisten.",
+    "problems_one": "{{count}} Problem",
+    "problems_other": "{{count}} Probleme",
+    "problemsLabel": "Probleme",
+    "checking": "Spezifikation wird geprüft",
+    "cannotRead": "Die Spezifikation kann nicht gelesen werden"
+  }
+}

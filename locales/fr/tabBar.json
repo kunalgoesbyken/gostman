@@ -1,9 +1,12 @@
 {
   "tabBar": {
     "openRequests": "Requêtes ouvertes",
+    "scrollStart": "Faire défiler les onglets vers le début",
+    "scrollEnd": "Faire défiler les onglets vers la fin",
     "newRequest": "Nouvelle requête",
     "untitled": "Sans titre",
     "unsaved": "Modifications non enregistrées",
+    "fromHistory": "Ouvert depuis l’historique",
     "close": "Fermer {{title}}"
   }
 }

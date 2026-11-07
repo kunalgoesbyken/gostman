@@ -7,7 +7,8 @@
     "window": {
       "minimize": "最小化",
       "maximize": "最大化",
-      "restore": "元に戻す"
+      "restore": "元に戻す",
+      "resize": "ウィンドウのサイズを変更"
     },
     "crash": {
       "title": "Gostmanでエラーが発生しました",

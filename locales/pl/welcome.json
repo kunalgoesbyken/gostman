@@ -3,6 +3,7 @@
     "title": "Witamy w Gostman",
     "intro": "Konto nie jest potrzebne. Nic nie opuszcza tego urządzenia, dopóki nie zostanie wysłane żądanie.",
     "dismiss": "Zamknij powitanie",
+    "skip": "Pomiń",
     "commandTitle": "Pokaż powitanie",
     "commandDescription": "Kroki na dobry początek, importy i skróty",
     "otherTitle": "Inne sposoby rozpoczęcia",
@@ -15,6 +16,7 @@
     "curlTitle": "Wklej polecenie curl",
     "curlHint": "Wklej je w pasku adresu, a żądanie zostanie uzupełnione.",
     "shortcutsTitle": "Skróty klawiszowe",
-    "sampleRequestName": "Przykładowe żądanie"
+    "sampleRequestName": "Przykładowe żądanie",
+    "exploreTitle": "Poznaj funkcje"
   }
 }

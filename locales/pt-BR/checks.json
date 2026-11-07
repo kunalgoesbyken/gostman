@@ -117,6 +117,9 @@
       "status": "Código de status",
       "contentType": "Tipo de conteúdo",
       "schema": "Formato do corpo, como JSON Schema: tipos dos campos, os campos que estavam presentes e null onde null foi visto. Um campo que era null aceita qualquer valor.",
+      "snapshot": "Snapshot do corpo: a verificação falha quando o corpo difere desta resposta. Valores de campos com nomes que parecem segredos, tokens, datas e ids que parecem gerados são ignorados e não são armazenados. Edite os caminhos ignorados na verificação.",
+      "headersSnapshot": "Snapshot dos cabeçalhos, sem cookies e credenciais. Cabeçalhos que mudam a cada resposta, como date e etag, são ignorados.",
+      "exampleSnapshot": "Snapshot do exemplo salvo \"{{name}}\": a verificação falha quando o corpo difere desse exemplo. Campos que parecem segredos, tokens, datas e ids gerados são ignorados e não são armazenados.",
       "responseTime": "Limite de tempo de resposta de {{budget}} ms, o dobro do que esta resposta levou, arredondado para cima."
     },
     "nothingNew": "A aba Verificações já tem estas verificações.",
@@ -178,6 +181,21 @@
     "filterTimedOut_one": "O filtro executou por mais de {{count}} segundo e foi interrompido. Procure nele uma expressão regular lenta.",
     "filterTimedOut_many": "O filtro executou por mais de {{count}} de segundos e foi interrompido. Procure nele uma expressão regular lenta.",
     "filterTimedOut_other": "O filtro executou por mais de {{count}} segundos e foi interrompido. Procure nele uma expressão regular lenta."
+  },
+  "snapshot": {
+    "operator": "corresponde ao snapshot",
+    "edit": "Editar snapshot",
+    "editorTitle": "Editar snapshot",
+    "editorHint": "Um objeto JSON. expected é o valor armazenado, ignore lista os JSONPaths que não são comparados (como $.id ou $.items[*].createdAt), e ignoreOrder true compara arrays sem considerar a ordem dos itens.",
+    "update": "Atualizar snapshot a partir da última resposta",
+    "notice": "Snapshots ficam em texto simples na requisição e, em uma pasta de espaço de trabalho, vão para o Git. Revise-os antes de fazer commit. Campos com nomes de credenciais (incluindo tudo abaixo deles), valores que parecem tokens, JWTs ou chaves de API, datas e ids gerados, e os valores de caminhos ignorados são substituídos por (ignored) e não são armazenados.",
+    "invalid": "O snapshot não é válido: deve ser um objeto JSON com um valor expected.",
+    "changed": "{{path}}: esperado {{expected}}, obtido {{actual}}",
+    "missing": "{{path}}: esperado {{expected}}, mas está ausente",
+    "extra": "{{path}}: não está no snapshot, obtido {{actual}}",
+    "more_one": "…e mais {{count}} diferença.",
+    "more_many": "…e mais {{count}} de diferenças.",
+    "more_other": "…e mais {{count}} diferenças."
   },
   "operators": {
     "eq": "é igual a",

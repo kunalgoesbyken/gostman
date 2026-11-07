@@ -12,7 +12,11 @@
       "folder": "Carpeta",
       "request": "Solicitud",
       "process": "Archivo .env",
-      "session": "Sesión"
+      "session": "Sesión",
+      "flowLoop": "Elemento del bucle",
+      "flowSend": "Solo este envío",
+      "flowCall": "Pasada al flujo llamado",
+      "flowRun": "Variable del flujo, para esta ejecución"
     }
   }
 }

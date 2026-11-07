@@ -1,0 +1,32 @@
+{
+  "trash": {
+    "title": "Excluídos recentemente",
+    "command": "Excluídos recentemente",
+    "commandDescription": "Restaurar uma requisição, pasta ou ambiente que você excluiu",
+    "commandKeywords": "lixeira restaurar desfazer recuperar",
+    "empty": "Nada foi excluído recentemente.",
+    "note_one": "Os itens excluídos são mantidos por {{count}} dia. Valores secretos não são mantidos; variáveis secretas restauradas voltam vazias.",
+    "note_many": "Os itens excluídos são mantidos por {{count}} de dias. Valores secretos não são mantidos; variáveis secretas restauradas voltam vazias.",
+    "note_other": "Os itens excluídos são mantidos por {{count}} dias. Valores secretos não são mantidos; variáveis secretas restauradas voltam vazias.",
+    "listLabel": "Itens excluídos",
+    "kinds": {
+      "request": "Requisição",
+      "folder": "Pasta",
+      "environment": "Ambiente"
+    },
+    "daysLeft_one": "Resta {{count}} dia",
+    "daysLeft_many": "Restam {{count}} de dias",
+    "daysLeft_other": "Restam {{count}} dias",
+    "restore": "Restaurar",
+    "restored": "{{name}} restaurado.",
+    "deleteForever": "Excluir permanentemente",
+    "emptyBin": "Esvaziar lixeira",
+    "emptyBinTitle": "Esvaziar a lixeira?",
+    "emptyBinMessage": "Tudo o que está na lixeira é excluído definitivamente.",
+    "emptyBinConfirm": "Esvaziar lixeira",
+    "readFailed": "Não foi possível ler a lixeira: {{detail}}",
+    "saveFailed": "Não foi possível manter o item excluído na lixeira: {{detail}}",
+    "restoreFailed": "Não foi possível restaurar o item: {{detail}}",
+    "unnamed": "Sem nome"
+  }
+}

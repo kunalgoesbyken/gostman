@@ -1,0 +1,34 @@
+{
+  "search": {
+    "sidebarTab": "検索",
+    "placeholder": "リクエスト、履歴、レスポンスを検索",
+    "label": "すべてを検索",
+    "hint": "リクエストの名前、URL、ヘッダー、ボディ、説明、履歴、開いている各タブの最新のレスポンスを検索します。",
+    "searching": "検索中…",
+    "none": "「{{query}}」に一致するものはありません",
+    "truncated": "最初の結果のみ表示しています。さらに表示するには検索を絞り込んでください。",
+    "timedOut": "検索に時間がかかりすぎたため、中止しました。より長い、または具体的な語句で検索してください。",
+    "failed": "検索に失敗しました：{{reason}}",
+    "results_other": "{{count}}件の結果",
+    "command": {
+      "label": "どこでも検索",
+      "description": "リクエストの名前、URL、ボディ、履歴、開いているレスポンスを検索",
+      "keywords": "find global search responses history 検索 全体 レスポンス 履歴"
+    },
+    "kinds": {
+      "request": "リクエスト",
+      "history": "履歴",
+      "response": "レスポンス"
+    },
+    "fields": {
+      "name": "名前",
+      "url": "URL",
+      "body": "ボディ",
+      "headers": "ヘッダー",
+      "description": "説明",
+      "tags": "タグ",
+      "responseBody": "レスポンスボディ",
+      "responseHeaders": "レスポンスヘッダー"
+    }
+  }
+}

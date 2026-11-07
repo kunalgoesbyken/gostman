@@ -1,0 +1,35 @@
+{
+  "variablesPanel": {
+    "type": "类型",
+    "typeLabel": "变量类型",
+    "value": "值",
+    "valueChoice": "选择一个值",
+    "fieldOptions": "字段选项",
+    "label": "标签",
+    "labelPlaceholder": "在变量视图中显示的名称",
+    "help": "帮助文本",
+    "helpPlaceholder": "在变量视图中显示于字段下方",
+    "placeholder": "占位文本",
+    "placeholderPlaceholder": "字段为空时显示",
+    "choices": "选项",
+    "choicesPlaceholder": "red, green, blue",
+    "required": "必填",
+    "inForm": "在变量视图中显示",
+    "showInherited": "显示继承的变量",
+    "inheritedTitle": "继承",
+    "inheritedHint": "只读。这些变量来自此请求之上的作用域。在此处，上层中同名的变量优先。",
+    "inheritedNone": "没有继承的变量。",
+    "hiddenValue": "已隐藏",
+    "typeNote": "带类型的变量以该类型传入脚本。在 URL、请求头或请求体中，它仍以文本形式写入。"
+  },
+  "variablesView": {
+    "switchLabel": "请求视图",
+    "fullEditor": "完整编辑器",
+    "variables": "变量",
+    "formLabel": "请求变量",
+    "emptyTitle": "没有要填写的变量",
+    "emptyDescription": "在完整编辑器的 Vars 标签页中添加的变量会在这里显示为输入框。",
+    "openEditor": "打开完整编辑器",
+    "required": "必填"
+  }
+}

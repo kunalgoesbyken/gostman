@@ -14,6 +14,18 @@
     "proxyAddressPlaceholder": "http://user:password@proxy.example.com:8080",
     "bypass": "除外するホスト",
     "bypassPlaceholder": "localhost, *.internal.example.com",
+    "resolution": "名前解決",
+    "resolve": "ホストの上書き",
+    "resolvePlaceholder": "api.example.com:443:203.0.113.10",
+    "resolveNote": "curl --resolveと同じく、1行に1つずつhost:port:addressの形式で指定します。任意のポートには*を使います。リクエストには元のホスト名がそのまま使われます。",
+    "ipFamily": "IPバージョン",
+    "ipFamilies": {
+      "auto": "自動",
+      "v4": "IPv4のみ",
+      "v6": "IPv6のみ"
+    },
+    "collectionResolve": "ホストの上書き",
+    "collectionIpFamily": "IPバージョン",
     "certificates": "証明書",
     "caCertificate": "CA証明書",
     "chooseCA": "CA証明書を選択（PEMまたはDER）",

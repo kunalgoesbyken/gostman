@@ -12,9 +12,21 @@
       "label": "条件分岐",
       "description": "レスポンスや変数を調べて分岐します。"
     },
+    "switch": {
+      "label": "スイッチ",
+      "description": "ケースを上から順に調べ、最初に一致したケースが指定する移動先へ進みます。"
+    },
     "forEach": {
       "label": "繰り返し",
       "description": "レスポンス内のリストの各項目に対してステップを繰り返します。"
+    },
+    "repeat": {
+      "label": "反復",
+      "description": "ステップを指定回数、または条件を満たすまで繰り返し実行します。"
+    },
+    "flow": {
+      "label": "フローを実行",
+      "description": "別の保存済みフローを1つのステップとして実行します。"
     },
     "delay": {
       "label": "待機",
@@ -26,13 +38,19 @@
     },
     "unknown": {
       "label": "不明なステップ"
+    },
+    "parallel": {
+      "label": "並列",
+      "description": "複数のリクエストを送信したり、複数のフローを同時に実行したりします。"
     }
   },
   "flowField": {
     "next": "次の移動先",
     "onFailure": "失敗時の移動先",
     "then": "真の場合の移動先",
-    "else": "偽の場合の移動先"
+    "else": "偽の場合の移動先",
+    "case": "「{{label}}」に一致した場合の移動先",
+    "otherwise": "どのケースにも一致しない場合の移動先"
   },
   "flowEngine": {
     "noSteps": "フローにステップがありません。実行するには追加してください。",
@@ -49,6 +67,13 @@
     "noList": "リストを含むレスポンスを返す「リクエストを送信」ステップを選択してください。",
     "noPath": "リストのJSONPathを指定してください（例：$.items）。",
     "emptyLoop": "「繰り返し」の中に、繰り返すステップを追加してください。",
+    "emptyRepeat": "「反復」の中に、繰り返すステップを追加してください。",
+    "noCases": "ケースを1つ以上追加してください。",
+    "caseNoConditions": "ケース「{{label}}」に条件を1つ以上追加してください。",
+    "noFlow": "このステップが実行する保存済みフローを選択してください。",
+    "missingFlow": "「{{reference}}」に一致する保存済みフローがありません。選択し直してください。",
+    "flowCycle": "ここから「{{name}}」を実行すると、すでに実行中のフローに戻ってしまいます。フローは、直接でも他のフローを経由しても、自分自身を実行できません。",
+    "flowTooDeep": "このステップから実行されるフローの入れ子が{{max}}階層を超えています。フローの中で実行するフローを減らしてください。",
     "problem": "{{title}}：{{message}}",
     "cannotRun_other": "{{count}}件の問題を修正するまで、フローを実行できません。",
     "notRunYet": "{{title}}はまだリクエストを送信していないため、そのレスポンスを使用できません。",
@@ -56,6 +81,8 @@
     "noHeader": "{{title}}のレスポンスに{{name}}ヘッダーがありません。",
     "notAList": "{{title}}のレスポンスの{{path}}はリストではありません。",
     "budget_other": "フローが上限の{{count}}件のリクエストを送信したため、停止しました。ループに終わりを設けるか、フロー設定で上限を引き上げてください（最大{{cap}}件）。",
+    "budgetOf_other": "フロー「{{name}}」が上限の{{count}}件のリクエストに達したため、実行を停止しました。ループに終わりを設けるか、「{{name}}」の設定で上限を引き上げてください（最大{{cap}}件）。",
+    "budgetAbove": "このフローを実行しているフローがリクエスト上限に達したため、実行を停止しました。",
     "endless_other": "フローがリクエストを送信せずに{{count}}個のステップを通過したため、停止しました。ステップの移動先を確認してください。",
     "timedOut": "次のステップの選択に{{seconds}}秒を超える時間がかかったため、フローを停止しました。",
     "passed": "フローが終了まで到達しました。",
@@ -76,14 +103,73 @@
     },
     "endOfFlow": "フローの終わり",
     "nextItem": "次の項目",
+    "nextPass": "次の回",
     "iteration": "{{count}}件中{{position}}件目の項目です。",
+    "pass": "{{count}}回中{{position}}回目です。",
+    "untilMet_other": "{{count}}回目で条件を満たしました。",
+    "untilNever_other": "{{count}}回繰り返しても条件を満たしませんでした。",
+    "untilNeverRerouted_other": "{{count}}回繰り返しても条件を満たしませんでした。{{target}}へ移動します。",
+    "repeatFailed_other": "{{title}}は条件を満たさないまま{{count}}回実行されましたが、失敗時の移動先となるステップがありません。",
+    "caseName": "ケース{{position}}",
+    "caseCheck": "{{label}}：{{name}}",
+    "noCaseMatched": "一致するケースなし",
+    "flowPassed_other": "成功しました。{{count}}件のリクエストを送信しました。",
     "emptyList": "リストが空のため、そのステップをスキップしました。",
     "waited": "{{duration}}待機しました。",
     "untilCheck": "{{name}}まで",
-    "milliseconds": "{{value}} ms"
+    "milliseconds": "{{value}} ms",
+    "inputsFailed": "{{title}}は、この送信の値を設定できませんでした。",
+    "unknownInput": "「{{target}}」は値の設定先ではありません。header、query、body、form、variableのいずれかを使用してください。",
+    "noInputName": "この送信の値にはすべて名前が必要です（ヘッダー、クエリパラメーター、ボディへのJSONPath、フォームフィールド、変数のいずれか）。",
+    "notEarlierStep": "「{{target}}」はこのステップより前に実行されないため、そのレスポンスはここで使用できません。",
+    "inputBadPath": "「{{name}}」は、このステップが書き込めるボディのパスではありません。$.customer.id、$.items[0].id、$['a name']の形式で書いてください。",
+    "inputNotJson": "「{{name}}」はJSONボディのフィールドを設定しますが、リクエストのボディがJSONではありません。",
+    "inputNotForm": "「{{name}}」はフォームフィールドを設定しますが、リクエストのボディがフォームではありません。",
+    "inputBodyNotJson": "リクエストのボディが有効なJSONではないため、「{{name}}」を設定できませんでした。ボディ内の{{example}}を引用符で囲むか、ここで値を設定してください。",
+    "inputPastEnd_other": "「{{name}}」は、{{count}}項目のリストの末尾より後を指しています。",
+    "inAllGroup": "すべて：{{name}}",
+    "inAnyGroup": "いずれか：{{name}}",
+    "typeNames": {
+      "string": "テキスト",
+      "number": "数値",
+      "boolean": "trueまたはfalse",
+      "json": "JSON"
+    },
+    "notOfType": "{{name}}は{{type}}である必要がありますが、「{{value}}」でした。値を変更するか、フロー設定で{{name}}の型を変更してください。",
+    "outputFailed": "フローは成功しましたが、出力{{name}}を設定できませんでした：{{message}}",
+    "inputMissing": "このフローには{{name}}の値が必要です。「フローを実行」ステップ、--var name=value、またはアクティブな環境で指定してください。",
+    "noVariableName": "名前のないフロー変数があります。名前を付けるか、行を削除してください。",
+    "variableTwice": "{{name}}という名前のフロー変数が2つあります。どちらかの名前を変更するか、削除してください。",
+    "variablesLoop": "{{names}}の初期値が互いを参照しているため、どれも求められません。いずれか1つに、他を使わない値を指定してください。",
+    "loopHidesVariable": "{{name}}はフロー変数でもあるため、ループでその名前を使用できません。どちらかの名前を変更してください。",
+    "groupsTooDeep": "グループの入れ子は最大{{levels}}階層です。最も深い条件を1階層上へ移動してください。",
+    "emptyParallel": "「並列」の中に、実行するリクエストやフローを追加してください。",
+    "branchKind": "「並列」の中で実行できるのは、「リクエストを送信」と「フローを実行」のステップだけです。",
+    "branchJump": "「並列」の中のステップは別のステップへ移動できません。移動先は「並列」ステップで設定してください。",
+    "branchRetry": "「並列」の中のステップは1回だけ送信されます。再試行するには、それをフローに入れ、そのフローをここで実行してください。",
+    "siblingBranch": "「{{target}}」はこのステップと同時に実行されるため、そのレスポンスはここで使用できません。",
+    "intoBranch": "{{field}}「{{target}}」は「並列」の中のステップです。代わりに「並列」ステップへ移動してください。",
+    "branchInputs": "{{title}}：{{message}}",
+    "branchStates": {
+      "running": "実行中",
+      "passed": "成功",
+      "failed": "失敗",
+      "cancelled": "停止"
+    },
+    "branchFact": "{{title}} {{timing}}",
+    "branchTook": "{{state}}（{{duration}}）",
+    "branchPassed": "成功しました。",
+    "branchFailed": "失敗しました。",
+    "branchCancelled": "「並列」ステップがすでに完了していたため、停止しました。",
+    "branchTimedOut": "「並列」ステップが時間切れになったため、停止しました。",
+    "parallelPassed_other": "{{count}}件中{{passed}}件が成功しました。{{duration}}で完了しました。",
+    "parallelFailed_other": "{{count}}件中{{passed}}件が成功しましたが、完了条件が満たされませんでした。",
+    "parallelTimedOut": "{{duration}}経っても完了しなかったため、実行中のステップを停止しました。"
   },
   "flowImport": {
-    "missingRequests": "フロー「{{name}}」のステップが、インポートに含まれていないリクエストを送信します。実行する前に選択し直してください。"
+    "missingRequests": "フロー「{{name}}」のステップが、インポートに含まれていないリクエストを送信します。実行する前に選択し直してください。",
+    "missingFlows": "フロー「{{name}}」のステップが、インポートに含まれていないフローを実行します。実行する前に選択し直してください。",
+    "missingFlowsNamed_other": "フロー「{{name}}」はフロー{{flows}}を実行しますが、インポートに含まれていません。「{{name}}」を実行する前に、それらのフローもインポートするか、「フローを実行」ステップで別のフローを選択してください。"
   },
   "flowTemplate": {
     "description": "ログインし、注文の準備ができるまで待ち、準備できない場合はキャンセルします。各「リクエストを送信」ステップのリクエストを選択して、自分用にしてください。",
@@ -147,14 +233,22 @@
     "fromResponse": "{{title}} {{source}}",
     "fromResponsePath": "{{title}} {{source}} {{path}}",
     "noValues": "値はまだありません",
+    "inputs_other": "この送信の値を{{count}}件設定",
     "conditionAnd_other": "{{condition}}、ほか{{count}}件すべて",
     "conditionOr_other": "{{condition}}、ほか{{count}}件のいずれか",
     "noCondition": "条件はまだありません",
     "variablesCondition": "変数：{{condition}}",
+    "caseLine": "{{label}}：{{condition}}",
+    "noCases": "ケースはまだありません",
     "loop": "{{title}}の{{path}}",
     "loopBody": "各項目に対して",
     "emptyLoop": "繰り返すステップを追加",
     "nextItem": "次の項目",
+    "repeatBody": "これらのステップを繰り返す",
+    "passes_other": "{{count}}回",
+    "passesApart_other": "{{count}}回（間隔{{delay}}）",
+    "runsFlow": "{{name}}を実行",
+    "noFlow": "フロー未選択",
     "wait": "{{duration}}待機",
     "seconds": "{{value}}秒",
     "milliseconds": "{{value}} ms",
@@ -164,9 +258,11 @@
     },
     "edges": {
       "next": "移動",
+      "passes": "成功",
       "onFailure": "失敗",
       "then": "真",
-      "else": "偽"
+      "else": "偽",
+      "otherwise": "それ以外"
     },
     "toEnd": "{{label}} → 終了",
     "attempt": "{{attempt}}/{{attempts}}",
@@ -184,19 +280,74 @@
     "remove": "ステップを削除",
     "removeTitle": "ステップを削除",
     "removeMessage": "ステップ「{{title}}」を削除しますか？このステップへ移動していたステップは、代わりに次のステップへ進みます。",
-    "stepActions": "{{title}}の操作"
+    "stepActions": "{{title}}の操作",
+    "tags": {
+      "request": "リクエスト",
+      "set": "設定",
+      "if": "条件",
+      "switch": "スイッチ",
+      "forEach": "各項目",
+      "repeat": "反復",
+      "flow": "フロー",
+      "delay": "待機",
+      "end": "終了"
+    },
+    "endPill": "終了",
+    "moreLines_other": "ほか{{count}}件",
+    "note": "メモ",
+    "zoomControls": "ズーム",
+    "zoomIn": "拡大",
+    "zoomOut": "縮小",
+    "fit": "フロー全体を表示",
+    "showHidden_other": "非表示の{{count}}ステップを表示",
+    "actualSize": "100%で表示",
+    "joiners": {
+      "all": "かつ",
+      "any": "または"
+    },
+    "parallelBody": "同時に実行",
+    "together_other": "{{count}}個の分岐を同時に実行",
+    "doneWhen": "{{condition}}で完了",
+    "doneWhenAll": "すべて成功で完了",
+    "timeout": "{{duration}}後に停止"
   },
   "flowPicker": {
     "title": "リクエストを選択",
     "search": "保存済みリクエストを検索",
     "noMatch": "一致する保存済みリクエストがありません",
     "noRequests": "保存済みリクエストはまだありません",
-    "noRequestsHint": "先にリクエストを保存してください。フローは保存済みのリクエストを送信します。"
+    "noRequestsHint": "先にリクエストを保存してください。フローは保存済みのリクエストを送信します。",
+    "flowTitle": "フローを選択",
+    "flowSearch": "保存済みフローを検索",
+    "noFlowMatch": "一致する保存済みフローがありません",
+    "noFlows": "他のフローはまだありません",
+    "noFlowsHint": "先に別のフローを保存してください。このステップは保存済みのフローを実行します。",
+    "noCollection": "コレクション外"
   },
   "flowEditor": {
     "label": "ラベル",
     "stepId": "ステップID",
+    "note": "メモ",
+    "notePlaceholder": "このステップがある理由（Markdown）。キャンバスでステップにカーソルを合わせると表示されます。",
     "request": "リクエスト",
+    "inputs": "この送信の値",
+    "inputsHint": "送信の直前にリクエストへ値を入れます：ヘッダー、クエリパラメーター、JSONPathで指定したJSONボディのフィールド、フォームフィールド、変数。レスポンスからの値はボディ内でJSONの型を保ちます。テキストは{{variables}}を埋めたうえで、書いたとおりに送信されます。",
+    "inputTarget": "設定先",
+    "inputTargets": {
+      "header": "ヘッダー",
+      "query": "クエリパラメーター",
+      "body": "JSONボディ",
+      "form": "フォームフィールド",
+      "variable": "変数"
+    },
+    "inputName": "名前",
+    "inputPlaceholders": {
+      "header": "Authorization",
+      "query": "page",
+      "body": "$.customer.id",
+      "form": "name",
+      "variable": "token"
+    },
     "variableName": "名前",
     "variableValue": "値",
     "removeRow": "削除",
@@ -234,6 +385,27 @@
     "itemName": "項目の変数",
     "indexName": "インデックスの変数",
     "loopHint": "中では、{{item}} が項目、{{field}} がそのフィールドの1つ、{{index}} が0から数えた位置です。",
+    "cases": "ケース",
+    "caseLabel": "ケースのラベル",
+    "addCase": "ケースを追加",
+    "removeCase": "ケースを削除",
+    "moveCaseUp": "ケースを上へ移動",
+    "moveCaseDown": "ケースを下へ移動",
+    "whenMatched": "一致した場合の移動先",
+    "whenNoCase": "どのケースにも一致しない場合の移動先",
+    "casesHint": "ケースは上から順に調べられ、最初に一致したケースが移動先を決めます。",
+    "passes": "回数",
+    "passDelay": "各回の間隔（ms）",
+    "passName": "回数の変数",
+    "repeatHint": "中では、{{index}} が0から数えた回数です。条件がない場合、ステップは毎回実行されます。",
+    "repeatUntilHint": "各回の後に調べられ、条件を満たした時点でループが終わります。",
+    "whenNeverMet": "条件を満たさなかった場合の移動先",
+    "afterRepeat": "ループの後の移動先",
+    "flow": "フロー",
+    "openFlow": "フローを開く",
+    "flowVariables": "この実行の変数",
+    "flowScope": "そのフローのステップだけで使用され、その後削除されます。",
+    "flowVariablesHint": "値には{{variables}}を使用できます。そのフローが「変数を設定」で設定した値は、ここと同様にセッションに残ります。",
     "values": "値",
     "valuesHint": "値は実行の最後までセッションに保持され、抽出ルールと同様に保存されません。",
     "valueSource": "取得元",
@@ -257,7 +429,41 @@
       "failed": "失敗"
     },
     "message": "メッセージ",
-    "messagePlaceholder": "実行の概要に表示されます"
+    "messagePlaceholder": "実行の概要に表示されます",
+    "sendScope": "この送信だけで使用され、その後削除されます。",
+    "sessionScope": "実行の終わりまで保持されます。",
+    "loopScope": "このループ内のステップで使用できます。",
+    "groupTitle": "グループ",
+    "addGroup": "グループを追加",
+    "removeGroup": "グループを削除",
+    "reads": "読み方：",
+    "typeLabels": {
+      "string": "テキスト",
+      "number": "数値",
+      "boolean": "真偽値",
+      "json": "JSON"
+    },
+    "required": "必須",
+    "requiredPlaceholder": "必須",
+    "defaultPlaceholder": "空欄で既定値",
+    "flowInputs": "フローの入力",
+    "otherVariables": "この実行のその他の変数",
+    "givesBack": "成功すると{{names}}を返します。",
+    "branchNote": "「並列」の中のステップは、他のステップと同時に1回だけ実行されます。フローの次の移動先は「並列」ステップが決めます。",
+    "branches": "分岐",
+    "branchesHint_other": "{{count}}件のリクエストまたはフローが同時に実行されます。枠内の + で追加できます。",
+    "timeout": "停止までの時間（ms）",
+    "timeoutHint": "0の場合は完了するまで待ちます。時間になると、実行中の分岐を停止します。",
+    "doneWhen": "完了条件",
+    "doneWhenEmpty": "条件がない場合、すべての分岐を待ち、すべて成功したときに成功します。",
+    "factsHint": "各分岐名は{{states}}のいずれかを持ちます。HTTPステータスは.status、所要時間は.msを付けて参照します。",
+    "branchStateWords": {
+      "passed": "passed",
+      "failed": "failed",
+      "cancelled": "cancelled",
+      "running": "running"
+    },
+    "whenParallelFails": "完了しなかった場合の移動先"
   },
   "flowView": {
     "start": "開始",
@@ -278,7 +484,27 @@
     "maxSendsHint": "実行はこの件数のリクエストで停止するため、終わりのないループが永遠に続くことはありません（最大{{cap}}件）。",
     "selectHint": "ステップを選択して編集するか、+ で追加します。ステップは上から下へ実行され、分岐は右側に描かれます。",
     "problems_other": "フローを実行するには、{{count}}件の項目の確認が必要です",
-    "cliHint": "ワークスペースのフォルダーで、ターミナルまたはCIから実行します："
+    "cliHint": "ワークスペースのフォルダーで、ターミナルまたはCIから実行します：",
+    "floatPanel": "パネルをフローティング表示",
+    "dockPanel": "パネルをドッキング",
+    "showSettings": "フロー設定",
+    "closePanel": "パネルを閉じる",
+    "panelTitle": "ステップと実行",
+    "variablesTitle": "変数",
+    "variablesHint": "フロー変数は1回の実行の間だけ存在します。すべてのステップが読み取ることができ、「変数を設定」で変更され、実行が終わると消えます。入力として指定すると、「フローを実行」ステップ、--var、または環境から値を渡せます。",
+    "variableType": "型",
+    "initialValue": "初期値",
+    "initialPlaceholders": {
+      "string": "初期値",
+      "number": "0",
+      "boolean": "trueまたはfalse",
+      "json": "{\"key\": \"value\"}"
+    },
+    "isInput": "入力",
+    "isRequired": "必須",
+    "outputsTitle": "出力",
+    "outputsHint": "成功したときにこのフローが返す値です。「フローを実行」ステップはそれを自分の変数に入れ、ここからの実行ではセッションに保持します。",
+    "cliTitle": "コマンドライン"
   },
   "flowRun": {
     "idle": "未実行",
@@ -294,7 +520,29 @@
     "report": "レポート",
     "resultsLabel": "実行されたステップ",
     "wrote": "設定",
-    "hidden": "非表示"
+    "hidden": "非表示",
+    "truthTable": "確認した条件",
+    "checkTrue": "真",
+    "checkFalse": "偽",
+    "variables": "変数",
+    "outputs": "出力",
+    "sessionValue": "セッション"
+  },
+  "flowMetrics": {
+    "title": "メトリクス",
+    "totalTime": "合計時間",
+    "requests": "リクエスト",
+    "sent": "送信",
+    "received": "受信",
+    "slowest": "最も遅いステップ",
+    "columns": {
+      "step": "ステップ",
+      "count": "実行回数",
+      "total": "合計",
+      "min": "最小",
+      "max": "最大",
+      "average": "平均"
+    }
   },
   "flowScript": {
     "skipped": "スクリプトによりスキップされました。",

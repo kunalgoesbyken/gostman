@@ -1,0 +1,28 @@
+{
+  "tour": {
+    "label": "Tour rapido",
+    "replay": "Mostra il tour",
+    "progress": "Passaggio {{current}} di {{total}}",
+    "next": "Avanti",
+    "done": "Fine",
+    "skip": "Salta il tour",
+    "steps": {
+      "send": {
+        "title": "Invia una richiesta",
+        "body": "Digita un URL nella barra degli indirizzi e premi Invia. La risposta si apre sotto."
+      },
+      "variables": {
+        "title": "Usa le variabili",
+        "body": "Scrivi un valore come {{example}} e impostalo in un ambiente, così una stessa richiesta funziona in locale, in staging e in produzione."
+      },
+      "tools": {
+        "title": "Trova ogni strumento",
+        "body": "Il menu Strumenti nell'intestazione raggruppa ciò che puoi fare con le richieste: eseguire, simulare con un mock, cercare segreti, monitorare e condividere."
+      },
+      "explore": {
+        "title": "Cerca qualsiasi cosa",
+        "body": "Premi {{shortcut}} per il riquadro comandi, oppure apri Aiuto e scegli Esplora funzionalità."
+      }
+    }
+  }
+}

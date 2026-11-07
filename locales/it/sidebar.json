@@ -2,13 +2,17 @@
   "sidebar": {
     "views": "Vista della barra laterale",
     "collections": "Raccolte",
+    "openTabs": "Schede aperte",
     "history": "Cronologia",
     "newFolder": "Nuova cartella",
+    "add": "Aggiungi",
     "newRequest": "Nuova richiesta",
     "toggle": "Mostra o nascondi la barra laterale",
     "close": "Chiudi barra laterale",
     "resize": "Ridimensiona barra laterale",
     "viewsMenu": "Schede della barra laterale",
+    "more": "Altro",
+    "moreHint": "Mostra le altre viste della barra laterale",
     "resetViews": "Mostra tutte le schede nell’ordine predefinito"
   },
   "history": {
@@ -37,6 +41,25 @@
       "days_many": "inviata {{count}} di giorni fa",
       "days_other": "inviata {{count}} giorni fa",
       "date": "inviata il {{date}}"
+    },
+    "range": "Intervallo di date",
+    "folder": "Cartella",
+    "tag": "Tag",
+    "allFolders": "Tutte le cartelle",
+    "allTags": "Tutti i tag",
+    "groupByDate": "Raggruppa per data",
+    "ranges": {
+      "any": "Qualsiasi data",
+      "today": "Oggi",
+      "week": "Ultimi 7 giorni",
+      "month": "Ultimi 30 giorni"
+    },
+    "groups": {
+      "today": "Oggi",
+      "yesterday": "Ieri",
+      "week": "In precedenza questa settimana",
+      "month": "In precedenza questo mese",
+      "older": "Meno recenti"
     }
   }
 }

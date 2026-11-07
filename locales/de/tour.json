@@ -1,0 +1,28 @@
+{
+  "tour": {
+    "label": "Kurze Tour",
+    "replay": "Tour anzeigen",
+    "progress": "Schritt {{current}} von {{total}}",
+    "next": "Weiter",
+    "done": "Fertig",
+    "skip": "Tour überspringen",
+    "steps": {
+      "send": {
+        "title": "Eine Anfrage senden",
+        "body": "Geben Sie eine URL in die Adressleiste ein und klicken Sie auf „Senden“. Die Antwort erscheint darunter."
+      },
+      "variables": {
+        "title": "Variablen verwenden",
+        "body": "Schreiben Sie einen Wert als {{example}} und legen Sie ihn in einer Umgebung fest, damit eine Anfrage lokal, im Staging und in der Produktion funktioniert."
+      },
+      "tools": {
+        "title": "Alle Werkzeuge finden",
+        "body": "Das Menü „Werkzeuge“ in der Kopfzeile bündelt, was Sie mit Anfragen tun können: ausführen, mocken, scannen, überwachen und teilen."
+      },
+      "explore": {
+        "title": "Alles durchsuchen",
+        "body": "Drücken Sie {{shortcut}} für die Befehlspalette oder öffnen Sie „Hilfe“ und wählen Sie „Funktionen entdecken“."
+      }
+    }
+  }
+}

@@ -3,6 +3,23 @@
     "name": "リクエスト名",
     "untitled": "無題のリクエスト",
     "method": "HTTPメソッド",
+    "protocol": "プロトコル",
+    "protocols": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "grpc": "gRPC",
+      "websocket": "WebSocket",
+      "sse": "Server-Sent Events",
+      "socketio": "Socket.IO",
+      "mqtt": "MQTT",
+      "soap": "SOAP",
+      "mcp": "MCP",
+      "signalr": "SignalR",
+      "tcp": "TCP",
+      "udp": "UDP",
+      "nats": "NATS"
+    },
+    "detected": "{{protocol}}を検出しました",
     "url": "リクエストURL",
     "methodPlaceholders": {
       "grpc": {
@@ -14,6 +31,21 @@
         "full": "MCPサーバーのURLを入力",
         "medium": "MCPサーバーのURL",
         "short": "URL"
+      },
+      "tcp": {
+        "full": "host:portを入力（例：localhost:9000）",
+        "medium": "host:port",
+        "short": "host:port"
+      },
+      "udp": {
+        "full": "host:portを入力（例：localhost:9000）",
+        "medium": "host:port",
+        "short": "host:port"
+      },
+      "nats": {
+        "full": "nats://host:4222/subjectを入力（?mode=publishまたは?mode=subscribeを追加）",
+        "medium": "nats://host:4222/subject",
+        "short": "nats://host/subject"
       }
     },
     "send": "送信",

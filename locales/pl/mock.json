@@ -59,7 +59,8 @@
     "fields": {
       "query": "Zapytanie",
       "header": "Nagłówek",
-      "body": "Treść"
+      "body": "Treść",
+      "param": "Parametr ścieżki"
     },
     "ops": {
       "equals": "jest równe",
@@ -73,6 +74,12 @@
     "headersLabel": "Nagłówki (jeden Nazwa: wartość w wierszu)",
     "bodyLabel": "Treść (puste zachowuje treść trasy)",
     "bodyHint": "Symbole zastępcze: {{placeholders}}",
+    "dataTitle": "Plik danych",
+    "dataHint": "Opcjonalne. Na żądanie, którego wartość pasuje do komórki kolumny, odpowiada ten wiersz jako JSON albo powyższa treść z użyciem {{example}}. Bez dopasowania ta reguła nie ma zastosowania. CSV, JSON lub XLSX, odczytywany z folderu obszaru roboczego.",
+    "dataFile": "Plik w folderze obszaru roboczego",
+    "dataField": "Dopasuj żądanie",
+    "dataName": "Nazwa lub ścieżka JSON",
+    "dataColumn": "Kolumna",
     "nth": "Tylko N-te dopasowanie",
     "nthPlaceholder": "Każde dopasowanie",
     "behaviorTitle": "Zachowanie",
@@ -109,6 +116,13 @@
       "conflicts": "W konflikcie: {{count}}",
       "off": "Wyłączone: {{count}}",
       "skipped": "Nieudostępnione: {{count}}"
-    }
+    },
+    "importRules": "Importuj reguły",
+    "exportRules": "Eksportuj reguły",
+    "rulesName": "gostman-mock-rules.yaml",
+    "rulesImported_one": "Zaimportowano {{count}} regułę, wyłączoną, dopóki jej nie włączysz.",
+    "rulesImported_few": "Zaimportowano {{count}} reguły, wyłączone, dopóki ich nie włączysz.",
+    "rulesImported_many": "Zaimportowano {{count}} reguł, wyłączonych, dopóki ich nie włączysz.",
+    "rulesImported_other": "Zaimportowano {{count}} reguły, wyłączone, dopóki ich nie włączysz."
   }
 }

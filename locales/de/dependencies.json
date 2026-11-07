@@ -1,0 +1,28 @@
+{
+  "dependencies": {
+    "title": "Variablenabhängigkeiten",
+    "menuFolder": "Variablenabhängigkeiten",
+    "scopeAll": "Alle Anfragen",
+    "scopeFolder": "Ordner: {{name}}",
+    "intro": "Jede Variable steht zwischen den Anfragen, die sie setzen, und den Anfragen, die sie lesen. Eine Anfrage setzt eine Variable mit einer Extraktionsregel oder einem Skript und liest sie mit {{reference}} in Adresse, Headern, Body oder Auth oder mit einem Skriptaufruf.",
+    "showInputs": "Variablen anzeigen, die nur aus Umgebungen stammen",
+    "producers": "Setzt",
+    "variables": "Variable",
+    "consumers": "Liest",
+    "missingTitle": "Gelesen, aber nie gesetzt",
+    "missingDetail": "Diese Variablen werden von einer Anfrage gelesen, aber keine Anfrage setzt sie und keine Umgebung, Sammlung oder globale Liste definiert sie: {{names}}.",
+    "missingMark": "nie gesetzt",
+    "none": "Keine Variablenverknüpfungen zwischen Anfragen",
+    "noneDescription": "Keine Anfrage in diesem Bereich setzt über eine Extraktionsregel oder ein Skript eine Variable, die eine andere Anfrage liest.",
+    "summary_one": "{{count}} Variable",
+    "summary_other": "{{count}} Variablen",
+    "graphLabel": "Abhängigkeitsgraph der Variablen",
+    "openRequest": "{{name}} öffnen",
+    "untitled": "Unbenannte Anfrage",
+    "command": {
+      "label": "Variablenabhängigkeiten anzeigen",
+      "description": "Darstellen, welche Anfragen jede Variable setzen und lesen",
+      "keywords": "graph kette extrahieren ablauf setzen lesen chain extract flow produce consume abhängigkeit"
+    }
+  }
+}

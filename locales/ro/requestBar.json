@@ -3,6 +3,23 @@
     "name": "Numele cererii",
     "untitled": "Cerere fără titlu",
     "method": "Metodă HTTP",
+    "protocol": "Protocol",
+    "protocols": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "grpc": "gRPC",
+      "websocket": "WebSocket",
+      "sse": "Server-Sent Events",
+      "socketio": "Socket.IO",
+      "mqtt": "MQTT",
+      "soap": "SOAP",
+      "mcp": "MCP",
+      "signalr": "SignalR",
+      "tcp": "TCP",
+      "udp": "UDP",
+      "nats": "NATS"
+    },
+    "detected": "{{protocol}} detectat",
     "url": "URL-ul cererii",
     "methodPlaceholders": {
       "grpc": {
@@ -14,6 +31,21 @@
         "full": "Introduceți URL-ul serverului MCP",
         "medium": "URL server MCP",
         "short": "URL"
+      },
+      "tcp": {
+        "full": "Introduceți host:port, de exemplu localhost:9000",
+        "medium": "host:port",
+        "short": "host:port"
+      },
+      "udp": {
+        "full": "Introduceți host:port, de exemplu localhost:9000",
+        "medium": "host:port",
+        "short": "host:port"
+      },
+      "nats": {
+        "full": "Introduceți nats://host:4222/subject, adăugați ?mode=publish sau ?mode=subscribe",
+        "medium": "nats://host:4222/subject",
+        "short": "nats://host/subject"
       }
     },
     "send": "Trimite",

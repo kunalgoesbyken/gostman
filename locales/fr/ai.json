@@ -76,6 +76,19 @@
         "inputLabel": "Que cherchez-vous ?",
         "placeholder": "le point d’accès qui annule une commande"
       },
+      "commit": {
+        "label": "Message de commit à partir des modifications",
+        "section": "Message de commit",
+        "apply": "Utiliser comme message de commit",
+        "nothing": "Il n’y a aucune modification à décrire."
+      },
+      "mock": {
+        "label": "Exemples fictifs pour cette requête",
+        "inputLabel": "Décrivez les réponses, ou collez un document OpenAPI",
+        "placeholder": "Une liste de commandes, une liste vide et un 404 pour une commande inconnue",
+        "section": "Exemples servis par le serveur fictif",
+        "apply": "Ajouter aux exemples"
+      },
       "schema": {
         "label": "Requêtes à partir d’une description d’API",
         "inputLabel": "Collez un document OpenAPI ou Swagger, un schéma GraphQL ou le texte d’une documentation d’API",
@@ -106,7 +119,8 @@
       "explain": "Expliquer avec l’IA",
       "explainError": "Expliquer cette erreur avec l’IA",
       "document": "Rédiger avec l’IA",
-      "documentLabel": "Rédiger la description avec l’IA"
+      "documentLabel": "Rédiger la description avec l’IA",
+      "commitMessage": "Suggérer un message avec l’IA"
     },
     "commands": {
       "request": {
@@ -135,6 +149,11 @@
         "description": "Trouve des requêtes à partir de leur description",
         "keywords": "chercher rechercher trouver"
       },
+      "mock": {
+        "label": "IA : exemples fictifs pour cette requête",
+        "description": "Proposer des exemples de réponses pour le serveur fictif à partir d’une description, d’un document OpenAPI ou de la dernière réponse",
+        "keywords": "fictif mock exemples réponses"
+      },
       "schema": {
         "label": "IA : requêtes à partir d’une description d’API",
         "description": "Les documents OpenAPI passent par l’importeur intégré ; les autres descriptions vont à l’IA",
@@ -154,6 +173,7 @@
       "consent": "Je comprends que, lorsque je lance une action d’IA, les détails de la requête ou de la réponse affichés dans l’aperçu sont envoyés à {{host}}, et que la facturation relève de ma relation avec le fournisseur.",
       "enable": "Activer les fonctions d’IA",
       "enableAfterConsent": "Activer les fonctions d’IA (cochez d’abord la ligne ci-dessus)",
+      "inlineCompletion": "Suggérer du code pendant la saisie dans les éditeurs de script. Après une courte pause, le script autour du curseur et les noms de vos variables, jamais leurs valeurs, sont envoyés à {{host}} sans aperçu. Appuyez sur Tab pour accepter une suggestion.",
       "provider": "Fournisseur",
       "baseUrl": "URL de base",
       "baseUrlPlaceholder": "https://host/v1",

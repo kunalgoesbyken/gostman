@@ -2,13 +2,17 @@
   "sidebar": {
     "views": "Visualização da barra lateral",
     "collections": "Coleções",
+    "openTabs": "Abas abertas",
     "history": "Histórico",
     "newFolder": "Nova pasta",
+    "add": "Adicionar",
     "newRequest": "Nova requisição",
     "toggle": "Alternar barra lateral",
     "close": "Fechar barra lateral",
     "resize": "Redimensionar barra lateral",
     "viewsMenu": "Abas da barra lateral",
+    "more": "Mais",
+    "moreHint": "Mostrar as outras visualizações da barra lateral",
     "resetViews": "Mostrar todas as abas na ordem padrão"
   },
   "history": {
@@ -37,6 +41,25 @@
       "days_many": "enviada há {{count}} de dias",
       "days_other": "enviada há {{count}} dias",
       "date": "enviada em {{date}}"
+    },
+    "range": "Período",
+    "folder": "Pasta",
+    "tag": "Tag",
+    "allFolders": "Todas as pastas",
+    "allTags": "Todas as tags",
+    "groupByDate": "Agrupar por data",
+    "ranges": {
+      "any": "Qualquer data",
+      "today": "Hoje",
+      "week": "Últimos 7 dias",
+      "month": "Últimos 30 dias"
+    },
+    "groups": {
+      "today": "Hoje",
+      "yesterday": "Ontem",
+      "week": "Antes nesta semana",
+      "month": "Antes neste mês",
+      "older": "Mais antigos"
     }
   }
 }

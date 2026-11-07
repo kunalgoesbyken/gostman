@@ -1,0 +1,57 @@
+{
+  "negative": {
+    "title": "Negativtests",
+    "intro": "Sendet veränderte Kopien Ihrer gespeicherten Anfragen: fehlende oder ungültige Anmeldedaten, fehlerhafte Bodys, Grenzwerte und Injection-Zeichenketten. Dies ist eine einfache Prüfung, kein Werkzeug für Penetrationstests. Führen Sie sie gegen eine Test- oder Staging-Umgebung aus.",
+    "scope": "Zu testende Anfragen",
+    "allRequests": "Alle Anfragen",
+    "hostsTitle": "Hosts, die Anfragen erhalten",
+    "noHosts": "Die Adressen dieser Anfragen konnten keinem Host zugeordnet werden. Prüfen Sie die Umgebungsvariablen, die sie verwenden.",
+    "confirm": "Ich darf veränderte Anfragen an diese Hosts senden",
+    "rate": "Anfragen pro Sekunde",
+    "limit": "Stoppen nach (Anfragen)",
+    "start": "Starten",
+    "stop": "Stoppen",
+    "plan_one": "{{count}} veränderte Kopie Ihrer Anfragen wird gesendet.",
+    "plan_other": "{{count}} veränderte Kopien Ihrer Anfragen werden gesendet.",
+    "variantsTitle": "Veränderte Kopien",
+    "progress": "{{sent}} von {{total}} gesendet",
+    "done_one": "{{sent}} Anfragen gesendet, {{count}} Befund.",
+    "done_other": "{{sent}} Anfragen gesendet, {{count}} Befunde.",
+    "noFindings": "Es wurden keine verdächtigen Antworten gefunden.",
+    "noFindingsHint": "Das zeigt nicht, dass die API sicher ist. Es werden nur einige häufige Fehler geprüft.",
+    "emptyAction": "Beispielsammlung hinzufügen",
+    "severity": {
+      "high": "Hoch",
+      "medium": "Mittel",
+      "low": "Niedrig"
+    },
+    "variant": {
+      "credentialsMissing": "keine Anmeldedaten",
+      "credentialsInvalid": "ungültige Anmeldedaten",
+      "bodyTruncated": "abgeschnittenes JSON",
+      "fieldRemoved": "Feld {{name}} entfernt",
+      "fieldWrongType": "Feld {{name}} mit falschem Typ",
+      "fieldValue": "Feld {{name}} = {{value}}",
+      "fieldEmpty": "Feld {{name}} leer",
+      "fieldLong_one": "Feld {{name}} mit {{count}} Zeichen",
+      "fieldLong_other": "Feld {{name}} mit {{count}} Zeichen",
+      "bodyLarge": "ein Body mit 1 MB",
+      "injectionField": "Feld {{name}} mit einer {{injection}}-Nutzlast",
+      "injectionParameter": "Parameter {{name}} mit einer {{injection}}-Nutzlast"
+    },
+    "injection": {
+      "sql": "SQL-Injection",
+      "xss": "Skript",
+      "traversal": "Path-Traversal",
+      "header": "Header-Injection",
+      "expression": "Ausdruck"
+    },
+    "finding": {
+      "accepted": "{{label}}: Der Server antwortete mit {{status}}, erwartet war eine Ablehnung (4xx)",
+      "serverError": "{{label}}: Der Server antwortete mit {{status}}",
+      "stackTrace": "{{label}}: Der Antwort-Body zeigt einen Stacktrace",
+      "sqlError": "{{label}}: Der Antwort-Body zeigt einen Datenbankfehler",
+      "reflected": "{{label}}: Die Nutzlast wird unverändert im Antwort-Body zurückgegeben"
+    }
+  }
+}

@@ -3,6 +3,7 @@
     "title": "欢迎使用 Gostman",
     "intro": "无需账号。在你发送请求之前，不会有任何内容离开此设备。",
     "dismiss": "关闭欢迎页",
+    "skip": "跳过",
     "commandTitle": "显示欢迎页",
     "commandDescription": "入门步骤、导入和快捷键",
     "otherTitle": "其他开始方式",
@@ -15,6 +16,7 @@
     "curlTitle": "粘贴 curl 命令",
     "curlHint": "粘贴到地址栏，请求就会自动填好。",
     "shortcutsTitle": "键盘快捷键",
-    "sampleRequestName": "示例请求"
+    "sampleRequestName": "示例请求",
+    "exploreTitle": "探索功能"
   }
 }

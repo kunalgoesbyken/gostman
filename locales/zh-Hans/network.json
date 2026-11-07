@@ -14,6 +14,18 @@
     "proxyAddressPlaceholder": "http://user:password@proxy.example.com:8080",
     "bypass": "绕过代理的主机",
     "bypassPlaceholder": "localhost, *.internal.example.com",
+    "resolution": "名称解析",
+    "resolve": "主机覆盖",
+    "resolvePlaceholder": "api.example.com:443:203.0.113.10",
+    "resolveNote": "每行一个覆盖，格式为 host:port:address，与 curl --resolve 相同。用 * 表示任意端口。请求仍携带原始主机名。",
+    "ipFamily": "IP 版本",
+    "ipFamilies": {
+      "auto": "自动",
+      "v4": "仅 IPv4",
+      "v6": "仅 IPv6"
+    },
+    "collectionResolve": "主机覆盖",
+    "collectionIpFamily": "IP 版本",
     "certificates": "证书",
     "caCertificate": "CA 证书",
     "chooseCA": "选择 CA 证书（PEM 或 DER）",

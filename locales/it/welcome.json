@@ -3,6 +3,7 @@
     "title": "Benvenuto in Gostman",
     "intro": "Nessun account necessario. Nulla lascia questo dispositivo finché non invii una richiesta.",
     "dismiss": "Chiudi il benvenuto",
+    "skip": "Salta",
     "commandTitle": "Mostra il benvenuto",
     "commandDescription": "Primi passi, importazioni e scorciatoie",
     "otherTitle": "Altri modi per iniziare",
@@ -15,6 +16,7 @@
     "curlTitle": "Incolla un comando curl",
     "curlHint": "Incollalo nella barra degli indirizzi e la richiesta si compila.",
     "shortcutsTitle": "Scorciatoie da tastiera",
-    "sampleRequestName": "Richiesta di esempio"
+    "sampleRequestName": "Richiesta di esempio",
+    "exploreTitle": "Esplora le funzionalità"
   }
 }

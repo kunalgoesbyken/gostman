@@ -11,7 +11,13 @@
     "postman": "Postman 文件",
     "openapi": "OpenAPI 规范",
     "gostman": "Gostman 导出文件",
-    "http": ".http 文件"
+    "http": ".http 文件",
+    "hoppscotch": "Hoppscotch 集合",
+    "thunder": "Thunder Client 集合",
+    "httpie": "HTTPie 集合",
+    "hurl": "Hurl 文件",
+    "raml": "RAML 规范",
+    "blueprint": "API Blueprint"
   },
   "import": {
     "chooseFiles": "选择文件",
@@ -93,13 +99,22 @@
       "http": {
         "label": ".http 文件",
         "description": "适用于 VS Code REST Client 和 JetBrains HTTP Client 的请求，每个文件夹一个文件，环境保存在 http-client.env.json 中"
+      },
+      "hurl": {
+        "label": "Hurl 文件",
+        "description": "每个文件夹一个 .hurl 文件，检查导出为 [Asserts]，提取规则导出为 [Captures]"
       }
     },
     "docs": {
       "titlePlaceholder": "标题（默认：API documentation）",
       "titleLabel": "文档标题",
       "includeExamples": "包含示例响应",
-      "playground": "包含“试一试”面板"
+      "playground": "包含“试一试”面板",
+      "accentLabel": "链接颜色",
+      "accentPlaceholder": "链接颜色，例如 #0b6bcb",
+      "logoChoose": "选择徽标",
+      "logoRemove": "移除徽标",
+      "logoTooLarge": "徽标必须小于 300 KB。"
     }
   },
   "transfer": {
@@ -140,12 +155,14 @@
       "scripts": "脚本",
       "oauth": "OAuth 2.0 设置",
       "commands": "用于启动本地 MCP 服务器的命令",
+      "sockets": "原始 TCP、UDP 和 NATS 请求",
       "files": "会发送这台电脑上文件的文件读取"
     },
     "titleOne": {
       "scripts": "导入脚本？",
       "oauth": "导入 OAuth 设置？",
       "commands": "导入命令？",
+      "sockets": "导入 TCP、UDP 和 NATS 请求？",
       "files": "导入文件读取？"
     },
     "titleMany": "导入前请检查",
@@ -153,6 +170,7 @@
       "scripts": "连同脚本一起导入",
       "oauth": "连同 OAuth 设置一起导入",
       "commands": "连同命令一起导入",
+      "sockets": "连同 TCP、UDP 和 NATS 请求一起导入",
       "files": "连同文件读取一起导入"
     },
     "withMany": "全部导入",
@@ -160,6 +178,7 @@
       "scripts": "不含脚本导入",
       "oauth": "不含 OAuth 设置导入",
       "commands": "不含命令导入",
+      "sockets": "导入时不含 TCP、UDP 和 NATS 请求地址",
       "files": "不含文件读取导入"
     },
     "withoutMany": "不含它们导入",
@@ -167,6 +186,7 @@
       "scripts": "已排除脚本。",
       "oauth": "已排除 OAuth 2.0 设置。",
       "commands": "已排除用于启动本地 MCP 服务器的命令。",
+      "sockets": "原始 TCP、UDP 和 NATS 请求的地址未导入。",
       "files": "已排除会发送这台电脑上文件的文件读取。"
     },
     "leftOut": "已排除{{kinds}}。",

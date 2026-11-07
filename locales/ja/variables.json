@@ -12,7 +12,11 @@
       "folder": "フォルダー",
       "request": "リクエスト",
       "process": ".envファイル",
-      "session": "セッション"
+      "session": "セッション",
+      "flowLoop": "ループの項目",
+      "flowSend": "この送信のみ",
+      "flowCall": "呼び出したフローに渡す値",
+      "flowRun": "フロー変数（この実行のみ）"
     }
   }
 }

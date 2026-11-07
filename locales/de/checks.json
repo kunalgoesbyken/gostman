@@ -106,6 +106,9 @@
       "status": "Statuscode",
       "contentType": "Content-Type",
       "schema": "Form des Bodys als JSON Schema: Feldtypen, die vorhandenen Felder und null, wo null auftrat. Ein Feld, das null war, akzeptiert jeden Wert.",
+      "snapshot": "Snapshot des Bodys: Die Prüfung schlägt fehl, wenn der Body von dieser Antwort abweicht. Werte von Feldern mit geheim wirkenden Namen, Tokens, Datumsangaben und generiert wirkende IDs werden ignoriert und nicht gespeichert. Bearbeiten Sie die ignorierten Pfade in der Prüfung.",
+      "headersSnapshot": "Snapshot der Header, ohne Cookies und Zugangsdaten. Header, die sich bei jeder Antwort ändern, wie date und etag, werden ignoriert.",
+      "exampleSnapshot": "Snapshot des gespeicherten Beispiels „{{name}}“: Die Prüfung schlägt fehl, wenn der Body von diesem Beispiel abweicht. Geheim wirkende Felder, Tokens, Datumsangaben und generierte IDs werden ignoriert und nicht gespeichert.",
       "responseTime": "Zeitbudget für die Antwort von {{budget}} ms, das Doppelte der gemessenen Zeit, aufgerundet."
     },
     "nothingNew": "Der Tab „Prüfungen“ enthält diese Prüfungen bereits.",
@@ -159,6 +162,20 @@
     "pathTimedOut_other": "Dieser Pfad lief länger als {{count}} Sekunden und wurde gestoppt. Prüfen Sie seinen Filter auf einen langsamen regulären Ausdruck.",
     "filterTimedOut_one": "Der Filter lief länger als {{count}} Sekunde und wurde gestoppt. Prüfen Sie ihn auf einen langsamen regulären Ausdruck.",
     "filterTimedOut_other": "Der Filter lief länger als {{count}} Sekunden und wurde gestoppt. Prüfen Sie ihn auf einen langsamen regulären Ausdruck."
+  },
+  "snapshot": {
+    "operator": "entspricht Snapshot",
+    "edit": "Snapshot bearbeiten",
+    "editorTitle": "Snapshot bearbeiten",
+    "editorHint": "Ein JSON-Objekt. expected ist der gespeicherte Wert, ignore listet JSONPaths, die nicht verglichen werden (etwa $.id oder $.items[*].createdAt), und ignoreOrder true vergleicht Arrays ohne Rücksicht auf die Reihenfolge ihrer Elemente.",
+    "update": "Snapshot aus der letzten Antwort aktualisieren",
+    "notice": "Snapshots stehen als Klartext in der Anfrage und landen in einem Arbeitsbereichsordner in Git. Prüfen Sie sie vor dem Commit. Felder mit zugangsdatenartigen Namen (einschließlich allem darunter), Werte, die wie Tokens, JWTs oder API-Schlüssel aussehen, Datumsangaben, generierte IDs und die Werte ignorierter Pfade werden durch (ignored) ersetzt und nicht gespeichert.",
+    "invalid": "Der Snapshot ist ungültig: Er muss ein JSON-Objekt mit einem Wert expected sein.",
+    "changed": "{{path}}: {{expected}} erwartet, {{actual}} erhalten",
+    "missing": "{{path}}: {{expected}} erwartet, fehlt aber",
+    "extra": "{{path}}: nicht im Snapshot, {{actual}} erhalten",
+    "more_one": "…und {{count}} weiterer Unterschied.",
+    "more_other": "…und {{count}} weitere Unterschiede."
   },
   "operators": {
     "eq": "ist gleich",

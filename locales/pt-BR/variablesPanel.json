@@ -1,0 +1,35 @@
+{
+  "variablesPanel": {
+    "type": "Tipo",
+    "typeLabel": "Tipo da variável",
+    "value": "Valor",
+    "valueChoice": "Escolha um valor",
+    "fieldOptions": "Opções do campo",
+    "label": "Rótulo",
+    "labelPlaceholder": "Nome mostrado na visualização de variáveis",
+    "help": "Texto de ajuda",
+    "helpPlaceholder": "Mostrado abaixo do campo na visualização de variáveis",
+    "placeholder": "Placeholder",
+    "placeholderPlaceholder": "Mostrado enquanto o campo está vazio",
+    "choices": "Opções",
+    "choicesPlaceholder": "vermelho, verde, azul",
+    "required": "Obrigatório",
+    "inForm": "Mostrar na visualização de variáveis",
+    "showInherited": "Mostrar variáveis herdadas",
+    "inheritedTitle": "Herdadas",
+    "inheritedHint": "Somente leitura. Estas vêm de escopos acima desta requisição. Uma variável com o mesmo nome acima prevalece aqui.",
+    "inheritedNone": "Nenhuma variável é herdada.",
+    "hiddenValue": "Oculto",
+    "typeNote": "Uma variável tipada chega aos scripts com esse tipo. Dentro de uma URL, cabeçalho ou corpo, ela continua sendo escrita como texto."
+  },
+  "variablesView": {
+    "switchLabel": "Visualização da requisição",
+    "fullEditor": "Editor completo",
+    "variables": "Variáveis",
+    "formLabel": "Variáveis da requisição",
+    "emptyTitle": "Nenhuma variável para preencher",
+    "emptyDescription": "As variáveis adicionadas na aba Vars do editor completo aparecem aqui como campos de entrada.",
+    "openEditor": "Abrir o editor completo",
+    "required": "Obrigatório"
+  }
+}

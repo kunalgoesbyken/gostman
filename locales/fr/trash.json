@@ -1,0 +1,32 @@
+{
+  "trash": {
+    "title": "Supprimés récemment",
+    "command": "Supprimés récemment",
+    "commandDescription": "Restaurer une requête, un dossier ou un environnement supprimé",
+    "commandKeywords": "corbeille restaurer annuler récupérer trash bin restore undo recover",
+    "empty": "Rien n’a été supprimé récemment.",
+    "note_one": "Les éléments supprimés sont conservés {{count}} jour. Les valeurs secrètes ne sont pas conservées ; les variables secrètes restaurées reviennent vides.",
+    "note_many": "Les éléments supprimés sont conservés {{count}} de jours. Les valeurs secrètes ne sont pas conservées ; les variables secrètes restaurées reviennent vides.",
+    "note_other": "Les éléments supprimés sont conservés {{count}} jours. Les valeurs secrètes ne sont pas conservées ; les variables secrètes restaurées reviennent vides.",
+    "listLabel": "Éléments supprimés",
+    "kinds": {
+      "request": "Requête",
+      "folder": "Dossier",
+      "environment": "Environnement"
+    },
+    "daysLeft_one": "{{count}} jour restant",
+    "daysLeft_many": "{{count}} de jours restants",
+    "daysLeft_other": "{{count}} jours restants",
+    "restore": "Restaurer",
+    "restored": "{{name}} restauré.",
+    "deleteForever": "Supprimer définitivement",
+    "emptyBin": "Vider la corbeille",
+    "emptyBinTitle": "Vider la corbeille ?",
+    "emptyBinMessage": "Tout le contenu de la corbeille est supprimé définitivement.",
+    "emptyBinConfirm": "Vider la corbeille",
+    "readFailed": "La corbeille n’a pas pu être lue : {{detail}}",
+    "saveFailed": "L’élément supprimé n’a pas pu être conservé dans la corbeille : {{detail}}",
+    "restoreFailed": "L’élément n’a pas pu être restauré : {{detail}}",
+    "unnamed": "Sans nom"
+  }
+}

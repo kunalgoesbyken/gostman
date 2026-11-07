@@ -12,7 +12,11 @@
       "folder": "Cartella",
       "request": "Richiesta",
       "process": "File .env",
-      "session": "Sessione"
+      "session": "Sessione",
+      "flowLoop": "Elemento del ciclo",
+      "flowSend": "Solo per questo invio",
+      "flowCall": "Passata al flusso chiamato",
+      "flowRun": "Variabile del flusso, per questa esecuzione"
     }
   }
 }

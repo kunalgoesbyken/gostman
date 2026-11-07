@@ -62,7 +62,22 @@
     "views": {
       "pretty": "Formatiert",
       "raw": "Roh",
-      "preview": "Vorschau"
+      "preview": "Vorschau",
+      "info": "Übersicht",
+      "hex": "Hex",
+      "msgpack": "MessagePack",
+      "cbor": "CBOR"
+    },
+    "hex": {
+      "label": "Hexadezimalansicht des Bodys",
+      "offset": "Offset",
+      "text": "Text"
+    },
+    "decode": {
+      "working": "Wird dekodiert…",
+      "failed": "Der Body konnte nicht als {{format}} gelesen werden: {{reason}}",
+      "timedOut": "Das Lesen des Bodys als {{format}} dauerte länger als {{seconds}} Sekunden und wurde daher abgebrochen. Verwenden Sie Hex oder speichern Sie ihn in einer Datei.",
+      "tooLarge": "Dieser Body ist {{size}} groß. Gostman dekodiert bis zu {{limit}}; verwenden Sie Hex oder speichern Sie ihn in einer Datei."
     },
     "bodyView": "Ansicht des Bodys",
     "checksPassed": "{{passed}} von {{total}} Prüfungen bestanden",
@@ -76,7 +91,8 @@
       "compareParts": "Vergleichen",
       "comparedWith": "verglichen mit",
       "bodyPart": "Body",
-      "headersPart": "Header"
+      "headersPart": "Header",
+      "exportHar": "Als HAR exportieren"
     },
     "columns": {
       "name": "Name",
@@ -114,6 +130,15 @@
     "previewTitle": "Vorschau der Antwort",
     "treeTrimmed_one": "Angezeigt wird der Anfang dieses Baums. {{count}} weiterer Wert ist ausgeblendet. Nutzen Sie „Roh“ oder den Filter, um den Rest zu sehen.",
     "treeTrimmed_other": "Angezeigt wird der Anfang dieses Baums. {{count}} weitere Werte sind ausgeblendet. Nutzen Sie „Roh“ oder den Filter, um den Rest zu sehen.",
+    "tree": {
+      "expandAll": "Alle aufklappen",
+      "collapseAll": "Alle zuklappen",
+      "depth": "Aufklapptiefe",
+      "level": "Ebene {{count}}",
+      "allLevels": "Alle Ebenen",
+      "remember": "Diese Anfrage immer in dieser Tiefe öffnen",
+      "remembered": "Diese Anfrage öffnet bereits in dieser Tiefe"
+    },
     "requestFailed": "Anfrage fehlgeschlagen",
     "error": "Fehler",
     "milliseconds": "{{value}} ms",

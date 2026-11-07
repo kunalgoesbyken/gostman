@@ -1,9 +1,12 @@
 {
   "tabBar": {
     "openRequests": "Geöffnete Anfragen",
+    "scrollStart": "Tabs zum Anfang scrollen",
+    "scrollEnd": "Tabs zum Ende scrollen",
     "newRequest": "Neue Anfrage",
     "untitled": "Unbenannt",
     "unsaved": "Ungespeicherte Änderungen",
+    "fromHistory": "Aus dem Verlauf geöffnet",
     "close": "{{title}} schließen"
   }
 }

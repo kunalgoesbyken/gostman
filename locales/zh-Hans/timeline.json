@@ -62,6 +62,29 @@
     },
     "tlsAlpn": "ALPN {{protocol}}",
     "tlsExpires": "{{date}} 到期",
-    "tlsExpired": "{{date}} 到期（已过期）"
+    "tlsExpired": "{{date}} 到期（已过期）",
+    "certificates": {
+      "title": "证书链",
+      "subject": "主题",
+      "issuer": "颁发者",
+      "validFrom": "生效时间",
+      "validTo": "有效期至",
+      "names": "名称",
+      "serial": "序列号",
+      "fingerprint": "SHA-256 指纹",
+      "keyType": "公钥",
+      "signature": "签名",
+      "authority": "证书颁发机构",
+      "position": "第 {{number}} 个证书，共 {{total}} 个",
+      "expired": "已过期",
+      "expiresSoon": "30 天内过期"
+    },
+    "redirects": {
+      "title": "重定向链",
+      "step": "步骤",
+      "status": "状态",
+      "url": "URL",
+      "time": "时间"
+    }
   }
 }

@@ -72,6 +72,29 @@
     },
     "tlsAlpn": "ALPN {{protocol}}",
     "tlsExpires": "expiră {{date}}",
-    "tlsExpired": "expiră {{date}} (expirat)"
+    "tlsExpired": "expiră {{date}} (expirat)",
+    "certificates": {
+      "title": "Lanț de certificate",
+      "subject": "Subiect",
+      "issuer": "Emitent",
+      "validFrom": "Valabil de la",
+      "validTo": "Valabil până la",
+      "names": "Nume",
+      "serial": "Număr de serie",
+      "fingerprint": "Amprentă SHA-256",
+      "keyType": "Cheie publică",
+      "signature": "Semnătură",
+      "authority": "Autoritate de certificare",
+      "position": "Certificatul {{number}} din {{total}}",
+      "expired": "Expirat",
+      "expiresSoon": "Expiră în cel mult 30 de zile"
+    },
+    "redirects": {
+      "title": "Lanț de redirecționări",
+      "step": "Pas",
+      "status": "Stare",
+      "url": "URL",
+      "time": "Timp"
+    }
   }
 }

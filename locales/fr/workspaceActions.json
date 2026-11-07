@@ -43,6 +43,7 @@
     "clear": "Effacer",
     "closeTab": "Fermer l’onglet",
     "closeTabMessage": "« {{name}} » a des modifications non enregistrées. Les enregistrer avant de fermer ?",
-    "dontSave": "Ne pas enregistrer"
+    "dontSave": "Ne pas enregistrer",
+    "openFirstRequest": "Ouvrir la première requête"
   }
 }

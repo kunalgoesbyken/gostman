@@ -24,6 +24,8 @@
     "source": "Źródło wartości",
     "scope": "Gdzie wartość jest przechowywana",
     "remove": "Usuń regułę wyodrębniania",
-    "runNow": "Uruchom teraz"
+    "runNow": "Uruchom teraz",
+    "environmentNamed": "Środowisko: {{name}}",
+    "alreadyDefined": "Już zdefiniowana ({{source}}); wyodrębniona wartość jest przechowywana w zakresie wybranym w tym wierszu."
   }
 }

@@ -117,6 +117,9 @@
       "status": "Cod de stare",
       "contentType": "Tip de conținut",
       "schema": "Forma corpului, ca JSON Schema: tipurile câmpurilor, câmpurile prezente și null acolo unde s-a văzut null. Un câmp null acceptă orice valoare.",
+      "snapshot": "Instantaneu al corpului: verificarea eșuează când corpul diferă de acest răspuns. Valorile câmpurilor cu nume care par secrete, tokenurile, datele și id-urile care par generate sunt ignorate și nu sunt stocate. Editați căile ignorate în verificare.",
+      "headersSnapshot": "Instantaneu al antetelor, fără cookie-uri și credențiale. Antetele care se schimbă la fiecare răspuns, precum date și etag, sunt ignorate.",
+      "exampleSnapshot": "Instantaneu al exemplului salvat „{{name}}”: verificarea eșuează când corpul diferă de acel exemplu. Câmpurile care par secrete, tokenurile, datele și id-urile generate sunt ignorate și nu sunt stocate.",
       "responseTime": "Buget de timp de răspuns de {{budget}} ms, dublul duratei acestui răspuns, rotunjit în sus."
     },
     "nothingNew": "Fila Verificări are deja aceste verificări.",
@@ -178,6 +181,21 @@
     "filterTimedOut_one": "Filtrul a rulat mai mult de {{count}} secundă și a fost oprit. Verificați-l pentru o expresie regulată lentă.",
     "filterTimedOut_few": "Filtrul a rulat mai mult de {{count}} secunde și a fost oprit. Verificați-l pentru o expresie regulată lentă.",
     "filterTimedOut_other": "Filtrul a rulat mai mult de {{count}} de secunde și a fost oprit. Verificați-l pentru o expresie regulată lentă."
+  },
+  "snapshot": {
+    "operator": "se potrivește cu instantaneul",
+    "edit": "Editare instantaneu",
+    "editorTitle": "Editare instantaneu",
+    "editorHint": "Un obiect JSON. expected este valoarea stocată, ignore listează căile JSONPath care nu sunt comparate (de exemplu $.id sau $.items[*].createdAt), iar ignoreOrder true compară array-urile indiferent de ordinea elementelor.",
+    "update": "Actualizare instantaneu din ultimul răspuns",
+    "notice": "Instantaneele sunt text simplu în cerere, iar într-un dosar de spațiu de lucru ajung în Git. Verificați-le înainte de commit. Câmpurile cu nume de tip credențială (inclusiv tot ce se află sub ele), valorile care par tokenuri, JWT-uri sau chei API, datele și id-urile generate, precum și valorile căilor ignorate sunt înlocuite cu (ignored) și nu sunt stocate.",
+    "invalid": "Instantaneul nu este valid: trebuie să fie un obiect JSON cu o valoare expected.",
+    "changed": "{{path}}: se aștepta {{expected}}, s-a primit {{actual}}",
+    "missing": "{{path}}: se aștepta {{expected}}, dar lipsește",
+    "extra": "{{path}}: nu este în instantaneu, s-a primit {{actual}}",
+    "more_one": "…și încă {{count}} diferență.",
+    "more_few": "…și încă {{count}} diferențe.",
+    "more_other": "…și încă {{count}} de diferențe."
   },
   "operators": {
     "eq": "este egal cu",

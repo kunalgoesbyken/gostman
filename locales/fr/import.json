@@ -11,7 +11,13 @@
     "postman": "Fichier Postman",
     "openapi": "Spécification OpenAPI",
     "gostman": "Export Gostman",
-    "http": "Fichier .http"
+    "http": "Fichier .http",
+    "hoppscotch": "Collection Hoppscotch",
+    "thunder": "Collection Thunder Client",
+    "httpie": "Collection HTTPie",
+    "hurl": "Fichier Hurl",
+    "raml": "Spécification RAML",
+    "blueprint": "API Blueprint"
   },
   "import": {
     "chooseFiles": "Choisir des fichiers",
@@ -97,13 +103,22 @@
       "http": {
         "label": "Fichiers .http",
         "description": "Requêtes pour VS Code REST Client et JetBrains HTTP Client, un fichier par dossier, avec des environnements http-client.env.json"
+      },
+      "hurl": {
+        "label": "Fichiers Hurl",
+        "description": "Un fichier .hurl par dossier, avec les vérifications en [Asserts] et les règles d’extraction en [Captures]"
       }
     },
     "docs": {
       "titlePlaceholder": "Titre (par défaut : API documentation)",
       "titleLabel": "Titre de la documentation",
       "includeExamples": "Inclure des exemples de réponses",
-      "playground": "Inclure un panneau Essayer"
+      "playground": "Inclure un panneau Essayer",
+      "accentLabel": "Couleur des liens",
+      "accentPlaceholder": "Couleur des liens, par exemple #0b6bcb",
+      "logoChoose": "Choisir un logo",
+      "logoRemove": "Retirer le logo",
+      "logoTooLarge": "Le logo doit faire moins de 300 Ko."
     }
   },
   "transfer": {
@@ -166,12 +181,14 @@
       "scripts": "scripts",
       "oauth": "paramètres OAuth 2.0",
       "commands": "commandes qui lancent des serveurs MCP locaux",
+      "sockets": "requêtes TCP, UDP et NATS brutes",
       "files": "lectures de fichiers qui envoient des fichiers de cet ordinateur"
     },
     "titleOne": {
       "scripts": "Importer les scripts ?",
       "oauth": "Importer les paramètres OAuth ?",
       "commands": "Importer les commandes ?",
+      "sockets": "Importer les requêtes TCP, UDP et NATS ?",
       "files": "Importer les lectures de fichiers ?"
     },
     "titleMany": "À relire avant l’import",
@@ -179,6 +196,7 @@
       "scripts": "Importer avec les scripts",
       "oauth": "Importer avec les paramètres OAuth",
       "commands": "Importer avec les commandes",
+      "sockets": "Importer avec les requêtes TCP, UDP et NATS",
       "files": "Importer avec les lectures de fichiers"
     },
     "withMany": "Tout importer",
@@ -186,6 +204,7 @@
       "scripts": "Importer sans les scripts",
       "oauth": "Importer sans les paramètres OAuth",
       "commands": "Importer sans les commandes",
+      "sockets": "Importer sans les adresses des requêtes TCP, UDP et NATS",
       "files": "Importer sans les lectures de fichiers"
     },
     "withoutMany": "Importer sans eux",
@@ -193,6 +212,7 @@
       "scripts": "Les scripts ont été exclus.",
       "oauth": "Les paramètres OAuth 2.0 ont été exclus.",
       "commands": "Les commandes qui lancent des serveurs MCP locaux ont été exclues.",
+      "sockets": "Les adresses des requêtes TCP, UDP et NATS brutes ont été omises.",
       "files": "Les lectures de fichiers qui envoient des fichiers de cet ordinateur ont été exclues."
     },
     "leftOut": "Les {{kinds}} ont été exclus.",

@@ -1,0 +1,30 @@
+{
+  "dependencies": {
+    "title": "Zależności zmiennych",
+    "menuFolder": "Zależności zmiennych",
+    "scopeAll": "Wszystkie żądania",
+    "scopeFolder": "Folder: {{name}}",
+    "intro": "Każda zmienna znajduje się między żądaniami, które ją ustawiają, a żądaniami, które ją odczytują. Żądanie ustawia zmienną regułą wyodrębniania lub skryptem, a odczytuje ją przez {{reference}} w adresie, nagłówkach, treści lub uwierzytelnianiu albo wywołaniem w skrypcie.",
+    "showInputs": "Pokaż zmienne pochodzące tylko ze środowisk",
+    "producers": "Ustawiają",
+    "variables": "Zmienna",
+    "consumers": "Odczytują",
+    "missingTitle": "Odczytywane, ale nigdy nieustawiane",
+    "missingDetail": "Te zmienne są odczytywane przez żądanie, ale żadne żądanie ich nie ustawia i nie definiuje ich żadne środowisko, kolekcja ani lista globalna: {{names}}.",
+    "missingMark": "nigdy nieustawiana",
+    "none": "Brak powiązań zmiennych między żądaniami",
+    "noneDescription": "Żadne żądanie w tym zakresie nie ustawia regułą wyodrębniania ani skryptem zmiennej, którą odczytuje inne żądanie.",
+    "summary_one": "{{count}} zmienna",
+    "summary_few": "{{count}} zmienne",
+    "summary_many": "{{count}} zmiennych",
+    "summary_other": "{{count}} zmiennej",
+    "graphLabel": "Graf zależności zmiennych",
+    "openRequest": "Otwórz {{name}}",
+    "untitled": "Żądanie bez nazwy",
+    "command": {
+      "label": "Pokaż zależności zmiennych",
+      "description": "Narysuj, które żądania ustawiają i odczytują każdą zmienną",
+      "keywords": "graf łańcuch wyodrębnianie przepływ zależności graph chain extract flow"
+    }
+  }
+}

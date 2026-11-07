@@ -62,7 +62,22 @@
     "views": {
       "pretty": "Formattato",
       "raw": "Grezzo",
-      "preview": "Anteprima"
+      "preview": "Anteprima",
+      "info": "Riepilogo",
+      "hex": "Hex",
+      "msgpack": "MessagePack",
+      "cbor": "CBOR"
+    },
+    "hex": {
+      "label": "Vista esadecimale del corpo",
+      "offset": "Offset",
+      "text": "Testo"
+    },
+    "decode": {
+      "working": "Decodifica…",
+      "failed": "Impossibile leggere il corpo come {{format}}: {{reason}}",
+      "timedOut": "La lettura del corpo come {{format}} ha richiesto più di {{seconds}} secondi, quindi è stata interrotta. Usa Hex o salvalo in un file.",
+      "tooLarge": "Questo corpo è di {{size}}. Gostman decodifica fino a {{limit}}, quindi usa Hex o salvalo in un file."
     },
     "bodyView": "Vista del corpo",
     "checksPassed": "{{passed}} controlli su {{total}} riusciti",
@@ -76,7 +91,8 @@
       "compareParts": "Confronta",
       "comparedWith": "confrontata con",
       "bodyPart": "Corpo",
-      "headersPart": "Header"
+      "headersPart": "Header",
+      "exportHar": "Esporta come HAR"
     },
     "columns": {
       "name": "Nome",
@@ -115,6 +131,15 @@
     "treeTrimmed_one": "Viene mostrato l'inizio di questo albero. {{count}} altro valore è nascosto. Usa Grezzo o il filtro per vedere il resto.",
     "treeTrimmed_many": "Viene mostrato l'inizio di questo albero. {{count}} di altri valori sono nascosti. Usa Grezzo o il filtro per vedere il resto.",
     "treeTrimmed_other": "Viene mostrato l'inizio di questo albero. {{count}} altri valori sono nascosti. Usa Grezzo o il filtro per vedere il resto.",
+    "tree": {
+      "expandAll": "Espandi tutto",
+      "collapseAll": "Comprimi tutto",
+      "depth": "Profondità di espansione",
+      "level": "Livello {{count}}",
+      "allLevels": "Tutti i livelli",
+      "remember": "Apri sempre questa richiesta a questa profondità",
+      "remembered": "Questa richiesta si apre già a questa profondità"
+    },
     "requestFailed": "Richiesta non riuscita",
     "error": "Errore",
     "milliseconds": "{{value}} ms",

@@ -1,0 +1,28 @@
+{
+  "tour": {
+    "label": "Szybki przewodnik",
+    "replay": "Pokaż przewodnik",
+    "progress": "Krok {{current}} z {{total}}",
+    "next": "Dalej",
+    "done": "Gotowe",
+    "skip": "Pomiń przewodnik",
+    "steps": {
+      "send": {
+        "title": "Wyślij żądanie",
+        "body": "Wpisz adres URL na pasku adresu i naciśnij Wyślij. Odpowiedź pojawi się poniżej."
+      },
+      "variables": {
+        "title": "Używaj zmiennych",
+        "body": "Zapisz wartość jako {{example}} i ustaw ją w środowisku, aby jedno żądanie działało lokalnie, na środowisku przedprodukcyjnym i produkcyjnym."
+      },
+      "tools": {
+        "title": "Znajdź wszystkie narzędzia",
+        "body": "Menu Narzędzia w nagłówku grupuje to, co można robić z żądaniami: uruchamianie, mock, skanowanie, monitorowanie i udostępnianie."
+      },
+      "explore": {
+        "title": "Szukaj czegokolwiek",
+        "body": "Naciśnij {{shortcut}}, aby otworzyć paletę poleceń, albo otwórz Pomoc i wybierz Poznaj funkcje."
+      }
+    }
+  }
+}

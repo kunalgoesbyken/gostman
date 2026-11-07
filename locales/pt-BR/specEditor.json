@@ -1,0 +1,88 @@
+{
+  "specEditor": {
+    "createFailed": "Não foi possível criar a especificação da API",
+    "saveFailed": "Não foi possível salvar a especificação da API",
+    "deleteFailed": "Não foi possível excluir a especificação da API",
+    "importFailed": "Não foi possível importar a especificação da API",
+    "convertFailed": "Não foi possível converter a especificação da API",
+    "mockFailed": "Não foi possível iniciar o servidor mock",
+    "generateFailed": "Não foi possível gerar as requisições",
+    "saved": "\"{{name}}\" foi salva.",
+    "renameTitle": "Renomear especificação da API",
+    "nameLabel": "Nome",
+    "deleteTitle": "Excluir especificação da API",
+    "deleteMessage": "Excluir a especificação da API \"{{name}}\"? Isso não pode ser desfeito.",
+    "closeTitle": "Fechar especificação da API",
+    "closeMessage": "\"{{name}}\" tem alterações não salvas. Salvar antes de fechar?",
+    "dontSave": "Não salvar",
+    "save": "Salvar",
+    "copyName": "{{name}} cópia",
+    "importedName": "API importada",
+    "importAddressTitle": "Importar uma especificação de API",
+    "importAddressMessage": "Informe o endereço de uma especificação OpenAPI ou Swagger.",
+    "importAddressPlaceholder": "https://example.com/openapi.json",
+    "importAddressConfirm": "Importar",
+    "checkResponsesTitle": "Verificar respostas",
+    "generateFirst": "Primeiro gere requisições a partir desta especificação. As respostas delas são então verificadas com base nela.",
+    "checkingResponses": "As respostas em \"{{name}}\" são verificadas com base nesta especificação.",
+    "tabLabel": "Especificação da API {{name}}",
+    "templates": {
+      "strategies": {
+        "name": "API de estratégias"
+      },
+      "resource": {
+        "name": "API de itens"
+      },
+      "blank": {
+        "name": "Nova API"
+      }
+    }
+  },
+  "specList": {
+    "listLabel": "Especificações de API",
+    "emptyTitle": "Projete uma API antes que ela exista",
+    "emptyDescription": "Escreva aqui uma especificação OpenAPI, com verificações enquanto você digita. Depois gere requisições, inicie um servidor mock e verifique respostas reais com base nela.",
+    "count_one": "{{count}} especificação de API",
+    "count_many": "{{count}} de especificações de API",
+    "count_other": "{{count}} especificações de API",
+    "newSpec": "Nova especificação de API",
+    "importSpec": "Importar uma especificação",
+    "importFile": "Importar de um arquivo",
+    "importAddress": "Importar de um endereço",
+    "actions": "Ações para {{name}}",
+    "rename": "Renomear",
+    "duplicate": "Duplicar",
+    "remove": "Excluir",
+    "sidebarTab": "Especificações"
+  },
+  "specView": {
+    "nameLabel": "Nome da especificação da API",
+    "unsaved": "Alterações não salvas",
+    "save": "Salvar",
+    "formatLabel": "Formato do arquivo",
+    "formatYaml": "YAML",
+    "formatJson": "JSON",
+    "editorLabel": "Especificação OpenAPI",
+    "previewLabel": "Pré-visualização da documentação",
+    "showPreview": "Mostrar pré-visualização da documentação",
+    "hidePreview": "Ocultar pré-visualização da documentação",
+    "viewDocs": "Ver documentação",
+    "viewDocsHint": "Abrir a documentação em uma janela maior.",
+    "generate": "Gerar requisições",
+    "generateHint": "Criar requisições a partir desta especificação, com um vínculo que as mantém sincronizadas com ela.",
+    "update": "Atualizar requisições",
+    "updateHint": "Comparar esta especificação com as requisições geradas a partir dela e aplicar as alterações escolhidas.",
+    "mock": "Iniciar mock",
+    "mockHint": "Servir os exemplos desta especificação a partir de um servidor mock local.",
+    "check": "Verificar respostas",
+    "checkHint": "Verificar as respostas das requisições geradas com base nesta especificação.",
+    "compare": "Comparar",
+    "compareHint": "Comparar esta especificação com outra versão e listar as alterações incompatíveis.",
+    "problems_one": "{{count}} problema",
+    "problems_many": "{{count}} de problemas",
+    "problems_other": "{{count}} problemas",
+    "problemsLabel": "Problemas",
+    "checking": "Verificando a especificação",
+    "cannotRead": "Não é possível ler a especificação"
+  }
+}

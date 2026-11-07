@@ -1,9 +1,12 @@
 {
   "tabBar": {
     "openRequests": "Cereri deschise",
+    "scrollStart": "Derulare file spre început",
+    "scrollEnd": "Derulare file spre sfârșit",
     "newRequest": "Cerere nouă",
     "untitled": "Fără titlu",
     "unsaved": "Modificări nesalvate",
+    "fromHistory": "Deschisă din istoric",
     "close": "Închidere {{title}}"
   }
 }

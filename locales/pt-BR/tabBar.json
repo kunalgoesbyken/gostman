@@ -1,9 +1,12 @@
 {
   "tabBar": {
     "openRequests": "Requisições abertas",
+    "scrollStart": "Rolar as abas para o início",
+    "scrollEnd": "Rolar as abas para o fim",
     "newRequest": "Nova requisição",
     "untitled": "Sem título",
     "unsaved": "Alterações não salvas",
+    "fromHistory": "Aberta a partir do histórico",
     "close": "Fechar {{title}}"
   }
 }

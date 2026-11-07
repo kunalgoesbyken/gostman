@@ -1,0 +1,30 @@
+{
+  "trash": {
+    "title": "Zuletzt gelöscht",
+    "command": "Zuletzt gelöscht",
+    "commandDescription": "Eine gelöschte Anfrage, einen Ordner oder eine Umgebung wiederherstellen",
+    "commandKeywords": "papierkorb wiederherstellen rückgängig trash bin restore undo recover",
+    "empty": "In letzter Zeit wurde nichts gelöscht.",
+    "note_one": "Gelöschte Elemente werden {{count}} Tag aufbewahrt. Secret-Werte werden nicht aufbewahrt; wiederhergestellte Secret-Variablen sind leer.",
+    "note_other": "Gelöschte Elemente werden {{count}} Tage aufbewahrt. Secret-Werte werden nicht aufbewahrt; wiederhergestellte Secret-Variablen sind leer.",
+    "listLabel": "Gelöschte Elemente",
+    "kinds": {
+      "request": "Anfrage",
+      "folder": "Ordner",
+      "environment": "Umgebung"
+    },
+    "daysLeft_one": "Noch {{count}} Tag",
+    "daysLeft_other": "Noch {{count}} Tage",
+    "restore": "Wiederherstellen",
+    "restored": "{{name}} wiederhergestellt.",
+    "deleteForever": "Endgültig löschen",
+    "emptyBin": "Papierkorb leeren",
+    "emptyBinTitle": "Papierkorb leeren?",
+    "emptyBinMessage": "Alles im Papierkorb wird endgültig gelöscht.",
+    "emptyBinConfirm": "Papierkorb leeren",
+    "readFailed": "Der Papierkorb konnte nicht gelesen werden: {{detail}}",
+    "saveFailed": "Das gelöschte Element konnte nicht im Papierkorb aufbewahrt werden: {{detail}}",
+    "restoreFailed": "Das Element konnte nicht wiederhergestellt werden: {{detail}}",
+    "unnamed": "Unbenannt"
+  }
+}

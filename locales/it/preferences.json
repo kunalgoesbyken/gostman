@@ -10,6 +10,7 @@
       "language": "Lingua",
       "ai": "AI",
       "privacy": "Privacy",
+      "updates": "Aggiornamenti",
       "data": "Dati"
     },
     "fields": {
@@ -21,12 +22,14 @@
       "codeFont": "Font del codice",
       "density": "Densità",
       "responseLayout": "Pannello della risposta",
+      "tabPlacement": "Schede aperte",
       "systemTitleBar": "Usa la barra del titolo di sistema",
       "editorFontSize": "Dimensione del font dell'editor",
       "wrapLines": "A capo automatico per le righe lunghe",
       "requestTimeout": "Timeout predefinito",
       "confirmCloseTab": "Chiedi prima di scartare le modifiche non salvate alla chiusura di una scheda",
       "language": "Lingua",
+      "authorName": "Il tuo nome nelle note",
       "sidebarViews": "Schede della barra laterale"
     },
     "themes": {
@@ -54,6 +57,11 @@
       "below": "Sotto",
       "right": "A destra"
     },
+    "tabPlacements": {
+      "bar": "Barra delle schede",
+      "sidebar": "Barra laterale"
+    },
+    "tabPlacementHint": "Barra laterale nasconde la barra delle schede ed elenca le schede aperte nella barra laterale, adatto agli schermi piccoli.",
     "seconds": "secondi",
     "pixels": "px",
     "contrastHint": "Alto disegna bordi e testo secondario più marcati.",
@@ -152,6 +160,7 @@
       "lowContrast": "Il testo potrebbe essere difficile da leggere. Punta ad almeno {{minimum}}:1.",
       "resetRow": "Ripristina {{name}}"
     },
+    "authorNameHint": "Mostrato sulle note che aggiungi a richieste e cartelle.",
     "timeoutHint_one": "Si applica alle richieste che non impostano un timeout proprio. 0 usa il limite integrato di {{count}} secondo.",
     "timeoutHint_many": "Si applica alle richieste che non impostano un timeout proprio. 0 usa il limite integrato di {{count}} di secondi.",
     "timeoutHint_other": "Si applica alle richieste che non impostano un timeout proprio. 0 usa il limite integrato di {{count}} secondi.",
@@ -165,6 +174,8 @@
     "accentAdjusted": "Mostrato come {{light}} in modalità chiara e {{dark}} in modalità scura, così il testo di questo colore resta leggibile.",
     "sidebarViewsHint": "Scegli quali schede mostra la barra laterale e in che ordine. Fai clic destro sulle schede della barra laterale per mostrarle o nasconderle.",
     "moveViewUp": "Sposta {{name}} in su",
-    "moveViewDown": "Sposta {{name}} in giù"
+    "moveViewDown": "Sposta {{name}} in giù",
+    "textScaleHint": "Ridimensiona l'interfaccia e i suoi campi di input. Lo zoom della finestra si applica sopra questa dimensione: una base di {{size}} px appare come {{zoomed}} px con zoom al 125%.",
+    "editorFontSizeHint": "Editor di codice, in pixel. Non segue Dimensione del testo, e lo zoom della finestra si applica sopra di essa."
   }
 }

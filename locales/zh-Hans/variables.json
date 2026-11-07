@@ -12,7 +12,11 @@
       "folder": "文件夹",
       "request": "请求",
       "process": ".env 文件",
-      "session": "会话"
+      "session": "会话",
+      "flowLoop": "循环项",
+      "flowSend": "仅限本次发送",
+      "flowCall": "传给被调用的流程",
+      "flowRun": "流程变量，仅限本次运行"
     }
   }
 }

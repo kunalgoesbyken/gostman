@@ -1,9 +1,12 @@
 {
   "tabBar": {
     "openRequests": "Richieste aperte",
+    "scrollStart": "Scorri le schede verso l'inizio",
+    "scrollEnd": "Scorri le schede verso la fine",
     "newRequest": "Nuova richiesta",
     "untitled": "Senza titolo",
     "unsaved": "Modifiche non salvate",
+    "fromHistory": "Aperta dalla cronologia",
     "close": "Chiudi {{title}}"
   }
 }

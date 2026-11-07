@@ -1,0 +1,60 @@
+{
+  "negative": {
+    "title": "Tests négatifs",
+    "intro": "Envoie des copies modifiées de vos requêtes enregistrées : identifiants absents ou invalides, corps incorrects, valeurs limites et chaînes d’injection. C’est un vérificateur simple, pas un outil de test d’intrusion. Utilisez-le sur un environnement de test ou de préproduction.",
+    "scope": "Requêtes à tester",
+    "allRequests": "Toutes les requêtes",
+    "hostsTitle": "Hôtes qui recevront des requêtes",
+    "noHosts": "Les adresses de ces requêtes n’ont pas pu être résolues en un hôte. Vérifiez les variables d’environnement qu’elles utilisent.",
+    "confirm": "J’ai le droit d’envoyer des requêtes modifiées à ces hôtes",
+    "rate": "Requêtes par seconde",
+    "limit": "Arrêter après (requêtes)",
+    "start": "Démarrer",
+    "stop": "Arrêter",
+    "plan_one": "{{count}} copie modifiée de vos requêtes sera envoyée.",
+    "plan_many": "{{count}} de copies modifiées de vos requêtes seront envoyées.",
+    "plan_other": "{{count}} copies modifiées de vos requêtes seront envoyées.",
+    "variantsTitle": "Copies modifiées",
+    "progress": "{{sent}} envoyées sur {{total}}",
+    "done_one": "{{sent}} requêtes envoyées, {{count}} constat.",
+    "done_many": "{{sent}} requêtes envoyées, {{count}} de constats.",
+    "done_other": "{{sent}} requêtes envoyées, {{count}} constats.",
+    "noFindings": "Aucune réponse suspecte n’a été trouvée.",
+    "noFindingsHint": "Cela ne prouve pas que l’API est sûre. Seules quelques erreurs courantes sont vérifiées.",
+    "emptyAction": "Ajouter une collection d’exemple",
+    "severity": {
+      "high": "Élevée",
+      "medium": "Moyenne",
+      "low": "Faible"
+    },
+    "variant": {
+      "credentialsMissing": "sans identifiants",
+      "credentialsInvalid": "identifiants invalides",
+      "bodyTruncated": "JSON tronqué",
+      "fieldRemoved": "champ {{name}} supprimé",
+      "fieldWrongType": "champ {{name}} avec un mauvais type",
+      "fieldValue": "champ {{name}} = {{value}}",
+      "fieldEmpty": "champ {{name}} vide",
+      "fieldLong_one": "champ {{name}} avec {{count}} caractère",
+      "fieldLong_many": "champ {{name}} avec {{count}} de caractères",
+      "fieldLong_other": "champ {{name}} avec {{count}} caractères",
+      "bodyLarge": "un corps de 1 Mo",
+      "injectionField": "champ {{name}} avec une charge {{injection}}",
+      "injectionParameter": "paramètre {{name}} avec une charge {{injection}}"
+    },
+    "injection": {
+      "sql": "injection SQL",
+      "xss": "script",
+      "traversal": "traversée de chemin",
+      "header": "injection d’en-tête",
+      "expression": "expression"
+    },
+    "finding": {
+      "accepted": "{{label}} : le serveur a répondu {{status}}, un refus (4xx) était attendu",
+      "serverError": "{{label}} : le serveur a répondu {{status}}",
+      "stackTrace": "{{label}} : le corps de la réponse contient une trace de pile",
+      "sqlError": "{{label}} : le corps de la réponse contient une erreur de base de données",
+      "reflected": "{{label}} : la charge est renvoyée telle quelle dans le corps de la réponse"
+    }
+  }
+}

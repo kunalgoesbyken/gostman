@@ -12,7 +12,11 @@
       "folder": "Dossier",
       "request": "Requête",
       "process": "Fichier .env",
-      "session": "Session"
+      "session": "Session",
+      "flowLoop": "Élément de la boucle",
+      "flowSend": "Cet envoi uniquement",
+      "flowCall": "Transmise au flux appelé",
+      "flowRun": "Variable de flux, pour cette exécution"
     }
   }
 }

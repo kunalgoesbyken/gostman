@@ -2,7 +2,8 @@
   "realtime": {
     "targets": {
       "topic": "トピック",
-      "event": "イベント"
+      "event": "イベント",
+      "method": "メソッド"
     },
     "browser": {
       "closed": "接続が閉じられました（コード{{code}}）",
@@ -22,6 +23,17 @@
       "binary": "バイナリのSocket.IOパケットはデコードされません。",
       "noEvent": "送信するイベント名を入力してください。",
       "ack": "ack {{id}}"
+    },
+    "signalR": {
+      "badNegotiate": "negotiateレスポンスに接続トークンがありません。",
+      "negotiateFailed": "SignalRのnegotiateリクエストが失敗しました：{{reason}}",
+      "handshake": "SignalRハンドシェイク完了（JSONプロトコル）",
+      "handshakeRefused": "ハブがハンドシェイクを拒否しました：{{reason}}",
+      "streamItem": "ストリーム {{id}}",
+      "completion": "結果 {{id}}",
+      "closed": "ハブが接続を閉じました",
+      "closedWith": "ハブが接続を閉じました：{{reason}}",
+      "noTarget": "呼び出すハブメソッドを入力してください。"
     },
     "mqtt": {
       "connected": "ブローカーに接続しました",

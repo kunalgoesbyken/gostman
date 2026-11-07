@@ -10,6 +10,7 @@
       "language": "Langue",
       "ai": "IA",
       "privacy": "Confidentialité",
+      "updates": "Mises à jour",
       "data": "Données"
     },
     "fields": {
@@ -21,12 +22,14 @@
       "codeFont": "Police du code",
       "density": "Densité",
       "responseLayout": "Panneau de réponse",
+      "tabPlacement": "Onglets ouverts",
       "systemTitleBar": "Utiliser la barre de titre du système",
       "editorFontSize": "Taille de police de l’éditeur",
       "wrapLines": "Retour à la ligne automatique",
       "requestTimeout": "Délai d’expiration par défaut",
       "confirmCloseTab": "Demander avant d’abandonner les modifications non enregistrées à la fermeture d’un onglet",
       "language": "Langue",
+      "authorName": "Votre nom sur les notes",
       "sidebarViews": "Onglets de la barre latérale"
     },
     "themes": {
@@ -54,6 +57,11 @@
       "below": "En dessous",
       "right": "À droite"
     },
+    "tabPlacements": {
+      "bar": "Barre d’onglets",
+      "sidebar": "Barre latérale"
+    },
+    "tabPlacementHint": "Barre latérale masque la barre d’onglets et liste les onglets ouverts dans la barre latérale, ce qui convient aux petits écrans.",
     "seconds": "secondes",
     "pixels": "px",
     "contrastHint": "Élevé dessine des bordures et un texte secondaire plus marqués.",
@@ -152,6 +160,7 @@
       "lowContrast": "Le texte peut être difficile à lire. Visez au moins {{minimum}}:1.",
       "resetRow": "Réinitialiser {{name}}"
     },
+    "authorNameHint": "Affiché sur les notes que vous ajoutez aux requêtes et aux dossiers.",
     "timeoutHint_one": "S’applique aux requêtes qui ne définissent pas leur propre délai. 0 utilise la limite intégrée de {{count}} seconde.",
     "timeoutHint_other": "S’applique aux requêtes qui ne définissent pas leur propre délai. 0 utilise la limite intégrée de {{count}} secondes.",
     "timeoutHint_many": "S’applique aux requêtes qui ne définissent pas leur propre délai. 0 utilise la limite intégrée de {{count}} de secondes.",
@@ -165,6 +174,8 @@
     "accentAdjusted": "Affichée en {{light}} en mode clair et en {{dark}} en mode sombre pour que le texte de cette couleur reste lisible.",
     "sidebarViewsHint": "Choisissez les onglets affichés dans la barre latérale et leur ordre. Faites un clic droit sur les onglets de la barre latérale pour les afficher ou les masquer.",
     "moveViewUp": "Monter {{name}}",
-    "moveViewDown": "Descendre {{name}}"
+    "moveViewDown": "Descendre {{name}}",
+    "textScaleHint": "Met à l’échelle l’interface et ses champs de saisie. Le zoom de la fenêtre s’applique en plus de cette taille : une base de {{size}} px s’affiche en {{zoomed}} px avec un zoom de 125 %.",
+    "editorFontSizeHint": "Éditeurs de code, en pixels. Ne suit pas la taille du texte, et le zoom de la fenêtre s’applique en plus."
   }
 }

@@ -1,0 +1,29 @@
+{
+  "dependencies": {
+    "title": "Dépendances des variables",
+    "menuFolder": "Dépendances des variables",
+    "scopeAll": "Toutes les requêtes",
+    "scopeFolder": "Dossier : {{name}}",
+    "intro": "Chaque variable se place entre les requêtes qui la définissent et celles qui la lisent. Une requête définit une variable avec une règle d’extraction ou un script, et la lit avec {{reference}} dans son adresse, ses en-têtes, son corps ou son authentification, ou avec un appel de script.",
+    "showInputs": "Afficher les variables qui viennent uniquement des environnements",
+    "producers": "Définit",
+    "variables": "Variable",
+    "consumers": "Lit",
+    "missingTitle": "Lues mais jamais définies",
+    "missingDetail": "Ces variables sont lues par une requête, mais aucune requête ne les définit et aucun environnement, aucune collection ni liste globale ne les déclare : {{names}}.",
+    "missingMark": "jamais définie",
+    "none": "Aucun lien de variable entre les requêtes",
+    "noneDescription": "Aucune requête de cette portée ne définit, par une règle d’extraction ou un script, une variable qu’une autre requête lit.",
+    "summary_one": "{{count}} variable",
+    "summary_many": "{{count}} de variables",
+    "summary_other": "{{count}} variables",
+    "graphLabel": "Graphe des dépendances des variables",
+    "openRequest": "Ouvrir {{name}}",
+    "untitled": "Requête sans titre",
+    "command": {
+      "label": "Afficher les dépendances des variables",
+      "description": "Montrer quelles requêtes définissent et lisent chaque variable",
+      "keywords": "graphe chaîne extraire flux produire consommer graph chain extract flow produce consume"
+    }
+  }
+}

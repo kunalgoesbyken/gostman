@@ -37,6 +37,11 @@
         "title": "Ihre Anfragen gemeinsam ausführen",
         "hint": "Der Runner sendet jede gespeicherte Anfrage der Reihe nach und meldet, welche Prüfungen bestanden haben.",
         "action": "Runner öffnen"
+      },
+      "explore": {
+        "title": "Funktionen entdecken",
+        "hint": "Durchsuchen Sie alle Funktionen, probieren Sie sie mit einem Beispiel aus und lesen Sie, wie sie funktionieren.",
+        "action": "Funktionen entdecken"
       }
     }
   }

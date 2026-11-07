@@ -2,7 +2,8 @@
   "realtime": {
     "targets": {
       "topic": "主题",
-      "event": "事件"
+      "event": "事件",
+      "method": "方法"
     },
     "browser": {
       "closed": "连接已关闭（代码 {{code}}）",
@@ -22,6 +23,17 @@
       "binary": "不会解码二进制 Socket.IO 数据包。",
       "noEvent": "请输入要发出的事件名称。",
       "ack": "ack {{id}}"
+    },
+    "signalR": {
+      "badNegotiate": "negotiate 响应中没有连接令牌。",
+      "negotiateFailed": "SignalR negotiate 请求失败：{{reason}}",
+      "handshake": "SignalR 握手完成（JSON 协议）",
+      "handshakeRefused": "Hub 拒绝了握手：{{reason}}",
+      "streamItem": "流 {{id}}",
+      "completion": "结果 {{id}}",
+      "closed": "Hub 关闭了连接",
+      "closedWith": "Hub 关闭了连接：{{reason}}",
+      "noTarget": "请输入要调用的 Hub 方法。"
     },
     "mqtt": {
       "connected": "已连接到代理",

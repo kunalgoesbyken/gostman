@@ -10,6 +10,7 @@
       "language": "Limbă",
       "ai": "AI",
       "privacy": "Confidențialitate",
+      "updates": "Actualizări",
       "data": "Date"
     },
     "fields": {
@@ -21,12 +22,14 @@
       "codeFont": "Font pentru cod",
       "density": "Densitate",
       "responseLayout": "Panou de răspuns",
+      "tabPlacement": "File deschise",
       "systemTitleBar": "Folosire bară de titlu a sistemului",
       "editorFontSize": "Dimensiunea fontului din editor",
       "wrapLines": "Încadrare linii lungi",
       "requestTimeout": "Timeout implicit",
       "confirmCloseTab": "Întreabă înainte de a renunța la modificările nesalvate la închiderea unei file",
       "language": "Limbă",
+      "authorName": "Numele dvs. pe note",
       "sidebarViews": "File din bara laterală"
     },
     "themes": {
@@ -54,6 +57,11 @@
       "below": "Dedesubt",
       "right": "Dreapta"
     },
+    "tabPlacements": {
+      "bar": "Bara de file",
+      "sidebar": "Bara laterală"
+    },
+    "tabPlacementHint": "Bara laterală ascunde bara de file și listează filele deschise în bara laterală, ceea ce se potrivește ecranelor mici.",
     "seconds": "secunde",
     "pixels": "px",
     "contrastHint": "Mai mult desenează borduri și text secundar mai pronunțate.",
@@ -152,6 +160,7 @@
       "lowContrast": "Textul poate fi greu de citit. Țintiți cel puțin {{minimum}}:1.",
       "resetRow": "Resetare {{name}}"
     },
+    "authorNameHint": "Afișat pe notele pe care le adăugați la cereri și dosare.",
     "timeoutHint_one": "Se aplică cererilor care nu își setează propriul timeout. 0 folosește limita încorporată de {{count}} secundă.",
     "timeoutHint_few": "Se aplică cererilor care nu își setează propriul timeout. 0 folosește limita încorporată de {{count}} secunde.",
     "timeoutHint_other": "Se aplică cererilor care nu își setează propriul timeout. 0 folosește limita încorporată de {{count}} de secunde.",
@@ -165,6 +174,8 @@
     "accentAdjusted": "Afișat ca {{light}} în modul luminos și ca {{dark}} în modul întunecat, astfel încât textul de această culoare să rămână lizibil.",
     "sidebarViewsHint": "Alegeți ce file afișează bara laterală și în ce ordine. Faceți clic dreapta pe filele din bara laterală pentru a le afișa sau ascunde acolo.",
     "moveViewUp": "Mutare {{name}} în sus",
-    "moveViewDown": "Mutare {{name}} în jos"
+    "moveViewDown": "Mutare {{name}} în jos",
+    "textScaleHint": "Scalează interfața și câmpurile de introducere. Zoomul ferestrei se aplică peste această dimensiune: o bază de {{size}} px apare ca {{zoomed}} px la un zoom de 125%.",
+    "editorFontSizeHint": "Editoarele de cod, în pixeli. Nu urmează Dimensiunea textului, iar zoomul ferestrei se aplică peste aceasta."
   }
 }

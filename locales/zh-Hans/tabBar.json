@@ -1,9 +1,12 @@
 {
   "tabBar": {
     "openRequests": "已打开的请求",
+    "scrollStart": "向开头滚动标签页",
+    "scrollEnd": "向末尾滚动标签页",
     "newRequest": "新建请求",
     "untitled": "未命名",
     "unsaved": "有未保存的更改",
+    "fromHistory": "从历史记录打开",
     "close": "关闭 {{title}}"
   }
 }

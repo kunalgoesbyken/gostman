@@ -1,0 +1,35 @@
+{
+  "variablesPanel": {
+    "type": "Tipo",
+    "typeLabel": "Tipo di variabile",
+    "value": "Valore",
+    "valueChoice": "Scegli un valore",
+    "fieldOptions": "Opzioni del campo",
+    "label": "Etichetta",
+    "labelPlaceholder": "Nome mostrato nella vista Variabili",
+    "help": "Testo di aiuto",
+    "helpPlaceholder": "Mostrato sotto il campo nella vista Variabili",
+    "placeholder": "Segnaposto",
+    "placeholderPlaceholder": "Mostrato mentre il campo è vuoto",
+    "choices": "Scelte",
+    "choicesPlaceholder": "rosso, verde, blu",
+    "required": "Obbligatorio",
+    "inForm": "Mostra nella vista Variabili",
+    "showInherited": "Mostra le variabili ereditate",
+    "inheritedTitle": "Ereditate",
+    "inheritedHint": "Sola lettura. Provengono dagli ambiti superiori a questa richiesta. Una variabile con lo stesso nome più in alto prevale qui.",
+    "inheritedNone": "Nessuna variabile ereditata.",
+    "hiddenValue": "Nascosto",
+    "typeNote": "Una variabile tipizzata arriva agli script con quel tipo. In un URL, un header o un corpo viene comunque scritta come testo."
+  },
+  "variablesView": {
+    "switchLabel": "Vista della richiesta",
+    "fullEditor": "Editor completo",
+    "variables": "Variabili",
+    "formLabel": "Variabili della richiesta",
+    "emptyTitle": "Nessuna variabile da compilare",
+    "emptyDescription": "Le variabili aggiunte nella scheda Var dell'editor completo compaiono qui come campi di input.",
+    "openEditor": "Apri l'editor completo",
+    "required": "Obbligatorio"
+  }
+}

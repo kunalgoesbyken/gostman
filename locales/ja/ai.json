@@ -76,6 +76,19 @@
         "inputLabel": "探しているもの",
         "placeholder": "注文をキャンセルするエンドポイント"
       },
+      "commit": {
+        "label": "変更内容からコミットメッセージを作成",
+        "section": "コミットメッセージ",
+        "apply": "コミットメッセージとして使用",
+        "nothing": "説明する変更がありません。"
+      },
+      "mock": {
+        "label": "このリクエストのモック例",
+        "inputLabel": "レスポンスを説明するか、OpenAPIドキュメントを貼り付けてください",
+        "placeholder": "注文の一覧、空の一覧、存在しない注文に対する404",
+        "section": "モックサーバーが返す例",
+        "apply": "例に追加"
+      },
       "schema": {
         "label": "API記述からリクエストを作成",
         "inputLabel": "OpenAPIまたはSwaggerドキュメント、GraphQLスキーマ、APIドキュメントのテキストを貼り付けてください",
@@ -98,7 +111,8 @@
       "explain": "AIで説明",
       "explainError": "AIでこのエラーを説明",
       "document": "AIで作成",
-      "documentLabel": "AIで説明を作成"
+      "documentLabel": "AIで説明を作成",
+      "commitMessage": "AIでメッセージを提案"
     },
     "commands": {
       "request": {
@@ -127,6 +141,11 @@
         "description": "説明からリクエストを探します",
         "keywords": "検索 探す search find"
       },
+      "mock": {
+        "label": "AI：このリクエストのモック例",
+        "description": "説明、OpenAPIドキュメント、または直前のレスポンスから、モックサーバー用のレスポンス例を提案します",
+        "keywords": "mock examples responses モック 例 レスポンス"
+      },
       "schema": {
         "label": "AI：API記述からリクエストを作成",
         "description": "OpenAPIドキュメントは内蔵のインポーターを使用し、それ以外の記述はAIに送られます",
@@ -146,6 +165,7 @@
       "consent": "AIアクションを実行すると、プレビューされたリクエストまたはレスポンスの詳細が{{host}}に送信されること、および課金は私とプロバイダーとの間で行われることを理解しました。",
       "enable": "AI機能をオンにする",
       "enableAfterConsent": "AI機能をオンにする（先に上の項目にチェックを入れてください）",
+      "inlineCompletion": "スクリプトエディターで入力中にコードを提案します。少し手を止めると、カーソル周辺のスクリプトと変数名（値は送信しません）がプレビューなしで{{host}}に送信されます。提案を受け入れるにはTabキーを押します。",
       "provider": "プロバイダー",
       "baseUrl": "ベースURL",
       "baseUrlPlaceholder": "https://host/v1",

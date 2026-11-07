@@ -24,6 +24,8 @@
     "source": "Wertquelle",
     "scope": "Wo der Wert gehalten wird",
     "remove": "Extraktion entfernen",
-    "runNow": "Jetzt ausführen"
+    "runNow": "Jetzt ausführen",
+    "environmentNamed": "Umgebung: {{name}}",
+    "alreadyDefined": "Bereits definiert ({{source}}); der extrahierte Wert wird in dem in dieser Zeile gewählten Bereich gespeichert."
   }
 }

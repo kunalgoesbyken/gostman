@@ -43,6 +43,7 @@
     "clear": "Cancella",
     "closeTab": "Chiudi scheda",
     "closeTabMessage": "\"{{name}}\" ha modifiche non salvate. Salvarle prima di chiudere?",
-    "dontSave": "Non salvare"
+    "dontSave": "Non salvare",
+    "openFirstRequest": "Apri la prima richiesta"
   }
 }

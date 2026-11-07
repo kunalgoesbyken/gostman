@@ -1,0 +1,28 @@
+{
+  "tour": {
+    "label": "Visite rapide",
+    "replay": "Afficher la visite",
+    "progress": "Étape {{current}} sur {{total}}",
+    "next": "Suivant",
+    "done": "Terminé",
+    "skip": "Passer la visite",
+    "steps": {
+      "send": {
+        "title": "Envoyer une requête",
+        "body": "Saisissez une URL dans la barre d’adresse et appuyez sur Envoyer. La réponse s’affiche en dessous."
+      },
+      "variables": {
+        "title": "Utiliser des variables",
+        "body": "Écrivez une valeur sous la forme {{example}} et définissez-la dans un environnement : une même requête fonctionne alors en local, en préproduction et en production."
+      },
+      "tools": {
+        "title": "Trouver tous les outils",
+        "body": "Le menu Outils de l’en-tête regroupe ce que vous pouvez faire avec les requêtes : exécuter, simuler, analyser, surveiller et partager."
+      },
+      "explore": {
+        "title": "Tout rechercher",
+        "body": "Appuyez sur {{shortcut}} pour ouvrir la palette de commandes, ou ouvrez Aide et choisissez Explorer les fonctionnalités."
+      }
+    }
+  }
+}

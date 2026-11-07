@@ -44,13 +44,17 @@
       "payloadHash": "ペイロードハッシュ",
       "extraData": "追加データ",
       "appId": "アプリID",
+      "passwordType": "パスワードの種類",
+      "timestampLifetime": "タイムスタンプの有効期間",
       "delegation": "委任"
     },
     "hints": {
       "generated": "空の場合は自動生成されます",
       "commaSeparated": "カンマ区切り、省略可",
       "optional": "省略可",
-      "expiry": "1h、または秒数"
+      "expiry": "1h、または秒数",
+      "jwtExpiry": "省略可：iatとexpを追加します。例：1hまたは900",
+      "wsseTimestamp": "省略可：5m（または秒数）だけ有効なTimestampを追加します"
     },
     "options": {
       "authorizationHeader": "Authorizationヘッダー",
@@ -58,6 +62,7 @@
       "formBody": "フォームボディ",
       "plainText": "プレーンテキスト",
       "doNotInclude": "含めない",
+      "passwordDigest": "Digest（nonceと作成時刻を含むSHA-1）",
       "include": "含める"
     },
     "notes": {
@@ -68,7 +73,8 @@
       "edgegrid": "リクエストに署名するには、クライアントトークン、クライアントシークレット、アクセストークンが必要です。",
       "jwt": "トークンはリクエストごとに署名し直されるため、ペイロード内の{{timestamp}}は常に最新になります。",
       "asap": "発行者、オーディエンス、キーID、秘密鍵が必要です。独自のiat、exp、jtiを持つ新しいトークンが、リクエストごとにBearerトークンとして送信されます。",
-      "hawk": "リクエストに署名するには、認証IDとキーが必要です。"
+      "hawk": "リクエストに署名するには、認証IDとキーが必要です。",
+      "wssecurity": "SOAPボディ形式のSOAPエンベロープにwsse:Securityヘッダーを挿入します。ユーザー名、タイムスタンプの有効期間、またはその両方を指定してください。"
     }
   }
 }

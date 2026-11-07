@@ -9,7 +9,8 @@
       "website": "Site web",
       "source": "Code source",
       "releases": "Versions",
-      "issues": "Signaler un problème"
+      "issues": "Signaler un problème",
+      "sponsor": "Sponsoriser"
     },
     "diagnosticsHint": "Le diagnostic indique uniquement la version, la plateforme et des nombres. Il n’inclut jamais de requêtes, d’URL, de variables, de jetons ni de secrets.",
     "copyDiagnostics": "Copier le diagnostic",

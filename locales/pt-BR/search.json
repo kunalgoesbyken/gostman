@@ -1,0 +1,36 @@
+{
+  "search": {
+    "sidebarTab": "Pesquisa",
+    "placeholder": "Pesquisar requisições, histórico e respostas",
+    "label": "Pesquisar tudo",
+    "hint": "Pesquisa nomes, URLs, cabeçalhos, corpos e descrições de requisições, o histórico e a última resposta de cada aba aberta.",
+    "searching": "Pesquisando…",
+    "none": "Nada corresponde a \"{{query}}\"",
+    "truncated": "Mostrando apenas os primeiros resultados. Refine a pesquisa para ver mais.",
+    "timedOut": "A pesquisa demorou demais e foi interrompida. Tente uma consulta mais longa ou mais específica.",
+    "failed": "A pesquisa falhou: {{reason}}",
+    "results_one": "{{count}} resultado",
+    "results_many": "{{count}} de resultados",
+    "results_other": "{{count}} resultados",
+    "command": {
+      "label": "Pesquisar em tudo",
+      "description": "Pesquisar nomes de requisições, URLs, corpos, histórico e respostas abertas",
+      "keywords": "buscar encontrar pesquisa global respostas histórico"
+    },
+    "kinds": {
+      "request": "Requisição",
+      "history": "Histórico",
+      "response": "Resposta"
+    },
+    "fields": {
+      "name": "Nome",
+      "url": "URL",
+      "body": "Corpo",
+      "headers": "Cabeçalhos",
+      "description": "Descrição",
+      "tags": "Tags",
+      "responseBody": "Corpo da resposta",
+      "responseHeaders": "Cabeçalhos da resposta"
+    }
+  }
+}

@@ -24,6 +24,8 @@
     "source": "Origine del valore",
     "scope": "Dove viene conservato il valore",
     "remove": "Rimuovi estrattore",
-    "runNow": "Esegui ora"
+    "runNow": "Esegui ora",
+    "environmentNamed": "Ambiente: {{name}}",
+    "alreadyDefined": "Già definita ({{source}}); il valore estratto viene conservato nell'ambito scelto in questa riga."
   }
 }

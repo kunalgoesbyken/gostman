@@ -1,8 +1,55 @@
 {
   "updates": {
+    "installedLabel": "Installierte Version",
+    "checkNow": "Jetzt prüfen",
+    "checking": "Wird geprüft…",
+    "neverChecked": "Noch nicht geprüft.",
+    "checkedAt": "Zuletzt geprüft {{when}}.",
+    "upToDate": "Dies ist die neueste Version.",
+    "checkFailed": "Der Update-Server war nicht erreichbar. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
     "checksLabel": "Nach neuen Versionen suchen",
+    "checksHint": "Einmal täglich das neueste Release von GitHub abrufen und in der Statusleiste anzeigen.",
+    "autoLabel": "Updates automatisch installieren",
+    "autoHint": "Neue Versionen im Hintergrund herunterladen und installieren, wenn Gostman beendet oder neu gestartet wird.",
+    "autoHintInstaller": "Neue Versionen im Hintergrund herunterladen und installieren, wenn Sie Gostman neu starten und Windows um Erlaubnis fragt.",
     "available": "Version {{version}} ist verfügbar",
+    "availableDetail": "Gostman lädt sie herunter, prüft, ob sie unbeschädigt angekommen ist, und installiert sie beim Neustart.",
+    "availableUnverified": "Diese Version kann nicht automatisch installiert werden; laden Sie sie daher von der Release-Seite herunter.",
+    "update": "Gostman aktualisieren",
+    "updateHint": "Version {{version}} herunterladen, prüfen und installieren",
+    "downloading": "{{version}} wird heruntergeladen… {{percent}}",
+    "downloadingDetail": "{{received}} von {{total}}",
+    "verifying": "Download wird auf Vollständigkeit geprüft…",
+    "installing": "Wird installiert…",
+    "ready": "Zum Aktualisieren neu starten",
+    "readyHint": "Version {{version}} ist heruntergeladen und geprüft. Starten Sie Gostman neu, um sie zu installieren.",
+    "readyDetail": "Version {{version}} ist heruntergeladen und geprüft.",
+    "restartNow": "Jetzt neu starten",
+    "restartTitle": "Gostman neu starten?",
+    "restartMessage": "Gostman wird beendet und mit Version {{version}} wieder geöffnet. Geöffnete Tabs und ungespeicherte Entwürfe bleiben erhalten.",
+    "restartMessageInstaller": "Gostman wird beendet, Windows fragt um Erlaubnis, Version {{version}} zu installieren, und Gostman wird wieder geöffnet. Geöffnete Tabs und ungespeicherte Entwürfe bleiben erhalten.",
+    "cancel": "Download abbrechen",
+    "tryAgain": "Erneut versuchen",
+    "releaseNotes": "Release Notes",
+    "openRelease": "Release-Seite öffnen",
+    "download": "Herunterladen",
+    "downloadHint": "Release Notes und Downloads auf GitHub öffnen",
     "dismiss": "Bis zur nächsten Version ausblenden",
-    "downloadHint": "Release Notes und Downloads auf GitHub öffnen"
+    "failed": "Update fehlgeschlagen",
+    "failedHint": "Was schiefgelaufen ist, sehen Sie unter Einstellungen, Updates",
+    "failures": {
+      "network": "Der Update-Server war nicht erreichbar. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+      "unsupported": "Für dieses System gibt es noch kein automatisches Update; laden Sie es daher von der Release-Seite herunter.",
+      "unverified": "Gostman konnte nicht bestätigen, dass dieses Update echt ist, daher wurde es nicht installiert. Laden Sie es von der Release-Seite herunter.",
+      "mismatch": "Der Download ist nicht korrekt angekommen, daher wurde er nicht installiert. Versuchen Sie es erneut.",
+      "storage": "Gostman konnte den Download nicht auf diesem Computer speichern. Geben Sie etwas Speicherplatz frei und versuchen Sie es erneut.",
+      "install": "Gostman konnte das Update nicht installieren. Beenden Sie Gostman und führen Sie das Installationsprogramm von der Release-Seite aus."
+    },
+    "manual": {
+      "scoop": "Mit Scoop installiert. Aktualisieren Sie mit {{command}}.",
+      "homebrew": "Mit Homebrew installiert. Aktualisieren Sie mit {{command}}.",
+      "system": "Als Systempaket installiert; laden Sie daher das neue Paket von der Release-Seite herunter und installieren Sie es.",
+      "other": "Diese Kopie von Gostman kann sich nicht selbst aktualisieren; laden Sie neue Versionen daher von der Release-Seite herunter."
+    }
   }
 }

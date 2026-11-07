@@ -4,8 +4,26 @@
     "timeoutPlaceholder": "{{milliseconds}}（默认）",
     "followRedirects": "跟随重定向",
     "verifyTls": "验证 TLS 证书",
+    "httpVersion": "HTTP 版本",
+    "rpcTransport": "gRPC 传输方式",
+    "rpcTransports": {
+      "grpc": "gRPC（HTTP/2）",
+      "grpcWeb": "gRPC-Web",
+      "grpcWebText": "gRPC-Web，base64 文本",
+      "connect": "Connect"
+    },
+    "httpVersions": {
+      "auto": "自动",
+      "http11": "HTTP/1.1",
+      "http2": "HTTP/2"
+    },
     "sendCookies": "发送 Cookie 罐中的 Cookie",
     "storeCookies": "保存响应设置的 Cookie",
+    "opensIn": "打开方式",
+    "opensInFull": "完整编辑器",
+    "opensInVariables": "变量视图",
+    "jsonDepth": "展开 JSON 响应",
+    "jsonDepthDefault": "应用默认值",
     "tags": "标签",
     "tagsPlaceholder": "冒烟测试, 回归测试",
     "description": "描述",
