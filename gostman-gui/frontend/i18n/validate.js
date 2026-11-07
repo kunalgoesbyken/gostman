@@ -231,7 +231,7 @@ export function validateCatalogues(localesRoot) {
 }
 
 export const absentFileSummary = ({ absentFiles }) =>
-  Object.entries(absentFiles).map(([namespace, languages]) => `${namespace}.json has no file in ${languages.join(', ')}, so its Weblate component has no translations ("No file mask matches")`)
+  Object.entries(absentFiles).map(([namespace, languages]) => `${namespace}.json has no file in ${languages.join(', ')}: add locales/<language>/${namespace}.json, translated or {}, or its Weblate component reports "No file mask matches"`)
 
 const withThousands = (value) => value.toLocaleString('en-US')
 

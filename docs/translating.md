@@ -164,7 +164,7 @@ A module reads its English with `messages(namespace, english, adapt)` from `src/
 
 **Changing English.** When you change what an English message means, drop the old translations with `npm run i18n:prune -- --drop namespace.key.path`, so no language keeps a wrong text. When you only fix a typo, leave them.
 
-**Adding a namespace.** A new `locales/en/<namespace>.json` becomes a Weblate component, and Weblate only lists the languages that have a file for it. Add `locales/<language>/<namespace>.json` for every language directory in the same change, translated or at least as `{}`. Without them the component has no translations and Weblate reports "No file mask matches". `npm run i18n:check` warns about every namespace that a language directory lacks.
+**Adding a namespace.** A new `locales/en/<namespace>.json` becomes a Weblate component, and Weblate only lists the languages that have a file for it. Add `locales/<language>/<namespace>.json` for every language directory in the same change, translated or at least as `{}`. Without them the component has no translations and Weblate reports "No file mask matches". `npm run i18n:check`, which CI runs on every push and pull request, fails while any language directory lacks a namespace file.
 
 ### Messages from Go
 
