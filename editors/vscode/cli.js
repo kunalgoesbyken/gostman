@@ -4,6 +4,7 @@ const path = require("path");
 const { execFile } = require("child_process");
 const vscode = require("vscode");
 const { settings } = require("./settings");
+const { logStart, logEnd, logError } = require("./output");
 const { SETTINGS } = require("./constants");
 
 const CONTROL = /\p{Cc}/u;
@@ -63,6 +64,7 @@ function execute(args, { cwd, scope, name }) {
   const parts = present(args);
   if (hasControl(parts)) return;
   const command = cliPath();
+  logStart(command, parts, cwd);
   const execution = new vscode.ProcessExecution(command, parts, { cwd });
   const task = new vscode.Task({ type: "gostman" }, scope ?? vscode.TaskScope.Workspace, name ?? "Gostman", "gostman", execution);
   task.presentationOptions = { reveal: vscode.TaskRevealKind.Always, clear: true };
@@ -71,16 +73,22 @@ function execute(args, { cwd, scope, name }) {
 
 function capture(args, { cwd, signal }) {
   const command = cliPath();
+  const parts = present(args);
+  logStart(command, parts, cwd);
   return new Promise((resolve, reject) => {
     const options = { cwd, signal, maxBuffer: OUTPUT_LIMIT, windowsHide: true, encoding: "utf8" };
-    execFile(command, present(args), options, (error, stdout, stderr) => {
+    execFile(command, parts, options, (error, stdout, stderr) => {
       if (error && typeof error.code !== "number") {
-        reject(startFailure(error, command));
+        const failure = startFailure(error, command);
+        logError(failure.message);
+        reject(failure);
         return;
       }
-      resolve({ code: error ? error.code : 0, stdout, stderr });
+      const code = error ? error.code : 0;
+      logEnd(code, stderr);
+      resolve({ code, stdout, stderr });
     });
   });
 }
 
-module.exports = { execute, capture, cliPath };
+module.exports = { execute, capture };

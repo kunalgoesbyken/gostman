@@ -6,41 +6,215 @@
   "publisher": "Gostman",
   "license": "MIT",
   "icon": "media/icon.png",
-  "repository": { "type": "git", "url": "https://github.com/kunalgoesbyken/gostman.git", "directory": "editors/vscode" },
+  "galleryBanner": {
+    "color": "#030711",
+    "theme": "dark"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kunalgoesbyken/gostman.git",
+    "directory": "editors/vscode"
+  },
   "homepage": "https://gostman.com",
-  "bugs": { "url": "https://github.com/kunalgoesbyken/gostman/issues" },
-  "engines": { "vscode": "^1.85.0" },
-  "categories": ["Testing", "Other"],
-  "keywords": ["api", "rest", "graphql", "grpc", "websocket", "http client", "postman", "bruno", "mcp"],
+  "bugs": {
+    "url": "https://github.com/kunalgoesbyken/gostman/issues"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Testing",
+    "Other"
+  ],
+  "keywords": [
+    "api",
+    "rest",
+    "graphql",
+    "grpc",
+    "websocket",
+    "http client",
+    "postman",
+    "bruno",
+    "mcp"
+  ],
   "main": "./extension.js",
-  "extensionKind": ["workspace"],
+  "extensionKind": [
+    "workspace"
+  ],
   "l10n": "./l10n",
-  "activationEvents": ["workspaceContains:**/gostman.yaml"],
+  "activationEvents": [
+    "workspaceContains:**/gostman.yaml"
+  ],
   "capabilities": {
-    "untrustedWorkspaces": { "supported": false, "description": "%capabilities.untrustedWorkspaces%" },
-    "virtualWorkspaces": { "supported": false, "description": "%capabilities.virtualWorkspaces%" }
+    "untrustedWorkspaces": {
+      "supported": false,
+      "description": "%capabilities.untrustedWorkspaces%"
+    },
+    "virtualWorkspaces": {
+      "supported": false,
+      "description": "%capabilities.virtualWorkspaces%"
+    }
   },
   "contributes": {
     "commands": [
-      { "command": "gostman.run", "title": "%command.run%" },
-      { "command": "gostman.runFolder", "title": "%command.runFolder%" },
-      { "command": "gostman.send", "title": "%command.send%" },
-      { "command": "gostman.sendFile", "title": "%command.sendFile%" },
-      { "command": "gostman.selectEnvironment", "title": "%command.selectEnvironment%" },
-      { "command": "gostman.flow", "title": "%command.flow%" },
-      { "command": "gostman.lint", "title": "%command.lint%" },
-      { "command": "gostman.scan", "title": "%command.scan%" },
-      { "command": "gostman.init", "title": "%command.init%" },
-      { "command": "gostman.docs", "title": "%command.docs%" }
+      {
+        "command": "gostman.run",
+        "title": "%command.run%"
+      },
+      {
+        "command": "gostman.runFolder",
+        "title": "%command.runFolder%"
+      },
+      {
+        "command": "gostman.send",
+        "title": "%command.send%"
+      },
+      {
+        "command": "gostman.sendFile",
+        "title": "%command.sendFile%",
+        "icon": "$(send)"
+      },
+      {
+        "command": "gostman.selectEnvironment",
+        "title": "%command.selectEnvironment%",
+        "icon": "$(gostman-logo)"
+      },
+      {
+        "command": "gostman.flow",
+        "title": "%command.flow%"
+      },
+      {
+        "command": "gostman.lint",
+        "title": "%command.lint%"
+      },
+      {
+        "command": "gostman.scan",
+        "title": "%command.scan%"
+      },
+      {
+        "command": "gostman.init",
+        "title": "%command.init%"
+      },
+      {
+        "command": "gostman.docs",
+        "title": "%command.docs%"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "gostman",
+          "title": "Gostman",
+          "icon": "media/mark.svg"
+        }
+      ]
+    },
+    "views": {
+      "gostman": [
+        {
+          "id": "gostman.requests",
+          "name": "%view.requests%",
+          "contextualTitle": "Gostman",
+          "icon": "media/mark.svg"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "gostman.requests",
+        "contents": "%view.requests.empty%"
+      }
     ],
     "menus": {
       "commandPalette": [
-        { "command": "gostman.sendFile", "when": "resourceExtname =~ /\\.ya?ml$/" }
+        {
+          "command": "gostman.sendFile",
+          "when": "resourceExtname =~ /\\.ya?ml$/"
+        }
       ],
       "explorer/context": [
-        { "command": "gostman.lint", "when": "resourceExtname =~ /\\.(ya?ml|json)$/", "group": "gostman" }
+        {
+          "command": "gostman.lint",
+          "when": "resourceExtname =~ /\\.(ya?ml|json)$/",
+          "group": "gostman"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "gostman.selectEnvironment",
+          "when": "view == gostman.requests",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "gostman.sendFile",
+          "when": "view == gostman.requests && viewItem == request",
+          "group": "inline"
+        }
       ]
     },
+    "icons": {
+      "gostman-logo": {
+        "description": "%icon.logo%",
+        "default": {
+          "fontPath": "media/gostman-icons.woff",
+          "fontCharacter": "\\ea01"
+        }
+      }
+    },
+    "colors": [
+      {
+        "id": "gostman.success",
+        "description": "%color.success%",
+        "defaults": {
+          "light": "#0f6c31",
+          "dark": "#36d399",
+          "highContrast": "#36d399",
+          "highContrastLight": "#0f6c31"
+        }
+      },
+      {
+        "id": "gostman.warning",
+        "description": "%color.warning%",
+        "defaults": {
+          "light": "#904504",
+          "dark": "#f59f0a",
+          "highContrast": "#f59f0a",
+          "highContrastLight": "#904504"
+        }
+      },
+      {
+        "id": "gostman.destructive",
+        "description": "%color.destructive%",
+        "defaults": {
+          "light": "#af1d1d",
+          "dark": "#ef4343",
+          "highContrast": "#ef4343",
+          "highContrastLight": "#af1d1d"
+        }
+      },
+      {
+        "id": "gostman.info",
+        "description": "%color.info%",
+        "defaults": {
+          "light": "#0950c3",
+          "dark": "#3c83f6",
+          "highContrast": "#3c83f6",
+          "highContrastLight": "#0950c3"
+        }
+      },
+      {
+        "id": "gostman.primary",
+        "description": "%color.primary%",
+        "defaults": {
+          "light": "#035e77",
+          "dark": "#19d1fa",
+          "highContrast": "#19d1fa",
+          "highContrastLight": "#035e77"
+        }
+      }
+    ],
     "configuration": {
       "title": "Gostman",
       "properties": {
@@ -60,8 +234,11 @@
   },
   "scripts": {
     "l10n:export": "vscode-l10n-dev export --outDir l10n \"*.js\"",
-    "package": "vsce package --no-dependencies",
-    "publish": "vsce publish --no-dependencies"
+    "package": "vsce package --no-dependencies --baseContentUrl https://github.com/kunalgoesbyken/gostman/blob/HEAD/editors/vscode --baseImagesUrl https://github.com/kunalgoesbyken/gostman/raw/HEAD/editors/vscode",
+    "publish": "vsce publish --no-dependencies --baseContentUrl https://github.com/kunalgoesbyken/gostman/blob/HEAD/editors/vscode --baseImagesUrl https://github.com/kunalgoesbyken/gostman/raw/HEAD/editors/vscode"
   },
-  "devDependencies": { "@vscode/l10n-dev": "^0.0.35", "@vscode/vsce": "^3.0.0" }
+  "devDependencies": {
+    "@vscode/l10n-dev": "^0.0.35",
+    "@vscode/vsce": "^3.0.0"
+  }
 }

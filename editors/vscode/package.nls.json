@@ -1,5 +1,5 @@
 {
-  "description": "Send requests, run collections in the Test Explorer, and lint and scan Gostman API collections from VS Code.",
+  "description": "Gostman in VS Code: send requests from their files and run your API collections, with their checks, in the Test Explorer. The free, open source API client for REST, GraphQL, gRPC and WebSocket.",
   "capabilities.untrustedWorkspaces": "Running a collection sends requests and runs its scripts.",
   "capabilities.virtualWorkspaces": "The extension starts the Gostman command line, which reads the collection from a local folder.",
   "command.run": "Gostman: Run collection",
@@ -13,5 +13,13 @@
   "command.init": "Gostman: Create a collection in this folder",
   "command.docs": "Gostman: Open the documentation",
   "config.path": "Command that starts the Gostman CLI. Use a full path when `gostman` is neither on the PATH nor in `GOBIN`, `GOPATH/bin` or `~/go/bin`.",
-  "config.environment": "Environment name passed as `--env` for collections where no environment was chosen with **Gostman: Select environment** or the status bar item. Empty uses the first environment of the collection."
+  "config.environment": "Environment name passed as `--env` for collections where no environment was chosen with **Gostman: Select environment** or the status bar item. Empty uses the first environment of the collection.",
+  "view.requests": "Requests",
+  "view.requests.empty": "No Gostman collection in this workspace yet.\n[Create a collection](command:gostman.init)\n[Open the documentation](command:gostman.docs)",
+  "icon.logo": "Gostman logo",
+  "color.success": "Gostman: colour of GET, HEAD and OPTIONS requests.",
+  "color.warning": "Gostman: colour of POST, PUT and PATCH requests.",
+  "color.destructive": "Gostman: colour of DELETE requests.",
+  "color.info": "Gostman: colour of gRPC, MCP and WebSocket requests.",
+  "color.primary": "Gostman: colour of GraphQL requests."
 }

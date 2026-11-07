@@ -43,7 +43,7 @@ async function showSelection(item) {
   const missing = selected !== "" && !names.includes(selected);
   const shown = selected || names[0] || vscode.l10n.t("No environment");
   const text = several ? vscode.l10n.t("{0}: {1}", collection.label, shown) : shown;
-  item.text = `${missing ? "$(warning)" : "$(server-environment)"} ${text}`;
+  item.text = `${missing ? "$(warning)" : "$(gostman-logo)"} ${text}`;
   item.tooltip = missing
     ? vscode.l10n.t("Gostman environment \"{0}\" is not in the environments folder of {1}. Select to change.", selected, collection.label)
     : vscode.l10n.t("Gostman environment of {0}. Select to change.", collection.label);

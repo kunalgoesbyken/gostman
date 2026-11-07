@@ -13,7 +13,7 @@ function createProvider() {
       const collection = collectionOf(document.uri.fsPath);
       if (!collection || !isRequestText(document.getText())) return [];
       const top = new vscode.Range(0, 0, 0, 0);
-      return [new vscode.CodeLens(top, { title: vscode.l10n.t("Send"), command: COMMANDS.sendFile, arguments: [document.uri] })];
+      return [new vscode.CodeLens(top, { title: `$(gostman-logo) ${vscode.l10n.t("Send")}`, command: COMMANDS.sendFile, arguments: [document.uri] })];
     },
   };
   return { provider, changed };

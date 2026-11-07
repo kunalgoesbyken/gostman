@@ -2,7 +2,8 @@ const vscode = require("vscode");
 const { capture } = require("./cli");
 const { environmentArgs } = require("./settings");
 const { collections } = require("./collections");
-const { readCollection, REFERENCE_SEPARATOR } = require("./workspaceFiles");
+const { readTree } = require("./collectionTree");
+const { REFERENCE_SEPARATOR } = require("./workspaceFiles");
 const { parseReport, verdict, resultLine } = require("./report");
 
 const REFRESH_DELAY_MS = 300;
@@ -11,10 +12,6 @@ function itemsOf(collection) {
   const found = [];
   collection.forEach((item) => found.push(item));
   return found;
-}
-
-async function collectionNode(collection) {
-  return { kind: "collection", path: collection.root, name: collection.label, collection, children: await readCollection(collection.root) };
 }
 
 function sortKey(index) {
@@ -27,14 +24,14 @@ function createTesting() {
   let loaded = false;
   let queue = Promise.resolve();
 
-  function sync(target, list, collection) {
+  function sync(target, list) {
     const items = list.map((node, index) => {
-      const owner = node.collection ?? collection;
       const item = target.get(node.path) ?? controller.createTestItem(node.path, node.name, vscode.Uri.file(node.path));
       item.label = node.name;
+      item.description = node.method;
       item.sortText = sortKey(index);
-      nodes.set(item, { ...node, collection: owner });
-      if (node.kind !== "request") sync(item.children, node.children, owner);
+      nodes.set(item, node);
+      if (node.kind !== "request") sync(item.children, node.children);
       return item;
     });
     target.replace(items);
@@ -42,9 +39,7 @@ function createTesting() {
 
   async function refreshItems() {
     loaded = true;
-    const found = await collections.all();
-    if (found.length === 1) sync(controller.items, await readCollection(found[0].root), found[0]);
-    else sync(controller.items, await Promise.all(found.map(collectionNode)));
+    sync(controller.items, await readTree());
   }
 
   function rebuild() {

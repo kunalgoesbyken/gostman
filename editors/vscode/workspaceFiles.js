@@ -8,6 +8,7 @@ const ENVIRONMENTS = "environments";
 const REFERENCE_SEPARATOR = "/";
 const REQUEST_MARKERS = ["method", "url"];
 const REQUEST_KEYS = ["id", "name", "order", ...REQUEST_MARKERS];
+const DEFAULT_METHOD = "GET";
 
 function isHidden(name) {
   return name.startsWith(".");
@@ -69,7 +70,8 @@ function requestNode(file, values, folderNames) {
   const name = values.get("name") || stemOf(file);
   const id = values.get("id");
   const qualified = [...folderNames, name].join(REFERENCE_SEPARATOR);
-  return { kind: "request", path: file, name, id, qualified, reference: id || qualified, order: orderOf(values) };
+  const method = (values.get("method") || DEFAULT_METHOD).toUpperCase();
+  return { kind: "request", path: file, name, id, method, qualified, reference: id || qualified, order: orderOf(values) };
 }
 
 async function readRequest(file, folderNames) {

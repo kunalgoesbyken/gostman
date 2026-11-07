@@ -6,7 +6,9 @@ const { collections, localFolders } = require("./collections");
 const { activateEnvironment } = require("./environment");
 const { activateLenses } = require("./lenses");
 const { activateTesting } = require("./testing");
-const { sendFile } = require("./sendPanel");
+const { createSender } = require("./sendPanel");
+const { activateRequestsView } = require("./requestsView");
+const { activateOutput } = require("./output");
 const { COMMANDS } = require("./constants");
 
 const DOCS_URL = "https://gostman.com/docs";
@@ -84,7 +86,6 @@ const HANDLERS = {
   [COMMANDS.run]: runCollection,
   [COMMANDS.runFolder]: runFolder,
   [COMMANDS.send]: sendRequest,
-  [COMMANDS.sendFile]: sendFile,
   [COMMANDS.flow]: runFlow,
   [COMMANDS.lint]: lintSpec,
   [COMMANDS.scan]: scanCollection,
@@ -94,13 +95,16 @@ const HANDLERS = {
 
 function activate(context) {
   useMemory(context.workspaceState);
+  activateOutput(context);
   collections.activate(context);
-  for (const [id, handler] of Object.entries(HANDLERS)) {
+  const handlers = { ...HANDLERS, [COMMANDS.sendFile]: createSender(context.extensionUri) };
+  for (const [id, handler] of Object.entries(handlers)) {
     context.subscriptions.push(vscode.commands.registerCommand(id, handler));
   }
   activateEnvironment(context);
   activateLenses(context);
   activateTesting(context);
+  activateRequestsView(context);
 }
 
 function deactivate() {}

@@ -9,7 +9,12 @@
 - Run collection, Run a folder, Send a saved request, Run a flow and Scan use the active editor's collection, or ask which one; their terminal is named after it and starts in its folder. Create a collection asks for the workspace folder when there are several.
 - When `gostman.path` is left at `gostman` and the CLI is not on the PATH, the extension also looks in `GOBIN`, `GOPATH/bin` and `~/go/bin`, and on macOS and Linux in `/opt/homebrew/bin`, `/usr/local/bin` and `~/.local/bin`.
 - An error starting a terminal task is shown instead of being dropped.
-- Checked in VS Code 1.145 with `@vscode/test-electron`: activation, the Send lens and panel, the Testing view, the environment picker, the terminal commands and finding the CLI.
+- The response panel follows the Gostman app: Body, Headers, Checks and Console tabs, the status badge with time and size, the app's status, method and JSON colours, the Outfit and JetBrains Mono fonts, and the app's empty and error states, themed from VS Code's light, dark and high contrast colours.
+- A Gostman view in the activity bar lists the requests of every collection, with their methods in the app's colours; select one to open it, or send it with the button next to it.
+- The Gostman mark is on the activity bar, the response panel, the Send lens and the environment in the status bar, and the Marketplace icon is the app's icon.
+- A Gostman output channel logs every command line the extension starts and what the CLI printed to stderr.
+- Test Explorer items show the request method.
+- Checked in VS Code 1.145 with `@vscode/test-electron`: activation, the Send lens and panel, the Testing view, the environment picker, the terminal commands and finding the CLI, with the panel seen in light, dark and high contrast themes.
 
 ## 0.2.0
 

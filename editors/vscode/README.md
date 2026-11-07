@@ -1,6 +1,12 @@
-# Gostman for VS Code
+<p align="center"><img src="media/icon.png" width="96" height="96" alt="Gostman"></p>
 
-Send requests, run collections and check their results from the editor. The extension calls the Gostman command line, so a request or a run in VS Code gives the same result as the app, a run in CI and the MCP server.
+<h1 align="center">Gostman for VS Code</h1>
+
+<p align="center">The free, open source API client, in your editor. Send requests from their files and run your collections, with their checks, in the Test Explorer.</p>
+
+![A request file with the Send lens, the Gostman Requests view on the left and the response beside the editor, in a dark theme](media/screenshots/send-dark.png)
+
+The extension calls the Gostman command line, so a request or a run in VS Code gives the same result as the app, a run in CI and the MCP server. The response panel follows the Gostman app: the same tabs, status colours, fonts and JSON colours, drawn from your VS Code theme, in light, dark and high contrast.
 
 ## Requirements
 
@@ -12,11 +18,13 @@ A collection is a folder that holds `gostman.yaml`. The extension finds every co
 
 ## Send from the file
 
-Open a request file of the collection. A **Send** lens above the first line runs `gostman send --json <id>` and shows the status, time, size, checks, body and response headers in a panel beside the editor. The panel is plain HTML with no scripts and a strict content security policy. Secret values stay redacted as `{{name}}`; the extension never passes `--reveal`. An unsaved file is saved first. The panel also lists placeholders that had no value, secrets Gostman did not fill in, skipped requests, script logs and the CLI's warnings, so a literal `{{token}}` from a wrong or missing environment is explained. Bodies are shown as received.
+Open a request file of the collection, or pick it in the **Requests** view under the Gostman icon in the activity bar. A **Send** lens above the first line, or the send button next to the request in the view, runs `gostman send --json <id>` and shows the response in a panel beside the editor: the status, time and size, then **Body**, **Headers**, **Checks** and **Console** tabs, with JSON bodies formatted. The panel is plain HTML with no scripts and a strict content security policy. Secret values stay redacted as `{{name}}`; the extension never passes `--reveal`. An unsaved file is saved first. The panel also lists placeholders that had no value, secrets Gostman did not fill in, skipped requests, script logs and the CLI's warnings, so a literal `{{token}}` from a wrong or missing environment is explained. Bodies are shown as received.
 
 ## Test Explorer
 
 The folders and requests of each collection appear in the Testing view. Run everything, a collection, a folder or a request: the extension runs `gostman run . --reporter json --redact` in each collection, with `--folder` or `--only`, and marks each request passed or failed. A failed request shows the failed checks, or the error, as its message.
+
+![A failed check in the Testing view and the Checks count in the response panel, in a light theme](media/screenshots/checks-light.png)
 
 ## Environment
 
@@ -38,7 +46,7 @@ Open the Command Palette and type `Gostman`.
 | Scan the collection for leaked secrets | `gostman scan .` |
 | Create a collection in this folder | `gostman init .` |
 
-The commands that are not the lens or the Testing view show their output in a terminal named after the collection. Create a collection in this folder asks for the workspace folder when there are several.
+The commands that are not the lens or the Testing view show their output in a terminal named after the collection. Create a collection in this folder asks for the workspace folder when there are several. Every command line the extension starts, and what the CLI printed to stderr, is logged in the **Gostman** output channel.
 
 ## Settings
 

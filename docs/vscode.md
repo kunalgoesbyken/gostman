@@ -2,7 +2,7 @@
 
 The Gostman extension sends requests and runs collections from the editor. It is a thin layer over the `gostman` command line: it prepares nothing itself, so a request sent from VS Code, a run in the Testing view, a run in [CI](ci.md), the [desktop app](getting-started.md) and the [MCP server](agents.md) all give the same result. It reads a collection kept as files in a folder (`gostman.yaml`, one YAML file per request; see [Workspaces and mock server](workspaces-and-mock.md)), the same folder the desktop app opens and Git tracks.
 
-The extension does three things: a **Send** lens above each request file, the collection in the Test Explorer, and an environment picker in the status bar. It also puts the CLI's other commands in the Command Palette. Its source is in [`editors/vscode`](https://github.com/kunalgoesbyken/gostman/tree/main/editors/vscode).
+The extension does four things: a **Send** lens above each request file, a **Requests** view under the Gostman icon in the activity bar, the collection in the Test Explorer, and an environment picker in the status bar. It also puts the CLI's other commands in the Command Palette. Its source is in [`editors/vscode`](https://github.com/kunalgoesbyken/gostman/tree/main/editors/vscode).
 
 ## Requirements and install
 
@@ -27,21 +27,28 @@ A collection is named after its workspace folder and the path below it, such as 
 
 Open a request file of the collection. A **Send** lens appears above its first line. Select it to run `gostman send --json` for that request and show the result in a panel beside the editor. A file with unsaved changes is saved first, because the CLI reads the file from disk.
 
-The panel shows:
+![A request file with the Send lens, the Requests view on the left and the response beside the editor](../editors/vscode/media/screenshots/send-dark.png)
 
-- the status, the time, the size and the content type of the response, and the address that was sent;
-- the checks of the request, each marked passed or failed with its message;
-- the body, exactly as the CLI returned it, up to 256 KB; a larger body is cut and the panel says how much of it is shown;
-- the response headers and the logs of the request's scripts, in sections you can open;
-- an **Error** section when the request got no response.
+The panel is laid out like the response panel of the app, with its colours taken from your VS Code theme (light, dark or high contrast):
 
-When something in the request had no value, the panel says so. A **Placeholders with no value** section lists each `{{name}}` that nothing defined, so a literal `{{base_url}}` or `{{token}}` in a result is explained: the wrong environment, or none, is selected, or a variable is missing. **Secrets not filled in** lists secrets Gostman left out, and a **Warnings** section repeats the CLI's own warnings.
+- the request name, its method and the address that was sent;
+- the status, the time and the size of the response;
+- a **Body** tab with the body as the CLI returned it, up to 256 KB, with JSON formatted and coloured; a larger body is cut and the panel says how much of it is shown. When the request got no response, the tab says **Request failed** and why;
+- a **Headers** tab with the response headers, a **Checks** tab with each check passed or failed and its message, and a **Console** tab with the logs of the request's scripts, when there are any.
 
-The panel is plain HTML with no scripts, no remote content and a strict content security policy, and it escapes everything it shows. Secret values appear as `{{name}}`, as in `gostman send`; the extension never passes `--reveal`, so it cannot print a secret.
+When something in the request had no value, the panel says so above the tabs. **Placeholders with no value** lists each `{{name}}` that nothing defined, so a literal `{{base_url}}` or `{{token}}` in a result is explained: the wrong environment, or none, is selected, or a variable is missing. **Secrets not filled in** lists secrets Gostman left out, and the CLI's own warnings follow.
+
+The panel is plain HTML with no scripts, no remote content and a strict content security policy, and it escapes everything it shows. Its fonts and the Gostman mark ship with the extension. Secret values appear as `{{name}}`, as in `gostman send`; the extension never passes `--reveal`, so it cannot print a secret.
 
 Two commands send without the lens: **Gostman: Send this request** sends the YAML file in the active editor, and **Gostman: Send a saved request** asks for a name, id or `Folder/Name` and runs `gostman send` in the Gostman terminal.
 
 A request is a YAML file with a `method` or a `url`. It is sent by its `id` when the file has one that no other file shares, and by `Folder/Name` otherwise, for example after you copied a request file.
+
+## The Requests view
+
+Select the Gostman icon in the activity bar to see the **Requests** view: every collection, its folders and its requests in the order the collection keeps them, each request with its method in the app's colours. Select a request to open its file, or use the send button next to it to send it as the lens does. The selector in the view's title bar picks the environment. When the workspace has no collection, the view offers to create one.
+
+Every command line the extension starts, and what the CLI printed to stderr, is logged in the **Gostman** output channel (**View > Output**, then **Gostman**).
 
 ## Run in the Test Explorer
 
