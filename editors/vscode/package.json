@@ -234,8 +234,7 @@
   },
   "scripts": {
     "l10n:export": "vscode-l10n-dev export --outDir l10n \"*.js\"",
-    "package": "vsce package --no-dependencies --baseContentUrl https://github.com/kunalgoesbyken/gostman/blob/HEAD/editors/vscode --baseImagesUrl https://github.com/kunalgoesbyken/gostman/raw/HEAD/editors/vscode",
-    "publish": "vsce publish --no-dependencies --baseContentUrl https://github.com/kunalgoesbyken/gostman/blob/HEAD/editors/vscode --baseImagesUrl https://github.com/kunalgoesbyken/gostman/raw/HEAD/editors/vscode"
+    "package": "vsce package --no-dependencies --baseContentUrl https://github.com/kunalgoesbyken/gostman/blob/HEAD/editors/vscode --baseImagesUrl https://github.com/kunalgoesbyken/gostman/raw/HEAD/editors/vscode"
   },
   "devDependencies": {
     "@vscode/l10n-dev": "^0.0.35",

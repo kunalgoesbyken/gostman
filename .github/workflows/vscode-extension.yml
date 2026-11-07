@@ -17,7 +17,7 @@ jobs:
         with:
           node-version: 22
       - run: npm install --no-audit --no-fund
-      - run: npx vsce package --no-dependencies
+      - run: npm run package
       - name: Publish to the Visual Studio Marketplace
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
