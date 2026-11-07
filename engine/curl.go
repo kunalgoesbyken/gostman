@@ -2,11 +2,12 @@ package engine
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
+
+	"github.com/kunalgoesbyken/gostman/locales"
 )
 
 type row struct {
@@ -27,24 +28,29 @@ const (
 	formParamFileName = "filename"
 )
 
+const (
+	curlIgnored    = "ignored"
+	curlEndOfFlags = "--"
+	curlLongPrefix = "--"
+	curlNegation   = "--no-"
+	curlShortFlag  = "-"
+)
+
 var curlValueFlags = map[string]string{
 	"-X": "request", "--request": "request",
 	"-H": "header", "--header": "header",
 	"-d": "data", "--data": "data", "--data-raw": "data-raw", "--data-binary": "data", "--data-ascii": "data",
 	"--data-urlencode": "data-urlencode",
+	"--url-query":      "url-query",
 	"--json":           "json",
 	"-F":               "form", "--form": "form", "--form-string": "form-string",
 	"-u": "user", "--user": "user",
-	"-b": "cookie", "--cookie": "cookie",
+	"--oauth2-bearer": "bearer",
+	"-b":              "cookie", "--cookie": "cookie",
 	"-A": "user-agent", "--user-agent": "user-agent",
 	"-e": "referer", "--referer": "referer",
 	"-m": "max-time", "--max-time": "max-time",
 	"--url": "url",
-	"-o":    "ignored", "--output": "ignored", "-w": "ignored", "--write-out": "ignored",
-	"-x": "ignored", "--proxy": "ignored", "-c": "ignored", "--cookie-jar": "ignored",
-	"-T": "ignored", "--upload-file": "ignored", "--connect-timeout": "ignored",
-	"--retry": "ignored", "--cert": "ignored", "--key": "ignored", "--cacert": "ignored",
-	"-U": "ignored", "--proxy-user": "ignored", "--resolve": "ignored", "--max-redirs": "ignored",
 }
 
 var curlSwitches = map[string]string{
@@ -53,12 +59,77 @@ var curlSwitches = map[string]string{
 	"--http1.1": "http1", "--http2": "http2", "--http2-prior-knowledge": "http2",
 }
 
+var curlOtherValueFlags = wordSet(`
+	-E -K -C -c -D -P -Q -r -t -z -T -w -Y -y -x -U -o
+	--abstract-unix-socket --alt-svc --aws-sigv4 --cacert --capath --cert --cert-type --ciphers
+	--config --connect-timeout --connect-to --continue-at --cookie-jar --create-file-mode --crlfile
+	--curves --delegation --dns-interface --dns-ipv4-addr --dns-ipv6-addr --dns-servers --doh-url
+	--dump-header --ech --egd-file --engine --etag-compare --etag-save --expect100-timeout
+	--ftp-account --ftp-alternative-to-user --ftp-method --ftp-port --ftp-ssl-ccc-mode
+	--happy-eyeballs-timeout-ms --haproxy-clientip --hostpubmd5 --hostpubsha256 --hsts --interface
+	--ip-tos --ipfs-gateway --keepalive-cnt --keepalive-time --key --key-type --knownhosts --krb --krb4
+	--libcurl --limit-rate --local-port --login-options --mail-auth --mail-from --mail-rcpt
+	--max-filesize --max-redirs --netrc-file --noproxy --output --output-dir --parallel-max
+	--parallel-max-host --pass --pinnedpubkey --preproxy --proto --proto-default --proto-redir --proxy
+	--proxy-cacert --proxy-capath --proxy-cert --proxy-cert-type --proxy-ciphers --proxy-crlfile
+	--proxy-header --proxy-key --proxy-key-type --proxy-pass --proxy-pinnedpubkey --proxy-service-name
+	--proxy-tls13-ciphers --proxy-tlsauthtype --proxy-tlspassword --proxy-tlsuser --proxy-user
+	--proxy1.0 --pubkey --quote --random-file --range --rate --request-target --resolve --retry
+	--retry-delay --retry-max-time --sasl-authzid --service-name --sigalgs --socks4 --socks4a --socks5
+	--socks5-gssapi-service --socks5-hostname --speed-limit --speed-time --ssl-sessions --stderr
+	--telnet-option --tftp-blksize --time-cond --tls-max --tls13-ciphers --tlsauthtype --tlspassword
+	--tlsuser --trace --trace-ascii --trace-config --unix-socket --upload-file --upload-flags
+	--variable --vlan-priority --write-out
+`)
+
+var curlOtherSwitches = wordSet(`
+	-a -q -f -g -0 -4 -6 -j -l -L -M -n -: -N -Z -# -p -J -O -R -S -i -s -2 -3 -1 -B -v -V -k -h
+	--anyauth --append --basic --ca-native --cert-status --compressed --compressed-ssh --create-dirs
+	--crlf --digest --disable --disable-eprt --disable-epsv --disallow-username-in-url
+	--doh-cert-status --doh-insecure --dump-ca-embed --fail --fail-early --fail-with-body
+	--false-start --follow --form-escape --ftp-create-dirs --ftp-pasv --ftp-pret --ftp-skip-pasv-ip
+	--ftp-ssl --ftp-ssl-ccc --ftp-ssl-control --globoff --haproxy-protocol --help --http0.9 --http1.0
+	--http3 --http3-only --ignore-content-length --include --insecure --ipv4 --ipv6
+	--junk-session-cookies --list-only --location --location-trusted --mail-rcpt-allowfails --manual
+	--metalink --mptcp --negotiate --netrc --netrc-optional --next --alpn --npn --buffer --clobber
+	--keepalive --progress-meter --sessionid --ntlm --ntlm-wb --out-null --parallel
+	--parallel-immediate --path-as-is --post301 --post302 --post303 --progress-bar --proxy-anyauth
+	--proxy-basic --proxy-ca-native --proxy-digest --proxy-http2 --proxy-insecure --proxy-negotiate
+	--proxy-ntlm --proxy-ssl-allow-beast --proxy-ssl-auto-client-cert --proxy-tlsv1 --proxytunnel
+	--raw --remote-header-name --remote-name --remote-name-all --remote-time --remove-on-error
+	--retry-all-errors --retry-connrefused --sasl-ir --show-error --show-headers --silent
+	--skip-existing --socks5-basic --socks5-gssapi --socks5-gssapi-nec --ssl --ssl-allow-beast
+	--ssl-auto-client-cert --ssl-no-revoke --ssl-reqd --ssl-revoke-best-effort --sslv2 --sslv3
+	--styled-output --suppress-connect-headers --tcp-fastopen --tcp-nodelay --tftp-no-options
+	--tls-earlydata --tlsv1 --tlsv1.0 --tlsv1.1 --tlsv1.2 --tlsv1.3 --tr-encoding --trace-ids
+	--trace-time --use-ascii --verbose --version --xattr
+`)
+
+type curlOption struct {
+	kind       string
+	takesValue bool
+}
+
 type curlCommand struct {
 	request   Request
 	headers   []row
 	data      []string
+	query     []string
 	formParts []row
 	asQuery   bool
+}
+
+type curlWord struct {
+	text         string
+	afterUnknown string
+}
+
+func wordSet(text string) map[string]bool {
+	set := map[string]bool{}
+	for _, word := range strings.Fields(text) {
+		set[word] = true
+	}
+	return set
 }
 
 func ParseCurl(command string) (Request, error) {
@@ -67,47 +138,136 @@ func ParseCurl(command string) (Request, error) {
 		return Request{}, err
 	}
 	if len(tokens) == 0 || !strings.EqualFold(tokens[0], "curl") {
-		return Request{}, fmt.Errorf("not a curl command")
+		return Request{}, locales.Errorf(locales.EngineCurlNotCurl, nil)
 	}
 
 	parsed := &curlCommand{}
+	var words []curlWord
+	unknown := ""
+	optionsEnded := false
 	for i := 1; i < len(tokens); i++ {
-		flag, value, attached := splitFlag(tokens[i])
-		if kind, ok := curlValueFlags[flag]; ok {
-			if !attached {
-				if i+1 >= len(tokens) {
-					return Request{}, fmt.Errorf("%s needs a value", flag)
-				}
-				i++
-				value = tokens[i]
+		token := tokens[i]
+		switch {
+		case optionsEnded || !isCurlOption(token):
+			words = append(words, curlWord{text: token, afterUnknown: unknown})
+			unknown = ""
+		case token == curlEndOfFlags:
+			optionsEnded = true
+		default:
+			i, unknown, err = parsed.readOption(tokens, i)
+			if err != nil {
+				return Request{}, err
 			}
-			parsed.applyValue(kind, value)
-			continue
 		}
-		if kind, ok := curlSwitches[flag]; ok {
-			parsed.applySwitch(kind)
-			continue
-		}
-		if !strings.HasPrefix(tokens[i], "-") && parsed.request.URL == "" {
-			parsed.request.URL = tokens[i]
+	}
+	if parsed.request.URL == "" {
+		if parsed.request.URL, err = chooseCurlURL(words); err != nil {
+			return Request{}, err
 		}
 	}
 	return parsed.build()
 }
 
-func splitFlag(token string) (flag, value string, attached bool) {
-	if strings.HasPrefix(token, "--") {
-		if name, rest, found := strings.Cut(token, "="); found {
-			return name, rest, true
-		}
-		return token, "", false
+func isCurlOption(token string) bool {
+	return len(token) > 1 && strings.HasPrefix(token, curlShortFlag)
+}
+
+func lookupCurlOption(name string) (curlOption, bool) {
+	if kind, ok := curlValueFlags[name]; ok {
+		return curlOption{kind: kind, takesValue: true}, true
 	}
-	if len(token) > 2 && token[0] == '-' {
-		if _, ok := curlValueFlags[token[:2]]; ok {
-			return token[:2], token[2:], true
+	if kind, ok := curlSwitches[name]; ok {
+		return curlOption{kind: kind}, true
+	}
+	if curlOtherValueFlags[name] {
+		return curlOption{kind: curlIgnored, takesValue: true}, true
+	}
+	if curlOtherSwitches[name] {
+		return curlOption{kind: curlIgnored}, true
+	}
+	if base, negated := strings.CutPrefix(name, curlNegation); negated && curlOtherSwitches[curlLongPrefix+base] {
+		return curlOption{kind: curlIgnored}, true
+	}
+	return curlOption{}, false
+}
+
+func (c *curlCommand) readOption(tokens []string, i int) (int, string, error) {
+	token := tokens[i]
+	if strings.HasPrefix(token, curlLongPrefix) {
+		return c.readLongOption(tokens, i)
+	}
+	unknown := ""
+	bundle := token[len(curlShortFlag):]
+	for offset, char := range bundle {
+		name := curlShortFlag + string(char)
+		option, known := lookupCurlOption(name)
+		switch {
+		case !known:
+			unknown = token
+		case !option.takesValue:
+			c.applySwitch(option.kind)
+		default:
+			if rest := bundle[offset+len(string(char)):]; rest != "" {
+				c.applyValue(option.kind, rest)
+				return i, "", nil
+			}
+			return c.takeNext(tokens, i, name, option)
 		}
 	}
-	return token, "", false
+	return i, unknown, nil
+}
+
+func (c *curlCommand) readLongOption(tokens []string, i int) (int, string, error) {
+	name, value, attached := strings.Cut(tokens[i], "=")
+	option, known := lookupCurlOption(name)
+	switch {
+	case !known && attached:
+		return i, "", nil
+	case !known:
+		return i, name, nil
+	case !option.takesValue:
+		c.applySwitch(option.kind)
+		return i, "", nil
+	case attached:
+		c.applyValue(option.kind, value)
+		return i, "", nil
+	}
+	return c.takeNext(tokens, i, name, option)
+}
+
+func (c *curlCommand) takeNext(tokens []string, i int, name string, option curlOption) (int, string, error) {
+	if i+1 >= len(tokens) {
+		return i, "", locales.Errorf(locales.EngineCurlNeedsValue, locales.Params{"option": name})
+	}
+	c.applyValue(option.kind, tokens[i+1])
+	return i + 1, "", nil
+}
+
+func chooseCurlURL(words []curlWord) (string, error) {
+	var plain, afterUnknown, bare []string
+	for _, word := range words {
+		switch {
+		case looksLikeURL(word.text) && word.afterUnknown == "":
+			plain = append(plain, word.text)
+		case looksLikeURL(word.text):
+			afterUnknown = append(afterUnknown, word.text)
+		case word.afterUnknown == "":
+			bare = append(bare, word.text)
+		}
+	}
+	for _, group := range [][]string{plain, afterUnknown, bare} {
+		if len(group) > 0 {
+			return group[0], nil
+		}
+	}
+	if len(words) > 0 {
+		return "", locales.Errorf(locales.EngineCurlNoUrlAfterOption, locales.Params{"option": words[0].afterUnknown, "value": words[0].text})
+	}
+	return "", locales.Errorf(locales.EngineCurlNoUrl, nil)
+}
+
+func looksLikeURL(text string) bool {
+	return strings.Contains(text, "://") || strings.HasPrefix(text, "{{") || strings.ContainsAny(text, "./:") || strings.EqualFold(text, "localhost")
 }
 
 func (c *curlCommand) applyValue(kind, value string) {
@@ -144,8 +304,14 @@ func (c *curlCommand) applyValue(kind, value string) {
 		if seconds, err := strconv.ParseFloat(value, 64); err == nil {
 			c.request.Options.TimeoutMs = int(seconds * 1000)
 		}
+	case "url-query":
+		c.query = append(c.query, urlEncodeData(value))
+	case "bearer":
+		c.request.Auth = Auth{Type: authBearer, Token: value}
 	case "url":
-		c.request.URL = value
+		if c.request.URL == "" {
+			c.request.URL = value
+		}
 	}
 }
 
@@ -178,20 +344,17 @@ func (c *curlCommand) header(name string) string {
 func (c *curlCommand) build() (Request, error) {
 	request := c.request
 	if request.URL == "" {
-		return Request{}, fmt.Errorf("the curl command has no URL")
+		return Request{}, locales.Errorf(locales.EngineCurlNoUrl, nil)
 	}
 
+	request.URL = withQuery(request.URL, strings.Join(c.query, "&"))
 	data := strings.Join(c.data, "&")
 	switch {
 	case len(c.formParts) > 0:
 		request.BodyType = BodyMultipart
 		request.Body = encodeRows(c.formParts)
 	case c.asQuery && data != "":
-		separator := "?"
-		if strings.Contains(request.URL, "?") {
-			separator = "&"
-		}
-		request.URL += separator + data
+		request.URL = withQuery(request.URL, data)
 	case data != "":
 		request.BodyType, request.Body = classifyData(data, c.header(headerContentType))
 	}
@@ -204,6 +367,17 @@ func (c *curlCommand) build() (Request, error) {
 	}
 	request.Headers = encodeRows(c.headers)
 	return request, nil
+}
+
+func withQuery(address, query string) string {
+	if query == "" {
+		return address
+	}
+	separator := "?"
+	if strings.Contains(address, "?") {
+		separator = "&"
+	}
+	return address + separator + query
 }
 
 func classifyData(data, contentType string) (string, string) {
@@ -368,7 +542,7 @@ func shellSplit(command string) ([]string, error) {
 		}
 	}
 	if quote != 0 {
-		return nil, fmt.Errorf("the curl command has an unclosed quote")
+		return nil, locales.Errorf(locales.EngineCurlUnclosedQuote, nil)
 	}
 	flush()
 	return tokens, nil
