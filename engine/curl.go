@@ -51,16 +51,18 @@ var curlValueFlags = map[string]string{
 	"-e": "referer", "--referer": "referer",
 	"-m": "max-time", "--max-time": "max-time",
 	"--url": "url",
+	"-T":    "upload", "--upload-file": "upload",
 }
 
 var curlSwitches = map[string]string{
 	"-G": "get", "--get": "get",
 	"-I": "head", "--head": "head",
+	"-g": "globoff", "--globoff": "globoff",
 	"--http1.1": "http1", "--http2": "http2", "--http2-prior-knowledge": "http2",
 }
 
 var curlOtherValueFlags = wordSet(`
-	-E -K -C -c -D -P -Q -r -t -z -T -w -Y -y -x -U -o
+	-E -K -C -c -D -P -Q -r -t -z -w -Y -y -x -U -o
 	--abstract-unix-socket --alt-svc --aws-sigv4 --cacert --capath --cert --cert-type --ciphers
 	--config --connect-timeout --connect-to --continue-at --cookie-jar --create-file-mode --crlfile
 	--curves --delegation --dns-interface --dns-ipv4-addr --dns-ipv6-addr --dns-servers --doh-url
@@ -78,17 +80,17 @@ var curlOtherValueFlags = wordSet(`
 	--retry-delay --retry-max-time --sasl-authzid --service-name --sigalgs --socks4 --socks4a --socks5
 	--socks5-gssapi-service --socks5-hostname --speed-limit --speed-time --ssl-sessions --stderr
 	--telnet-option --tftp-blksize --time-cond --tls-max --tls13-ciphers --tlsauthtype --tlspassword
-	--tlsuser --trace --trace-ascii --trace-config --unix-socket --upload-file --upload-flags
+	--tlsuser --trace --trace-ascii --trace-config --unix-socket --upload-flags
 	--variable --vlan-priority --write-out
 `)
 
 var curlOtherSwitches = wordSet(`
-	-a -q -f -g -0 -4 -6 -j -l -L -M -n -: -N -Z -# -p -J -O -R -S -i -s -2 -3 -1 -B -v -V -k -h
+	-a -q -f -0 -4 -6 -j -l -L -M -n -: -N -Z -# -p -J -O -R -S -i -s -2 -3 -1 -B -v -V -k -h
 	--anyauth --append --basic --ca-native --cert-status --compressed --compressed-ssh --create-dirs
 	--crlf --digest --disable --disable-eprt --disable-epsv --disallow-username-in-url
 	--doh-cert-status --doh-insecure --dump-ca-embed --fail --fail-early --fail-with-body
 	--false-start --follow --form-escape --ftp-create-dirs --ftp-pasv --ftp-pret --ftp-skip-pasv-ip
-	--ftp-ssl --ftp-ssl-ccc --ftp-ssl-control --globoff --haproxy-protocol --help --http0.9 --http1.0
+	--ftp-ssl --ftp-ssl-ccc --ftp-ssl-control --haproxy-protocol --help --http0.9 --http1.0
 	--http3 --http3-only --ignore-content-length --include --insecure --ipv4 --ipv6
 	--junk-session-cookies --list-only --location --location-trusted --mail-rcpt-allowfails --manual
 	--metalink --mptcp --negotiate --netrc --netrc-optional --next --alpn --npn --buffer --clobber
@@ -117,7 +119,11 @@ type curlCommand struct {
 	query     []string
 	formParts []row
 	asQuery   bool
+	uploads   bool
+	globoff   bool
 }
+
+var curlGlobEscapes = strings.NewReplacer(`\[`, "[", `\]`, "]", `\{`, "{", `\}`, "}")
 
 type curlWord struct {
 	text         string
@@ -133,11 +139,11 @@ func wordSet(text string) map[string]bool {
 }
 
 func ParseCurl(command string) (Request, error) {
-	tokens, err := shellSplit(command)
+	tokens, err := splitCommand(command)
 	if err != nil {
 		return Request{}, err
 	}
-	if len(tokens) == 0 || !strings.EqualFold(tokens[0], "curl") {
+	if len(tokens) == 0 || !isCurlProgram(tokens[0]) {
 		return Request{}, locales.Errorf(locales.EngineCurlNotCurl, nil)
 	}
 
@@ -304,6 +310,8 @@ func (c *curlCommand) applyValue(kind, value string) {
 		if seconds, err := strconv.ParseFloat(value, 64); err == nil {
 			c.request.Options.TimeoutMs = int(seconds * 1000)
 		}
+	case "upload":
+		c.uploads = true
 	case "url-query":
 		c.query = append(c.query, urlEncodeData(value))
 	case "bearer":
@@ -321,6 +329,8 @@ func (c *curlCommand) applySwitch(kind string) {
 		c.asQuery = true
 	case "head":
 		c.request.Method = http.MethodHead
+	case "globoff":
+		c.globoff = true
 	case "http1":
 		c.request.Options.HTTPVersion = HTTPVersion1
 	case "http2":
@@ -347,6 +357,9 @@ func (c *curlCommand) build() (Request, error) {
 		return Request{}, locales.Errorf(locales.EngineCurlNoUrl, nil)
 	}
 
+	if !c.globoff {
+		request.URL = curlGlobEscapes.Replace(request.URL)
+	}
 	request.URL = withQuery(request.URL, strings.Join(c.query, "&"))
 	data := strings.Join(c.data, "&")
 	switch {
@@ -360,13 +373,20 @@ func (c *curlCommand) build() (Request, error) {
 	}
 
 	if request.Method == "" {
-		request.Method = http.MethodGet
-		if request.Body != "" {
-			request.Method = http.MethodPost
-		}
+		request.Method = c.impliedMethod()
 	}
 	request.Headers = encodeRows(c.headers)
 	return request, nil
+}
+
+func (c *curlCommand) impliedMethod() string {
+	switch {
+	case len(c.formParts) > 0, len(c.data) > 0 && !c.asQuery:
+		return http.MethodPost
+	case c.uploads && !c.asQuery:
+		return http.MethodPut
+	}
+	return http.MethodGet
 }
 
 func withQuery(address, query string) string {
@@ -483,6 +503,105 @@ func encodeRows(rows []row) string {
 	return string(encoded)
 }
 
+func isCurlProgram(token string) bool {
+	name := strings.ToLower(token[strings.LastIndexAny(token, `/\`)+1:])
+	return name == "curl" || name == "curl.exe"
+}
+
+func splitCommand(command string) ([]string, error) {
+	command = strings.ReplaceAll(command, "\r\n", "\n")
+	if isCmdCommand(command) {
+		return crtSplit(cmdUnescape(command)), nil
+	}
+	return shellSplit(command)
+}
+
+func isCmdCommand(command string) bool {
+	if strings.Contains(command, `^"`) {
+		return true
+	}
+	for _, line := range strings.Split(command, "\n") {
+		if strings.HasSuffix(strings.TrimRight(line, " \t"), "^") {
+			return true
+		}
+	}
+	return false
+}
+
+func cmdUnescape(command string) string {
+	var out strings.Builder
+	quoted := false
+	runes := []rune(command)
+	for i := 0; i < len(runes); i++ {
+		char := runes[i]
+		switch {
+		case char == '"':
+			quoted = !quoted
+			out.WriteRune(char)
+		case char == '^' && !quoted:
+			i++
+			if i < len(runes) && runes[i] != '\n' {
+				out.WriteRune(runes[i])
+			}
+		default:
+			out.WriteRune(char)
+		}
+	}
+	return out.String()
+}
+
+func crtSplit(command string) []string {
+	var (
+		tokens  []string
+		current strings.Builder
+		inToken bool
+		quoted  bool
+	)
+	runes := []rune(command)
+	for i := 0; i < len(runes); i++ {
+		char := runes[i]
+		switch {
+		case char == '\\':
+			count := 1
+			for i+count < len(runes) && runes[i+count] == '\\' {
+				count++
+			}
+			i += count - 1
+			inToken = true
+			if i+1 < len(runes) && runes[i+1] == '"' {
+				current.WriteString(strings.Repeat(`\`, count/2))
+				if count%2 == 1 {
+					i++
+					current.WriteRune('"')
+				}
+			} else {
+				current.WriteString(strings.Repeat(`\`, (count+1)/2))
+			}
+		case char == '"':
+			inToken = true
+			if quoted && i+1 < len(runes) && runes[i+1] == '"' {
+				i++
+				current.WriteRune('"')
+			} else {
+				quoted = !quoted
+			}
+		case !quoted && (char == ' ' || char == '\t' || char == '\n'):
+			if inToken {
+				tokens = append(tokens, current.String())
+				current.Reset()
+				inToken = false
+			}
+		default:
+			current.WriteRune(char)
+			inToken = true
+		}
+	}
+	if inToken {
+		tokens = append(tokens, current.String())
+	}
+	return tokens
+}
+
 func shellSplit(command string) ([]string, error) {
 	var (
 		tokens  []string
@@ -491,7 +610,7 @@ func shellSplit(command string) ([]string, error) {
 		quote   rune
 		ansi    bool
 	)
-	runes := []rune(strings.ReplaceAll(command, "\r\n", "\n"))
+	runes := []rune(command)
 	flush := func() {
 		if inToken {
 			tokens = append(tokens, current.String())
@@ -507,8 +626,9 @@ func shellSplit(command string) ([]string, error) {
 			if char == '\'' {
 				quote, ansi = 0, false
 			} else if ansi && char == '\\' && i+1 < len(runes) {
-				i++
-				current.WriteRune(unescapeANSI(runes[i]))
+				var text string
+				text, i = ansiEscape(runes, i+1)
+				current.WriteString(text)
 			} else {
 				current.WriteRune(char)
 			}
@@ -534,6 +654,8 @@ func shellSplit(command string) ([]string, error) {
 				current.WriteRune(runes[i])
 				inToken = true
 			}
+		case char == '`' && i+1 < len(runes) && runes[i+1] == '\n':
+			i++
 		case char == ' ' || char == '\t' || char == '\n':
 			flush()
 		default:
@@ -548,15 +670,47 @@ func shellSplit(command string) ([]string, error) {
 	return tokens, nil
 }
 
-func unescapeANSI(char rune) rune {
-	switch char {
-	case 'n':
-		return '\n'
-	case 't':
-		return '\t'
-	case 'r':
-		return '\r'
-	default:
-		return char
+var ansiCharacters = map[rune]string{
+	'n': "\n", 't': "\t", 'r': "\r", 'a': "\a", 'b': "\b", 'f': "\f", 'v': "\v", 'e': "\x1b", 'E': "\x1b",
+}
+
+var ansiNumbers = map[rune]struct{ base, digits int }{
+	'x': {16, 2}, 'u': {16, 4}, 'U': {16, 8},
+}
+
+func ansiEscape(runes []rune, at int) (string, int) {
+	char := runes[at]
+	if text, ok := ansiCharacters[char]; ok {
+		return text, at
 	}
+	if number, ok := ansiNumbers[char]; ok {
+		if text, end, found := ansiNumber(runes, at+1, number.base, number.digits); found {
+			return text, end
+		}
+		return `\` + string(char), at
+	}
+	if text, end, found := ansiNumber(runes, at, 8, 3); found {
+		return text, end
+	}
+	return string(char), at
+}
+
+func ansiNumber(runes []rune, start, base, digits int) (string, int, bool) {
+	end := start
+	for end < len(runes) && end-start < digits && isDigitIn(runes[end], base) {
+		end++
+	}
+	if end == start {
+		return "", start, false
+	}
+	value, err := strconv.ParseUint(string(runes[start:end]), base, 32)
+	if err != nil {
+		return "", start, false
+	}
+	return string(rune(value)), end - 1, true
+}
+
+func isDigitIn(char rune, base int) bool {
+	_, err := strconv.ParseUint(string(char), base, 8)
+	return err == nil
 }
