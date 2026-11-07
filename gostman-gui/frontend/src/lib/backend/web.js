@@ -143,7 +143,10 @@ async function readDocument() {
   return stored
 }
 
+const afterCurrentTask = () => new Promise((resolve) => setTimeout(resolve))
+
 const mutateData = (mutate) => serially(async () => {
+  await afterCurrentTask()
   const data = cachedDocument || await readDocument()
   mutate(data)
   try {

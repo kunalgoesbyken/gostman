@@ -142,9 +142,11 @@ const folderPathOf = (folders) => {
   }
 }
 
+const withPlace = (item) => ({ ...item, place: `${item.path} ${item.method} ${item.url}` })
+
 const requestItems = (requests, folders) => {
   const pathOf = folderPathOf(folders)
-  return requests.map((request) => ({
+  return requests.map((request) => withPlace({
     kind: KIND_REQUEST,
     id: `request-${request.id}`,
     request,
@@ -155,7 +157,7 @@ const requestItems = (requests, folders) => {
   }))
 }
 
-const historyItems = (history) => history.map((entry) => ({
+const historyItems = (history) => history.map((entry) => withPlace({
   kind: KIND_HISTORY,
   id: `history-${entry.id}`,
   request: entry,
@@ -165,17 +167,20 @@ const historyItems = (history) => history.map((entry) => ({
   url: "",
 }))
 
-const commandItems = (commands) => commands.map((command) => ({ ...command, kind: KIND_COMMAND }))
+const commandItems = (commands) => commands.map((command) => ({
+  ...command,
+  kind: KIND_COMMAND,
+  details: `${command.description} ${command.keywords || ""}`.toLowerCase(),
+}))
 
 const KEYWORD_MATCH = 1
 
 function commandScore(item, needle) {
-  const details = `${item.description} ${item.keywords || ""}`.toLowerCase()
   let total = 0
   for (const word of needle.split(/\s+/).filter(Boolean)) {
     const label = fuzzyScore(item.label, word)
     if (label !== null) total += label
-    else if (details.includes(word)) total += KEYWORD_MATCH
+    else if (item.details.includes(word)) total += KEYWORD_MATCH
     else return null
   }
   return total
@@ -185,7 +190,7 @@ const itemScore = (item, needle) => {
   if (item.kind === KIND_COMMAND) return commandScore(item, needle)
   const title = fuzzyScore(item.title, needle)
   if (title !== null) return title + NAME_MATCH_BONUS
-  return fuzzyScore(`${item.path} ${item.method} ${item.url}`, needle)
+  return fuzzyScore(item.place, needle)
 }
 
 const rank = (items, needle, limit) => items
@@ -216,14 +221,19 @@ const rowClass = (isSelected, extra) => cn(
   isSelected && "bg-accent"
 )
 
-const scrollWhenSelected = (isSelected) => (element) => {
-  if (isSelected) element?.scrollIntoView({ block: "nearest" })
+function useScrollWhenSelected(isSelected) {
+  const ref = useRef(null)
+  useEffect(() => {
+    if (isSelected) ref.current?.scrollIntoView({ block: "nearest" })
+  }, [isSelected])
+  return ref
 }
 
 function CommandRow({ id, command, isSelected, onSelect, onHover }) {
   const Icon = command.icon
   const tag = command.tag
   const shortcut = useShortcutLabel(command.shortcutId)
+  const rowRef = useScrollWhenSelected(isSelected)
   return (
     <button
       id={id}
@@ -232,7 +242,7 @@ function CommandRow({ id, command, isSelected, onSelect, onHover }) {
       tabIndex={-1}
       aria-selected={isSelected}
       title={command.label}
-      ref={scrollWhenSelected(isSelected)}
+      ref={rowRef}
       onClick={() => onSelect(command)}
       onMouseMove={onHover}
       className={rowClass(isSelected, command.destructive && "text-destructive")}
@@ -253,6 +263,7 @@ function RequestRow({ id, item, isSelected, onSelect, onHover }) {
   const isHistory = item.kind === KIND_HISTORY
   const detail = isHistory ? COMMAND_TEXT.sentEarlier : [item.path, item.url].filter(Boolean).join("  ·  ")
   const Icon = isHistory ? Clock : FileText
+  const rowRef = useScrollWhenSelected(isSelected)
   return (
     <button
       id={id}
@@ -261,7 +272,7 @@ function RequestRow({ id, item, isSelected, onSelect, onHover }) {
       tabIndex={-1}
       aria-selected={isSelected}
       title={isHistory ? item.title : `${item.title}${item.path ? ` (${item.path})` : ""}`}
-      ref={scrollWhenSelected(isSelected)}
+      ref={rowRef}
       onClick={() => onSelect(item)}
       onMouseMove={onHover}
       className={rowClass(isSelected)}

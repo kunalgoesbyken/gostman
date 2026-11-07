@@ -114,7 +114,7 @@ function useFittedIndexes(items, activeValue) {
     setLayout(next)
   }, [activeIndex])
 
-  React.useLayoutEffect(fit)
+  React.useLayoutEffect(fit, [fit, items.length])
 
   React.useEffect(() => {
     const observer = new ResizeObserver(fit)
