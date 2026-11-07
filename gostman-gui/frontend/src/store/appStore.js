@@ -12,6 +12,7 @@ import { ENVIRONMENT_TEXT } from '../lib/environmentText'
 import { DEFAULT_SETTINGS, normalizeSettings } from '../lib/network'
 import { ROOT_SETTINGS_ID, isBlankScope, normalizeFolder, normalizeScopeSettings, updatedScope } from '../lib/inheritance'
 import { normalizeRequest } from '../lib/request'
+import { VIEW_FULL, defaultViewOf, viewOf } from '../lib/requestView'
 import { normalizeFlow } from '../lib/flows/model'
 import { isFlowDirty } from '../lib/flows/edit'
 import { isSpecDirty, normalizeSpec } from '../lib/specDocument'
@@ -63,7 +64,7 @@ const asArray = (value) => (Array.isArray(value) ? value : [])
 function createTab(id, request, isPreview = false, historyId = '') {
   const normalized = normalizeRequest(request)
   const last = lastResponseOf(normalized.id)
-  return { id, request: normalized, isPreview, historyId, pendingId: null, response: last?.response ?? null, responses: last ? [last] : [], bodyDrafts: {} }
+  return { id, request: normalized, isPreview, historyId, pendingId: null, response: last?.response ?? null, responses: last ? [last] : [], bodyDrafts: {}, view: defaultViewOf(normalized), formValues: {} }
 }
 
 const createFlowTab = (id, flow) => ({ ...createTab(id), flowId: flow.id, flowDraft: normalizeFlow(flow) })
@@ -103,18 +104,19 @@ const savedLookup = (requests) => {
 
 const persistableTab = (requests) => {
   const saved = savedLookup(requests)
-  return ({ id, request, isPreview, historyId, vanished, flowId, flowDraft, specId, specDraft }) => {
+  return ({ id, request, isPreview, historyId, vanished, flowId, flowDraft, specId, specDraft, view, formValues }) => {
     if (flowId) return { id, flowId, flowDraft, request: {} }
     if (specId) return { id, specId, specDraft, request: {} }
     const baseline = (request.id && saved.get(request.id)) || vanished
-    return { id, isPreview, historyId, isSaved: Boolean(baseline) && !isRequestDirty(request, baseline), request: { ...request, examples: '' } }
+    return { id, isPreview, historyId, view, formValues, isSaved: Boolean(baseline) && !isRequestDirty(request, baseline), request: { ...request, examples: '' } }
   }
 }
 
-const restoreTab = ({ id, request, isPreview, historyId, isSaved, flowId, flowDraft, specId, specDraft }) => {
+const restoreTab = ({ id, request, isPreview, historyId, isSaved, flowId, flowDraft, specId, specDraft, view, formValues }) => {
   if (flowId) return createFlowTab(id, { ...flowDraft, id: flowId })
   if (specId) return createSpecTab(id, { ...specDraft, id: specId })
-  const tab = createTab(id, request, isPreview === true, typeof historyId === 'string' ? historyId : '')
+  const created = createTab(id, request, isPreview === true, typeof historyId === 'string' ? historyId : '')
+  const tab = { ...created, view: viewOf({ ...created, view }), formValues: isPlainObject(formValues) ? formValues : {} }
   return isSaved === true ? { ...tab, vanished: tab.request } : tab
 }
 
@@ -647,7 +649,13 @@ export const useAppStore = create(
           })
         )),
         patchTab: (tabId, patch) => set((state) => mapTab(state, tabId, (tab) => ({ ...tab, ...patch }))),
+        setTabFormValue: (tabId, name, entry) => set((state) => (
+          mapTab(state, tabId, (tab) => ({ ...tab, isPreview: false, formValues: { ...tab.formValues, [name]: entry } }))
+        )),
+        resetTabForm: (tabId) => set((state) => mapTab(state, tabId, (tab) => ({ ...tab, formValues: {}, formAttempt: 0 }))),
+        markFormAttempt: (tabId) => set((state) => mapTab(state, tabId, (tab) => ({ ...tab, formAttempt: (tab.formAttempt || 0) + 1 }))),
         setRequestPanel: (requestPanel) => set({ requestPanel }),
+        openEditorPanel: (tabId, requestPanel) => set((state) => ({ requestPanel, ...mapTab(state, tabId, (tab) => ({ ...tab, view: VIEW_FULL })) })),
 
         setActiveEnvironment: (id) => set((state) => choiceFor(state, contextFolderId(state), id)),
         updateEnvironment: (scope, id, patch) => set((state) => {

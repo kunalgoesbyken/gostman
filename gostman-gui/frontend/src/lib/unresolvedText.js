@@ -10,6 +10,7 @@ const text = messages('unresolved', english, (t) => ({
       isOnly ? t('unresolved.extractedByOnly', { request }) : t('unresolved.extractedBy', { reference: braced(name), request })
     ),
     define: (name) => t('unresolved.define', { reference: braced(name) }),
+    switchedOff: (name) => t('unresolved.switchedOff', { reference: braced(name) }),
   },
 }))
 

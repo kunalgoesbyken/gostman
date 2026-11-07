@@ -14,7 +14,7 @@ import { StatusBar } from "./StatusBar"
 import { WindowEdges, useAdjustableWindow, useFramelessWindow } from "./WindowResize"
 import { TabBar } from "./TabBar"
 import { RequestTabs } from "./RequestTabs"
-import { VariablesView, focusFirstProblem } from "./VariablesView"
+import { VariablesView } from "./VariablesView"
 import { AppSkeleton } from "./AppSkeleton"
 import { Button } from "./ui/button"
 import { DialogPending } from "./ui/dialog"
@@ -35,9 +35,9 @@ import { useAiEnabled, useAiStore } from "../lib/ai/session"
 import { TASK_EXPLAIN, TASK_REQUEST } from "../lib/ai/tasks"
 import { MIN_REQUEST_HEIGHT_PX, isNarrowViewport } from "../lib/layout"
 import { isBlankRequest } from "../lib/requestChanges"
-import { VIEW_FULL, VIEW_VARIABLES, defaultViewOf } from "../lib/requestView"
-import { isShownInForm, variableProblems } from "../lib/requestVariables"
-import { parseRows } from "../lib/rows"
+import { VIEW_FULL, VIEW_VARIABLES, viewOf } from "../lib/requestView"
+import { VARS_PANEL } from "../lib/requestSections"
+import { formValueEntry } from "../lib/variablesForm"
 import { forgetSharedLink, pendingSharedLink, subscribeToSharedLink } from "../lib/sharedLink"
 import { currentOpenLink, dismissOpenLink, subscribeToOpenLink } from "../lib/openLink"
 import { exportableVariables, foldersWithoutSecrets, listWithoutSecrets, withoutSecretValues } from "../lib/variableScopes"
@@ -371,21 +371,14 @@ export function LoadedWorkspace({ backend, onBack }) {
     actions.goToRequest(requestId)
   }, [actions, closeScanDialog, closeImportDialog])
 
-  const viewKey = `${activeTab.id}:${activeRequest.id}`
-  const [viewChoices, setViewChoices] = useState({})
-  const [revealedKey, setRevealedKey] = useState("")
+  const shownTabId = activeTab.id
   const canSwitchView = !isSocket
-  const view = canSwitchView ? viewChoices[viewKey] ?? defaultViewOf(activeRequest) : VIEW_FULL
-  const changeView = useCallback((next) => setViewChoices((current) => ({ ...current, [viewKey]: next })), [viewKey])
+  const view = canSwitchView ? viewOf(activeTab) : VIEW_FULL
+  const changeView = useCallback((next) => store().patchTab(shownTabId, { view: next }), [shownTabId])
   const openFullEditor = useCallback(() => changeView(VIEW_FULL), [changeView])
-  const sendFromVariablesView = useCallback(() => {
-    if (variableProblems(parseRows(activeRequest.vars).filter(isShownInForm)).length === 0) {
-      actions.send()
-      return
-    }
-    setRevealedKey(viewKey)
-    requestAnimationFrame(focusFirstProblem)
-  }, [actions, activeRequest.vars, viewKey])
+  const openVarsTab = useCallback(() => store().openEditorPanel(shownTabId, VARS_PANEL), [shownTabId])
+  const changeFormValue = useCallback((saved, value) => store().setTabFormValue(shownTabId, saved.key, formValueEntry(saved, value)), [shownTabId])
+  const resetForm = useCallback(() => store().resetTabForm(shownTabId), [shownTabId])
 
   const setJsonDepth = useCallback((jsonDepth) => updateActiveRequest({ jsonDepth }), [updateActiveRequest])
   const updateField = useCallback((field, value) => updateActiveRequest({ [field]: value }), [updateActiveRequest])
@@ -464,7 +457,7 @@ export function LoadedWorkspace({ backend, onBack }) {
                 activeRequest={activeRequest}
                 {...fieldHandlers}
                 onUpdateRequest={updateActiveRequest}
-                onSend={view === VIEW_VARIABLES ? sendFromVariablesView : actions.send}
+                onSend={actions.send}
                 view={view}
                 onViewChange={canSwitchView ? changeView : null}
                 onCancel={actions.cancel}
@@ -481,7 +474,7 @@ export function LoadedWorkspace({ backend, onBack }) {
                 <div className="response-split flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden">
                   <section aria-label={APP_TEXT.requestSection} data-pane="request" className="flex min-h-0 flex-1 flex-col" style={REQUEST_AREA_STYLE}>
                     {view === VIEW_VARIABLES ? (
-                      <VariablesView request={activeRequest} isRevealed={revealedKey === viewKey} onUpdateRequest={updateActiveRequest} onOpenEditor={openFullEditor} />
+                      <VariablesView tab={activeTab} onChange={changeFormValue} onReset={resetForm} onSend={actions.send} onOpenEditor={openFullEditor} onOpenVars={openVarsTab} />
                     ) : <RequestTabs
                       tabId={activeTab.id}
                       activeRequest={activeRequest}

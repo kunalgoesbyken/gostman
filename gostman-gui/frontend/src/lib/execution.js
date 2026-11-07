@@ -25,6 +25,7 @@ import { scriptedRequest } from './scripting/subjects'
 import { rememberResolved } from './resolvedSecrets'
 import { blockedMessage, variableProblems } from './requestVariables'
 import { parseRows } from './rows'
+import { givenNames, withoutGiven, writtenNames } from './variablesForm'
 import { SECRETS_TEXT } from './secretsText'
 import { ENTRY_KINDS, exchangeEntry, scriptEntry, secretsEntry, withActivity } from './timeline'
 import { promptNames, referenceTargets, resolveLayers, scopeLayers, usedVariableNames } from './variableScopes'
@@ -253,7 +254,8 @@ export function createExecutor(backend) {
     let request = original
     if (store().isRestricted && (hasActiveContent(request) || hasActiveInheritance(lineage))) return stop(request, EXECUTION_TEXT.restricted, RESTRICTED_ERROR)
 
-    const problems = variableProblems(parseRows(request.vars), Object.keys(store().sessionVariables))
+    const given = givenNames(request)
+    const problems = variableProblems(parseRows(request.vars), Object.keys(store().sessionVariables).filter((name) => !given.includes(name)))
     if (problems.length > 0) return stop(request, blockedMessage(problems))
 
     let referenced
@@ -271,6 +273,7 @@ export function createExecutor(backend) {
     for (const step of preSteps(lineage, request)) {
       const pre = await runStage(step.label, { script: step.script, request: requestSubject(request, inherited), modules }, request, context)
       runs.push(pre)
+      request = withoutGiven(request, writtenNames(pre.writes))
       if (pre.error) return stop(request, pre.error, SCRIPT_ERROR)
       if (holdsBack(pre.flow)) return { ...stop(request, reasonFor(pre.flow)), skipped: reasonFor(pre.flow) }
       request = applyRequestEdits(request, pre.request, inherited)
@@ -297,16 +300,19 @@ export function createExecutor(backend) {
     if (!outgoing.options?.discardCookies) store().storeCookies(response.cookies || [])
     const extraction = await applyExtractors(request, response)
     if (extraction?.error) runs.push(extractionRun(extraction))
+    request = withoutGiven(request, writtenNames(extraction?.written))
 
     if (isUsableResponse(response)) {
       for (const step of postSteps(lineage, request)) {
-        runs.push(await runStage(step.label, {
+        const post = await runStage(step.label, {
           script: step.script,
           assertions: step.assertions,
           request: requestSubject(request, inherited),
           response: responseSubject(response),
           modules,
-        }, request, context))
+        }, request, context)
+        runs.push(post)
+        request = withoutGiven(request, writtenNames(post.writes))
       }
       contractRun = await checkContract(linkFor(store().specLinks, lineage), request, response)
       runs.push(contractRun)

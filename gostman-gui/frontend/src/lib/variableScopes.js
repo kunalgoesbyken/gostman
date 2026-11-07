@@ -117,6 +117,8 @@ export const sessionEntries = (values) => (
 
 const sessionLayer = (values) => ({ source: 'session', entries: sessionEntries(values) })
 
+const givenLayer = (values) => ({ source: 'session', entries: Object.entries(values).map(([name, value]) => ({ name, value })) })
+
 const dotEnvLayer = (dotEnv) => ({ source: 'process', entries: dotEnvEntries(dotEnv || {}) })
 
 export function folderChain(folders, folderId) {
@@ -144,6 +146,7 @@ export function scopeLayers(state, request, referenced = {}) {
     rowsLayer(request?.vars),
     sessionLayer(state.sessionVariables),
     ...(request?.flowGiven ? [sessionLayer(request.flowGiven)] : []),
+    ...(isPlainObject(request?.formGiven) ? [givenLayer(request.formGiven)] : []),
   ]
 }
 

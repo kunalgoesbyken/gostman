@@ -1,14 +1,24 @@
-import { useId, useMemo } from "react"
-import { SlidersHorizontal } from "lucide-react"
+import { useEffect, useId, useMemo, useRef } from "react"
+import { RotateCcw, SlidersHorizontal } from "lucide-react"
 import { VariableValueField } from "./VariableValueField"
 import { Button } from "./ui/button"
 import { EmptyState } from "./ui/emptyState"
 import { PanelBody } from "./ui/panel"
-import { PROBLEM_REQUIRED, TYPE_BOOLEAN, isShownInForm, problemOf, problemText, typeOf, variableName } from "../lib/requestVariables"
-import { parseRows, serializeRows } from "../lib/rows"
+import { PROBLEM_REQUIRED, TYPE_BOOLEAN, problemOf, problemText, typeOf, variableName } from "../lib/requestVariables"
+import { formFields, hasFormChanges, hasNamedRows } from "../lib/variablesForm"
+import { parseRows } from "../lib/rows"
 import { VARIABLES_VIEW_TEXT as TEXT } from "../lib/variablesPanelText"
 
+const SUBMIT_KEY = "Enter"
+const INPUT_TAG = "INPUT"
+
 const textOf = (value) => (typeof value === "string" ? value.trim() : "")
+
+const hasModifier = (event) => event.shiftKey || event.altKey || event.ctrlKey || event.metaKey
+
+const submitsForm = (event) => (
+  event.key === SUBMIT_KEY && !hasModifier(event) && !event.defaultPrevented && !event.nativeEvent.isComposing && event.target.tagName === INPUT_TAG
+)
 
 function FormField({ row, isRevealed, onChange }) {
   const id = useId()
@@ -44,15 +54,8 @@ function FormField({ row, isRevealed, onChange }) {
   )
 }
 
-export const focusFirstProblem = () => document.querySelector('[aria-invalid="true"]')?.focus()
-
-export function VariablesView({ request, isRevealed, onUpdateRequest, onOpenEditor }) {
-  const rows = useMemo(() => parseRows(request.vars), [request.vars])
-  const shown = rows.map((row, index) => ({ row, index })).filter(({ row }) => isShownInForm(row))
-
-  const change = (index, patch) => onUpdateRequest({ vars: serializeRows(rows.map((row, at) => (at === index ? { ...row, ...patch } : row))) })
-
-  if (shown.length === 0) {
+function NoFields({ rows, onOpenEditor, onOpenVars }) {
+  if (!hasNamedRows(rows)) {
     return (
       <EmptyState
         icon={SlidersHorizontal}
@@ -62,13 +65,54 @@ export function VariablesView({ request, isRevealed, onUpdateRequest, onOpenEdit
       />
     )
   }
+  return (
+    <EmptyState
+      icon={SlidersHorizontal}
+      title={TEXT.noFieldsTitle}
+      description={TEXT.noFieldsDescription}
+      action={<Button size="sm" variant="outline" onClick={onOpenVars}>{TEXT.openVars}</Button>}
+    />
+  )
+}
+
+export function VariablesView({ tab, onChange, onReset, onSend, onOpenEditor, onOpenVars }) {
+  const formRef = useRef(null)
+  const { request, formValues } = tab
+  const attempt = tab.formAttempt || 0
+  const rows = useMemo(() => parseRows(request.vars), [request.vars])
+  const fields = useMemo(() => formFields(rows, formValues), [rows, formValues])
+  const isChanged = useMemo(() => hasFormChanges(rows, formValues), [rows, formValues])
+
+  useEffect(() => {
+    if (attempt > 0) formRef.current?.querySelector('[aria-invalid="true"]')?.focus()
+  }, [attempt])
+
+  if (fields.length === 0) return <NoFields rows={rows} onOpenEditor={onOpenEditor} onOpenVars={onOpenVars} />
+
+  const send = (event) => {
+    event.preventDefault()
+    onSend()
+  }
+  const sendOnEnter = (event) => {
+    if (!submitsForm(event)) return
+    event.preventDefault()
+    onSend()
+  }
 
   return (
     <PanelBody>
-      <form aria-label={TEXT.formLabel} onSubmit={(event) => event.preventDefault()} className="flex max-w-xl flex-col gap-4">
-        {shown.map(({ row, index }) => (
-          <FormField key={index} row={row} isRevealed={isRevealed} onChange={(patch) => change(index, patch)} />
+      <form ref={formRef} aria-label={TEXT.formLabel} onSubmit={send} onKeyDown={sendOnEnter} className="flex max-w-xl flex-col gap-4">
+        {fields.map(({ row, saved, index }) => (
+          <FormField key={index} row={row} isRevealed={attempt > 0} onChange={(patch) => onChange(saved, patch.value)} />
         ))}
+        {isChanged && (
+          <div>
+            <Button type="button" size="sm" variant="ghost" title={TEXT.resetHint} onClick={onReset}>
+              <RotateCcw />
+              {TEXT.reset}
+            </Button>
+          </div>
+        )}
       </form>
     </PanelBody>
   )

@@ -20,7 +20,16 @@
     "inheritedHint": "Read only. These come from scopes above this request. A variable with the same name above wins here.",
     "inheritedNone": "No variables are inherited.",
     "hiddenValue": "Hidden",
-    "typeNote": "A typed variable reaches scripts as that type. Inside a URL, header or body it is still written as text."
+    "typeNote": "A typed variable reaches scripts as that type. Inside a URL, header or body it is still written as text.",
+    "useRow": "Use this variable",
+    "useRowHint": "Switch the variable on or off. A variable that is off is not sent, not checked and not shown in the Variables view.",
+    "offOptions": "This variable is switched off, so these options have no effect: it is not sent, not checked and not shown in the Variables view. Turn it on with the checkbox at the start of its row.",
+    "inFormHint": "A hidden variable is still sent with the value set here, and still checked. To stop sending it, switch it off with the checkbox at the start of its row.",
+    "shownDespiteHidden": "This variable needs a value it does not have, so the Variables view shows it anyway. Give it a value here to keep it hidden.",
+    "markShown": "Shown in the Variables view",
+    "markHidden": "Hidden from the Variables view, still sent",
+    "markShownDespiteHidden": "Hidden, but shown in the Variables view until it has a value",
+    "sessionReplaces": "A session value with this name is sent instead of this value, except when you send from the Variables view."
   },
   "variablesView": {
     "switchLabel": "Request view",
@@ -30,6 +39,11 @@
     "emptyTitle": "No variables to fill in",
     "emptyDescription": "Variables added in the Vars tab of the full editor appear here as input fields.",
     "openEditor": "Open the full editor",
-    "required": "Required"
+    "required": "Required",
+    "noFieldsTitle": "No fields to fill in",
+    "noFieldsDescription": "This request has variables, but they are switched off or hidden from the Variables view. Change that in the Vars tab of the full editor.",
+    "openVars": "Open the Vars tab",
+    "reset": "Reset values",
+    "resetHint": "Go back to the values saved with the request"
   }
 }

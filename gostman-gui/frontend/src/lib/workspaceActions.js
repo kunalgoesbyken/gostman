@@ -41,6 +41,8 @@ import { REPORT_FORMATS } from './runReportFormats'
 import { coverageOfRun } from './runCoverage'
 import { createSocketActions, isSocketAddress } from './socketSessions'
 import { TESTS_PANEL } from './requestSections'
+import { VIEW_VARIABLES, viewOf } from './requestView'
+import { filledRequest, withoutFormGiven } from './variablesForm'
 import { createSpecActions } from './specActions'
 import { createStorageActions } from './storageActions'
 import { createBackupActions } from './backupActions'
@@ -281,14 +283,20 @@ export function createWorkspaceActions(backend) {
       return
     }
     if (tab.pendingId) return
-    if (!store().isRestricted && !(await mayRunCommand(tab.request))) return
+    const filled = viewOf(tab) === VIEW_VARIABLES ? filledRequest(tab.request, tab.formValues) : null
+    if (filled && filled.problems.length > 0) {
+      store().markFormAttempt(tab.id)
+      return
+    }
+    const request = filled ? filled.request : tab.request
+    if (!store().isRestricted && !(await mayRunCommand(request))) return
     sendSequence += 1
     const pendingId = `${tab.id}-${sendSequence}`
     store().startTabRequest(tab.id, pendingId)
-    const { auth, response, tests, extraction } = await execute(tab.request, pendingId)
+    const { auth, response, tests, extraction } = await execute(request, pendingId)
     store().finishTabRequest(tab.id, pendingId, response, { tests, extraction })
     if (auth.oauth2 !== tab.request.auth.oauth2) setToken(tab.id, auth.oauth2)
-    if (!UNRECORDED_ERRORS.includes(response.error)) store().addToHistory(tab.request, httpStatusOf(response), Boolean(response.error) && !response.statusCode)
+    if (!UNRECORDED_ERRORS.includes(response.error)) store().addToHistory(withoutFormGiven(request), httpStatusOf(response), Boolean(response.error) && !response.statusCode)
   }
 
   const saveSettings = async (settings) => {

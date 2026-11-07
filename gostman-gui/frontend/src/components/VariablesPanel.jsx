@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { SlidersHorizontal, X } from "lucide-react"
+import { EyeOff, SlidersHorizontal, TextCursorInput, X } from "lucide-react"
 import { BulkEditor, ModeSwitch, ROW_GRID, ROW_STACK } from "./KeyValueEditor"
 import { ScopeMark, hasScopeMark } from "./ScopeMark"
 import { VariableInput } from "./VariableInput"
@@ -11,9 +11,10 @@ import { Input } from "./ui/input"
 import { InfoTip } from "./ui/infoTip"
 import { PanelBody, SectionLabel } from "./ui/panel"
 import { Select } from "./ui/select"
-import { isBlankRow } from "../lib/rows"
+import { isBlankRow, isSentRow } from "../lib/rows"
 import { updatePreferences, usePreferences } from "../lib/preferences"
-import { PROBLEM_REQUIRED, TYPE_BOOLEAN, TYPE_ENUM, TYPE_NONE, VARIABLE_TYPES, keepRowSettings, problemOf, problemText, typeOf } from "../lib/requestVariables"
+import { BOOLEAN_FALSE, BOOLEAN_TRUE, PROBLEM_REQUIRED, TYPE_BOOLEAN, TYPE_ENUM, TYPE_NONE, VARIABLE_TYPES, keepRowSettings, problemOf, problemText, typeOf, typedValue } from "../lib/requestVariables"
+import { isFormField, isShownDespiteHidden } from "../lib/variablesForm"
 import { KEY_VALUE_TEXT } from "../lib/keyValueText"
 import { REQUEST_TABS_TEXT } from "../lib/requestTabsText"
 import { REQUEST_VARIABLES_TEXT } from "../lib/requestVariablesText"
@@ -22,7 +23,7 @@ import { VARIABLES_PANEL_TEXT as TEXT } from "../lib/variablesPanelText"
 import { selectResolvedVariables, useAppStore } from "../store/appStore"
 import { cn } from "../lib/utils"
 
-const COLUMNS = "grid-cols-[1.5rem_minmax(0,1fr)_7.5rem_minmax(0,1.5fr)_1.75rem_1.75rem]"
+const COLUMNS = "grid-cols-[1.5rem_minmax(0,1fr)_7.5rem_minmax(0,1.5fr)_1.25rem_1.75rem_1.75rem]"
 const HIDDEN_VALUE = "••••••"
 const REQUEST_SOURCE = "request"
 const NONE_OPEN = -1
@@ -44,6 +45,7 @@ function ColumnLabels() {
       <SectionLabel>{TEXT.value}</SectionLabel>
       <span />
       <span />
+      <span />
     </div>
   )
 }
@@ -52,40 +54,70 @@ function FieldOptions({ row, onChange }) {
   const type = typeOf(row)
   return (
     <div className="ms-8 mb-2 mt-1 flex max-w-xl flex-col gap-2 border-s border-border ps-3">
-      <Field label={TEXT.label}>
-        <Input value={row.label ?? ""} placeholder={TEXT.labelPlaceholder} onChange={(event) => onChange({ label: event.target.value })} />
-      </Field>
-      <Field label={TEXT.help}>
-        <Input value={row.help ?? ""} placeholder={TEXT.helpPlaceholder} onChange={(event) => onChange({ help: event.target.value })} />
-      </Field>
-      {type !== TYPE_BOOLEAN && (
-        <Field label={TEXT.placeholder}>
-          <Input value={row.placeholder ?? ""} placeholder={TEXT.placeholderPlaceholder} onChange={(event) => onChange({ placeholder: event.target.value })} />
+      {!row.enabled && <p className="text-2xs text-muted-foreground">{TEXT.offOptions}</p>}
+      <fieldset disabled={!row.enabled} className={cn("flex min-w-0 flex-col gap-2", !row.enabled && "opacity-50")}>
+        <Field label={TEXT.label}>
+          <Input value={row.label ?? ""} placeholder={TEXT.labelPlaceholder} onChange={(event) => onChange({ label: event.target.value })} />
         </Field>
-      )}
-      {type === TYPE_ENUM && (
-        <Field label={TEXT.choices}>
-          <Input value={row.choices ?? ""} placeholder={TEXT.choicesPlaceholder} onChange={(event) => onChange({ choices: event.target.value })} className="font-mono" />
+        <Field label={TEXT.help}>
+          <Input value={row.help ?? ""} placeholder={TEXT.helpPlaceholder} onChange={(event) => onChange({ help: event.target.value })} />
         </Field>
-      )}
-      <div className="flex flex-wrap gap-x-4">
         {type !== TYPE_BOOLEAN && (
-          <Checkbox checked={row.required === true} onChange={(event) => onChange({ required: event.target.checked })}>{TEXT.required}</Checkbox>
+          <Field label={TEXT.placeholder}>
+            <Input value={row.placeholder ?? ""} placeholder={TEXT.placeholderPlaceholder} onChange={(event) => onChange({ placeholder: event.target.value })} />
+          </Field>
         )}
-        <Checkbox checked={row.hidden !== true} onChange={(event) => onChange({ hidden: !event.target.checked })}>{TEXT.inForm}</Checkbox>
-      </div>
+        {type === TYPE_ENUM && (
+          <Field label={TEXT.choices}>
+            <Input value={row.choices ?? ""} placeholder={TEXT.choicesPlaceholder} onChange={(event) => onChange({ choices: event.target.value })} className="font-mono" />
+          </Field>
+        )}
+        <div className="flex flex-wrap gap-x-4">
+          {type !== TYPE_BOOLEAN && (
+            <Checkbox checked={row.required === true} onChange={(event) => onChange({ required: event.target.checked })}>{TEXT.required}</Checkbox>
+          )}
+          <span className="flex items-center gap-1">
+            <Checkbox checked={row.hidden !== true} onChange={(event) => onChange({ hidden: !event.target.checked })}>{TEXT.inForm}</Checkbox>
+            <InfoTip text={TEXT.inFormHint} />
+          </span>
+        </div>
+        {isShownDespiteHidden(row) && <p className="text-2xs text-muted-foreground">{TEXT.shownDespiteHidden}</p>}
+      </fieldset>
     </div>
   )
 }
 
-function VariableRow({ row, isDraft, isOpen, onChange, onRemove, onToggleOptions }) {
+function FormMark({ row }) {
+  if (!isSentRow(row)) return <span />
+  const isShown = isFormField(row)
+  const label = isShownDespiteHidden(row) ? TEXT.markShownDespiteHidden : isShown ? TEXT.markShown : TEXT.markHidden
+  const Icon = isShown ? TextCursorInput : EyeOff
+  return (
+    <span role="img" aria-label={label} title={label} className="flex items-center justify-center text-muted-foreground">
+      <Icon aria-hidden="true" className="h-3.5 w-3.5" />
+    </span>
+  )
+}
+
+function ValueCell({ row, onChange }) {
+  if (typeOf(row) !== TYPE_BOOLEAN) return <VariableValueField row={row} label={TEXT.value} onChange={onChange} />
+  return (
+    <Select value={typedValue(row) === true ? BOOLEAN_TRUE : BOOLEAN_FALSE} onChange={(event) => onChange({ value: event.target.value })} aria-label={TEXT.value} className="font-mono">
+      <option value={BOOLEAN_TRUE}>{BOOLEAN_TRUE}</option>
+      <option value={BOOLEAN_FALSE}>{BOOLEAN_FALSE}</option>
+    </Select>
+  )
+}
+
+function VariableRow({ row, isDraft, isOpen, isReplaced, onChange, onRemove, onToggleOptions }) {
   const problem = problemOf(row)
   const hasTypeProblem = problem !== "" && problem !== PROBLEM_REQUIRED
   return (
     <>
       <div className={cn(ROW_GRID, COLUMNS, !row.enabled && "opacity-50")}>
         <Checkbox
-          label={KEY_VALUE_TEXT.sendRow}
+          label={TEXT.useRow}
+          title={TEXT.useRowHint}
           checked={row.enabled}
           onChange={(event) => onChange({ enabled: event.target.checked })}
           className={cn(isDraft && "invisible")}
@@ -102,7 +134,8 @@ function VariableRow({ row, isDraft, isOpen, onChange, onRemove, onToggleOptions
         <Select value={typeOf(row)} onChange={(event) => onChange({ type: event.target.value })} aria-label={TEXT.typeLabel}>
           {VARIABLE_TYPES.map((type) => <option key={type || "none"} value={type}>{typeName(type)}</option>)}
         </Select>
-        <VariableValueField row={row} label={TEXT.value} onChange={onChange} />
+        <ValueCell row={row} onChange={onChange} />
+        {isDraft ? <span /> : <FormMark row={row} />}
         <IconButton
           label={TEXT.fieldOptions}
           icon={SlidersHorizontal}
@@ -113,6 +146,7 @@ function VariableRow({ row, isDraft, isOpen, onChange, onRemove, onToggleOptions
         <IconButton label={KEY_VALUE_TEXT.removeRow} icon={X} onClick={onRemove} className={cn(isDraft && "invisible")} />
       </div>
       {hasTypeProblem && <p role="alert" className="ms-8 text-2xs text-destructive">{problemText(row, problem)}</p>}
+      {isReplaced && <p className="ms-8 text-2xs text-muted-foreground">{TEXT.sessionReplaces}</p>}
       {isOpen && !isDraft && <FieldOptions row={row} onChange={onChange} />}
     </>
   )
@@ -120,6 +154,7 @@ function VariableRow({ row, isDraft, isOpen, onChange, onRemove, onToggleOptions
 
 function Table({ rows, onChange }) {
   const [openAt, setOpenAt] = useState(NONE_OPEN)
+  const sessionVariables = useAppStore((state) => state.sessionVariables)
   const shown = [...rows, draftRow()]
   const commit = (next) => onChange(next.filter((row) => !isEmptyRow(row)))
   const replaceRow = (index, patch) => commit(shown.map((row, at) => (at === index ? { ...row, ...patch } : row)))
@@ -138,6 +173,7 @@ function Table({ rows, onChange }) {
             row={row}
             isDraft={index === rows.length}
             isOpen={openAt === index}
+            isReplaced={isSentRow(row) && Object.hasOwn(sessionVariables || {}, row.key)}
             onChange={(patch) => replaceRow(index, patch)}
             onRemove={() => removeRow(index)}
             onToggleOptions={() => setOpenAt(openAt === index ? NONE_OPEN : index)}
