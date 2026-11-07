@@ -27,7 +27,7 @@ const (
 	formParamFileName = "filename"
 )
 
-var curlValueFlags = map[string]string{
+var curlValueFlags = withIgnoredFlags(map[string]string{
 	"-X": "request", "--request": "request",
 	"-H": "header", "--header": "header",
 	"-d": "data", "--data": "data", "--data-raw": "data-raw", "--data-binary": "data", "--data-ascii": "data",
@@ -40,12 +40,30 @@ var curlValueFlags = map[string]string{
 	"-e": "referer", "--referer": "referer",
 	"-m": "max-time", "--max-time": "max-time",
 	"--url": "url",
-	"-o":    "ignored", "--output": "ignored", "-w": "ignored", "--write-out": "ignored",
-	"-x": "ignored", "--proxy": "ignored", "-c": "ignored", "--cookie-jar": "ignored",
-	"-T": "ignored", "--upload-file": "ignored", "--connect-timeout": "ignored",
-	"--retry": "ignored", "--cert": "ignored", "--key": "ignored", "--cacert": "ignored",
-	"-U": "ignored", "--proxy-user": "ignored", "--resolve": "ignored", "--max-redirs": "ignored",
-}
+},
+	"-C", "-D", "-E", "-K", "-P", "-Q", "-T", "-U", "-c", "-o", "-r", "-t", "-w", "-x", "-y", "-Y", "-z",
+	"--abstract-unix-socket", "--alt-svc", "--aws-sigv4", "--cacert", "--capath", "--cert", "--cert-type",
+	"--ciphers", "--config", "--connect-timeout", "--connect-to", "--continue-at", "--cookie-jar",
+	"--create-file-mode", "--crlfile", "--curves", "--delegation", "--dns-interface", "--dns-ipv4-addr",
+	"--dns-ipv6-addr", "--dns-servers", "--doh-url", "--dump-header", "--ech", "--egd-file", "--engine",
+	"--etag-compare", "--etag-save", "--expect100-timeout", "--ftp-account", "--ftp-alternative-to-user",
+	"--ftp-method", "--ftp-port", "--ftp-ssl-ccc-mode", "--happy-eyeballs-timeout-ms", "--haproxy-clientip",
+	"--hostpubmd5", "--hostpubsha256", "--hsts", "--interface", "--ip-tos", "--ipfs-gateway",
+	"--keepalive-cnt", "--keepalive-time", "--key", "--key-type", "--krb", "--libcurl", "--limit-rate",
+	"--local-port", "--login-options", "--mail-auth", "--mail-from", "--mail-rcpt", "--max-filesize",
+	"--max-redirs", "--netrc-file", "--noproxy", "--oauth2-bearer", "--output", "--output-dir",
+	"--parallel-max", "--pass", "--pinnedpubkey", "--preproxy", "--proto", "--proto-default", "--proto-redir",
+	"--proxy", "--proxy-cacert", "--proxy-capath", "--proxy-cert", "--proxy-cert-type", "--proxy-ciphers",
+	"--proxy-crlfile", "--proxy-header", "--proxy-key", "--proxy-key-type", "--proxy-pass",
+	"--proxy-pinnedpubkey", "--proxy-service-name", "--proxy-tls13-ciphers", "--proxy-tlsauthtype",
+	"--proxy-tlspassword", "--proxy-tlsuser", "--proxy-user", "--proxy1.0", "--pubkey", "--quote",
+	"--random-file", "--range", "--rate", "--request-target", "--resolve", "--retry", "--retry-delay",
+	"--retry-max-time", "--sasl-authzid", "--service-name", "--socks4", "--socks4a", "--socks5",
+	"--socks5-gssapi-service", "--socks5-hostname", "--speed-limit", "--speed-time", "--stderr",
+	"--telnet-option", "--tftp-blksize", "--time-cond", "--tls-max", "--tls13-ciphers", "--tlsauthtype",
+	"--tlspassword", "--tlsuser", "--trace", "--trace-ascii", "--trace-config", "--unix-socket",
+	"--upload-file", "--url-query", "--variable", "--write-out",
+)
 
 var curlSwitches = map[string]string{
 	"-G": "get", "--get": "get",
@@ -61,6 +79,19 @@ type curlCommand struct {
 	asQuery   bool
 }
 
+type curlOption struct {
+	name     string
+	value    string
+	attached bool
+}
+
+func withIgnoredFlags(flags map[string]string, ignored ...string) map[string]string {
+	for _, name := range ignored {
+		flags[name] = "ignored"
+	}
+	return flags
+}
+
 func ParseCurl(command string) (Request, error) {
 	tokens, err := shellSplit(command)
 	if err != nil {
@@ -71,43 +102,74 @@ func ParseCurl(command string) (Request, error) {
 	}
 
 	parsed := &curlCommand{}
+	var positional []string
 	for i := 1; i < len(tokens); i++ {
-		flag, value, attached := splitFlag(tokens[i])
-		if kind, ok := curlValueFlags[flag]; ok {
-			if !attached {
+		if !isCurlOption(tokens[i]) {
+			positional = append(positional, tokens[i])
+			continue
+		}
+		for _, option := range splitOptions(tokens[i]) {
+			kind, takesValue := curlValueFlags[option.name]
+			if !takesValue {
+				parsed.applySwitch(curlSwitches[option.name])
+				continue
+			}
+			if !option.attached {
 				if i+1 >= len(tokens) {
-					return Request{}, fmt.Errorf("%s needs a value", flag)
+					return Request{}, fmt.Errorf("%s needs a value", option.name)
 				}
 				i++
-				value = tokens[i]
+				option.value = tokens[i]
 			}
-			parsed.applyValue(kind, value)
-			continue
+			parsed.applyValue(kind, option.value)
 		}
-		if kind, ok := curlSwitches[flag]; ok {
-			parsed.applySwitch(kind)
-			continue
-		}
-		if !strings.HasPrefix(tokens[i], "-") && parsed.request.URL == "" {
-			parsed.request.URL = tokens[i]
-		}
+	}
+	if parsed.request.URL == "" {
+		parsed.request.URL = likeliestURL(positional)
 	}
 	return parsed.build()
 }
 
-func splitFlag(token string) (flag, value string, attached bool) {
+func isCurlOption(token string) bool {
+	return len(token) > 1 && token[0] == '-'
+}
+
+func splitOptions(token string) []curlOption {
 	if strings.HasPrefix(token, "--") {
-		if name, rest, found := strings.Cut(token, "="); found {
-			return name, rest, true
-		}
-		return token, "", false
+		name, value, attached := strings.Cut(token, "=")
+		return []curlOption{{name: name, value: value, attached: attached}}
 	}
-	if len(token) > 2 && token[0] == '-' {
-		if _, ok := curlValueFlags[token[:2]]; ok {
-			return token[:2], token[2:], true
+	var options []curlOption
+	letters := []rune(token[1:])
+	for i, letter := range letters {
+		name := "-" + string(letter)
+		if _, takesValue := curlValueFlags[name]; takesValue {
+			value := string(letters[i+1:])
+			return append(options, curlOption{name: name, value: value, attached: value != ""})
+		}
+		options = append(options, curlOption{name: name})
+	}
+	return options
+}
+
+func likeliestURL(candidates []string) string {
+	best, bestScore := "", -1
+	for _, candidate := range candidates {
+		if score := urlScore(candidate); score > bestScore {
+			best, bestScore = candidate, score
 		}
 	}
-	return token, "", false
+	return best
+}
+
+func urlScore(value string) int {
+	switch {
+	case strings.Contains(value, "://"):
+		return 2
+	case strings.ContainsAny(value, "./:"):
+		return 1
+	}
+	return 0
 }
 
 func (c *curlCommand) applyValue(kind, value string) {
