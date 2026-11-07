@@ -12,6 +12,7 @@ import (
 	"github.com/kunalgoesbyken/gostman/deeplink"
 	"github.com/kunalgoesbyken/gostman/engine"
 	"github.com/kunalgoesbyken/gostman/importer"
+	"github.com/kunalgoesbyken/gostman/locales"
 	"github.com/kunalgoesbyken/gostman/mcpclient"
 	"github.com/kunalgoesbyken/gostman/openapi"
 	"github.com/kunalgoesbyken/gostman/openapi/diff"
@@ -74,8 +75,9 @@ type curlPayload struct {
 }
 
 type curlResult struct {
-	Request *engine.Request `json:"request,omitempty"`
-	Error   string          `json:"error,omitempty"`
+	Request   *engine.Request  `json:"request,omitempty"`
+	Error     string           `json:"error,omitempty"`
+	Localized *locales.Message `json:"localized,omitempty"`
 }
 
 type describeResult struct {
@@ -245,7 +247,7 @@ func parseCurl(r *http.Request) curlResult {
 	}
 	request, err := engine.ParseCurl(payload.Command)
 	if err != nil {
-		return curlResult{Error: err.Error()}
+		return curlResult{Error: err.Error(), Localized: locales.Whole(err)}
 	}
 	return curlResult{Request: &request}
 }

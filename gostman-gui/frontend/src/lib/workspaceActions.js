@@ -7,6 +7,7 @@ import { createCaptureActions } from './captureSession'
 import { createLoadTestActions } from './loadTestSession'
 import { createMonitorActions } from './monitors/monitorSession'
 import { asSentence } from './dataUtils'
+import { localizedText } from './localized'
 import { createExampleActions } from './exampleActions'
 import { createImporterClient } from './importerClient'
 import { createScanClient } from './scanClient'
@@ -79,7 +80,7 @@ const activeTab = () => selectActiveTab(store())
 const tabById = (tabId) => store().tabs.find((candidate) => candidate.id === tabId)
 const activeVariables = () => selectActiveVariables(store())
 const activeEnvironmentId = () => findActiveEnvironment(store())?.id || ''
-const messageOf = (error) => error?.message || String(error)
+const messageOf = (error) => localizedText(error?.localized, error?.message || String(error))
 const failureOf = (error) => asSentence(messageOf(error))
 const warn = (title, error) => store().showAlert(title, failureOf(error), DIALOG_TEXT.ok, 'warning')
 const idsOf = (items) => items.map((item) => item.id)

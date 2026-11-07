@@ -188,7 +188,7 @@ async function postJSON(query, payload, signal) {
 
 async function postForResult(query, payload, field) {
   const result = await postJSON(query, payload)
-  if (result.error) throw new Error(result.error)
+  if (result.error) throw Object.assign(new Error(result.error), { localized: result.localized })
   return result[field]
 }
 

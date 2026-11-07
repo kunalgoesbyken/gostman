@@ -15,5 +15,8 @@
   "request.headersInvalid": "{{detail}} is the technical reason, in English, from the JSON parser.",
   "files": "Errors about the file functions that read a file into a request. {{example}} is the literal text of the function, with double braces.",
   "attachments": "Errors about files attached to a request body from disk.",
-  "proxy": "Errors in the proxy address of the network settings."
+  "proxy": "Errors in the proxy address of the network settings.",
+  "curl": "Errors shown when a curl command pasted into the request bar or imported cannot be read. Option names such as --url and curl itself stay as written.",
+  "curl.needsValue": "{{option}} is a curl option as written in the command, for example -H or --data.",
+  "curl.noUrlAfterOption": "{{option}} is an option as written in the command, for example --unknown-option. {{value}} is the word that came after it."
 }
