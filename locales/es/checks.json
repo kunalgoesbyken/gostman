@@ -117,6 +117,9 @@
       "status": "Código de estado",
       "contentType": "Tipo de contenido",
       "schema": "Forma del cuerpo, como JSON Schema: tipos de campo, campos presentes y null donde se vio null. Un campo que era null acepta cualquier valor.",
+      "snapshot": "Instantánea del cuerpo: la prueba falla cuando el cuerpo difiere de esta respuesta. Los valores de campos con nombres que parecen secretos, los tokens, las fechas y los ids que parecen generados se ignoran y no se guardan. Edita las rutas ignoradas en la prueba.",
+      "headersSnapshot": "Instantánea de los encabezados, sin cookies ni credenciales. Los encabezados que cambian en cada respuesta, como date y etag, se ignoran.",
+      "exampleSnapshot": "Instantánea del ejemplo guardado «{{name}}»: la prueba falla cuando el cuerpo difiere de ese ejemplo. Los campos que parecen secretos, los tokens, las fechas y los ids generados se ignoran y no se guardan.",
       "responseTime": "Presupuesto de tiempo de respuesta de {{budget}} ms, el doble de lo que tardó esta respuesta, redondeado hacia arriba."
     },
     "nothingNew": "La pestaña Pruebas ya tiene estas pruebas.",
@@ -178,6 +181,21 @@
     "filterTimedOut_one": "El filtro se ejecutó durante más de {{count}} segundo y se detuvo. Revísalo por si hay una expresión regular lenta.",
     "filterTimedOut_many": "El filtro se ejecutó durante más de {{count}} de segundos y se detuvo. Revísalo por si hay una expresión regular lenta.",
     "filterTimedOut_other": "El filtro se ejecutó durante más de {{count}} segundos y se detuvo. Revísalo por si hay una expresión regular lenta."
+  },
+  "snapshot": {
+    "operator": "coincide con la instantánea",
+    "edit": "Editar instantánea",
+    "editorTitle": "Editar instantánea",
+    "editorHint": "Un objeto JSON. expected es el valor guardado, ignore enumera las rutas JSONPath que no se comparan (como $.id o $.items[*].createdAt), e ignoreOrder true compara los arrays sin tener en cuenta el orden de sus elementos.",
+    "update": "Actualizar la instantánea con la última respuesta",
+    "notice": "Las instantáneas son texto sin cifrar en la solicitud y, en una carpeta de espacio de trabajo, van a Git. Revísalas antes de hacer commit. Los campos con nombres de credenciales (incluido todo lo que contienen), los valores que parecen tokens, JWT o claves de API, las fechas y los ids generados, y los valores de las rutas ignoradas se reemplazan por (ignored) y no se guardan.",
+    "invalid": "La instantánea no es válida: debe ser un objeto JSON con un valor expected.",
+    "changed": "{{path}}: se esperaba {{expected}}, se obtuvo {{actual}}",
+    "missing": "{{path}}: se esperaba {{expected}}, pero falta",
+    "extra": "{{path}}: no está en la instantánea, se obtuvo {{actual}}",
+    "more_one": "…y {{count}} diferencia más.",
+    "more_many": "…y {{count}} de diferencias más.",
+    "more_other": "…y {{count}} diferencias más."
   },
   "operators": {
     "eq": "es igual a",

@@ -1,9 +1,12 @@
 {
   "tabBar": {
     "openRequests": "Otwarte żądania",
+    "scrollStart": "Przewiń karty w stronę początku",
+    "scrollEnd": "Przewiń karty w stronę końca",
     "newRequest": "Nowe żądanie",
     "untitled": "Bez nazwy",
     "unsaved": "Niezapisane zmiany",
+    "fromHistory": "Otwarte z historii",
     "close": "Zamknij: {{title}}"
   }
 }

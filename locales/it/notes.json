@@ -1,0 +1,16 @@
+{
+  "notes": {
+    "empty": "Ancora nessuna nota.",
+    "secretHint": "Le note vengono salvate in chiaro e condivise con il workspace. Non incollare segreti.",
+    "looksLikeCredential": "Sembra una credenziale. Le note vengono salvate in chiaro, nei file della cartella e nelle esportazioni.",
+    "inputLabel": "Nuova nota",
+    "inputPlaceholder": "Scrivi una nota per il tuo team",
+    "add": "Aggiungi nota",
+    "anonymous": "Sconosciuto",
+    "resolve": "Risolvi",
+    "reopen": "Riapri",
+    "resolved": "Risolta",
+    "delete": "Elimina nota",
+    "listLabel": "Note"
+  }
+}

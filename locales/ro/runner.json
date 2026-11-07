@@ -12,6 +12,19 @@
     "dataFile": "Fișier de date (CSV sau JSON)",
     "clearData": "Eliminare fișier de date",
     "report": "Descărcare raport HTML",
+    "reportFormat": "Formatul raportului",
+    "formats": {
+      "html": "HTML",
+      "junit": "JUnit",
+      "json": "JSON"
+    },
+    "schedule": "Programare rulare",
+    "cliLine": "Aceeași rulare într-un terminal",
+    "shells": {
+      "posix": "macOS și Linux",
+      "powershell": "PowerShell"
+    },
+    "cliUnsafe": "Numele unui dosar sau al unui fișier de date conține un salt de linie, ghilimele duble, o bară inversă la final sau alt caracter care nu poate fi transmis în siguranță în orice shell, deci nu este afișată nicio comandă. Redenumiți-l pentru a obține una.",
     "includeTags": "Doar etichetele",
     "excludeTags": "Omitere etichete",
     "anyTag": "Oricare",
@@ -66,6 +79,12 @@
     "progressPassed": "Reușite: {{count}}",
     "progressFailed": "Eșuate: {{count}}",
     "progressSkipped": "Omise: {{count}}",
-    "socketSkipped": "Cererile WebSocket nu fac parte dintr-o rulare."
+    "socketSkipped": "Cererile WebSocket nu fac parte dintr-o rulare.",
+    "coverageTitle": "Acoperire OpenAPI",
+    "coverageOperations": "{{covered}} din {{total}} operații ({{percent}}%)",
+    "coverageResponses": "{{covered}} din {{total}} răspunsuri documentate ({{percent}}%)",
+    "coverageNotCalled": "neapelată",
+    "coverageMissing": "fără răspuns: {{codes}}",
+    "coverageUndocumented": "stare nedocumentată: {{codes}}"
   }
 }

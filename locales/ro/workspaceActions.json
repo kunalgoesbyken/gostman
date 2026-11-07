@@ -43,6 +43,7 @@
     "clear": "Golire",
     "closeTab": "Închidere filă",
     "closeTabMessage": "„{{name}}” are modificări nesalvate. Le salvați înainte de închidere?",
-    "dontSave": "Fără salvare"
+    "dontSave": "Fără salvare",
+    "openFirstRequest": "Deschidere prima cerere"
   }
 }

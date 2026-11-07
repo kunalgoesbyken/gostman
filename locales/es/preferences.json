@@ -10,6 +10,7 @@
       "language": "Idioma",
       "ai": "IA",
       "privacy": "Privacidad",
+      "updates": "Actualizaciones",
       "data": "Datos"
     },
     "fields": {
@@ -21,12 +22,14 @@
       "codeFont": "Fuente del código",
       "density": "Densidad",
       "responseLayout": "Panel de respuesta",
+      "tabPlacement": "Pestañas abiertas",
       "systemTitleBar": "Usar la barra de título del sistema",
       "editorFontSize": "Tamaño de fuente del editor",
       "wrapLines": "Ajustar líneas largas",
       "requestTimeout": "Tiempo de espera predeterminado",
       "confirmCloseTab": "Preguntar antes de descartar cambios sin guardar al cerrar una pestaña",
       "language": "Idioma",
+      "authorName": "Tu nombre en las notas",
       "sidebarViews": "Pestañas de la barra lateral"
     },
     "themes": {
@@ -54,6 +57,11 @@
       "below": "Debajo",
       "right": "A la derecha"
     },
+    "tabPlacements": {
+      "bar": "Barra de pestañas",
+      "sidebar": "Barra lateral"
+    },
+    "tabPlacementHint": "Barra lateral oculta la barra de pestañas y muestra las pestañas abiertas en la barra lateral, lo que conviene en pantallas pequeñas.",
     "seconds": "segundos",
     "pixels": "px",
     "contrastHint": "Alto dibuja bordes y texto secundario más marcados.",
@@ -152,6 +160,7 @@
       "lowContrast": "Puede que el texto sea difícil de leer. Busca al menos {{minimum}}:1.",
       "resetRow": "Restablecer {{name}}"
     },
+    "authorNameHint": "Se muestra en las notas que añades a solicitudes y carpetas.",
     "timeoutHint_one": "Se aplica a las solicitudes que no definen su propio tiempo de espera. 0 usa el límite integrado de {{count}} segundo.",
     "timeoutHint_many": "Se aplica a las solicitudes que no definen su propio tiempo de espera. 0 usa el límite integrado de {{count}} de segundos.",
     "timeoutHint_other": "Se aplica a las solicitudes que no definen su propio tiempo de espera. 0 usa el límite integrado de {{count}} segundos.",
@@ -165,6 +174,8 @@
     "accentAdjusted": "Se muestra como {{light}} en modo claro y como {{dark}} en modo oscuro para que el texto de este color siga siendo legible.",
     "sidebarViewsHint": "Elige qué pestañas muestra la barra lateral y en qué orden. Haz clic derecho en las pestañas de la barra lateral para mostrarlas u ocultarlas allí.",
     "moveViewUp": "Subir {{name}}",
-    "moveViewDown": "Bajar {{name}}"
+    "moveViewDown": "Bajar {{name}}",
+    "textScaleHint": "Escala la interfaz y sus campos de entrada. El zoom de la ventana se aplica sobre este tamaño: una base de {{size}} px se ve como {{zoomed}} px con un zoom del 125 %.",
+    "editorFontSizeHint": "Editores de código, en píxeles. No sigue el Tamaño del texto, y el zoom de la ventana se aplica sobre él."
   }
 }

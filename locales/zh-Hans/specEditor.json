@@ -1,0 +1,84 @@
+{
+  "specEditor": {
+    "createFailed": "无法创建 API 规范",
+    "saveFailed": "无法保存 API 规范",
+    "deleteFailed": "无法删除 API 规范",
+    "importFailed": "无法导入 API 规范",
+    "convertFailed": "无法转换 API 规范",
+    "mockFailed": "无法启动模拟服务器",
+    "generateFailed": "无法生成请求",
+    "saved": "“{{name}}”已保存。",
+    "renameTitle": "重命名 API 规范",
+    "nameLabel": "名称",
+    "deleteTitle": "删除 API 规范",
+    "deleteMessage": "删除 API 规范“{{name}}”？此操作无法撤销。",
+    "closeTitle": "关闭 API 规范",
+    "closeMessage": "“{{name}}”有未保存的更改。关闭前要保存吗？",
+    "dontSave": "不保存",
+    "save": "保存",
+    "copyName": "{{name}} 副本",
+    "importedName": "导入的 API",
+    "importAddressTitle": "导入 API 规范",
+    "importAddressMessage": "请输入 OpenAPI 或 Swagger 规范的地址。",
+    "importAddressPlaceholder": "https://example.com/openapi.json",
+    "importAddressConfirm": "导入",
+    "checkResponsesTitle": "检查响应",
+    "generateFirst": "请先从此规范生成请求，之后它们的响应会对照此规范检查。",
+    "checkingResponses": "“{{name}}”中的响应会对照此规范检查。",
+    "tabLabel": "API 规范 {{name}}",
+    "templates": {
+      "strategies": {
+        "name": "Strategies API"
+      },
+      "resource": {
+        "name": "Items API"
+      },
+      "blank": {
+        "name": "新 API"
+      }
+    }
+  },
+  "specList": {
+    "listLabel": "API 规范",
+    "emptyTitle": "在 API 存在之前先设计它",
+    "emptyDescription": "在这里编写 OpenAPI 规范，输入时即进行检查。然后生成请求、启动模拟服务器，并对照规范检查真实响应。",
+    "count_other": "{{count}} 个 API 规范",
+    "newSpec": "新建 API 规范",
+    "importSpec": "导入规范",
+    "importFile": "从文件导入",
+    "importAddress": "从地址导入",
+    "actions": "{{name}} 的操作",
+    "rename": "重命名",
+    "duplicate": "复制",
+    "remove": "删除",
+    "sidebarTab": "规范"
+  },
+  "specView": {
+    "nameLabel": "API 规范名称",
+    "unsaved": "未保存的更改",
+    "save": "保存",
+    "formatLabel": "文件格式",
+    "formatYaml": "YAML",
+    "formatJson": "JSON",
+    "editorLabel": "OpenAPI 规范",
+    "previewLabel": "文档预览",
+    "showPreview": "显示文档预览",
+    "hidePreview": "隐藏文档预览",
+    "viewDocs": "查看文档",
+    "viewDocsHint": "在更大的窗口中打开文档。",
+    "generate": "生成请求",
+    "generateHint": "从此规范创建请求，并保留一个让它们与规范保持同步的关联。",
+    "update": "更新请求",
+    "updateHint": "将此规范与从它生成的请求进行比较，并应用你选择的更改。",
+    "mock": "启动模拟",
+    "mockHint": "通过本地模拟服务器提供此规范中的示例。",
+    "check": "检查响应",
+    "checkHint": "对照此规范检查所生成请求的响应。",
+    "compare": "比较",
+    "compareHint": "将此规范与另一个版本比较，并列出破坏性更改。",
+    "problems_other": "{{count}} 个问题",
+    "problemsLabel": "问题",
+    "checking": "正在检查规范",
+    "cannotRead": "无法读取规范"
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "specEditor": {
+    "createFailed": "API仕様を作成できませんでした",
+    "saveFailed": "API仕様を保存できませんでした",
+    "deleteFailed": "API仕様を削除できませんでした",
+    "importFailed": "API仕様をインポートできませんでした",
+    "convertFailed": "API仕様を変換できませんでした",
+    "mockFailed": "モックサーバーを起動できませんでした",
+    "generateFailed": "リクエストを生成できませんでした",
+    "saved": "「{{name}}」を保存しました。",
+    "renameTitle": "API仕様の名前を変更",
+    "nameLabel": "名前",
+    "deleteTitle": "API仕様を削除",
+    "deleteMessage": "API仕様「{{name}}」を削除しますか？この操作は元に戻せません。",
+    "closeTitle": "API仕様を閉じる",
+    "closeMessage": "「{{name}}」には未保存の変更があります。閉じる前に保存しますか？",
+    "dontSave": "保存しない",
+    "save": "保存",
+    "copyName": "{{name}}のコピー",
+    "importedName": "インポートしたAPI",
+    "importAddressTitle": "API仕様をインポート",
+    "importAddressMessage": "OpenAPIまたはSwagger仕様のアドレスを入力してください。",
+    "importAddressPlaceholder": "https://example.com/openapi.json",
+    "importAddressConfirm": "インポート",
+    "checkResponsesTitle": "レスポンスをチェック",
+    "generateFirst": "まずこの仕様からリクエストを生成してください。そのレスポンスがこの仕様に照らしてチェックされます。",
+    "checkingResponses": "「{{name}}」のレスポンスはこの仕様に照らしてチェックされます。",
+    "tabLabel": "API仕様 {{name}}",
+    "templates": {
+      "strategies": {
+        "name": "Strategies API"
+      },
+      "resource": {
+        "name": "Items API"
+      },
+      "blank": {
+        "name": "新しいAPI"
+      }
+    }
+  },
+  "specList": {
+    "listLabel": "API仕様",
+    "emptyTitle": "存在する前にAPIを設計",
+    "emptyDescription": "ここでOpenAPI仕様を書くと、入力中にチェックされます。その後、リクエストを生成し、モックサーバーを起動して、実際のレスポンスを仕様に照らしてチェックできます。",
+    "count_other": "{{count}}件のAPI仕様",
+    "newSpec": "新しいAPI仕様",
+    "importSpec": "仕様をインポート",
+    "importFile": "ファイルからインポート",
+    "importAddress": "アドレスからインポート",
+    "actions": "{{name}}の操作",
+    "rename": "名前を変更",
+    "duplicate": "複製",
+    "remove": "削除",
+    "sidebarTab": "仕様"
+  },
+  "specView": {
+    "nameLabel": "API仕様の名前",
+    "unsaved": "未保存の変更",
+    "save": "保存",
+    "formatLabel": "ファイル形式",
+    "formatYaml": "YAML",
+    "formatJson": "JSON",
+    "editorLabel": "OpenAPI仕様",
+    "previewLabel": "ドキュメントのプレビュー",
+    "showPreview": "ドキュメントのプレビューを表示",
+    "hidePreview": "ドキュメントのプレビューを非表示",
+    "viewDocs": "ドキュメントを表示",
+    "viewDocsHint": "ドキュメントを大きなウィンドウで開きます。",
+    "generate": "リクエストを生成",
+    "generateHint": "この仕様からリクエストを作成し、仕様との同期を保つリンクを付けます。",
+    "update": "リクエストを更新",
+    "updateHint": "この仕様と、そこから生成したリクエストを比較し、選んだ変更を適用します。",
+    "mock": "モックを起動",
+    "mockHint": "この仕様の例をローカルのモックサーバーから返します。",
+    "check": "レスポンスをチェック",
+    "checkHint": "生成したリクエストのレスポンスをこの仕様に照らしてチェックします。",
+    "compare": "比較",
+    "compareHint": "この仕様を別のバージョンと比較し、破壊的変更を一覧表示します。",
+    "problems_other": "{{count}}件の問題",
+    "problemsLabel": "問題",
+    "checking": "仕様をチェック中",
+    "cannotRead": "仕様を読み取れません"
+  }
+}

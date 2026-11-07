@@ -11,7 +11,13 @@
     "postman": "Postmanのファイル",
     "openapi": "OpenAPI仕様",
     "gostman": "Gostmanのエクスポート",
-    "http": ".httpファイル"
+    "http": ".httpファイル",
+    "hoppscotch": "Hoppscotchコレクション",
+    "thunder": "Thunder Clientコレクション",
+    "httpie": "HTTPieコレクション",
+    "hurl": "Hurlファイル",
+    "raml": "RAML仕様",
+    "blueprint": "API Blueprint"
   },
   "import": {
     "chooseFiles": "ファイルを選択",
@@ -93,13 +99,22 @@
       "http": {
         "label": ".httpファイル",
         "description": "VS Code REST ClientとJetBrains HTTP Client用のリクエスト。フォルダーごとに1ファイルで、環境はhttp-client.env.jsonに保存"
+      },
+      "hurl": {
+        "label": "Hurlファイル",
+        "description": "フォルダーごとに1つの.hurlファイル。チェックは[Asserts]、抽出ルールは[Captures]になります"
       }
     },
     "docs": {
       "titlePlaceholder": "タイトル（既定：API documentation）",
       "titleLabel": "ドキュメントのタイトル",
       "includeExamples": "レスポンスの例を含める",
-      "playground": "お試しパネルを含める"
+      "playground": "お試しパネルを含める",
+      "accentLabel": "リンクの色",
+      "accentPlaceholder": "リンクの色（例：#0b6bcb）",
+      "logoChoose": "ロゴを選択",
+      "logoRemove": "ロゴを削除",
+      "logoTooLarge": "ロゴは300 KB未満にしてください。"
     }
   },
   "transfer": {
@@ -140,12 +155,14 @@
       "scripts": "スクリプト",
       "oauth": "OAuth 2.0設定",
       "commands": "ローカルのMCPサーバーを起動するコマンド",
+      "sockets": "生のTCP、UDP、NATSリクエスト",
       "files": "このコンピューターのファイルを送信するファイル読み取り"
     },
     "titleOne": {
       "scripts": "スクリプトをインポートしますか？",
       "oauth": "OAuth設定をインポートしますか？",
       "commands": "コマンドをインポートしますか？",
+      "sockets": "TCP、UDP、NATSリクエストをインポートしますか？",
       "files": "ファイル読み取りをインポートしますか？"
     },
     "titleMany": "インポート前に確認",
@@ -153,6 +170,7 @@
       "scripts": "スクリプトを含めてインポート",
       "oauth": "OAuth設定を含めてインポート",
       "commands": "コマンドを含めてインポート",
+      "sockets": "TCP、UDP、NATSリクエストを含めてインポート",
       "files": "ファイル読み取りを含めてインポート"
     },
     "withMany": "すべてインポート",
@@ -160,6 +178,7 @@
       "scripts": "スクリプトなしでインポート",
       "oauth": "OAuth設定なしでインポート",
       "commands": "コマンドなしでインポート",
+      "sockets": "TCP、UDP、NATSリクエストのアドレスなしでインポート",
       "files": "ファイル読み取りなしでインポート"
     },
     "withoutMany": "除外してインポート",
@@ -167,6 +186,7 @@
       "scripts": "スクリプトは除外されました。",
       "oauth": "OAuth 2.0設定は除外されました。",
       "commands": "ローカルのMCPサーバーを起動するコマンドは除外されました。",
+      "sockets": "生のTCP、UDP、NATSリクエストのアドレスは除外されました。",
       "files": "このコンピューターのファイルを送信するファイル読み取りは除外されました。"
     },
     "leftOut": "{{kinds}}は除外されました。",

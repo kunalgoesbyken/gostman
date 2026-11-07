@@ -95,6 +95,9 @@
       "status": "状态码",
       "contentType": "Content type",
       "schema": "响应体结构，以 JSON Schema 表示：字段类型、出现过的字段，以及出现过 null 的位置。值为 null 的字段可接受任何值。",
+      "snapshot": "响应体快照：响应体与此响应不同时检查失败。名称看起来像机密的字段、令牌、日期以及看起来是自动生成的 id 的值会被忽略且不存储。可在检查中编辑忽略的路径。",
+      "headersSnapshot": "响应头快照，不含 Cookie 和凭据。每次响应都会变化的响应头（例如 date 和 etag）会被忽略。",
+      "exampleSnapshot": "已保存示例“{{name}}”的快照：响应体与该示例不同时检查失败。看起来像机密的字段、令牌、日期和自动生成的 id 会被忽略且不存储。",
       "responseTime": "响应时间上限为 {{budget}} ms，即此响应耗时的两倍，向上取整。"
     },
     "nothingNew": "“检查”标签页中已有这些检查。",
@@ -140,6 +143,19 @@
     "extractTimedOut_other": "提取规则运行超过 {{count}} 秒，已被停止，因此没有保留任何值。请检查其 JSONPath 过滤器中是否有运行缓慢的正则表达式。",
     "pathTimedOut_other": "此路径运行超过 {{count}} 秒，已被停止。请检查其过滤器中是否有运行缓慢的正则表达式。",
     "filterTimedOut_other": "过滤器运行超过 {{count}} 秒，已被停止。请检查其中是否有运行缓慢的正则表达式。"
+  },
+  "snapshot": {
+    "operator": "符合快照",
+    "edit": "编辑快照",
+    "editorTitle": "编辑快照",
+    "editorHint": "一个 JSON 对象。expected 是存储的值，ignore 列出不参与比较的 JSONPath（例如 $.id 或 $.items[*].createdAt），ignoreOrder 为 true 时比较数组不考虑元素顺序。",
+    "update": "用上一个响应更新快照",
+    "notice": "快照以纯文本形式保存在请求中，在工作区文件夹中会进入 Git。提交前请检查。名称类似凭据的字段（包括其下的所有内容）、看起来像令牌、JWT 或 API 密钥的值、日期和自动生成的 id，以及忽略路径的值都会被替换为 (ignored)，不会存储。",
+    "invalid": "快照无效：它必须是一个包含 expected 值的 JSON 对象。",
+    "changed": "{{path}}：期望 {{expected}}，实际为 {{actual}}",
+    "missing": "{{path}}：期望 {{expected}}，但缺失",
+    "extra": "{{path}}：不在快照中，实际为 {{actual}}",
+    "more_other": "……还有 {{count}} 处差异。"
   },
   "operators": {
     "eq": "等于",

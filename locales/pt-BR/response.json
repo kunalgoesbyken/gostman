@@ -62,7 +62,22 @@
     "views": {
       "pretty": "Formatado",
       "raw": "Bruto",
-      "preview": "Prévia"
+      "preview": "Prévia",
+      "info": "Resumo",
+      "hex": "Hex",
+      "msgpack": "MessagePack",
+      "cbor": "CBOR"
+    },
+    "hex": {
+      "label": "Visualização hexadecimal do corpo",
+      "offset": "Deslocamento",
+      "text": "Texto"
+    },
+    "decode": {
+      "working": "Decodificando…",
+      "failed": "Não foi possível ler o corpo como {{format}}: {{reason}}",
+      "timedOut": "Ler o corpo como {{format}} levou mais de {{seconds}} segundos, então foi interrompido. Use Hex ou salve-o em um arquivo.",
+      "tooLarge": "Este corpo tem {{size}}. O Gostman decodifica até {{limit}}, então use Hex ou salve-o em um arquivo."
     },
     "bodyView": "Visualização do corpo",
     "checksPassed": "{{passed}} de {{total}} verificações aprovadas",
@@ -76,7 +91,8 @@
       "compareParts": "Comparar",
       "comparedWith": "comparada com",
       "bodyPart": "Corpo",
-      "headersPart": "Cabeçalhos"
+      "headersPart": "Cabeçalhos",
+      "exportHar": "Exportar como HAR"
     },
     "columns": {
       "name": "Nome",
@@ -115,6 +131,15 @@
     "treeTrimmed_one": "Mostrando o início desta árvore. Mais {{count}} valor está oculto. Use Bruto ou o filtro para ver o resto.",
     "treeTrimmed_many": "Mostrando o início desta árvore. Mais {{count}} de valores estão ocultos. Use Bruto ou o filtro para ver o resto.",
     "treeTrimmed_other": "Mostrando o início desta árvore. Mais {{count}} valores estão ocultos. Use Bruto ou o filtro para ver o resto.",
+    "tree": {
+      "expandAll": "Expandir tudo",
+      "collapseAll": "Recolher tudo",
+      "depth": "Profundidade de expansão",
+      "level": "Nível {{count}}",
+      "allLevels": "Todos os níveis",
+      "remember": "Abrir esta requisição sempre nesta profundidade",
+      "remembered": "Esta requisição já abre nesta profundidade"
+    },
     "requestFailed": "A requisição falhou",
     "error": "Erro",
     "milliseconds": "{{value}} ms",

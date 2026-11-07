@@ -58,7 +58,8 @@
     "fields": {
       "query": "Query",
       "header": "Header",
-      "body": "Corpo"
+      "body": "Corpo",
+      "param": "Parametro di percorso"
     },
     "ops": {
       "equals": "è uguale a",
@@ -72,6 +73,12 @@
     "headersLabel": "Header (uno Nome: valore per riga)",
     "bodyLabel": "Corpo (se vuoto mantiene il corpo della route)",
     "bodyHint": "Segnaposto: {{placeholders}}",
+    "dataTitle": "File di dati",
+    "dataHint": "Facoltativo. A una richiesta il cui valore corrisponde a una cella della colonna si risponde con quella riga come JSON, oppure con il corpo qui sopra usando {{example}}. Senza corrispondenza questa regola non si applica. CSV, JSON o XLSX, letto dalla cartella del workspace.",
+    "dataFile": "File nella cartella del workspace",
+    "dataField": "Richiesta da confrontare",
+    "dataName": "Nome o percorso JSON",
+    "dataColumn": "Colonna",
     "nth": "Solo l'N-esima corrispondenza",
     "nthPlaceholder": "Ogni corrispondenza",
     "behaviorTitle": "Comportamento",
@@ -107,6 +114,12 @@
       "conflicts": "{{count}} in conflitto",
       "off": "{{count}} disattivate",
       "skipped": "{{count}} non servite"
-    }
+    },
+    "importRules": "Importa regole",
+    "exportRules": "Esporta regole",
+    "rulesName": "gostman-mock-rules.yaml",
+    "rulesImported_one": "Importata {{count}} regola, disattivata finché non la attivi.",
+    "rulesImported_many": "Importate {{count}} di regole, disattivate finché non le attivi.",
+    "rulesImported_other": "Importate {{count}} regole, disattivate finché non le attivi."
   }
 }

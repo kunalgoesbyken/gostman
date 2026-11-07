@@ -10,6 +10,7 @@
       "language": "言語",
       "ai": "AI",
       "privacy": "プライバシー",
+      "updates": "アップデート",
       "data": "データ"
     },
     "fields": {
@@ -21,12 +22,14 @@
       "codeFont": "コードのフォント",
       "density": "密度",
       "responseLayout": "レスポンスパネル",
+      "tabPlacement": "開いているタブ",
       "systemTitleBar": "システムのタイトルバーを使用",
       "editorFontSize": "エディターのフォントサイズ",
       "wrapLines": "長い行を折り返す",
       "requestTimeout": "既定のタイムアウト",
       "confirmCloseTab": "タブを閉じるとき、未保存の変更を破棄する前に確認する",
       "language": "言語",
+      "authorName": "メモに表示する名前",
       "sidebarViews": "サイドバーのタブ"
     },
     "themes": {
@@ -54,6 +57,11 @@
       "below": "下",
       "right": "右"
     },
+    "tabPlacements": {
+      "bar": "タブバー",
+      "sidebar": "サイドバー"
+    },
+    "tabPlacementHint": "サイドバーを選ぶとタブバーが非表示になり、開いているタブがサイドバーに一覧表示されます。小さな画面に向いています。",
     "seconds": "秒",
     "pixels": "px",
     "contrastHint": "「強め」にすると、境界線と補助テキストがよりはっきり表示されます。",
@@ -152,6 +160,7 @@
       "lowContrast": "文字が読みにくい可能性があります。{{minimum}}:1以上を目安にしてください。",
       "resetRow": "{{name}}をリセット"
     },
+    "authorNameHint": "リクエストやフォルダーに追加したメモに表示されます。",
     "timeoutHint_other": "独自のタイムアウトを設定していないリクエストに適用されます。0にすると、組み込みの上限である{{count}}秒が使われます。",
     "languageSystem": "システムに合わせる（{{language}}）",
     "languageSwitchHint": "新しい言語を表示するためにGostmanを再読み込みします。開いているタブと未保存の下書きは保持されますが、タブに表示中のレスポンスはクリアされます。",
@@ -163,6 +172,8 @@
     "accentAdjusted": "この色の文字が読みやすいよう、ライトモードでは{{light}}、ダークモードでは{{dark}}で表示されます。",
     "sidebarViewsHint": "サイドバーに表示するタブと順序を選びます。サイドバーのタブを右クリックしても表示・非表示を切り替えられます。",
     "moveViewUp": "{{name}}を上へ移動",
-    "moveViewDown": "{{name}}を下へ移動"
+    "moveViewDown": "{{name}}を下へ移動",
+    "textScaleHint": "インターフェースと入力欄の大きさを変えます。ウィンドウのズームはこのサイズに重ねて適用されます。基準が{{size}} pxの場合、125%ズームでは{{zoomed}} pxで表示されます。",
+    "editorFontSizeHint": "コードエディターの文字サイズ（ピクセル）。文字サイズの設定には連動せず、ウィンドウのズームはこれに重ねて適用されます。"
   }
 }

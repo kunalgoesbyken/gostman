@@ -1,0 +1,22 @@
+{
+  "requestVariables": {
+    "types": {
+      "none": "Dowolny",
+      "string": "Tekst",
+      "number": "Liczba",
+      "integer": "Liczba całkowita",
+      "boolean": "Prawda lub fałsz",
+      "json": "JSON",
+      "enum": "Jedna z listy"
+    },
+    "problems": {
+      "required": "{{name}} wymaga wartości.",
+      "number": "{{name}} musi być liczbą.",
+      "integer": "{{name}} musi być liczbą całkowitą.",
+      "boolean": "{{name}} musi mieć wartość true lub false.",
+      "json": "{{name}} musi być prawidłowym JSON-em.",
+      "enum": "{{name}} musi być jedną z wartości: {{choices}}."
+    },
+    "blocked": "Żądanie nie zostało wysłane z powodu jego zmiennych.\n{{problems}}"
+  }
+}

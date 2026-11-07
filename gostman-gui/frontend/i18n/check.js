@@ -1,5 +1,5 @@
 import { LOCALES_ROOT } from './paths.js'
-import { fallbackSummary, validateCatalogues } from './validate.js'
+import { absentFileSummary, fallbackSummary, validateCatalogues } from './validate.js'
 
 const percent = (ratio) => `${(ratio * 100).toFixed(1)}%`
 
@@ -7,6 +7,7 @@ const verbose = process.argv.includes('--verbose') || process.env.GOSTMAN_I18N_V
 const result = validateCatalogues(LOCALES_ROOT)
 
 result.errors.forEach((line) => console.error(`error  ${line}`))
+absentFileSummary(result).forEach((line) => console.warn(`warn   ${line}`))
 fallbackSummary(result).forEach((line) => console.warn(`warn   ${line}`))
 if (verbose) result.warnings.forEach((line) => console.warn(`warn   ${line}`))
 

@@ -1,0 +1,36 @@
+{
+  "search": {
+    "sidebarTab": "Recherche",
+    "placeholder": "Rechercher dans les requêtes, l’historique et les réponses",
+    "label": "Tout rechercher",
+    "hint": "Recherche dans les noms, URL, en-têtes, corps et descriptions des requêtes, dans l’historique et dans la dernière réponse de chaque onglet ouvert.",
+    "searching": "Recherche…",
+    "none": "Aucun résultat pour « {{query}} »",
+    "truncated": "Seuls les premiers résultats sont affichés. Affinez la recherche pour en voir davantage.",
+    "timedOut": "La recherche a pris trop de temps et a été arrêtée. Essayez une requête plus longue ou plus précise.",
+    "failed": "La recherche a échoué : {{reason}}",
+    "results_one": "{{count}} résultat",
+    "results_many": "{{count}} de résultats",
+    "results_other": "{{count}} résultats",
+    "command": {
+      "label": "Rechercher partout",
+      "description": "Rechercher dans les noms, URL et corps des requêtes, l’historique et les réponses ouvertes",
+      "keywords": "chercher trouver recherche globale réponses historique find global search responses history"
+    },
+    "kinds": {
+      "request": "Requête",
+      "history": "Historique",
+      "response": "Réponse"
+    },
+    "fields": {
+      "name": "Nom",
+      "url": "URL",
+      "body": "Corps",
+      "headers": "En-têtes",
+      "description": "Description",
+      "tags": "Tags",
+      "responseBody": "Corps de la réponse",
+      "responseHeaders": "En-têtes de la réponse"
+    }
+  }
+}

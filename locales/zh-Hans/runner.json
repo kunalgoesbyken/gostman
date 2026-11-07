@@ -12,6 +12,19 @@
     "dataFile": "数据文件（CSV 或 JSON）",
     "clearData": "移除数据文件",
     "report": "下载 HTML 报告",
+    "reportFormat": "报告格式",
+    "formats": {
+      "html": "HTML",
+      "junit": "JUnit",
+      "json": "JSON"
+    },
+    "schedule": "定时运行",
+    "cliLine": "在终端中执行相同的运行",
+    "shells": {
+      "posix": "macOS 和 Linux",
+      "powershell": "PowerShell"
+    },
+    "cliUnsafe": "某个文件夹或数据文件的名称包含换行符、双引号、末尾反斜杠或其他无法在所有 shell 中安全传递的字符，因此不显示命令。重命名后即可获得命令。",
     "includeTags": "仅包含标签",
     "excludeTags": "排除标签",
     "anyTag": "任意",
@@ -54,6 +67,12 @@
     "progressPassed": "{{count}} 个通过",
     "progressFailed": "{{count}} 个失败",
     "progressSkipped": "{{count}} 个已跳过",
-    "socketSkipped": "WebSocket 请求不属于运行范围。"
+    "socketSkipped": "WebSocket 请求不属于运行范围。",
+    "coverageTitle": "OpenAPI 覆盖率",
+    "coverageOperations": "{{total}} 个操作中覆盖了 {{covered}} 个（{{percent}}%）",
+    "coverageResponses": "{{total}} 个已记录的响应中覆盖了 {{covered}} 个（{{percent}}%）",
+    "coverageNotCalled": "未调用",
+    "coverageMissing": "无响应：{{codes}}",
+    "coverageUndocumented": "未记录的状态码：{{codes}}"
   }
 }

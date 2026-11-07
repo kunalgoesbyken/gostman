@@ -1,0 +1,27 @@
+{
+  "dependencies": {
+    "title": "变量依赖",
+    "menuFolder": "变量依赖",
+    "scopeAll": "所有请求",
+    "scopeFolder": "文件夹：{{name}}",
+    "intro": "每个变量位于设置它的请求和读取它的请求之间。请求通过提取规则或脚本设置变量，并通过地址、请求头、请求体或认证中的 {{reference}}，或通过脚本调用读取变量。",
+    "showInputs": "显示仅来自环境的变量",
+    "producers": "设置",
+    "variables": "变量",
+    "consumers": "读取",
+    "missingTitle": "被读取但从未设置",
+    "missingDetail": "这些变量被请求读取，但没有请求设置它们，也没有环境、集合或全局列表定义它们：{{names}}。",
+    "missingMark": "从未设置",
+    "none": "请求之间没有变量关联",
+    "noneDescription": "此范围内没有请求通过提取规则或脚本设置另一个请求会读取的变量。",
+    "summary_other": "{{count}} 个变量",
+    "graphLabel": "变量依赖关系图",
+    "openRequest": "打开 {{name}}",
+    "untitled": "未命名请求",
+    "command": {
+      "label": "显示变量依赖",
+      "description": "绘制哪些请求设置和读取每个变量",
+      "keywords": "graph chain extract flow produce consume 依赖 图 提取 流程"
+    }
+  }
+}

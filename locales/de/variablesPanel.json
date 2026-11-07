@@ -1,0 +1,35 @@
+{
+  "variablesPanel": {
+    "type": "Typ",
+    "typeLabel": "Variablentyp",
+    "value": "Wert",
+    "valueChoice": "Wert wählen",
+    "fieldOptions": "Feldoptionen",
+    "label": "Beschriftung",
+    "labelPlaceholder": "Name in der Variablenansicht",
+    "help": "Hilfetext",
+    "helpPlaceholder": "Wird in der Variablenansicht unter dem Feld angezeigt",
+    "placeholder": "Platzhalter",
+    "placeholderPlaceholder": "Wird angezeigt, solange das Feld leer ist",
+    "choices": "Auswahlwerte",
+    "choicesPlaceholder": "rot, grün, blau",
+    "required": "Erforderlich",
+    "inForm": "In der Variablenansicht anzeigen",
+    "showInherited": "Geerbte Variablen anzeigen",
+    "inheritedTitle": "Geerbt",
+    "inheritedHint": "Schreibgeschützt. Diese stammen aus Bereichen oberhalb dieser Anfrage. Eine weiter oben definierte Variable mit gleichem Namen hat hier Vorrang.",
+    "inheritedNone": "Es werden keine Variablen geerbt.",
+    "hiddenValue": "Verborgen",
+    "typeNote": "Eine typisierte Variable erreicht Skripte als dieser Typ. In einer URL, einem Header oder einem Body wird sie weiterhin als Text geschrieben."
+  },
+  "variablesView": {
+    "switchLabel": "Anfrageansicht",
+    "fullEditor": "Vollständiger Editor",
+    "variables": "Variablen",
+    "formLabel": "Anfragevariablen",
+    "emptyTitle": "Keine Variablen auszufüllen",
+    "emptyDescription": "Variablen, die im Tab „Vars“ des vollständigen Editors hinzugefügt werden, erscheinen hier als Eingabefelder.",
+    "openEditor": "Vollständigen Editor öffnen",
+    "required": "Erforderlich"
+  }
+}

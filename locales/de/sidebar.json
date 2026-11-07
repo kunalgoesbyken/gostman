@@ -2,13 +2,17 @@
   "sidebar": {
     "views": "Ansicht der Seitenleiste",
     "collections": "Sammlungen",
+    "openTabs": "Geöffnete Tabs",
     "history": "Verlauf",
     "newFolder": "Neuer Ordner",
+    "add": "Hinzufügen",
     "newRequest": "Neue Anfrage",
     "toggle": "Seitenleiste ein-/ausblenden",
     "close": "Seitenleiste schließen",
     "resize": "Größe der Seitenleiste ändern",
     "viewsMenu": "Tabs der Seitenleiste",
+    "more": "Mehr",
+    "moreHint": "Die anderen Ansichten der Seitenleiste anzeigen",
     "resetViews": "Alle Tabs in der Standardreihenfolge anzeigen"
   },
   "history": {
@@ -34,6 +38,25 @@
       "days_one": "vor {{count}} Tag gesendet",
       "days_other": "vor {{count}} Tagen gesendet",
       "date": "gesendet am {{date}}"
+    },
+    "range": "Zeitraum",
+    "folder": "Ordner",
+    "tag": "Tag",
+    "allFolders": "Alle Ordner",
+    "allTags": "Alle Tags",
+    "groupByDate": "Nach Datum gruppieren",
+    "ranges": {
+      "any": "Beliebiger Zeitpunkt",
+      "today": "Heute",
+      "week": "Letzte 7 Tage",
+      "month": "Letzte 30 Tage"
+    },
+    "groups": {
+      "today": "Heute",
+      "yesterday": "Gestern",
+      "week": "Früher in dieser Woche",
+      "month": "Früher in diesem Monat",
+      "older": "Älter"
     }
   }
 }

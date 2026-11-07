@@ -1,0 +1,681 @@
+{
+  "features": {
+    "title": "Poznaj funkcje",
+    "intro": "Wyszukaj, co potrafi Gostman, wypróbuj funkcję na miejscu i przeczytaj, jak działa.",
+    "searchLabel": "Szukaj funkcji",
+    "searchPlaceholder": "Szukaj funkcji, na przykład migawka, mock lub git",
+    "groupsLabel": "Grupy funkcji",
+    "allGroups": "Wszystkie",
+    "groups": {
+      "requests": "Żądania",
+      "data": "Kolekcje i dane",
+      "variables": "Zmienne i sekrety",
+      "testing": "Sprawdzenia i specyfikacje",
+      "automation": "Automatyzacja",
+      "mocking": "Mock i przechwytywanie",
+      "git": "Git",
+      "ai": "AI",
+      "app": "Aplikacja"
+    },
+    "tryIt": "Wypróbuj",
+    "tryItLabel": "Wypróbuj: {{title}}",
+    "learnMore": "Więcej informacji",
+    "learnMoreLabel": "Więcej informacji: {{title}}",
+    "newBadge": "Nowość",
+    "platformDesktop": "Aplikacja desktopowa",
+    "platformCli": "Wiersz poleceń",
+    "platformWeb": "Aplikacja webowa",
+    "desktopOnlyTitle": "{{title}} wymaga aplikacji desktopowej",
+    "desktopOnlyBody": "Przeglądarka nie ma dostępu do plików lokalnych, portów ani ustawień systemu, więc ta funkcja jest dostępna tylko w aplikacji desktopowej.",
+    "getDesktop": "Pobierz aplikację desktopową",
+    "nothingMatches": "Żadna funkcja nie pasuje do „{{query}}”.",
+    "results_one": "{{count}} funkcja",
+    "results_few": "{{count}} funkcje",
+    "results_many": "{{count}} funkcji",
+    "results_other": "{{count}} funkcji",
+    "close": "Zamknij",
+    "commandTitle": "Poznaj funkcje",
+    "commandDescription": "Przeszukaj wszystkie funkcje, wypróbuj je i przeczytaj, jak działają",
+    "commandKeywords": "funkcje funkcja możliwości odkryj co potrafi gostman pomoc features index capabilities discover help",
+    "statusLabel": "Odkrywaj",
+    "statusTitle": "Poznaj funkcje",
+    "helpHideLabel": "Ukryj wskazówkę o: {{title}}",
+    "whatsNewTitle": "Co nowego",
+    "whatsNewIntro": "Nowości w wersji {{version}}",
+    "whatsNewNothing": "W tej wersji nie ma nowości do pokazania.",
+    "whatsNewCommandTitle": "Co nowego",
+    "whatsNewCommandDescription": "Funkcje dodane w najnowszej wersji",
+    "whatsNewKeywords": "informacje o wydaniu lista zmian aktualizacje wersja nowości release notes changelog",
+    "whatsNewDot": "Co nowego w wersji {{version}}",
+    "exploreAll": "Poznaj wszystkie funkcje",
+    "samplesAdded": "Dodano przykładową kolekcję.",
+    "helpMenu": "Pomoc",
+    "exploreHint_one": "Przeszukaj {{count}} funkcję Gostmana, wypróbuj ją na przykładzie i przeczytaj, jak działa.",
+    "exploreHint_few": "Przeszukaj {{count}} funkcje Gostmana, wypróbuj je na przykładzie i przeczytaj, jak działają.",
+    "exploreHint_many": "Przeszukaj {{count}} funkcji Gostmana, wypróbuj je na przykładzie i przeczytaj, jak działają.",
+    "exploreHint_other": "Przeszukaj {{count}} funkcji Gostmana, wypróbuj je na przykładzie i przeczytaj, jak działają.",
+    "copied": "Skopiowano {{command}}",
+    "copyFailed": "Nie udało się skopiować {{command}}",
+    "toolsMenu": "Narzędzia",
+    "toolsMenuHint": "Wszystko, co Gostman potrafi zrobić z Twoimi żądaniami, według zadania",
+    "toolGroups": {
+      "build": "Tworzenie",
+      "test": "Testowanie",
+      "automate": "Automatyzacja",
+      "mockCapture": "Mock i przechwytywanie",
+      "shareGit": "Udostępnianie i Git"
+    },
+    "cliLine": "W terminalu"
+  },
+  "featureWords": {
+    "rest": {
+      "title": "Żądania REST i HTTP",
+      "blurb": "Wyślij dowolną metodę z parametrami, nagłówkami, treścią i uwierzytelnianiem, i odczytaj status, czas oraz rozmiar.",
+      "synonyms": "żądanie zapytanie metoda http api get post put delete patch rest request",
+      "tool": "Nowe żądanie"
+    },
+    "graphql": {
+      "title": "GraphQL",
+      "blurb": "Pisz zapytania z przeglądarką schematu, kreatorem zapytań i zmiennymi. Subskrypcje działają przez WebSocket.",
+      "synonyms": "graphql zapytanie mutacja schemat introspekcja subskrypcja query mutation schema subscription apollo"
+    },
+    "grpc": {
+      "title": "gRPC",
+      "blurb": "Wczytaj usługi przez refleksję lub pliki .proto i wywołuj metody unarne i strumieniowe.",
+      "synonyms": "grpc protobuf proto refleksja strumień reflection stream bloomrpc grpcurl"
+    },
+    "websocket": {
+      "title": "WebSocket, Socket.IO i MQTT",
+      "blurb": "Połącz się, wysyłaj zapisane wiadomości i czytaj dziennik wiadomości przez WebSocket, Socket.IO lub MQTT.",
+      "synonyms": "websocket socket.io socketio mqtt czas rzeczywisty wiadomości zdarzenia realtime ws sse events"
+    },
+    "mcp": {
+      "title": "Serwery MCP",
+      "blurb": "Wywołuj narzędzia, zasoby i prompty serwera MCP i sprawdzaj, co zwraca.",
+      "synonyms": "mcp model context protocol narzędzia agent serwer tools server inspector"
+    },
+    "curl": {
+      "title": "Wklej polecenie curl",
+      "blurb": "Wklej polecenie curl do paska adresu, a żądanie wypełni się samo.",
+      "synonyms": "curl wklej polecenie wiersz poleceń import schowek paste command line clipboard"
+    },
+    "codegen": {
+      "title": "Fragmenty kodu",
+      "blurb": "Skopiuj wysyłane żądanie jako cURL, Python, Go, JavaScript, Java, C# i inne, w tym axios, httpx, OkHttp, RestSharp, Guzzle, HTTPie i wget.",
+      "synonyms": "kod fragment generuj code snippet generate curl python javascript fetch go java",
+      "tool": "Kod"
+    },
+    "responseViewer": {
+      "title": "Podgląd odpowiedzi",
+      "blurb": "Czytaj JSON jako drzewo, podglądaj HTML, obrazy i PDF, filtruj za pomocą JSONPath i przeszukuj treść.",
+      "synonyms": "odpowiedź treść podgląd filtr szukaj oś czasu konsola wizualizacja response body json preview filter search jsonpath timeline console visualize"
+    },
+    "examples": {
+      "title": "Zapisane przykłady",
+      "blurb": "Zachowuj odpowiedzi jako nazwane przykłady, które dokumentują żądanie i zasilają serwer mock.",
+      "synonyms": "przykład zapisana odpowiedź próbka dokumentacja example saved response sample documentation"
+    },
+    "oauth": {
+      "title": "Uwierzytelnianie i OAuth 2",
+      "blurb": "Basic, bearer, klucz API, OAuth 1 i 2, Digest, AWS SigV4, NTLM, JWT i inne, z odnawianiem tokenów.",
+      "synonyms": "uwierzytelnianie autoryzacja logowanie klucz auth authentication oauth oauth2 bearer token basic digest sigv4 ntlm hawk apikey"
+    },
+    "cookies": {
+      "title": "Słoik cookies",
+      "blurb": "Przeglądaj, edytuj i czyść cookies przechowywane dla każdej domeny.",
+      "synonyms": "ciasteczka ciastka cookie cookies jar sesja session",
+      "tool": "Cookies"
+    },
+    "requestSettings": {
+      "title": "Ustawienia żądania",
+      "blurb": "Ustaw limit czasu, przekierowania i weryfikację TLS dla pojedynczego żądania.",
+      "synonyms": "ustawienia limit czasu przekierowanie weryfikacja settings timeout redirect tls verify ssl follow"
+    },
+    "hexView": {
+      "title": "Widok szesnastkowy",
+      "blurb": "Czytaj treść odpowiedzi jako przesunięcia, bajty szesnastkowe i tekst.",
+      "synonyms": "hex szesnastkowy binarny bajty zrzut binary bytes dump"
+    },
+    "msgpackCbor": {
+      "title": "MessagePack i CBOR",
+      "blurb": "Dekoduj odpowiedzi MessagePack i CBOR do tekstu JSON, który można przeszukiwać i kopiować.",
+      "synonyms": "msgpack messagepack cbor binarny dekodowanie binary decode"
+    },
+    "certificateViewer": {
+      "title": "Łańcuch certyfikatów i przekierowania",
+      "blurb": "Karta Oś czasu pokazuje łańcuch certyfikatów przedstawiony przez serwer, z datami ważności, nazwami i odciskami, oraz tabelę kolejnych przekierowań.",
+      "synonyms": "certyfikat łańcuch ważność przekierowanie oś czasu certificate tls ssl chain x509 https redirect hops timeline expiry"
+    },
+    "jwtSigning": {
+      "title": "Podpisywanie JWT",
+      "blurb": "Podpisz JWT na karcie Auth kluczem prywatnym JWK i ustaw, kiedy wygasa.",
+      "synonyms": "jwt podpis podpisywanie klucz wygaśnięcie sign jwk token expiry bearer hs256 rs256"
+    },
+    "httpVersion": {
+      "title": "Wersja HTTP",
+      "blurb": "Wybierz dla żądania Automatycznie, HTTP/1.1 lub HTTP/2. Oś czasu pokazuje użyty protokół.",
+      "synonyms": "wersja protokół http2 http/2 http1 protocol version alpn prior knowledge"
+    },
+    "dnsOverride": {
+      "title": "Nadpisania hostów",
+      "blurb": "Kieruj host na stały adres, tak jak curl --resolve, i ogranicz połączenia do IPv4 lub IPv6.",
+      "synonyms": "dns rozwiązywanie host hosty nadpisanie adres resolve hosts override ip ipv4 ipv6 curl"
+    },
+    "graphqlUpload": {
+      "title": "Przesyłanie plików w GraphQL",
+      "blurb": "Wysyłaj pliki w żądaniu GraphQL zgodnie ze specyfikacją multipart request z karty Pliki.",
+      "synonyms": "graphql przesyłanie plik pliki upload multipart file files mutation"
+    },
+    "wsSecurity": {
+      "title": "SOAP WS-Security",
+      "blurb": "Dodaj do żądania SOAP z karty Auth WS-Security UsernameToken (zwykły lub digest) i Timestamp.",
+      "synonyms": "soap wsse ws-security wsdl xml usernametoken digest bezpieczeństwo"
+    },
+    "grpcWeb": {
+      "title": "gRPC-Web i Connect",
+      "blurb": "Wywołuj usługi gRPC przez gRPC-Web lub Connect, co działa też w aplikacji webowej.",
+      "synonyms": "grpc-web grpcweb connect przeglądarka browser transport"
+    },
+    "signalr": {
+      "title": "SignalR",
+      "blurb": "Wynegocjuj połączenie z hubem SignalR, połącz się przez WebSocket i wywołuj jego metody.",
+      "synonyms": "signalr hub aspnet czas rzeczywisty realtime websocket"
+    },
+    "tcpUdp": {
+      "title": "TCP i UDP",
+      "blurb": "Wysyłaj tekst lub dane szesnastkowe przez TCP lub UDP i odczytuj odpowiedź. Tylko aplikacja desktopowa i zaufane foldery.",
+      "synonyms": "tcp udp gniazdo surowe bajty socket raw bytes hex"
+    },
+    "nats": {
+      "title": "NATS",
+      "blurb": "Żądanie i odpowiedź, publikowanie lub oczekiwanie na jedną wiadomość w temacie NATS. Tylko aplikacja desktopowa i zaufane foldery.",
+      "synonyms": "nats temat publikuj subskrybuj wiadomości subject publish subscribe request reply messaging broker"
+    },
+    "breakpoints": {
+      "title": "Wstrzymane wywołania",
+      "blurb": "Wstrzymaj przechwycone żądanie lub odpowiedź regułą, edytuj je, a potem przepuść lub odrzuć.",
+      "synonyms": "punkt przerwania wstrzymaj przechwyć edytuj przepuść odrzuć debugowanie breakpoint breakpoints pause hold intercept edit release drop debug"
+    },
+    "jsonRpc": {
+      "title": "Wywołania JSON-RPC",
+      "blurb": "Dodaj do treści JSON wywołanie JSON-RPC 2.0 lub paczkę wywołań jednym przyciskiem.",
+      "synonyms": "json-rpc jsonrpc rpc paczka metoda parametry batch method params id"
+    },
+    "responseCompare": {
+      "title": "Wcześniejsze odpowiedzi",
+      "blurb": "Każda karta przechowuje 10 ostatnich odpowiedzi; otwórz jedną z nich lub porównaj ją z najnowszą.",
+      "synonyms": "wcześniejsze poprzednie odpowiedzi porównaj różnice historia earlier previous responses compare diff history response"
+    },
+    "responseHar": {
+      "title": "Eksport odpowiedzi do HAR",
+      "blurb": "Zapisz przechowywane odpowiedzi karty jako plik HAR z zamaskowanymi danymi uwierzytelniającymi.",
+      "synonyms": "har eksport odpowiedzi archiwum export responses archive"
+    },
+    "splitView": {
+      "title": "Odpowiedź obok karty",
+      "blurb": "Pokaż najnowszą odpowiedź innej karty w panelu obok otwartej karty, z menu żądania w panelu bocznym.",
+      "synonyms": "podział obok panel odpowiedź porównaj split side by side beside pane response compare"
+    },
+    "globalSearch": {
+      "title": "Szukaj wszędzie",
+      "blurb": "Przeszukuj zapisane żądania, historię i otwarte odpowiedzi w jednym miejscu.",
+      "synonyms": "szukaj znajdź wyszukiwanie globalne wszędzie żądania historia odpowiedzi search find global everywhere requests history responses"
+    },
+    "dependencyGraph": {
+      "title": "Zależności zmiennych",
+      "blurb": "Zobacz, które żądania ustawiają zmienną, a które ją odczytują.",
+      "synonyms": "zależność zależności graf zmienne wyodrębnij ustaw odczyt dependency dependencies graph variables extract set read"
+    },
+    "openTabs": {
+      "title": "Lista otwartych kart",
+      "blurb": "Pokaż otwarte karty jako listę w panelu bocznym i przechodź między nimi.",
+      "synonyms": "karty otwarte lista panel boczny przełącz tabs open list sidebar switch"
+    },
+    "history": {
+      "title": "Historia",
+      "blurb": "Każde wysłane żądanie jest zachowywane wraz ze statusem odpowiedzi, więc można je ponownie otworzyć.",
+      "synonyms": "historia ostatnie wysłane poprzednie history recent sent previous"
+    },
+    "collections": {
+      "title": "Kolekcje i foldery",
+      "blurb": "Grupuj żądania w zagnieżdżonych folderach, przeciągaj je na miejsce, wyszukuj, taguj i koloruj.",
+      "synonyms": "kolekcja folder drzewo panel boczny porządkuj tag etykieta collection tree sidebar organize postman collections"
+    },
+    "folderWorkspace": {
+      "title": "Obszary robocze w folderach",
+      "blurb": "Przechowuj kolekcję jako zwykłe pliki YAML obok swojego kodu i udostępniaj ją przez Git.",
+      "synonyms": "folder obszar roboczy pliki yaml git workspace files bruno opencollection",
+      "tool": "Obszar roboczy",
+      "webInstead": "W wersji webowej kolekcje są przechowywane w tej przeglądarce. Wyeksportuj je, aby je udostępnić lub zrobić kopię zapasową."
+    },
+    "folderSettings": {
+      "title": "Ustawienia folderu",
+      "blurb": "Ustaw nagłówki, uwierzytelnianie, zmienne, skrypty i sprawdzenia raz dla wszystkich żądań w folderze.",
+      "synonyms": "folder kolekcja ustawienia dziedziczenie nagłówki uwierzytelnianie skrypty collection settings inherit headers auth scripts",
+      "tool": "Ustawienia kolekcji"
+    },
+    "import": {
+      "title": "Import",
+      "blurb": "Wczytaj dane z Postman, Bruno, Insomnia, OpenAPI, HAR, WSDL, plików .http i poleceń curl.",
+      "synonyms": "import importuj migracja przenieś postman bruno insomnia openapi swagger har wsdl http curl migrate"
+    },
+    "firecampImport": {
+      "title": "Import z Firecamp",
+      "blurb": "Importuj eksporty kolekcji z Firecamp: foldery, żądania REST, nagłówki i skrypty.",
+      "synonyms": "firecamp import migracja kolekcja migrate collection"
+    },
+    "specImporters": {
+      "title": "Więcej formatów importu",
+      "blurb": "Importuj pliki Hoppscotch, Thunder Client, HTTPie, Hurl, RAML i API Blueprint. Hurl jest też formatem eksportu. Pliki Paw nie są odczytywane.",
+      "synonyms": "hoppscotch thunder client hurl raml blueprint httpie restfox import migracja migrate"
+    },
+    "export": {
+      "title": "Eksport",
+      "blurb": "Zapisz kolekcję do formatu Postman, OpenAPI, Markdown, plików .http lub kopii zapasowej.",
+      "synonyms": "eksport eksportuj kopia zapasowa export postman openapi markdown backup http"
+    },
+    "share": {
+      "title": "Linki do udostępniania",
+      "blurb": "Wyślij kolekcję jako zaszyfrowany link lub plik, bez konta.",
+      "synonyms": "udostępnij link zaszyfrowany wyślij zespół współpraca share encrypted send team collaborate",
+      "tool": "Udostępnij"
+    },
+    "versionedDocs": {
+      "title": "Wersjonowana dokumentacja",
+      "blurb": "gostman docs --versions tworzy dokumentację dla każdego tagu Git, a --logo i --accent nadają stronie wygląd.",
+      "synonyms": "dokumentacja wersja tagi logo publikuj docs documentation html publish version tags accent"
+    },
+    "notes": {
+      "title": "Notatki",
+      "blurb": "Prowadź wątek notatek przy żądaniu lub folderze, zapisany w jego pliku, aby zespół mógł go przejrzeć w Git.",
+      "synonyms": "notatki komentarze przegląd wątek rozwiąż notes comments review thread resolve"
+    },
+    "recentlyDeleted": {
+      "title": "Ostatnio usunięte",
+      "blurb": "Przywracaj usunięte żądania, foldery i środowiska przez 30 dni.",
+      "synonyms": "kosz usunięte przywróć cofnij odzyskaj trash bin deleted restore undo recover"
+    },
+    "backups": {
+      "title": "Kopie zapasowe",
+      "blurb": "Codzienne kopie zapasowe danych oraz kopie przy każdej wersji, z przywracaniem.",
+      "synonyms": "kopia zapasowa backup przywróć odzyskaj restore snapshot recover"
+    },
+    "environments": {
+      "title": "Środowiska",
+      "blurb": "Przełączaj się między zestawami zmiennych dla środowiska lokalnego, testowego i produkcyjnego.",
+      "synonyms": "środowisko zmienne produkcja testowe environment variables dev staging prod env"
+    },
+    "scopes": {
+      "title": "Zakresy zmiennych",
+      "blurb": "Zmienne globalne, kolekcji, folderu, środowiska, sesji i żądania, z jasną kolejnością pierwszeństwa.",
+      "synonyms": "zmienne zakresy pierwszeństwo globalne kolekcja folder żądanie variables scopes precedence global collection request vars"
+    },
+    "jsonTreeDepth": {
+      "title": "Głębokość drzewa JSON",
+      "blurb": "Rozwiń lub zwiń odpowiedź JSON do dowolnego poziomu i otwieraj każde żądanie na preferowanej głębokości.",
+      "synonyms": "json rozwiń zwiń drzewo głębokość poziom expand collapse tree depth level fold unfold response viewer"
+    },
+    "typedVariables": {
+      "title": "Typowane zmienne",
+      "blurb": "Nadaj zmiennym żądania typ, aby skrypty otrzymywały liczby, wartości logiczne i JSON zamiast tekstu, a błędne wartości były wykrywane przed wysłaniem.",
+      "synonyms": "typowane zmienne typ liczba logiczna walidacja wymagane typed variables type number boolean integer json enum validation required"
+    },
+    "variablesView": {
+      "title": "Widok zmiennych",
+      "blurb": "Pokaż żądanie jako krótki formularz jego zmiennych z przyciskiem Wyślij i odpowiedzią, dla osób, które tylko wpisują wartości.",
+      "synonyms": "zmienne widok formularz prosty pola szablon variables view form simple input fields occasional users template"
+    },
+    "inheritedVariables": {
+      "title": "Dziedziczone zmienne",
+      "blurb": "Zobacz, które zmienne globalne, kolekcji, środowiska, folderu i sesji przejmuje żądanie, obok jego własnych.",
+      "synonyms": "dziedziczone zmienne zakres lista pokaż ukryj inherited variables scope list show hide request only"
+    },
+    "secrets": {
+      "title": "Zmienne sekretne",
+      "blurb": "Przechowuj wartości sekretne w pęku kluczy systemu, poza plikami i eksportami.",
+      "synonyms": "sekret hasło pęk kluczy token sejf secret keychain password vault"
+    },
+    "secretManagers": {
+      "title": "Menedżery sekretów",
+      "blurb": "Odczytuj wartości z Vault, AWS, Azure, Google Cloud, 1Password, Bitwarden lub KeePassXC w momencie wysyłania.",
+      "synonyms": "menedżer sekretów sejf hasła vault aws azure gcp 1password bitwarden keepassxc secret manager"
+    },
+    "extract": {
+      "title": "Reguły wyodrębniania",
+      "blurb": "Wyodrębnij wartość z odpowiedzi do zmiennej dla następnego żądania.",
+      "synonyms": "wyodrębnij przechwyć łańcuch zmienna odpowiedź extract capture chain variable response jsonpath"
+    },
+    "network": {
+      "title": "Proxy i certyfikaty",
+      "blurb": "Używaj proxy, certyfikatów klienta i własnych certyfikatów CA.",
+      "synonyms": "proxy certyfikat sieć mtls ca tls certificate network"
+    },
+    "checks": {
+      "title": "Sprawdzenia",
+      "blurb": "Sprawdzaj status, nagłówki, treść i czas bez pisania kodu.",
+      "synonyms": "sprawdzenia testy asercje checks tests assertions assert postman tests chai"
+    },
+    "scripts": {
+      "title": "Skrypty",
+      "blurb": "Uruchamiaj JavaScript przed żądaniem i po nim, z API zgodnymi z pm, bru i insomnia.",
+      "synonyms": "skrypt skrypty przed żądaniem po odpowiedzi script pre-request post-response javascript pm bru insomnia"
+    },
+    "contract": {
+      "title": "Sprawdzenia kontraktu",
+      "blurb": "Sprawdzaj odpowiedzi względem specyfikacji OpenAPI w uruchamianiu i w CI.",
+      "synonyms": "kontrakt schemat walidacja zgodność contract openapi schema validate conformance dredd"
+    },
+    "snapshotChecks": {
+      "title": "Sprawdzenia migawek",
+      "blurb": "Porównuj wartość z odpowiedzi z zapisaną migawką, pomijaj zmieniające się ścieżki i odświeżaj ją z ostatniej odpowiedzi.",
+      "synonyms": "migawka wzorzec różnice regresja snapshot golden diff regression matches ignore"
+    },
+    "openapiFuzz": {
+      "title": "Fuzzing OpenAPI",
+      "blurb": "Wysyłaj wyprowadzone ze schematu poprawne, graniczne i niepoprawne dane wejściowe dla każdej operacji specyfikacji i zgłaszaj odpowiedzi 5xx, przekroczenia limitu czasu i naruszenia kontraktu.",
+      "synonyms": "openapi fuzz fuzzing testy wartości graniczne niepoprawne dane schemathesis property based boundary invalid inputs swagger"
+    },
+    "negativeTests": {
+      "title": "Testy negatywne",
+      "blurb": "Wysyłaj zmienione kopie zapisanych żądań i oznaczaj 2xx dla błędnych danych, 5xx, stos wywołań lub odbity ładunek.",
+      "synonyms": "negatywne testy bezpieczeństwo wstrzyknięcie niepoprawne dane negative fuzz fuzzing security injection invalid inputs boundary schemathesis owasp"
+    },
+    "coverage": {
+      "title": "Pokrycie OpenAPI",
+      "blurb": "Zobacz, które operacje powiązanej specyfikacji OpenAPI wywołało uruchomienie i które udokumentowane statusy nigdy nie wróciły.",
+      "synonyms": "pokrycie operacje nieprzetestowane specyfikacja coverage openapi operations untested spec min-coverage"
+    },
+    "pmPackages": {
+      "title": "Pakiety i pm.vault",
+      "blurb": "Wczytuj wspólny kod przez require lub pm.require z folderu packages obszaru roboczego i odczytuj sekrety przez pm.vault.",
+      "synonyms": "pakiety biblioteka wspólny kod pm packages require library postman vault shared code"
+    },
+    "specLint": {
+      "title": "Linter OpenAPI",
+      "blurb": "Sprawdź specyfikację pod kątem brakujących opisów, przykładów i zabezpieczeń.",
+      "synonyms": "lint linter specyfikacja openapi spectral swagger",
+      "tool": "Lint specyfikacji"
+    },
+    "specSync": {
+      "title": "Synchronizacja specyfikacji",
+      "blurb": "Utrzymuj kolekcję w zgodzie ze zdalną specyfikacją OpenAPI.",
+      "synonyms": "synchronizacja specyfikacja aktualizacja zdalna sync openapi spec update remote"
+    },
+    "runner": {
+      "title": "Uruchamianie",
+      "blurb": "Uruchamiaj folder po kolei z plikami danych CSV, JSON lub XLSX, uruchomieniami równoległymi i raportami HTML lub JUnit.",
+      "synonyms": "uruchom uruchamianie kolekcja iteracja dane runner run collection postman collection runner newman data csv json xlsx iteration"
+    },
+    "flows": {
+      "title": "Przepływy",
+      "blurb": "Narysuj sekwencję żądań z rozgałęzieniami, ponowieniami i pętlami.",
+      "synonyms": "przepływ łańcuch ponowienie gałąź pętla scenariusz flow workflow chain retry branch loop scenario"
+    },
+    "loadTest": {
+      "title": "Test obciążeniowy",
+      "blurb": "Wysyłaj wiele żądań jednocześnie i odczytuj percentyle opóźnień oraz błędy.",
+      "synonyms": "obciążenie wydajność test obciążeniowy opóźnienie load performance stress k6 benchmark latency",
+      "webInstead": "W wersji webowej uruchom kolekcję z plikiem danych i odczytaj czasy każdego żądania w uruchamianiu."
+    },
+    "loadThresholds": {
+      "title": "Progi obciążenia",
+      "blurb": "Zapisz progi takie jak p95<300 lub errors<1% i odczytaj wynik pozytywny lub negatywny w teście obciążeniowym.",
+      "synonyms": "próg limit etapy narastanie threshold slo fail load stages ramp"
+    },
+    "scan": {
+      "title": "Skanowanie sekretów",
+      "blurb": "Znajdź tokeny i hasła w kolekcji, zanim ją udostępnisz.",
+      "synonyms": "skanowanie sekrety wyciek token hasło dane uwierzytelniające scan secrets leak password credential gitleaks"
+    },
+    "cli": {
+      "title": "Wiersz poleceń",
+      "blurb": "Uruchamiaj, wysyłaj, testuj obciążenie, skanuj i lintuj z jednego pliku binarnego, z kodami wyjścia dla CI.",
+      "synonyms": "cli wiersz poleceń terminal konsola command line newman bruno cli inso"
+    },
+    "ci": {
+      "title": "Integracja z CI",
+      "blurb": "GitHub Action, obraz Docker, przepisy dla GitLab, Azure Pipelines, CircleCI, Bitbucket i Jenkins oraz raporty JUnit, HTML i Markdown.",
+      "synonyms": "ci potok integracja github actions gitlab azure circleci bitbucket jenkins docker pipeline junit"
+    },
+    "ciPrComment": {
+      "title": "Wyniki w pull requeście",
+      "blurb": "GitHub Action zapisuje liczby i każde nieudane sprawdzenie w podsumowaniu zadania i może aktualizować jeden komentarz w pull requeście.",
+      "synonyms": "pull request komentarz podsumowanie raport comment pr check job summary markdown report github actions"
+    },
+    "ciStarters": {
+      "title": "Startowe potoki CI i pre-commit",
+      "blurb": "gostman init --ci zapisuje startowy potok dla GitHub, GitLab, Azure, CircleCI lub Bitbucket. Hooki pre-commit uruchamiają lint, scan i run.",
+      "synonyms": "ci potok szablon hook ci pipeline starter template pre-commit makefile azure circleci bitbucket"
+    },
+    "monitors": {
+      "title": "Monitory",
+      "blurb": "Uruchamiaj folder lub przepływ według harmonogramu, gdy aplikacja jest otwarta, i zachowuj odsetek udanych, historię i powiadomienia.",
+      "synonyms": "monitor monitory harmonogram dostępność powiadomienia postman monitor schedule cron uptime interval notify"
+    },
+    "agents": {
+      "title": "Agenci kodujący",
+      "blurb": "Serwer MCP, który pozwala agentom kodującym wysyłać żądania, z ukrywaniem sekretów i listą dozwolonych hostów.",
+      "synonyms": "agent agenci mcp ai programowanie claude cursor coding skill"
+    },
+    "mock": {
+      "title": "Serwer mock",
+      "blurb": "Udostępniaj lokalnie zapisane przykłady lub specyfikację OpenAPI, z bieżącym dziennikiem żądań.",
+      "synonyms": "mock serwer atrapa zaślepka przykłady server stub fake wiremock prism examples",
+      "tool": "Serwer mock",
+      "webInstead": "W wersji webowej zapisuj przykłady przy żądaniach; są przechowywane z kolekcją i trafiają do eksportów. Aby udostępniać je przez HTTP, uruchom serwer mock z CLI lub aplikacji desktopowej."
+    },
+    "mockDataRows": {
+      "title": "Odpowiedzi mock z pliku danych",
+      "blurb": "Odpowiadaj wierszem pliku CSV, JSON lub XLSX, który pasuje do parametru ścieżki, wartości zapytania, nagłówka lub pola treści.",
+      "synonyms": "mock plik danych wiersze wyszukiwanie dane testowe data file csv xlsx json rows lookup fixture wiremock"
+    },
+    "mockRules": {
+      "title": "Reguły mock",
+      "blurb": "Wybieraj odpowiedź według zapytania, nagłówka lub treści, dodawaj opóźnienia i wstrzykuj błędy.",
+      "synonyms": "mock reguły warunki opóźnienie błąd rules conditions delay fault latency"
+    },
+    "capture": {
+      "title": "Proxy przechwytujące",
+      "blurb": "Przekazuj ruch do serwera docelowego, nagrywaj go i zamieniaj w żądania.",
+      "synonyms": "przechwytywanie proxy nagrywanie ruch przechwyć capture record traffic intercept charles fiddler mitm",
+      "tool": "Proxy przechwytujące",
+      "webInstead": "W wersji webowej wklej polecenie curl lub zaimportuj plik HAR, aby utworzyć żądania z ruchu nagranego gdzie indziej."
+    },
+    "captureRules": {
+      "title": "Reguły przechwytywania",
+      "blurb": "Edytuj nagłówki i treści, odpowiadaj lokalnie, wstrzykuj błędy lub spowalniaj wywołania pasujące do reguły.",
+      "synonyms": "przechwytywanie reguły przepisz blokuj spowolnij opóźnienie błąd capture rules rewrite block map local throttle slow latency fault"
+    },
+    "captureHar": {
+      "title": "Przechwytywanie do HAR",
+      "blurb": "Eksportuj przechwycone wywołania jako plik HAR 1.2, który odczytają inne narzędzia.",
+      "synonyms": "har przechwytywanie eksport archiwum capture export archive"
+    },
+    "gitPanel": {
+      "title": "Panel Git",
+      "blurb": "Różnice, commit, push, gałęzie, stash i historia w aplikacji.",
+      "synonyms": "git commit push pull gałąź różnice kontrola wersji branch stash diff version control",
+      "tool": "Git",
+      "webInstead": "W wersji webowej użyj Udostępnij lub Eksportuj, aby przenieść kolekcję. Do kontroli wersji używaj obszaru roboczego w folderze w aplikacji desktopowej lub w CLI."
+    },
+    "gitFieldDiff": {
+      "title": "Różnice na poziomie pól",
+      "blurb": "Zobacz, które pola żądania się zmieniły, takie jak URL, nagłówki, uwierzytelnianie, treść i sprawdzenia, i porównaj dwie wersje pliku.",
+      "synonyms": "git różnice pola zmiany przegląd porównaj wersje diff field changes yaml review compare versions"
+    },
+    "gitCommitGraph": {
+      "title": "Graf commitów",
+      "blurb": "Czytaj historię z grafem torów gałęzi, scaleń i tagów.",
+      "synonyms": "git graf commity gałęzie historia tagi scalenie graph commits branches log history tags merge"
+    },
+    "conflicts": {
+      "title": "Rozwiązywanie konfliktów",
+      "blurb": "Rozwiązuj konflikty scalania w pliku żądania w edytorze z widokiem obok siebie.",
+      "synonyms": "konflikt scalanie rozwiąż merge conflict resolve git"
+    },
+    "repoCreate": {
+      "title": "Utwórz repozytorium GitHub",
+      "blurb": "Utwórz repozytorium GitHub z karty Zdalne i wypchnij do niego zmiany.",
+      "synonyms": "git repozytorium github publikuj zdalne utwórz wypchnij init repository publish remote create push"
+    },
+    "ai": {
+      "title": "Asystent AI",
+      "blurb": "Generuj żądania, sprawdzenia i skrypty oraz wyjaśniaj odpowiedzi, z własnym kluczem.",
+      "synonyms": "ai asystent sztuczna inteligencja generuj wyjaśnij llm openai anthropic claude generate explain postbot"
+    },
+    "aiMock": {
+      "title": "Przykłady mock z AI",
+      "blurb": "Wygeneruj z pomocą AI przykład odpowiedzi mock dla żądania, pokazany jako podgląd do zaakceptowania.",
+      "synonyms": "ai mock generuj dane przykład odpowiedź generate data fake example response"
+    },
+    "aiCommit": {
+      "title": "Komunikaty commitów z AI",
+      "blurb": "Przygotuj komunikat commita na podstawie zmian w poczekalni przyciskiem Zaproponuj komunikat z AI w panelu Git.",
+      "synonyms": "ai commit komunikat wiadomość git szkic zaproponuj message draft suggest"
+    },
+    "aiInline": {
+      "title": "Podpowiedzi w skryptach",
+      "blurb": "Podpowiedzi kodu jako szary tekst w edytorach skryptów, wyłączone, dopóki nie włączysz ich w ustawieniach AI. Naciśnij Tab, aby zaakceptować.",
+      "synonyms": "ai autouzupełnianie podpowiedzi uzupełnianie skrypt autocomplete completion copilot ghost text script suggest"
+    },
+    "palette": {
+      "title": "Paleta poleceń",
+      "blurb": "Znajdź dowolne polecenie, żądanie lub funkcję po nazwie.",
+      "synonyms": "paleta polecenie szukaj szybkie otwieranie palette command search quick open ctrl k"
+    },
+    "shortcuts": {
+      "title": "Skróty klawiaturowe",
+      "blurb": "Zobacz wszystkie skróty i zmień te, które chcesz.",
+      "synonyms": "skróty klawiatura klawisze keyboard shortcuts keys hotkeys chords bindings"
+    },
+    "themes": {
+      "title": "Motywy i kolory",
+      "blurb": "Kolory jasne, ciemne i własne dla każdej części okna.",
+      "synonyms": "motyw ciemny jasny kolor wygląd czcionka theme dark light color colour appearance accent font"
+    },
+    "languages": {
+      "title": "Języki",
+      "blurb": "Używaj aplikacji w innym języku, także z układem od prawej do lewej.",
+      "synonyms": "język tłumaczenie lokalizacja polski arabski language translation locale i18n localization arabic"
+    },
+    "desktop": {
+      "title": "Aplikacja desktopowa",
+      "blurb": "Foldery, Git, serwer mock, przechwytywanie, proxy i certyfikaty wymagają aplikacji desktopowej.",
+      "synonyms": "aplikacja desktopowa pobierz zainstaluj desktop download install app windows mac linux"
+    },
+    "webApp": {
+      "title": "Aplikacja webowa",
+      "blurb": "Używaj Gostmana w przeglądarce bez konta i bez instalacji.",
+      "synonyms": "web przeglądarka online bez instalacji browser no install pwa"
+    },
+    "pricing": {
+      "title": "Cena",
+      "blurb": "Bezpłatny, na licencji MIT.",
+      "synonyms": "cena darmowy bezpłatny licencja price free license"
+    },
+    "vscode": {
+      "title": "Rozszerzenie VS Code",
+      "blurb": "Rozszerzenie VS Code uruchamia kolekcje, przepływy, lint i skanowanie przez CLI.",
+      "synonyms": "vscode rozszerzenie edytor extension editor"
+    },
+    "vscodeExtension": {
+      "title": "Rozszerzenie VS Code",
+      "blurb": "Uruchamiaj kolekcję, folder lub przepływ, lintuj specyfikację i skanuj sekrety z poziomu edytora. Rozszerzenie wywołuje wiersz poleceń Gostmana, więc uruchomienie jest zgodne z CI.",
+      "synonyms": "vscode visual studio code rozszerzenie edytor extension editor ide marketplace"
+    },
+    "xlsxData": {
+      "title": "Pliki danych",
+      "blurb": "Uruchamiaj folder raz dla każdego wiersza pliku CSV, JSON lub XLSX, w aplikacji lub poleceniem gostman run --data.",
+      "synonyms": "dane plik arkusz wiersze iteracja data csv json xlsx excel spreadsheet iteration rows data-driven"
+    },
+    "scheduledRuns": {
+      "title": "Zaplanowane uruchomienia",
+      "blurb": "gostman run --every powtarza uruchomienie w odstępach czasu, zachowuje lokalną historię i może powiadomić webhook.",
+      "synonyms": "harmonogram zaplanuj powtarzaj historia powiadomienie schedule cron every interval repeat history webhook notify"
+    },
+    "openapiDiff": {
+      "title": "Różnice OpenAPI",
+      "blurb": "Porównaj dwie wersje specyfikacji OpenAPI i wypisz zmiany niezgodne wstecz w aplikacji lub poleceniem gostman diff w CI.",
+      "synonyms": "openapi różnice zmiany niezgodne porównaj specyfikacja diff oasdiff breaking changes compare spec"
+    },
+    "apiDesign": {
+      "title": "Projektowanie API",
+      "blurb": "Napisz specyfikację OpenAPI, zanim powstanie backend, ze sprawdzaniem w trakcie pisania, a potem wygeneruj z niej żądania, mock i sprawdzenia odpowiedzi.",
+      "synonyms": "projektowanie api specyfikacja kontrakt edytor schemat openapi swagger design first contract editor stoplight spec yaml schema"
+    },
+    "flowCanvas": {
+      "title": "Diagram przepływu",
+      "blurb": "Oglądaj przepływ od góry do dołu z gałęziami obok siebie, pętlami w ramkach, powiększaniem, przesuwaniem i ścieżką, którą przeszło uruchomienie.",
+      "synonyms": "przepływ diagram graf powiększenie przesuwanie gałęzie flow canvas graph workflow designer zoom pan branches join"
+    },
+    "flowSwitch": {
+      "title": "Kroki Przełącznik",
+      "blurb": "Skieruj przepływ na jedną z kilku ścieżek, każdą z własnym zestawem sprawdzeń.",
+      "synonyms": "przełącznik przypadek warunek gałąź decyzja switch case condition branch truth table decision router"
+    },
+    "flowRepeat": {
+      "title": "Kroki Powtórz",
+      "blurb": "Powtarzaj kilka kroków, aż sprawdzenie przejdzie lub zostanie osiągnięta liczba przebiegów.",
+      "synonyms": "powtórz pętla dopóki odpytywanie repeat loop while until poll iterate"
+    },
+    "nestedFlows": {
+      "title": "Przepływy w przepływach",
+      "blurb": "Uruchom zapisany przepływ jako jeden krok innego, z własnymi wartościami i własną ścieżką na wypadek niepowodzenia.",
+      "synonyms": "podprzepływ zagnieżdżony przepływ ponowne użycie wywołanie sub-flow subflow nested flow of flows reuse call"
+    },
+    "flowInputs": {
+      "title": "Wartości w żądaniu",
+      "blurb": "Wstaw wartość z wcześniejszej odpowiedzi do nagłówków, zapytania, treści JSON, pól formularza lub zmiennych następnego żądania.",
+      "synonyms": "łańcuch mapowanie danych odpowiedź nagłówek treść pole formularza przekaż wartość chain response mapping data mapping header body form field extract pass value"
+    },
+    "flowMetrics": {
+      "title": "Metryki uruchomień przepływu",
+      "blurb": "Czas na krok, przebieg pętli i przepływ oraz bajty wysłane i odebrane, w aplikacji, raportach i CLI.",
+      "synonyms": "metryki czas trwanie bajty wydajność statystyki metrics timing duration bytes performance stats"
+    },
+    "flowParallel": {
+      "title": "Kroki równoległe",
+      "blurb": "Wysyłaj kilka żądań lub uruchamiaj kilka przepływów jednocześnie i idź dalej, gdy warunek na ich wynikach jest spełniony lub skończy się limit czasu.",
+      "synonyms": "równolegle współbieżnie jednocześnie wyścig rozgałęzienie łączenie czekaj limit czasu parallel concurrent race fan out join wait for any wait for all timeout Postman Flows"
+    },
+    "flowConditionGroups": {
+      "title": "Zgrupowane warunki",
+      "blurb": "Łącz warunki przez i oraz lub w zagnieżdżonych grupach, na przykład (A lub (B i C)) i D, w jednym kroku Jeśli, Przełącznik, Powtórz lub Równolegle.",
+      "synonyms": "i lub zagnieżdżone grupy logika nawiasy złożony warunek and or nested groups boolean logic parentheses complex condition truth table"
+    },
+    "flowVariables": {
+      "title": "Zmienne, wejścia i wyjścia przepływu",
+      "blurb": "Deklaruj typowane zmienne istniejące przez jedno uruchomienie, oznaczaj niektóre jako wejścia, zwracaj wartości jako wyjścia i obserwuj, jak się zmieniają podczas działania przepływu.",
+      "synonyms": "typowane zmienne liczba logiczna wejścia wyjścia parametry wartości zwracane obserwuj typed variables number boolean json inputs outputs parameters return values flow scope inspect watch"
+    }
+  },
+  "featureSamples": {
+    "collection": "Przykładowa kolekcja",
+    "listUsers": "Lista użytkowników",
+    "getUser": "Pobierz użytkownika",
+    "createUser": "Utwórz użytkownika",
+    "okExample": "200 OK",
+    "createdExample": "201 Created",
+    "flowName": "Przykładowy przepływ",
+    "scanRequest": "Żądanie z fałszywym tokenem",
+    "graphqlRequest": "Żądanie GraphQL",
+    "websocketRequest": "Żądanie WebSocket",
+    "grpcRequest": "Żądanie gRPC",
+    "mcpRequest": "Żądanie MCP",
+    "flowDescription": "Wysyła dwa żądania jednocześnie, przechowuje typowaną zmienną przepływu, wybiera ścieżkę według zgrupowanego warunku, przekazuje imię do żądania, powtarza krok, aż sprawdzenie przejdzie, i zwraca wartość. Każde żądanie odpowiada z zapisanego przykładu, więc przepływ działa offline.",
+    "flowDone": "Gotowe",
+    "flowListNote": "Odpowiada zapisanym przykładem **200 OK**, więc nic nie opuszcza tego urządzenia.",
+    "flowCheckStatus": "Sprawdź status",
+    "flowCreateNote": "Jego `name` pochodzi od drugiego użytkownika z listy i jest wstawiane do treści JSON tuż przed wysłaniem.",
+    "flowWaitForUser": "Odczytuj, aż będzie to Ada",
+    "flowStopped": "Zatrzymano",
+    "flowStoppedMessage": "Lista użytkowników nie odpowiedziała 200 OK.",
+    "binaryRequest": "Odpowiedź binarna",
+    "jwtRequest": "Żądanie JWT",
+    "flowFetchTogether": "Pobierz listę i Adę jednocześnie",
+    "flowFetchNote": "Oba żądania są wysyłane jednocześnie; przepływ idzie dalej, gdy oba się powiodą.",
+    "flowFirstUser": "Ada",
+    "flowKeepName": "Zachowaj jej imię",
+    "flowCheckNote": "Przechodzi, gdy status to 200, a pierwszy lub drugi użytkownik to ten zapisany w `firstName`."
+  }
+}

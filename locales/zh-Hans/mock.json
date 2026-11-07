@@ -56,7 +56,8 @@
     "fields": {
       "query": "查询参数",
       "header": "请求头",
-      "body": "请求体"
+      "body": "请求体",
+      "param": "路径参数"
     },
     "ops": {
       "equals": "等于",
@@ -70,6 +71,12 @@
     "headersLabel": "响应头（每行一个 Name: value）",
     "bodyLabel": "响应体（留空则沿用路由的响应体）",
     "bodyHint": "占位符：{{placeholders}}",
+    "dataTitle": "数据文件",
+    "dataHint": "可选。请求中的值与该列某个单元格匹配时，以该行的 JSON 应答，或以使用 {{example}} 的上方响应体应答。没有匹配时此规则不生效。支持 CSV、JSON 或 XLSX，从工作区文件夹读取。",
+    "dataFile": "工作区文件夹中的文件",
+    "dataField": "匹配请求",
+    "dataName": "名称或 JSON 路径",
+    "dataColumn": "列",
     "nth": "仅第 N 次匹配",
     "nthPlaceholder": "每次匹配",
     "behaviorTitle": "行为",
@@ -103,6 +110,10 @@
       "conflicts": "{{count}} 个冲突",
       "off": "{{count}} 个已关闭",
       "skipped": "{{count}} 个未提供"
-    }
+    },
+    "importRules": "导入规则",
+    "exportRules": "导出规则",
+    "rulesName": "gostman-mock-rules.yaml",
+    "rulesImported_other": "已导入 {{count}} 条规则，在你启用之前处于关闭状态。"
   }
 }

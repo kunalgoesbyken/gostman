@@ -1,0 +1,29 @@
+{
+  "dependencies": {
+    "title": "Dipendenze delle variabili",
+    "menuFolder": "Dipendenze delle variabili",
+    "scopeAll": "Tutte le richieste",
+    "scopeFolder": "Cartella: {{name}}",
+    "intro": "Ogni variabile si trova tra le richieste che la impostano e quelle che la leggono. Una richiesta imposta una variabile con una regola di estrazione o uno script, e la legge con {{reference}} nell'indirizzo, negli header, nel corpo o nell'autenticazione, oppure con una chiamata in uno script.",
+    "showInputs": "Mostra le variabili che provengono solo dagli ambienti",
+    "producers": "Imposta",
+    "variables": "Variabile",
+    "consumers": "Legge",
+    "missingTitle": "Lette ma mai impostate",
+    "missingDetail": "Queste variabili vengono lette da una richiesta, ma nessuna richiesta le imposta e nessun ambiente, raccolta o elenco globale le definisce: {{names}}.",
+    "missingMark": "mai impostata",
+    "none": "Nessun collegamento di variabili tra le richieste",
+    "noneDescription": "Nessuna richiesta in questo ambito imposta, tramite una regola di estrazione o uno script, una variabile letta da un'altra richiesta.",
+    "summary_one": "{{count}} variabile",
+    "summary_many": "{{count}} di variabili",
+    "summary_other": "{{count}} variabili",
+    "graphLabel": "Grafo delle dipendenze delle variabili",
+    "openRequest": "Apri {{name}}",
+    "untitled": "Richiesta senza titolo",
+    "command": {
+      "label": "Mostra dipendenze delle variabili",
+      "description": "Disegna quali richieste impostano e leggono ogni variabile",
+      "keywords": "grafo catena estrai flusso produce consuma graph chain extract flow"
+    }
+  }
+}

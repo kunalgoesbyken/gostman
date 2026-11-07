@@ -16,12 +16,14 @@
       "body": "Treść",
       "auth": "Auth",
       "graphql": "GraphQL",
+      "files": "Pliki",
       "grpc": "gRPC",
       "mcp": "MCP",
       "websocket": "WebSocket",
       "vars": "Zmienne",
       "extract": "Wyodrębnij",
       "tests": "Sprawdzenia",
+      "notes": "Notatki",
       "settings": "Ustawienia"
     }
   }

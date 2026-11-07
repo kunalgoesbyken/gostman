@@ -3,6 +3,7 @@
     "title": "Willkommen bei Gostman",
     "intro": "Kein Konto nötig. Nichts verlässt dieses Gerät, bis Sie eine Anfrage senden.",
     "dismiss": "Die Begrüßung schließen",
+    "skip": "Überspringen",
     "commandTitle": "Begrüßung anzeigen",
     "commandDescription": "Erste Schritte, Importe und Tastenkürzel",
     "otherTitle": "Andere Wege zum Einstieg",
@@ -15,6 +16,7 @@
     "curlTitle": "Einen curl-Befehl einfügen",
     "curlHint": "Fügen Sie ihn in die Adressleiste ein, und die Anfrage wird ausgefüllt.",
     "shortcutsTitle": "Tastenkürzel",
-    "sampleRequestName": "Beispielanfrage"
+    "sampleRequestName": "Beispielanfrage",
+    "exploreTitle": "Funktionen entdecken"
   }
 }

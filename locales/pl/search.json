@@ -1,0 +1,37 @@
+{
+  "search": {
+    "sidebarTab": "Szukaj",
+    "placeholder": "Szukaj w żądaniach, historii i odpowiedziach",
+    "label": "Szukaj wszędzie",
+    "hint": "Przeszukuje nazwy, adresy URL, nagłówki, treści i opisy żądań, historię oraz najnowszą odpowiedź każdej otwartej karty.",
+    "searching": "Wyszukiwanie…",
+    "none": "Brak wyników dla „{{query}}”",
+    "truncated": "Pokazano tylko pierwsze wyniki. Zawęź wyszukiwanie, aby zobaczyć więcej.",
+    "timedOut": "Wyszukiwanie trwało zbyt długo i zostało zatrzymane. Spróbuj dłuższego lub bardziej szczegółowego zapytania.",
+    "failed": "Wyszukiwanie nie powiodło się: {{reason}}",
+    "results_one": "{{count}} wynik",
+    "results_few": "{{count}} wyniki",
+    "results_many": "{{count}} wyników",
+    "results_other": "{{count}} wyniku",
+    "command": {
+      "label": "Szukaj wszędzie",
+      "description": "Szukaj w nazwach żądań, adresach URL, treściach, historii i otwartych odpowiedziach",
+      "keywords": "znajdź szukaj globalnie odpowiedzi historia find search"
+    },
+    "kinds": {
+      "request": "Żądanie",
+      "history": "Historia",
+      "response": "Odpowiedź"
+    },
+    "fields": {
+      "name": "Nazwa",
+      "url": "URL",
+      "body": "Treść",
+      "headers": "Nagłówki",
+      "description": "Opis",
+      "tags": "Tagi",
+      "responseBody": "Treść odpowiedzi",
+      "responseHeaders": "Nagłówki odpowiedzi"
+    }
+  }
+}

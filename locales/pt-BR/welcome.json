@@ -3,6 +3,7 @@
     "title": "Bem-vindo ao Gostman",
     "intro": "Não precisa de conta. Nada sai deste dispositivo até você enviar uma requisição.",
     "dismiss": "Dispensar as boas-vindas",
+    "skip": "Pular",
     "commandTitle": "Mostrar boas-vindas",
     "commandDescription": "Primeiros passos, importações e atalhos",
     "otherTitle": "Outras formas de começar",
@@ -15,6 +16,7 @@
     "curlTitle": "Colar um comando curl",
     "curlHint": "Cole-o na barra de endereço e a requisição é preenchida.",
     "shortcutsTitle": "Atalhos de teclado",
-    "sampleRequestName": "Requisição de exemplo"
+    "sampleRequestName": "Requisição de exemplo",
+    "exploreTitle": "Explorar recursos"
   }
 }

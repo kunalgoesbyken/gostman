@@ -12,6 +12,19 @@
     "dataFile": "Datendatei (CSV oder JSON)",
     "clearData": "Datendatei entfernen",
     "report": "HTML-Bericht herunterladen",
+    "reportFormat": "Berichtsformat",
+    "formats": {
+      "html": "HTML",
+      "junit": "JUnit",
+      "json": "JSON"
+    },
+    "schedule": "Diesen Durchlauf planen",
+    "cliLine": "Derselbe Durchlauf im Terminal",
+    "shells": {
+      "posix": "macOS und Linux",
+      "powershell": "PowerShell"
+    },
+    "cliUnsafe": "Ein Ordner- oder Datendateiname enthält einen Zeilenumbruch, ein doppeltes Anführungszeichen, einen abschließenden Backslash oder ein anderes Zeichen, das sich nicht in jeder Shell sicher übergeben lässt, daher wird kein Befehl angezeigt. Benennen Sie ihn um, um einen zu erhalten.",
     "includeTags": "Nur Tags",
     "excludeTags": "Tags überspringen",
     "anyTag": "Beliebig",
@@ -60,6 +73,12 @@
     "progressPassed": "{{count}} bestanden",
     "progressFailed": "{{count}} fehlgeschlagen",
     "progressSkipped": "{{count}} übersprungen",
-    "socketSkipped": "WebSocket-Anfragen sind nicht Teil eines Durchlaufs."
+    "socketSkipped": "WebSocket-Anfragen sind nicht Teil eines Durchlaufs.",
+    "coverageTitle": "OpenAPI-Abdeckung",
+    "coverageOperations": "{{covered}} von {{total}} Operationen ({{percent}} %)",
+    "coverageResponses": "{{covered}} von {{total}} dokumentierten Antworten ({{percent}} %)",
+    "coverageNotCalled": "nicht aufgerufen",
+    "coverageMissing": "keine Antwort: {{codes}}",
+    "coverageUndocumented": "nicht dokumentierter Status: {{codes}}"
   }
 }

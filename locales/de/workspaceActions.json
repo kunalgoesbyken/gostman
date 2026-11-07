@@ -40,6 +40,7 @@
     "clear": "Löschen",
     "closeTab": "Tab schließen",
     "closeTabMessage": "„{{name}}“ hat ungespeicherte Änderungen. Vor dem Schließen speichern?",
-    "dontSave": "Nicht speichern"
+    "dontSave": "Nicht speichern",
+    "openFirstRequest": "Erste Anfrage öffnen"
   }
 }

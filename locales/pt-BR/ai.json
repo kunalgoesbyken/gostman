@@ -76,6 +76,19 @@
         "inputLabel": "O que você procura",
         "placeholder": "o endpoint que cancela um pedido"
       },
+      "commit": {
+        "label": "Mensagem de commit a partir das alterações",
+        "section": "Mensagem de commit",
+        "apply": "Usar como mensagem de commit",
+        "nothing": "Não há alterações para descrever."
+      },
+      "mock": {
+        "label": "Exemplos mock para esta requisição",
+        "inputLabel": "Descreva as respostas ou cole um documento OpenAPI",
+        "placeholder": "Uma lista de pedidos, uma lista vazia e um 404 para um pedido desconhecido",
+        "section": "Exemplos servidos pelo servidor mock",
+        "apply": "Adicionar aos exemplos"
+      },
       "schema": {
         "label": "Requisições a partir de uma descrição de API",
         "inputLabel": "Cole um documento OpenAPI ou Swagger, um esquema GraphQL ou o texto de uma documentação de API",
@@ -106,7 +119,8 @@
       "explain": "Explicar com IA",
       "explainError": "Explicar este erro com IA",
       "document": "Escrever com IA",
-      "documentLabel": "Escrever a descrição com IA"
+      "documentLabel": "Escrever a descrição com IA",
+      "commitMessage": "Sugerir mensagem com IA"
     },
     "commands": {
       "request": {
@@ -135,6 +149,11 @@
         "description": "Encontre requisições descrevendo-as",
         "keywords": "buscar pesquisar encontrar"
       },
+      "mock": {
+        "label": "IA: exemplos mock para esta requisição",
+        "description": "Propor respostas de exemplo para o servidor mock a partir de uma descrição, de um documento OpenAPI ou da última resposta",
+        "keywords": "mock exemplos respostas"
+      },
       "schema": {
         "label": "IA: requisições a partir de uma descrição de API",
         "description": "Documentos OpenAPI usam o importador integrado; outras descrições vão para a IA",
@@ -154,6 +173,7 @@
       "consent": "Entendo que, ao executar uma ação de IA, os detalhes da requisição ou resposta pré-visualizados são enviados para {{host}}, e que a cobrança é entre mim e o provedor.",
       "enable": "Ativar recursos de IA",
       "enableAfterConsent": "Ativar recursos de IA (marque a linha acima primeiro)",
+      "inlineCompletion": "Sugerir código enquanto digito nos editores de script. Após uma breve pausa, o script ao redor do cursor e os nomes das suas variáveis, nunca os valores, são enviados para {{host}} sem pré-visualização. Pressione Tab para aceitar uma sugestão.",
       "provider": "Provedor",
       "baseUrl": "URL base",
       "baseUrlPlaceholder": "https://host/v1",

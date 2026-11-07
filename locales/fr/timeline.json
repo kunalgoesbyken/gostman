@@ -72,6 +72,29 @@
     },
     "tlsAlpn": "ALPN {{protocol}}",
     "tlsExpires": "expire le {{date}}",
-    "tlsExpired": "expire le {{date}} (expiré)"
+    "tlsExpired": "expire le {{date}} (expiré)",
+    "certificates": {
+      "title": "Chaîne de certificats",
+      "subject": "Sujet",
+      "issuer": "Émetteur",
+      "validFrom": "Valide à partir du",
+      "validTo": "Valide jusqu’au",
+      "names": "Noms",
+      "serial": "Numéro de série",
+      "fingerprint": "Empreinte SHA-256",
+      "keyType": "Clé publique",
+      "signature": "Signature",
+      "authority": "Autorité de certification",
+      "position": "Certificat {{number}} sur {{total}}",
+      "expired": "Expiré",
+      "expiresSoon": "Expire dans moins de 30 jours"
+    },
+    "redirects": {
+      "title": "Chaîne de redirections",
+      "step": "Étape",
+      "status": "Statut",
+      "url": "URL",
+      "time": "Durée"
+    }
   }
 }

@@ -164,6 +164,8 @@ A module reads its English with `messages(namespace, english, adapt)` from `src/
 
 **Changing English.** When you change what an English message means, drop the old translations with `npm run i18n:prune -- --drop namespace.key.path`, so no language keeps a wrong text. When you only fix a typo, leave them.
 
+**Adding a namespace.** A new `locales/en/<namespace>.json` becomes a Weblate component, and Weblate only lists the languages that have a file for it. Add `locales/<language>/<namespace>.json` for every language directory in the same change, translated or at least as `{}`. Without them the component has no translations and Weblate reports "No file mask matches". `npm run i18n:check` warns about every namespace that a language directory lacks.
+
 ### Messages from Go
 
 Go builds some texts shown to people: network failures, import remarks, scan findings, OpenAPI lint results and mock reasons. They live in `locales/en/*Messages.json` (`engineMessages`, `importerMessages`, `scanMessages`, `lintMessages`, `mockMessages`), and the Go package `locales` renders the English from the same files. The command line prints that English.

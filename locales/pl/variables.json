@@ -12,7 +12,11 @@
       "folder": "Folder",
       "request": "Żądanie",
       "process": "Plik .env",
-      "session": "Sesja"
+      "session": "Sesja",
+      "flowLoop": "Element pętli",
+      "flowSend": "Tylko to wysłanie",
+      "flowCall": "Przekazana do wywołanego przepływu",
+      "flowRun": "Zmienna przepływu, dla tego uruchomienia"
     }
   }
 }

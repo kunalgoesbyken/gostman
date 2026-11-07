@@ -16,12 +16,14 @@
       "body": "Corps",
       "auth": "Auth",
       "graphql": "GraphQL",
+      "files": "Fichiers",
       "grpc": "gRPC",
       "mcp": "MCP",
       "websocket": "WebSocket",
       "vars": "Vars",
       "extract": "Extraire",
       "tests": "Vérifications",
+      "notes": "Notes",
       "settings": "Paramètres"
     }
   }

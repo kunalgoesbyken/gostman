@@ -1,8 +1,55 @@
 {
   "updates": {
+    "installedLabel": "インストール済みのバージョン",
+    "checkNow": "今すぐ確認",
+    "checking": "確認中…",
+    "neverChecked": "まだ確認していません。",
+    "checkedAt": "最終確認：{{when}}。",
+    "upToDate": "最新バージョンです。",
+    "checkFailed": "アップデートサーバーに接続できませんでした。接続を確認して、もう一度お試しください。",
     "checksLabel": "新しいバージョンを確認",
+    "checksHint": "1日に1回、GitHubから最新リリースを読み取り、ステータスバーに表示します。",
+    "autoLabel": "アップデートを自動でインストール",
+    "autoHint": "新しいバージョンをバックグラウンドでダウンロードし、Gostmanの終了時または再起動時にインストールします。",
+    "autoHintInstaller": "新しいバージョンをバックグラウンドでダウンロードし、Gostmanを再起動してWindowsが許可を求めたときにインストールします。",
     "available": "バージョン{{version}}を利用できます",
+    "availableDetail": "Gostmanがダウンロードし、破損なく届いたことを確認して、再起動時にインストールします。",
+    "availableUnverified": "このバージョンは自動でインストールできないため、リリースページからダウンロードしてください。",
+    "update": "Gostmanをアップデート",
+    "updateHint": "バージョン{{version}}をダウンロードし、確認してインストール",
+    "downloading": "{{version}}をダウンロード中… {{percent}}",
+    "downloadingDetail": "{{total}}中{{received}}",
+    "verifying": "ダウンロードが完全か確認しています…",
+    "installing": "インストール中…",
+    "ready": "再起動してアップデート",
+    "readyHint": "バージョン{{version}}のダウンロードと確認が完了しました。インストールするにはGostmanを再起動してください。",
+    "readyDetail": "バージョン{{version}}のダウンロードと確認が完了しました。",
+    "restartNow": "今すぐ再起動",
+    "restartTitle": "Gostmanを再起動しますか？",
+    "restartMessage": "Gostmanが終了し、バージョン{{version}}で再び開きます。開いているタブと未保存の下書きは保持されます。",
+    "restartMessageInstaller": "Gostmanが終了し、Windowsがバージョン{{version}}のインストールの許可を求めたあと、Gostmanが再び開きます。開いているタブと未保存の下書きは保持されます。",
+    "cancel": "ダウンロードをキャンセル",
+    "tryAgain": "再試行",
+    "releaseNotes": "リリースノート",
+    "openRelease": "リリースページを開く",
+    "download": "ダウンロード",
+    "downloadHint": "GitHubでリリースノートとダウンロードを開く",
     "dismiss": "次のバージョンまで非表示",
-    "downloadHint": "GitHubでリリースノートとダウンロードを開く"
+    "failed": "アップデートに失敗しました",
+    "failedHint": "原因は「設定」の「アップデート」で確認できます",
+    "failures": {
+      "network": "アップデートサーバーに接続できませんでした。接続を確認して、もう一度お試しください。",
+      "unsupported": "このシステムにはまだ自動アップデートがないため、リリースページからダウンロードしてください。",
+      "unverified": "このアップデートが正規のものか確認できなかったため、インストールしませんでした。リリースページからダウンロードしてください。",
+      "mismatch": "ダウンロードが正しく完了しなかったため、インストールしませんでした。もう一度お試しください。",
+      "storage": "このコンピューターにダウンロードを保存できませんでした。空き容量を確保して、もう一度お試しください。",
+      "install": "アップデートをインストールできませんでした。Gostmanを閉じて、リリースページのインストーラーを実行してください。"
+    },
+    "manual": {
+      "scoop": "Scoopでインストールされています。{{command}}でアップデートしてください。",
+      "homebrew": "Homebrewでインストールされています。{{command}}でアップデートしてください。",
+      "system": "システムパッケージとしてインストールされているため、リリースページから新しいパッケージをダウンロードしてインストールしてください。",
+      "other": "このGostmanは自身をアップデートできないため、新しいバージョンはリリースページからダウンロードしてください。"
+    }
   }
 }

@@ -62,7 +62,22 @@
     "views": {
       "pretty": "Sformatowany",
       "raw": "Surowy",
-      "preview": "Podgląd"
+      "preview": "Podgląd",
+      "info": "Podsumowanie",
+      "hex": "Hex",
+      "msgpack": "MessagePack",
+      "cbor": "CBOR"
+    },
+    "hex": {
+      "label": "Widok szesnastkowy treści",
+      "offset": "Przesunięcie",
+      "text": "Tekst"
+    },
+    "decode": {
+      "working": "Dekodowanie…",
+      "failed": "Nie udało się odczytać treści jako {{format}}: {{reason}}",
+      "timedOut": "Odczytywanie treści jako {{format}} trwało dłużej niż {{seconds}} s, więc zostało zatrzymane. Użyj widoku Hex lub zapisz ją do pliku.",
+      "tooLarge": "Ta treść ma rozmiar {{size}}. Gostman dekoduje do {{limit}}, więc użyj widoku Hex lub zapisz ją do pliku."
     },
     "bodyView": "Widok treści",
     "checksPassed": "Sprawdzenia zakończone powodzeniem: {{passed}} z {{total}}",
@@ -76,7 +91,8 @@
       "compareParts": "Porównaj",
       "comparedWith": "porównane z",
       "bodyPart": "Treść",
-      "headersPart": "Nagłówki"
+      "headersPart": "Nagłówki",
+      "exportHar": "Eksportuj jako HAR"
     },
     "columns": {
       "name": "Nazwa",
@@ -116,6 +132,15 @@
     "treeTrimmed_few": "Pokazano początek tego drzewa. Ukryto jeszcze {{count}} wartości. Użyj widoku Surowy lub filtra, aby zobaczyć resztę.",
     "treeTrimmed_many": "Pokazano początek tego drzewa. Ukryto jeszcze {{count}} wartości. Użyj widoku Surowy lub filtra, aby zobaczyć resztę.",
     "treeTrimmed_other": "Pokazano początek tego drzewa. Ukryto jeszcze {{count}} wartości. Użyj widoku Surowy lub filtra, aby zobaczyć resztę.",
+    "tree": {
+      "expandAll": "Rozwiń wszystko",
+      "collapseAll": "Zwiń wszystko",
+      "depth": "Głębokość rozwinięcia",
+      "level": "Poziom {{count}}",
+      "allLevels": "Wszystkie poziomy",
+      "remember": "Zawsze otwieraj to żądanie z tą głębokością",
+      "remembered": "To żądanie już otwiera się z tą głębokością"
+    },
     "requestFailed": "Żądanie nie powiodło się",
     "error": "Błąd",
     "milliseconds": "{{value}} ms",

@@ -1,0 +1,16 @@
+{
+  "notes": {
+    "empty": "Aún no hay notas.",
+    "secretHint": "Las notas se guardan como texto sin cifrar y se comparten con el espacio de trabajo. No pegues secretos.",
+    "looksLikeCredential": "Esto parece una credencial. Las notas se guardan como texto sin cifrar, en los archivos de la carpeta y en las exportaciones.",
+    "inputLabel": "Nueva nota",
+    "inputPlaceholder": "Escribe una nota para tu equipo",
+    "add": "Añadir nota",
+    "anonymous": "Desconocido",
+    "resolve": "Resolver",
+    "reopen": "Reabrir",
+    "resolved": "Resuelta",
+    "delete": "Eliminar nota",
+    "listLabel": "Notas"
+  }
+}

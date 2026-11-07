@@ -117,6 +117,9 @@
       "status": "Code de statut",
       "contentType": "Type de contenu",
       "schema": "Forme du corps, sous forme de JSON Schema : types des champs, champs présents, et null là où null a été observé. Un champ qui valait null accepte n’importe quelle valeur.",
+      "snapshot": "Instantané du corps : la vérification échoue quand le corps diffère de cette réponse. Les valeurs des champs aux noms qui évoquent un secret, les jetons, les dates et les id qui semblent générés sont ignorés et ne sont pas stockés. Modifiez les chemins ignorés dans la vérification.",
+      "headersSnapshot": "Instantané des en-têtes, sans les cookies ni les identifiants. Les en-têtes qui changent à chaque réponse, comme date et etag, sont ignorés.",
+      "exampleSnapshot": "Instantané de l’exemple enregistré « {{name}} » : la vérification échoue quand le corps diffère de cet exemple. Les champs qui évoquent un secret, les jetons, les dates et les id générés sont ignorés et ne sont pas stockés.",
       "responseTime": "Budget de temps de réponse de {{budget}} ms, soit le double du temps de cette réponse, arrondi à l’unité supérieure."
     },
     "nothingNew": "L’onglet Vérifications contient déjà ces vérifications.",
@@ -178,6 +181,21 @@
     "filterTimedOut_one": "Le filtre s’est exécuté plus de {{count}} seconde et a été interrompu. Cherchez-y une expression régulière lente.",
     "filterTimedOut_many": "Le filtre s’est exécuté plus de {{count}} de secondes et a été interrompu. Cherchez-y une expression régulière lente.",
     "filterTimedOut_other": "Le filtre s’est exécuté plus de {{count}} secondes et a été interrompu. Cherchez-y une expression régulière lente."
+  },
+  "snapshot": {
+    "operator": "correspond à l’instantané",
+    "edit": "Modifier l’instantané",
+    "editorTitle": "Modifier l’instantané",
+    "editorHint": "Un objet JSON. expected est la valeur stockée, ignore liste les JSONPath qui ne sont pas comparés (comme $.id ou $.items[*].createdAt), et ignoreOrder à true compare les tableaux sans tenir compte de l’ordre de leurs éléments.",
+    "update": "Mettre à jour l’instantané à partir de la dernière réponse",
+    "notice": "Les instantanés sont du texte brut dans la requête et, dans un dossier d’espace de travail, ils vont dans Git. Relisez-les avant de valider. Les champs aux noms qui évoquent un identifiant (avec tout ce qu’ils contiennent), les valeurs qui ressemblent à des jetons, des JWT ou des clés d’API, les dates, les id générés et les valeurs des chemins ignorés sont remplacés par (ignored) et ne sont pas stockés.",
+    "invalid": "L’instantané n’est pas valide : il doit être un objet JSON avec une valeur expected.",
+    "changed": "{{path}} : attendu {{expected}}, obtenu {{actual}}",
+    "missing": "{{path}} : attendu {{expected}}, mais absent",
+    "extra": "{{path}} : absent de l’instantané, obtenu {{actual}}",
+    "more_one": "…et {{count}} autre différence.",
+    "more_many": "…et {{count}} d’autres différences.",
+    "more_other": "…et {{count}} autres différences."
   },
   "operators": {
     "eq": "est égal à",

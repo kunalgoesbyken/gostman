@@ -62,7 +62,22 @@
     "views": {
       "pretty": "整形",
       "raw": "Raw",
-      "preview": "プレビュー"
+      "preview": "プレビュー",
+      "info": "概要",
+      "hex": "Hex",
+      "msgpack": "MessagePack",
+      "cbor": "CBOR"
+    },
+    "hex": {
+      "label": "ボディの16進表示",
+      "offset": "オフセット",
+      "text": "テキスト"
+    },
+    "decode": {
+      "working": "デコード中…",
+      "failed": "ボディを{{format}}として読み取れませんでした：{{reason}}",
+      "timedOut": "ボディを{{format}}として読み取るのに{{seconds}}秒以上かかったため、中止しました。Hexを使うか、ファイルに保存してください。",
+      "tooLarge": "このボディは{{size}}です。Gostmanがデコードできるのは{{limit}}までなので、Hexを使うか、ファイルに保存してください。"
     },
     "bodyView": "ボディの表示",
     "checksPassed": "{{total}}件中{{passed}}件のチェックに成功",
@@ -76,7 +91,8 @@
       "compareParts": "比較",
       "comparedWith": "との比較",
       "bodyPart": "ボディ",
-      "headersPart": "ヘッダー"
+      "headersPart": "ヘッダー",
+      "exportHar": "HARとしてエクスポート"
     },
     "columns": {
       "name": "名前",
@@ -113,6 +129,15 @@
     "binaryDescription": "{{type}}はテキストとして表示できません。ダウンロードして別のアプリで開いてください。",
     "previewTitle": "レスポンスのプレビュー",
     "treeTrimmed_other": "ツリーの先頭部分を表示しています。ほかに{{count}}個の値が非表示です。残りを見るには、Rawまたはフィルターを使ってください。",
+    "tree": {
+      "expandAll": "すべて展開",
+      "collapseAll": "すべて折りたたむ",
+      "depth": "展開の深さ",
+      "level": "レベル{{count}}",
+      "allLevels": "すべてのレベル",
+      "remember": "このリクエストを毎回この深さで開く",
+      "remembered": "このリクエストはすでにこの深さで開きます"
+    },
     "requestFailed": "リクエストに失敗しました",
     "error": "エラー",
     "milliseconds": "{{value}} ms",

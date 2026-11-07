@@ -1,0 +1,35 @@
+{
+  "variablesPanel": {
+    "type": "Tip",
+    "typeLabel": "Tipul variabilei",
+    "value": "Valoare",
+    "valueChoice": "Alegeți o valoare",
+    "fieldOptions": "Opțiuni ale câmpului",
+    "label": "Etichetă",
+    "labelPlaceholder": "Numele afișat în vizualizarea Variabile",
+    "help": "Text de ajutor",
+    "helpPlaceholder": "Afișat sub câmp în vizualizarea Variabile",
+    "placeholder": "Text substituent",
+    "placeholderPlaceholder": "Afișat cât timp câmpul este gol",
+    "choices": "Opțiuni",
+    "choicesPlaceholder": "roșu, verde, albastru",
+    "required": "Obligatoriu",
+    "inForm": "Afișare în vizualizarea Variabile",
+    "showInherited": "Afișare variabile moștenite",
+    "inheritedTitle": "Moștenite",
+    "inheritedHint": "Doar pentru citire. Acestea provin din domeniile de deasupra acestei cereri. O variabilă cu același nume de deasupra are prioritate aici.",
+    "inheritedNone": "Nu este moștenită nicio variabilă.",
+    "hiddenValue": "Ascunsă",
+    "typeNote": "O variabilă cu tip ajunge în scripturi cu acel tip. Într-un URL, antet sau corp este scrisă în continuare ca text."
+  },
+  "variablesView": {
+    "switchLabel": "Vizualizarea cererii",
+    "fullEditor": "Editorul complet",
+    "variables": "Variabile",
+    "formLabel": "Variabilele cererii",
+    "emptyTitle": "Nicio variabilă de completat",
+    "emptyDescription": "Variabilele adăugate în fila Vars a editorului complet apar aici ca câmpuri de introducere.",
+    "openEditor": "Deschidere editor complet",
+    "required": "Obligatoriu"
+  }
+}

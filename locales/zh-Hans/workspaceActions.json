@@ -37,6 +37,7 @@
     "clear": "清除",
     "closeTab": "关闭标签页",
     "closeTabMessage": "“{{name}}”有未保存的更改。关闭前要保存吗？",
-    "dontSave": "不保存"
+    "dontSave": "不保存",
+    "openFirstRequest": "打开第一个请求"
   }
 }

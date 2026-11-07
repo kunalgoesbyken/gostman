@@ -1,0 +1,28 @@
+{
+  "tour": {
+    "label": "Tur rapid",
+    "replay": "Afișare tur",
+    "progress": "Pasul {{current}} din {{total}}",
+    "next": "Următorul",
+    "done": "Gata",
+    "skip": "Omitere tur",
+    "steps": {
+      "send": {
+        "title": "Trimiteți o cerere",
+        "body": "Introduceți un URL în bara de adrese și apăsați Trimite. Răspunsul se deschide dedesubt."
+      },
+      "variables": {
+        "title": "Folosiți variabile",
+        "body": "Scrieți o valoare ca {{example}} și setați-o într-un mediu, astfel încât o cerere să funcționeze pentru local, staging și producție."
+      },
+      "tools": {
+        "title": "Găsiți fiecare instrument",
+        "body": "Meniul Instrumente din antet grupează ce puteți face cu cererile: rulare, mock, scanare, monitorizare și partajare."
+      },
+      "explore": {
+        "title": "Căutați orice",
+        "body": "Apăsați {{shortcut}} pentru paleta de comenzi sau deschideți Ajutor și alegeți Explorare funcții."
+      }
+    }
+  }
+}

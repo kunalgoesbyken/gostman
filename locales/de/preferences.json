@@ -10,6 +10,7 @@
       "language": "Sprache",
       "ai": "KI",
       "privacy": "Datenschutz",
+      "updates": "Updates",
       "data": "Daten"
     },
     "fields": {
@@ -21,12 +22,14 @@
       "codeFont": "Schrift für Code",
       "density": "Dichte",
       "responseLayout": "Antwortbereich",
+      "tabPlacement": "Geöffnete Tabs",
       "systemTitleBar": "Systemtitelleiste verwenden",
       "editorFontSize": "Schriftgröße im Editor",
       "wrapLines": "Lange Zeilen umbrechen",
       "requestTimeout": "Standard-Zeitlimit",
       "confirmCloseTab": "Beim Schließen eines Tabs vor dem Verwerfen ungespeicherter Änderungen fragen",
       "language": "Sprache",
+      "authorName": "Ihr Name bei Notizen",
       "sidebarViews": "Tabs der Seitenleiste"
     },
     "themes": {
@@ -54,6 +57,11 @@
       "below": "Unten",
       "right": "Rechts"
     },
+    "tabPlacements": {
+      "bar": "Tab-Leiste",
+      "sidebar": "Seitenleiste"
+    },
+    "tabPlacementHint": "„Seitenleiste“ blendet die Tab-Leiste aus und listet die geöffneten Tabs in der Seitenleiste auf, was sich für kleine Bildschirme eignet.",
     "seconds": "Sekunden",
     "pixels": "px",
     "contrastHint": "„Höher“ zeichnet stärkere Rahmen und sekundären Text.",
@@ -152,6 +160,7 @@
       "lowContrast": "Text ist möglicherweise schwer lesbar. Streben Sie mindestens {{minimum}}:1 an.",
       "resetRow": "{{name}} zurücksetzen"
     },
+    "authorNameHint": "Wird bei den Notizen angezeigt, die Sie zu Anfragen und Ordnern hinzufügen.",
     "timeoutHint_one": "Gilt für Anfragen, die kein eigenes Zeitlimit festlegen. 0 verwendet das eingebaute Limit von {{count}} Sekunde.",
     "timeoutHint_other": "Gilt für Anfragen, die kein eigenes Zeitlimit festlegen. 0 verwendet das eingebaute Limit von {{count}} Sekunden.",
     "languageSystem": "Wie das System ({{language}})",
@@ -164,6 +173,8 @@
     "accentAdjusted": "Im hellen Modus als {{light}} und im dunklen Modus als {{dark}} dargestellt, damit Text in dieser Farbe lesbar bleibt.",
     "sidebarViewsHint": "Legen Sie fest, welche Tabs die Seitenleiste zeigt und in welcher Reihenfolge. Mit einem Rechtsklick auf die Tabs in der Seitenleiste lassen sie sich dort ein- und ausblenden.",
     "moveViewUp": "{{name}} nach oben",
-    "moveViewDown": "{{name}} nach unten"
+    "moveViewDown": "{{name}} nach unten",
+    "textScaleHint": "Skaliert die Oberfläche und ihre Eingabefelder. Der Fenster-Zoom wird zusätzlich zu dieser Größe angewendet: Eine Basis von {{size}} px wird bei 125 % Zoom als {{zoomed}} px angezeigt.",
+    "editorFontSizeHint": "Code-Editoren, in Pixeln. Folgt nicht der Textgröße, und der Fenster-Zoom wird zusätzlich angewendet."
   }
 }

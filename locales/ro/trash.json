@@ -1,0 +1,32 @@
+{
+  "trash": {
+    "title": "Șterse recent",
+    "command": "Șterse recent",
+    "commandDescription": "Restaurați o cerere, un dosar sau un mediu pe care l-ați șters",
+    "commandKeywords": "coș gunoi restaurare anulare recuperare trash bin restore undo recover",
+    "empty": "Nimic nu a fost șters recent.",
+    "note_one": "Elementele șterse sunt păstrate {{count}} zi. Valorile secrete nu sunt păstrate; variabilele secrete restaurate revin goale.",
+    "note_few": "Elementele șterse sunt păstrate {{count}} zile. Valorile secrete nu sunt păstrate; variabilele secrete restaurate revin goale.",
+    "note_other": "Elementele șterse sunt păstrate {{count}} de zile. Valorile secrete nu sunt păstrate; variabilele secrete restaurate revin goale.",
+    "listLabel": "Elemente șterse",
+    "kinds": {
+      "request": "Cerere",
+      "folder": "Dosar",
+      "environment": "Mediu"
+    },
+    "daysLeft_one": "{{count}} zi rămasă",
+    "daysLeft_few": "{{count}} zile rămase",
+    "daysLeft_other": "{{count}} de zile rămase",
+    "restore": "Restaurare",
+    "restored": "{{name}} a fost restaurat.",
+    "deleteForever": "Ștergere definitivă",
+    "emptyBin": "Golire coș",
+    "emptyBinTitle": "Goliți coșul?",
+    "emptyBinMessage": "Tot ce se află în coș este șters definitiv.",
+    "emptyBinConfirm": "Golire coș",
+    "readFailed": "Coșul nu a putut fi citit: {{detail}}",
+    "saveFailed": "Elementul șters nu a putut fi păstrat în coș: {{detail}}",
+    "restoreFailed": "Elementul nu a putut fi restaurat: {{detail}}",
+    "unnamed": "Fără nume"
+  }
+}

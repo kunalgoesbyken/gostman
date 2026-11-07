@@ -37,6 +37,11 @@
         "title": "Exécuter vos requêtes ensemble",
         "hint": "L’exécuteur envoie chaque requête enregistrée dans l’ordre et indique quelles vérifications ont réussi.",
         "action": "Ouvrir l’exécuteur"
+      },
+      "explore": {
+        "title": "Explorer les fonctionnalités",
+        "hint": "Recherchez n’importe quelle fonctionnalité, essayez-la avec un exemple et découvrez son fonctionnement.",
+        "action": "Explorer les fonctionnalités"
       }
     }
   }

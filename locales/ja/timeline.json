@@ -62,6 +62,29 @@
     },
     "tlsAlpn": "ALPN {{protocol}}",
     "tlsExpires": "有効期限：{{date}}",
-    "tlsExpired": "有効期限：{{date}}（期限切れ）"
+    "tlsExpired": "有効期限：{{date}}（期限切れ）",
+    "certificates": {
+      "title": "証明書チェーン",
+      "subject": "サブジェクト",
+      "issuer": "発行者",
+      "validFrom": "有効期間の開始",
+      "validTo": "有効期限",
+      "names": "名前",
+      "serial": "シリアル番号",
+      "fingerprint": "SHA-256フィンガープリント",
+      "keyType": "公開鍵",
+      "signature": "署名",
+      "authority": "認証局",
+      "position": "証明書 {{number}}/{{total}}",
+      "expired": "期限切れ",
+      "expiresSoon": "30日以内に期限切れ"
+    },
+    "redirects": {
+      "title": "リダイレクトチェーン",
+      "step": "ステップ",
+      "status": "ステータス",
+      "url": "URL",
+      "time": "時間"
+    }
   }
 }

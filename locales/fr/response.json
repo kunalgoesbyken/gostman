@@ -62,7 +62,22 @@
     "views": {
       "pretty": "Formaté",
       "raw": "Brut",
-      "preview": "Aperçu"
+      "preview": "Aperçu",
+      "info": "Résumé",
+      "hex": "Hex",
+      "msgpack": "MessagePack",
+      "cbor": "CBOR"
+    },
+    "hex": {
+      "label": "Vue hexadécimale du corps",
+      "offset": "Décalage",
+      "text": "Texte"
+    },
+    "decode": {
+      "working": "Décodage…",
+      "failed": "Le corps n’a pas pu être lu en {{format}} : {{reason}}",
+      "timedOut": "La lecture du corps en {{format}} a pris plus de {{seconds}} secondes et a été arrêtée. Utilisez Hex ou enregistrez-le dans un fichier.",
+      "tooLarge": "Ce corps fait {{size}}. Gostman décode jusqu’à {{limit}} : utilisez Hex ou enregistrez-le dans un fichier."
     },
     "bodyView": "Affichage du corps",
     "checksPassed": "{{passed}} vérifications réussies sur {{total}}",
@@ -76,7 +91,8 @@
       "compareParts": "Comparer",
       "comparedWith": "comparé à",
       "bodyPart": "Corps",
-      "headersPart": "En-têtes"
+      "headersPart": "En-têtes",
+      "exportHar": "Exporter en HAR"
     },
     "columns": {
       "name": "Nom",
@@ -115,6 +131,15 @@
     "treeTrimmed_one": "Affichage du début de cet arbre. {{count}} valeur de plus est masquée. Utilisez Brut ou le filtre pour voir le reste.",
     "treeTrimmed_other": "Affichage du début de cet arbre. {{count}} valeurs de plus sont masquées. Utilisez Brut ou le filtre pour voir le reste.",
     "treeTrimmed_many": "Affichage du début de cet arbre. {{count}} de valeurs de plus sont masquées. Utilisez Brut ou le filtre pour voir le reste.",
+    "tree": {
+      "expandAll": "Tout déplier",
+      "collapseAll": "Tout replier",
+      "depth": "Profondeur de dépliage",
+      "level": "Niveau {{count}}",
+      "allLevels": "Tous les niveaux",
+      "remember": "Toujours ouvrir cette requête à cette profondeur",
+      "remembered": "Cette requête s’ouvre déjà à cette profondeur"
+    },
     "requestFailed": "Échec de la requête",
     "error": "Erreur",
     "milliseconds": "{{value}} ms",

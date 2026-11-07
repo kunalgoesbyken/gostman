@@ -1,0 +1,679 @@
+{
+  "features": {
+    "title": "Explorar funciones",
+    "intro": "Busca lo que puede hacer Gostman, prueba una función en el sitio y lee cómo funciona.",
+    "searchLabel": "Buscar funciones",
+    "searchPlaceholder": "Busca funciones, por ejemplo snapshot, simulado o git",
+    "groupsLabel": "Grupos de funciones",
+    "allGroups": "Todas",
+    "groups": {
+      "requests": "Solicitudes",
+      "data": "Colecciones y datos",
+      "variables": "Variables y secretos",
+      "testing": "Pruebas y especificaciones",
+      "automation": "Automatización",
+      "mocking": "Simulación y captura",
+      "git": "Git",
+      "ai": "IA",
+      "app": "Aplicación"
+    },
+    "tryIt": "Probar",
+    "tryItLabel": "Probar {{title}}",
+    "learnMore": "Más información",
+    "learnMoreLabel": "Más información sobre {{title}}",
+    "newBadge": "Nuevo",
+    "platformDesktop": "App de escritorio",
+    "platformCli": "Línea de comandos",
+    "platformWeb": "App web",
+    "desktopOnlyTitle": "{{title}} necesita la app de escritorio",
+    "desktopOnlyBody": "El navegador no puede acceder a archivos locales, puertos ni ajustes del sistema, así que esto solo está en la app de escritorio.",
+    "getDesktop": "Obtener la app de escritorio",
+    "nothingMatches": "Ninguna función coincide con «{{query}}».",
+    "results_one": "{{count}} función",
+    "results_many": "{{count}} de funciones",
+    "results_other": "{{count}} funciones",
+    "close": "Cerrar",
+    "commandTitle": "Explorar funciones",
+    "commandDescription": "Busca cualquier función, pruébala y lee cómo funciona",
+    "commandKeywords": "funciones índice capacidades descubrir qué puede hacer gostman ayuda features",
+    "statusLabel": "Explorar",
+    "statusTitle": "Explorar funciones",
+    "helpHideLabel": "Ocultar la sugerencia sobre {{title}}",
+    "whatsNewTitle": "Novedades",
+    "whatsNewIntro": "Novedades de la versión {{version}}",
+    "whatsNewNothing": "No hay novedades que mostrar en esta versión.",
+    "whatsNewCommandTitle": "Novedades",
+    "whatsNewCommandDescription": "Funciones añadidas en la última versión",
+    "whatsNewKeywords": "notas de la versión novedades cambios actualizaciones versión changelog",
+    "whatsNewDot": "Novedades de la versión {{version}}",
+    "exploreAll": "Explorar todas las funciones",
+    "samplesAdded": "Se añadió la colección de ejemplo.",
+    "helpMenu": "Ayuda",
+    "exploreHint_one": "Busca entre la {{count}} función de Gostman, pruébala con un ejemplo y lee cómo funciona.",
+    "exploreHint_many": "Busca entre las {{count}} de funciones de Gostman, pruébalas con un ejemplo y lee cómo funcionan.",
+    "exploreHint_other": "Busca entre las {{count}} funciones de Gostman, pruébalas con un ejemplo y lee cómo funcionan.",
+    "copied": "Se copió {{command}}",
+    "copyFailed": "No se pudo copiar {{command}}",
+    "toolsMenu": "Herramientas",
+    "toolsMenuHint": "Todo lo que Gostman puede hacer con tus solicitudes, por tarea",
+    "toolGroups": {
+      "build": "Crear",
+      "test": "Probar",
+      "automate": "Automatizar",
+      "mockCapture": "Simulación y captura",
+      "shareGit": "Compartir y Git"
+    },
+    "cliLine": "En un terminal"
+  },
+  "featureWords": {
+    "rest": {
+      "title": "Solicitudes REST y HTTP",
+      "blurb": "Envía cualquier método con parámetros, encabezados, un cuerpo y autenticación, y lee el estado, el tiempo y el tamaño.",
+      "synonyms": "http api get post put delete patch rest solicitud petición request",
+      "tool": "Nueva solicitud"
+    },
+    "graphql": {
+      "title": "GraphQL",
+      "blurb": "Escribe consultas con un explorador de esquema, un generador de consultas y variables. Las suscripciones van por WebSocket.",
+      "synonyms": "graphql consulta mutación esquema introspección suscripción query mutation schema apollo"
+    },
+    "grpc": {
+      "title": "gRPC",
+      "blurb": "Carga servicios por reflexión o con archivos .proto y llama a métodos unarios y de streaming.",
+      "synonyms": "grpc protobuf proto reflexión reflection stream streaming bloomrpc grpcurl"
+    },
+    "websocket": {
+      "title": "WebSocket, Socket.IO y MQTT",
+      "blurb": "Conéctate, envía mensajes guardados y lee un registro de mensajes por WebSocket, Socket.IO o MQTT.",
+      "synonyms": "websocket socket.io socketio mqtt tiempo real realtime ws sse eventos mensajes"
+    },
+    "mcp": {
+      "title": "Servidores MCP",
+      "blurb": "Llama a las herramientas, recursos y prompts de un servidor MCP y comprueba lo que devuelve.",
+      "synonyms": "mcp model context protocol herramientas tools agente servidor inspector"
+    },
+    "curl": {
+      "title": "Pegar un comando curl",
+      "blurb": "Pega un comando curl en la barra de direcciones y la solicitud se rellena.",
+      "synonyms": "curl pegar comando línea de comandos importar portapapeles"
+    },
+    "codegen": {
+      "title": "Fragmentos de código",
+      "blurb": "Copia la solicitud que se envía como cURL, Python, Go, JavaScript, Java, C# y más, incluidos axios, httpx, OkHttp, RestSharp, Guzzle, HTTPie y wget.",
+      "synonyms": "código fragmento snippet generar curl python javascript fetch go java",
+      "tool": "Código"
+    },
+    "responseViewer": {
+      "title": "Visor de respuestas",
+      "blurb": "Lee JSON como árbol, previsualiza HTML, imágenes y PDF, filtra con JSONPath y busca en el cuerpo.",
+      "synonyms": "respuesta cuerpo json vista previa filtrar buscar jsonpath cronología consola visualizar"
+    },
+    "examples": {
+      "title": "Ejemplos guardados",
+      "blurb": "Guarda respuestas como ejemplos con nombre que documentan una solicitud y alimentan el servidor simulado.",
+      "synonyms": "ejemplo respuesta guardada muestra documentación example"
+    },
+    "oauth": {
+      "title": "Autenticación y OAuth 2",
+      "blurb": "Basic, bearer, clave de API, OAuth 1 y 2, Digest, AWS SigV4, NTLM, JWT y más, con renovación de tokens.",
+      "synonyms": "auth autenticación autorización oauth oauth2 bearer token basic digest sigv4 ntlm hawk apikey clave"
+    },
+    "cookies": {
+      "title": "Almacén de cookies",
+      "blurb": "Consulta, edita y borra las cookies guardadas de cada dominio.",
+      "synonyms": "cookie cookies almacén jar sesión",
+      "tool": "Cookies"
+    },
+    "requestSettings": {
+      "title": "Ajustes de la solicitud",
+      "blurb": "Establece el tiempo de espera, las redirecciones y la verificación TLS de una sola solicitud.",
+      "synonyms": "ajustes tiempo de espera timeout redirección redirect tls verificar ssl seguir"
+    },
+    "hexView": {
+      "title": "Vista hexadecimal",
+      "blurb": "Lee el cuerpo de una respuesta como desplazamientos, bytes en hexadecimal y texto.",
+      "synonyms": "hex hexadecimal binario bytes volcado dump"
+    },
+    "msgpackCbor": {
+      "title": "MessagePack y CBOR",
+      "blurb": "Decodifica respuestas MessagePack y CBOR a texto JSON que puedes buscar y copiar.",
+      "synonyms": "msgpack messagepack cbor binario decodificar"
+    },
+    "certificateViewer": {
+      "title": "Cadena de certificados y redirecciones",
+      "blurb": "La pestaña Cronología muestra la cadena de certificados que presentó un servidor, con fechas de validez, nombres y huellas, y una tabla de los saltos de redirección.",
+      "synonyms": "certificado tls ssl cadena x509 https redirección saltos cronología caducidad"
+    },
+    "jwtSigning": {
+      "title": "Firma de JWT",
+      "blurb": "Firma un JWT en la pestaña Auth con una clave privada JWK y establece cuándo caduca.",
+      "synonyms": "jwt firmar firma jwk token caducidad bearer hs256 rs256"
+    },
+    "httpVersion": {
+      "title": "Versión de HTTP",
+      "blurb": "Elige Automático, HTTP/1.1 o HTTP/2 para una solicitud. La Cronología muestra el protocolo que se usó.",
+      "synonyms": "http2 http/2 http1 protocolo versión alpn prior knowledge"
+    },
+    "dnsOverride": {
+      "title": "Sustitución de hosts",
+      "blurb": "Envía un host a una dirección fija, como hace curl --resolve, y limita las conexiones a IPv4 o IPv6.",
+      "synonyms": "dns resolver resolve host hosts sustituir override ip ipv4 ipv6 curl"
+    },
+    "graphqlUpload": {
+      "title": "Subida de archivos GraphQL",
+      "blurb": "Envía archivos en una solicitud GraphQL con la especificación multipart request desde la pestaña Archivos.",
+      "synonyms": "graphql subir subida upload multipart archivo archivos mutación"
+    },
+    "wsSecurity": {
+      "title": "SOAP WS-Security",
+      "blurb": "Añade un UsernameToken de WS-Security (en claro o digest) y un Timestamp a una solicitud SOAP desde la pestaña Auth.",
+      "synonyms": "soap wsse ws-security wsdl xml usernametoken digest seguridad"
+    },
+    "grpcWeb": {
+      "title": "gRPC-Web y Connect",
+      "blurb": "Llama a servicios gRPC por gRPC-Web o Connect, que también funciona desde la app web.",
+      "synonyms": "grpc-web grpcweb connect navegador transporte"
+    },
+    "signalr": {
+      "title": "SignalR",
+      "blurb": "Negocia con un hub de SignalR, conéctate por WebSocket e invoca sus métodos.",
+      "synonyms": "signalr hub aspnet tiempo real realtime websocket"
+    },
+    "tcpUdp": {
+      "title": "TCP y UDP",
+      "blurb": "Envía texto o hexadecimal por TCP o UDP y lee la respuesta. App de escritorio, solo carpetas de confianza.",
+      "synonyms": "tcp udp socket bytes crudos raw hex hexadecimal"
+    },
+    "nats": {
+      "title": "NATS",
+      "blurb": "Solicitud y respuesta, publica o espera un mensaje en un subject de NATS. App de escritorio, solo carpetas de confianza.",
+      "synonyms": "nats subject publicar suscribir publish subscribe solicitud respuesta mensajería broker"
+    },
+    "breakpoints": {
+      "title": "Llamadas retenidas",
+      "blurb": "Retén una solicitud o respuesta capturada con una regla, edítala y luego libérala o descártala.",
+      "synonyms": "breakpoint breakpoints punto de interrupción pausa retener interceptar editar liberar descartar depurar"
+    },
+    "jsonRpc": {
+      "title": "Llamadas JSON-RPC",
+      "blurb": "Añade una llamada JSON-RPC 2.0 o un lote a un cuerpo JSON con un botón.",
+      "synonyms": "json-rpc jsonrpc rpc lote batch método params id"
+    },
+    "responseCompare": {
+      "title": "Respuestas anteriores",
+      "blurb": "Cada pestaña conserva sus últimas 10 respuestas; abre una o compárala con la más reciente.",
+      "synonyms": "anteriores previas respuestas comparar diferencias diff historial respuesta"
+    },
+    "responseHar": {
+      "title": "Exportar respuestas como HAR",
+      "blurb": "Guarda las respuestas conservadas de una pestaña como archivo HAR con las credenciales enmascaradas.",
+      "synonyms": "har exportar respuestas archivo"
+    },
+    "splitView": {
+      "title": "Respuesta junto a la pestaña",
+      "blurb": "Muestra la última respuesta de otra pestaña en un panel junto a la pestaña abierta, desde el menú de la solicitud en la barra lateral.",
+      "synonyms": "dividir lado a lado junto panel respuesta comparar split"
+    },
+    "globalSearch": {
+      "title": "Buscar en todo",
+      "blurb": "Busca en solicitudes guardadas, el historial y las respuestas abiertas en un solo lugar.",
+      "synonyms": "buscar encontrar global todo solicitudes historial respuestas search"
+    },
+    "dependencyGraph": {
+      "title": "Dependencias de variables",
+      "blurb": "Consulta qué solicitudes establecen una variable y cuáles la leen.",
+      "synonyms": "dependencia dependencias grafo variables extraer establecer leer"
+    },
+    "openTabs": {
+      "title": "Lista de pestañas abiertas",
+      "blurb": "Muestra las pestañas abiertas como una lista en la barra lateral y salta entre ellas.",
+      "synonyms": "pestañas abiertas lista barra lateral cambiar tabs"
+    },
+    "history": {
+      "title": "Historial",
+      "blurb": "Se conserva cada solicitud que envías, con el estado de su respuesta, para que puedas abrirla de nuevo.",
+      "synonyms": "historial recientes enviadas anteriores history"
+    },
+    "collections": {
+      "title": "Colecciones y carpetas",
+      "blurb": "Agrupa solicitudes en carpetas anidadas, arrástralas a su sitio, búscalas, etiquétalas y coloréalas.",
+      "synonyms": "colección carpeta árbol barra lateral organizar etiqueta collection postman collections"
+    },
+    "folderWorkspace": {
+      "title": "Espacios de trabajo en carpetas",
+      "blurb": "Guarda una colección como archivos YAML simples junto a tu código y compártela con Git.",
+      "synonyms": "carpeta espacio de trabajo workspace yaml archivos git bruno opencollection",
+      "tool": "Espacio de trabajo",
+      "webInstead": "En la web, tus colecciones se guardan en este navegador. Expórtalas para compartirlas o hacer una copia de seguridad."
+    },
+    "folderSettings": {
+      "title": "Ajustes de la carpeta",
+      "blurb": "Establece encabezados, autenticación, variables, scripts y pruebas una sola vez para todas las solicitudes de una carpeta.",
+      "synonyms": "carpeta colección ajustes heredar encabezados autenticación auth scripts",
+      "tool": "Ajustes de la colección"
+    },
+    "import": {
+      "title": "Importar",
+      "blurb": "Importa desde Postman, Bruno, Insomnia, OpenAPI, HAR, WSDL, archivos .http y comandos curl.",
+      "synonyms": "importar import postman bruno insomnia openapi swagger har wsdl http curl migrar"
+    },
+    "firecampImport": {
+      "title": "Importar de Firecamp",
+      "blurb": "Importa exportaciones de colecciones de Firecamp: carpetas, solicitudes REST, encabezados y scripts.",
+      "synonyms": "firecamp importar migrar colección"
+    },
+    "specImporters": {
+      "title": "Más formatos de importación",
+      "blurb": "Importa archivos de Hoppscotch, Thunder Client, HTTPie, Hurl, RAML y API Blueprint. Hurl también es un formato de exportación. Los archivos de Paw no se leen.",
+      "synonyms": "hoppscotch thunder client hurl raml blueprint httpie restfox importar migrar"
+    },
+    "export": {
+      "title": "Exportar",
+      "blurb": "Escribe una colección en Postman, OpenAPI, Markdown, archivos .http o una copia de seguridad.",
+      "synonyms": "exportar export postman openapi markdown copia de seguridad backup http"
+    },
+    "share": {
+      "title": "Enlaces para compartir",
+      "blurb": "Envía una colección como enlace o archivo cifrado, sin cuenta.",
+      "synonyms": "compartir enlace cifrado enviar equipo colaborar share",
+      "tool": "Compartir"
+    },
+    "versionedDocs": {
+      "title": "Documentación por versiones",
+      "blurb": "gostman docs --versions genera documentación para cada etiqueta de Git, y --logo y --accent dan estilo a la página.",
+      "synonyms": "docs documentación html publicar versión etiquetas tags logo accent"
+    },
+    "notes": {
+      "title": "Notas",
+      "blurb": "Mantén un hilo de notas en una solicitud o carpeta, guardado en su archivo para que tu equipo lo revise en Git.",
+      "synonyms": "notas comentarios revisión hilo resolver"
+    },
+    "recentlyDeleted": {
+      "title": "Eliminados recientemente",
+      "blurb": "Restaura solicitudes, carpetas y entornos eliminados durante 30 días.",
+      "synonyms": "papelera eliminados borrados restaurar deshacer recuperar"
+    },
+    "backups": {
+      "title": "Copias de seguridad",
+      "blurb": "Copias de seguridad diarias y por versión de tus datos, con restauración.",
+      "synonyms": "copia de seguridad backup restaurar instantánea recuperar"
+    },
+    "environments": {
+      "title": "Entornos",
+      "blurb": "Cambia entre conjuntos de variables para local, staging y producción.",
+      "synonyms": "entorno variables desarrollo dev staging pruebas producción prod env"
+    },
+    "scopes": {
+      "title": "Ámbitos de variables",
+      "blurb": "Variables globales, de colección, de carpeta, de entorno, de sesión y de solicitud, con un orden de prioridad claro.",
+      "synonyms": "variables ámbitos alcance prioridad precedencia global colección carpeta solicitud vars"
+    },
+    "jsonTreeDepth": {
+      "title": "Profundidad del árbol JSON",
+      "blurb": "Expande o contrae una respuesta JSON a cualquier nivel y haz que cada solicitud se abra a la profundidad que prefieras.",
+      "synonyms": "json expandir contraer árbol profundidad nivel plegar desplegar visor respuesta"
+    },
+    "typedVariables": {
+      "title": "Variables con tipo",
+      "blurb": "Da un tipo a las variables de la solicitud para que los scripts reciban números, booleanos y JSON en lugar de texto, y los valores incorrectos se detecten antes de enviar.",
+      "synonyms": "variables tipo tipadas número booleano entero json enum validación obligatorio"
+    },
+    "variablesView": {
+      "title": "Vista de variables",
+      "blurb": "Muestra una solicitud como un formulario breve con sus variables, Enviar y la respuesta, para quien solo rellena valores.",
+      "synonyms": "variables vista formulario simple campos entrada usuarios ocasionales plantilla"
+    },
+    "inheritedVariables": {
+      "title": "Variables heredadas",
+      "blurb": "Consulta qué variables globales, de colección, de entorno, de carpeta y de sesión recibe una solicitud, junto a las suyas.",
+      "synonyms": "heredadas variables ámbito lista mostrar ocultar solo solicitud"
+    },
+    "secrets": {
+      "title": "Variables secretas",
+      "blurb": "Guarda los valores secretos en el llavero del sistema, fuera de archivos y exportaciones.",
+      "synonyms": "secreto secreta llavero keychain contraseña token vault"
+    },
+    "secretManagers": {
+      "title": "Gestores de secretos",
+      "blurb": "Lee valores de Vault, AWS, Azure, Google Cloud, 1Password, Bitwarden o KeePassXC en el momento del envío.",
+      "synonyms": "vault aws azure gcp 1password bitwarden keepassxc gestor de secretos secret manager"
+    },
+    "extract": {
+      "title": "Reglas de extracción",
+      "blurb": "Saca un valor de una respuesta a una variable para la siguiente solicitud.",
+      "synonyms": "extraer capturar encadenar variable respuesta jsonpath extract"
+    },
+    "network": {
+      "title": "Proxy y certificados",
+      "blurb": "Usa un proxy, certificados de cliente y certificados de CA propios.",
+      "synonyms": "proxy certificado mtls ca tls red"
+    },
+    "checks": {
+      "title": "Pruebas",
+      "blurb": "Comprueba el estado, los encabezados, el cuerpo y el tiempo sin escribir código.",
+      "synonyms": "pruebas tests aserciones assert comprobaciones checks postman tests chai"
+    },
+    "scripts": {
+      "title": "Scripts",
+      "blurb": "Ejecuta JavaScript antes y después de una solicitud con API compatibles con pm, bru e insomnia.",
+      "synonyms": "script pre-request post-response previo posterior javascript pm bru insomnia"
+    },
+    "contract": {
+      "title": "Pruebas de contrato",
+      "blurb": "Comprueba las respuestas con una especificación OpenAPI en el ejecutor y en CI.",
+      "synonyms": "contrato contract openapi esquema validar conformidad dredd"
+    },
+    "snapshotChecks": {
+      "title": "Pruebas de instantánea",
+      "blurb": "Compara un valor de la respuesta con una instantánea guardada, deja fuera las rutas que cambian y actualízala desde la última respuesta.",
+      "synonyms": "instantánea snapshot golden diferencias diff regresión coincide ignorar"
+    },
+    "openapiFuzz": {
+      "title": "Fuzzing de OpenAPI",
+      "blurb": "Envía entradas válidas, límite y no válidas derivadas del esquema para cada operación de una especificación e informa de respuestas 5xx, tiempos de espera agotados e infracciones del contrato.",
+      "synonyms": "openapi fuzz fuzzing schemathesis basado en propiedades límite entradas no válidas swagger"
+    },
+    "negativeTests": {
+      "title": "Pruebas negativas",
+      "blurb": "Envía copias alteradas de solicitudes guardadas y marca un 2xx ante una entrada incorrecta, un 5xx, una traza de pila o una carga reflejada.",
+      "synonyms": "negativas fuzz fuzzing seguridad inyección entradas no válidas límite schemathesis owasp"
+    },
+    "coverage": {
+      "title": "Cobertura de OpenAPI",
+      "blurb": "Consulta a qué operaciones de una especificación OpenAPI vinculada llamó una ejecución y qué estados documentados nunca llegaron.",
+      "synonyms": "cobertura coverage openapi operaciones sin probar especificación spec min-coverage"
+    },
+    "pmPackages": {
+      "title": "Paquetes y pm.vault",
+      "blurb": "Carga código compartido con require o pm.require desde la carpeta packages de un espacio de trabajo y lee secretos con pm.vault.",
+      "synonyms": "pm paquetes packages require biblioteca librería postman vault código compartido"
+    },
+    "specLint": {
+      "title": "Linter de OpenAPI",
+      "blurb": "Revisa si a una especificación le faltan descripciones, ejemplos o seguridad.",
+      "synonyms": "lint linter openapi spectral swagger validar",
+      "tool": "Lint de especificación"
+    },
+    "specSync": {
+      "title": "Sincronización de especificaciones",
+      "blurb": "Mantén una colección al día con una especificación OpenAPI remota.",
+      "synonyms": "sincronizar sync openapi especificación spec actualizar remota"
+    },
+    "runner": {
+      "title": "Ejecutar",
+      "blurb": "Ejecuta una carpeta en orden con archivos de datos CSV, JSON o XLSX, ejecuciones en paralelo e informes HTML o JUnit.",
+      "synonyms": "ejecutor runner ejecutar colección postman collection runner newman datos csv json xlsx iteración"
+    },
+    "flows": {
+      "title": "Flujos",
+      "blurb": "Dibuja una secuencia de solicitudes con bifurcaciones, reintentos y bucles.",
+      "synonyms": "flujo workflow encadenar reintento bifurcación rama bucle escenario flow"
+    },
+    "loadTest": {
+      "title": "Prueba de carga",
+      "blurb": "Envía muchas solicitudes a la vez y lee los percentiles de latencia y los errores.",
+      "synonyms": "carga rendimiento estrés load performance stress k6 benchmark latencia",
+      "webInstead": "En la web, ejecuta la colección con un archivo de datos y lee los tiempos de cada solicitud en el ejecutor."
+    },
+    "loadThresholds": {
+      "title": "Umbrales de carga",
+      "blurb": "Escribe umbrales como p95<300 o errors<1% y lee si se superan o fallan en la prueba de carga.",
+      "synonyms": "umbral threshold slo límite fallo carga etapas rampa"
+    },
+    "scan": {
+      "title": "Analizar secretos",
+      "blurb": "Encuentra tokens y contraseñas en una colección antes de compartirla.",
+      "synonyms": "analizar escanear secretos fuga token contraseña credencial scan gitleaks"
+    },
+    "cli": {
+      "title": "Línea de comandos",
+      "blurb": "Ejecuta, envía, haz pruebas de carga, analiza y revisa con lint desde un solo binario, con códigos de salida para CI.",
+      "synonyms": "cli línea de comandos terminal consola newman bruno cli inso"
+    },
+    "ci": {
+      "title": "Integración con CI",
+      "blurb": "Una GitHub Action, una imagen de Docker, recetas para GitLab, Azure Pipelines, CircleCI, Bitbucket y Jenkins, e informes JUnit, HTML y Markdown.",
+      "synonyms": "ci integración continua github actions gitlab azure circleci bitbucket jenkins docker pipeline junit"
+    },
+    "ciPrComment": {
+      "title": "Resultados en la pull request",
+      "blurb": "La GitHub Action escribe los recuentos y cada prueba fallida en el resumen del job, y puede mantener actualizado un comentario en la pull request.",
+      "synonyms": "pull request comentario pr prueba resumen del job markdown informe github actions"
+    },
+    "ciStarters": {
+      "title": "Plantillas de CI y pre-commit",
+      "blurb": "gostman init --ci escribe un pipeline inicial para GitHub, GitLab, Azure, CircleCI o Bitbucket. Los hooks de pre-commit ejecutan lint, scan y run.",
+      "synonyms": "ci pipeline inicial plantilla pre-commit hook makefile azure circleci bitbucket"
+    },
+    "monitors": {
+      "title": "Monitores",
+      "blurb": "Ejecuta una carpeta o un flujo con un temporizador mientras la app está abierta, y conserva tasas de éxito, historial y notificaciones.",
+      "synonyms": "monitor monitores postman monitor programar cron disponibilidad uptime intervalo notificar"
+    },
+    "agents": {
+      "title": "Agentes de programación",
+      "blurb": "Un servidor MCP que permite a los agentes de programación enviar solicitudes, con ocultación de secretos y una lista de hosts permitidos.",
+      "synonyms": "agente mcp claude cursor ia ai programación código skill"
+    },
+    "mock": {
+      "title": "Servidor simulado",
+      "blurb": "Sirve ejemplos guardados o una especificación OpenAPI en local, con un registro de solicitudes en directo.",
+      "synonyms": "simulado mock servidor stub falso fake wiremock prism ejemplos",
+      "tool": "Servidor simulado",
+      "webInstead": "En la web, guarda ejemplos en tus solicitudes; se conservan con la colección y se incluyen en las exportaciones. Para servirlos por HTTP, ejecuta el servidor simulado desde la CLI o la app de escritorio."
+    },
+    "mockDataRows": {
+      "title": "Respuestas simuladas desde un archivo de datos",
+      "blurb": "Responde con la fila de un archivo CSV, JSON o XLSX que coincide con un parámetro de ruta, un valor de consulta, un encabezado o un campo del cuerpo.",
+      "synonyms": "simulado mock datos archivo csv xlsx json filas búsqueda fixture wiremock"
+    },
+    "mockRules": {
+      "title": "Reglas de simulación",
+      "blurb": "Elige una respuesta según la consulta, un encabezado o el cuerpo, añade retardos e inyecta fallos.",
+      "synonyms": "simulado mock reglas condiciones retardo fallo latencia"
+    },
+    "capture": {
+      "title": "Proxy de captura",
+      "blurb": "Reenvía el tráfico a un servidor de destino, regístralo y conviértelo en solicitudes.",
+      "synonyms": "captura capturar proxy grabar tráfico interceptar charles fiddler mitm",
+      "tool": "Proxy de captura",
+      "webInstead": "En la web, pega un comando curl o importa un archivo HAR para crear solicitudes a partir del tráfico que grabaste en otro sitio."
+    },
+    "captureRules": {
+      "title": "Reglas de captura",
+      "blurb": "Edita encabezados y cuerpos, responde en local, inyecta fallos o ralentiza las llamadas que coinciden con una regla.",
+      "synonyms": "captura reglas reescribir bloquear map local ralentizar lento latencia fallo"
+    },
+    "captureHar": {
+      "title": "Captura a HAR",
+      "blurb": "Exporta las llamadas capturadas como un archivo HAR 1.2 que leen otras herramientas.",
+      "synonyms": "har captura exportar archivo"
+    },
+    "gitPanel": {
+      "title": "Panel de Git",
+      "blurb": "Diff, commit, push, ramas, stash e historial en la app.",
+      "synonyms": "git commit push pull rama branch stash diff control de versiones",
+      "tool": "Git",
+      "webInstead": "En la web, usa Compartir o Exportar para mover una colección. Para el control de versiones, usa un espacio de trabajo en carpeta en la app de escritorio o la CLI."
+    },
+    "gitFieldDiff": {
+      "title": "Diferencias por campo",
+      "blurb": "Consulta qué campos de una solicitud cambiaron, como la URL, los encabezados, la autenticación, el cuerpo y las pruebas, y compara dos versiones de un archivo.",
+      "synonyms": "git diff diferencias campo cambios yaml revisión comparar versiones"
+    },
+    "gitCommitGraph": {
+      "title": "Grafo de commits",
+      "blurb": "Lee el historial con un grafo de carriles de ramas, merges y etiquetas.",
+      "synonyms": "git grafo commits ramas log historial etiquetas tags merge"
+    },
+    "conflicts": {
+      "title": "Resolución de conflictos",
+      "blurb": "Resuelve conflictos de merge en un archivo de solicitud con un editor lado a lado.",
+      "synonyms": "merge conflicto resolver fusión git"
+    },
+    "repoCreate": {
+      "title": "Crear un repositorio de GitHub",
+      "blurb": "Crea un repositorio de GitHub desde la pestaña Remotos y haz push a él.",
+      "synonyms": "git init repositorio github publicar remoto crear push"
+    },
+    "ai": {
+      "title": "Asistente de IA",
+      "blurb": "Genera solicitudes, pruebas y scripts y explica respuestas, con tu propia clave.",
+      "synonyms": "ia ai llm openai anthropic claude generar explicar asistente postbot"
+    },
+    "aiMock": {
+      "title": "Ejemplos simulados con IA",
+      "blurb": "Genera con IA un ejemplo de respuesta simulada para una solicitud, mostrado como vista previa que aceptas.",
+      "synonyms": "ia ai simulado mock generar datos falsos ejemplo respuesta"
+    },
+    "aiCommit": {
+      "title": "Mensajes de commit con IA",
+      "blurb": "Redacta un mensaje de commit a partir de los cambios preparados con Sugerir mensaje con IA en el panel de Git.",
+      "synonyms": "ia ai mensaje de commit git redactar sugerir"
+    },
+    "aiInline": {
+      "title": "Sugerencias en línea en scripts",
+      "blurb": "Sugerencias de código en texto atenuado en los editores de scripts, desactivadas hasta que las actives en los ajustes de IA. Pulsa Tab para aceptar.",
+      "synonyms": "ia ai autocompletar completado copilot texto fantasma script sugerir"
+    },
+    "palette": {
+      "title": "Paleta de comandos",
+      "blurb": "Encuentra cualquier comando, solicitud o función por su nombre.",
+      "synonyms": "paleta comandos buscar apertura rápida ctrl k palette"
+    },
+    "shortcuts": {
+      "title": "Atajos de teclado",
+      "blurb": "Consulta todos los atajos y cambia los que quieras.",
+      "synonyms": "teclado atajos teclas hotkeys combinaciones shortcuts"
+    },
+    "themes": {
+      "title": "Temas y colores",
+      "blurb": "Colores claros, oscuros y personalizados para cada parte de la ventana.",
+      "synonyms": "tema oscuro claro color colores apariencia acento fuente theme"
+    },
+    "languages": {
+      "title": "Idiomas",
+      "blurb": "Usa la app en otro idioma, incluidos los diseños de derecha a izquierda.",
+      "synonyms": "idioma traducción configuración regional i18n localización árabe español"
+    },
+    "desktop": {
+      "title": "App de escritorio",
+      "blurb": "Las carpetas, Git, el servidor simulado, la captura, los proxies y los certificados necesitan la app de escritorio.",
+      "synonyms": "escritorio descargar instalar app windows mac linux desktop"
+    },
+    "webApp": {
+      "title": "App web",
+      "blurb": "Usa Gostman en el navegador sin cuenta y sin nada que instalar.",
+      "synonyms": "web navegador en línea online sin instalar pwa"
+    },
+    "pricing": {
+      "title": "Precio",
+      "blurb": "Gratis y con licencia MIT.",
+      "synonyms": "precio gratis gratuito licencia"
+    },
+    "vscode": {
+      "title": "Extensión de VS Code",
+      "blurb": "Una extensión de VS Code ejecuta colecciones, flujos, lint y scan a través de la CLI.",
+      "synonyms": "vscode extensión editor"
+    },
+    "vscodeExtension": {
+      "title": "Extensión de VS Code",
+      "blurb": "Ejecuta una colección, una carpeta o un flujo, revisa una especificación con lint y busca secretos desde el editor. Llama a la línea de comandos de Gostman, así que una ejecución coincide con la de CI.",
+      "synonyms": "vscode visual studio code extensión editor ide marketplace"
+    },
+    "xlsxData": {
+      "title": "Archivos de datos",
+      "blurb": "Ejecuta una carpeta una vez por cada fila de un archivo CSV, JSON o XLSX, en la app o con gostman run --data.",
+      "synonyms": "datos csv json xlsx excel hoja de cálculo iteración filas data-driven"
+    },
+    "scheduledRuns": {
+      "title": "Ejecuciones programadas",
+      "blurb": "gostman run --every repite una ejecución a intervalos, conserva un historial local y puede avisar a un webhook.",
+      "synonyms": "programar cron cada intervalo repetir historial webhook notificar"
+    },
+    "openapiDiff": {
+      "title": "Diff de OpenAPI",
+      "blurb": "Compara dos versiones de una especificación OpenAPI y enumera los cambios incompatibles en la app, o con gostman diff en CI.",
+      "synonyms": "openapi diff diferencias oasdiff cambios incompatibles breaking changes comparar especificación"
+    },
+    "apiDesign": {
+      "title": "Diseño de API",
+      "blurb": "Escribe una especificación OpenAPI antes de que exista el backend, con comprobaciones mientras escribes, y luego genera a partir de ella solicitudes, un servidor simulado y pruebas de respuesta.",
+      "synonyms": "openapi swagger diseño design first contrato editor stoplight api especificación spec yaml esquema"
+    },
+    "flowCanvas": {
+      "title": "Lienzo de flujos",
+      "blurb": "Ve un flujo de arriba abajo con las bifurcaciones una al lado de otra, los bucles enmarcados, zoom y desplazamiento, y el camino que tomó una ejecución.",
+      "synonyms": "flujo diagrama lienzo grafo workflow diseñador zoom desplazar bifurcaciones unión canvas"
+    },
+    "flowSwitch": {
+      "title": "Pasos Según",
+      "blurb": "Envía un flujo por uno de varios caminos, cada uno con su propio conjunto de pruebas.",
+      "synonyms": "según switch caso case condición bifurcación tabla de verdad decisión enrutador"
+    },
+    "flowRepeat": {
+      "title": "Pasos Repetir",
+      "blurb": "Repite varios pasos hasta que pase una prueba o se alcance un número de pasadas.",
+      "synonyms": "repetir bucle mientras hasta sondear iterar repeat loop while until poll"
+    },
+    "nestedFlows": {
+      "title": "Flujos dentro de flujos",
+      "blurb": "Ejecuta un flujo guardado como un paso de otro, con sus propios valores y su propio camino cuando falla.",
+      "synonyms": "subflujo sub-flow subflow anidado flujo de flujos reutilizar llamar"
+    },
+    "flowInputs": {
+      "title": "Valores en una solicitud",
+      "blurb": "Pon un valor de una respuesta anterior en los encabezados, la consulta, el cuerpo JSON, los campos de formulario o las variables de la siguiente solicitud.",
+      "synonyms": "encadenar respuesta mapeo mapeo de datos encabezado cuerpo formulario campo extraer pasar valor"
+    },
+    "flowMetrics": {
+      "title": "Métricas de ejecución de flujos",
+      "blurb": "Tiempo por paso, pasada de bucle y flujo, y los bytes enviados y recibidos, en la app, los informes y la CLI.",
+      "synonyms": "métricas tiempos duración bytes rendimiento estadísticas metrics"
+    },
+    "flowParallel": {
+      "title": "Pasos en paralelo",
+      "blurb": "Envía varias solicitudes o ejecuta varios flujos a la vez y continúa cuando se cumple una condición sobre sus resultados o se agota un tiempo límite.",
+      "synonyms": "paralelo concurrente a la vez simultáneo carrera fan out unión esperar a cualquiera esperar a todos tiempo de espera parallel Postman Flows"
+    },
+    "flowConditionGroups": {
+      "title": "Condiciones agrupadas",
+      "blurb": "Combina condiciones con y y o en grupos anidados, como (A o (B y C)) y D, en un solo paso Si, Según, Repetir o En paralelo.",
+      "synonyms": "y o and or grupos anidados lógica booleana paréntesis condición compleja tabla de verdad"
+    },
+    "flowVariables": {
+      "title": "Variables, entradas y salidas de flujos",
+      "blurb": "Declara variables con tipo que duran una ejecución, marca algunas como entradas, devuelve valores como salidas y obsérvalas cambiar mientras se ejecuta el flujo.",
+      "synonyms": "variables con tipo número booleano json entradas salidas parámetros valores devueltos ámbito del flujo inspeccionar observar"
+    }
+  },
+  "featureSamples": {
+    "collection": "Colección de ejemplo",
+    "listUsers": "Listar usuarios",
+    "getUser": "Obtener un usuario",
+    "createUser": "Crear un usuario",
+    "okExample": "200 OK",
+    "createdExample": "201 Created",
+    "flowName": "Flujo de ejemplo",
+    "scanRequest": "Solicitud con un token falso",
+    "graphqlRequest": "Solicitud GraphQL",
+    "websocketRequest": "Solicitud WebSocket",
+    "grpcRequest": "Solicitud gRPC",
+    "mcpRequest": "Solicitud MCP",
+    "flowDescription": "Envía dos solicitudes a la vez, conserva una variable del flujo con tipo, elige un camino según una condición agrupada, pasa un nombre a una solicitud, repite un paso hasta que pasa una prueba y devuelve un valor. Cada solicitud responde desde un ejemplo guardado, así que funciona sin conexión.",
+    "flowDone": "Terminado",
+    "flowListNote": "Responde con su ejemplo guardado **200 OK**, así que nada sale de este dispositivo.",
+    "flowCheckStatus": "Comprobar el estado",
+    "flowCreateNote": "Su `name` viene del segundo usuario de la lista y se pone en el cuerpo JSON justo antes de enviarla.",
+    "flowWaitForUser": "Leer hasta que sea Ada",
+    "flowStopped": "Detenido",
+    "flowStoppedMessage": "La lista de usuarios no respondió 200 OK.",
+    "binaryRequest": "Respuesta binaria",
+    "jwtRequest": "Solicitud JWT",
+    "flowFetchTogether": "Obtener la lista y a Ada a la vez",
+    "flowFetchNote": "Las dos solicitudes se envían a la vez; el flujo sigue cuando ambas se superan.",
+    "flowFirstUser": "Ada",
+    "flowKeepName": "Conservar su nombre",
+    "flowCheckNote": "Se cumple cuando el estado es 200 y el primer o el segundo usuario es el que se guardó en `firstName`."
+  }
+}

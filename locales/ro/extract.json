@@ -24,6 +24,8 @@
     "source": "Sursa valorii",
     "scope": "Unde este păstrată valoarea",
     "remove": "Eliminare extractor",
-    "runNow": "Rulare acum"
+    "runNow": "Rulare acum",
+    "environmentNamed": "Mediu: {{name}}",
+    "alreadyDefined": "Deja definită ({{source}}); valoarea extrasă este păstrată în domeniul ales pe acest rând."
   }
 }

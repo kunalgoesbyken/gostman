@@ -76,6 +76,19 @@
         "inputLabel": "Qué estás buscando",
         "placeholder": "el endpoint que cancela un pedido"
       },
+      "commit": {
+        "label": "Mensaje de commit a partir de los cambios",
+        "section": "Mensaje de commit",
+        "apply": "Usar como mensaje de commit",
+        "nothing": "No hay cambios que describir."
+      },
+      "mock": {
+        "label": "Ejemplos simulados para esta solicitud",
+        "inputLabel": "Describe las respuestas o pega un documento OpenAPI",
+        "placeholder": "Una lista de pedidos, una lista vacía y un 404 para un pedido desconocido",
+        "section": "Ejemplos que sirve el servidor simulado",
+        "apply": "Añadir a los ejemplos"
+      },
       "schema": {
         "label": "Solicitudes a partir de una descripción de API",
         "inputLabel": "Pega un documento OpenAPI o Swagger, un esquema GraphQL o el texto de la documentación de una API",
@@ -106,7 +119,8 @@
       "explain": "Explicar con IA",
       "explainError": "Explicar este error con IA",
       "document": "Escribir con IA",
-      "documentLabel": "Escribir la descripción con IA"
+      "documentLabel": "Escribir la descripción con IA",
+      "commitMessage": "Sugerir mensaje con IA"
     },
     "commands": {
       "request": {
@@ -135,6 +149,11 @@
         "description": "Encuentra solicitudes describiéndolas",
         "keywords": "buscar encontrar"
       },
+      "mock": {
+        "label": "IA: ejemplos simulados para esta solicitud",
+        "description": "Proponer respuestas de ejemplo para el servidor simulado a partir de una descripción, un documento OpenAPI o la última respuesta",
+        "keywords": "mock ejemplos respuestas simulado"
+      },
       "schema": {
         "label": "IA: solicitudes a partir de una descripción de API",
         "description": "Los documentos OpenAPI usan el importador integrado; las demás descripciones van a la IA",
@@ -154,6 +173,7 @@
       "consent": "Entiendo que, al ejecutar una acción de IA, los detalles de la solicitud o respuesta de la vista previa se envían a {{host}}, y que la facturación es entre el proveedor y yo.",
       "enable": "Activar las funciones de IA",
       "enableAfterConsent": "Activar las funciones de IA (marca primero la línea de arriba)",
+      "inlineCompletion": "Sugerir código mientras escribo en los editores de scripts. Tras una breve pausa, el script alrededor del cursor y los nombres de tus variables, nunca sus valores, se envían a {{host}} sin vista previa. Pulsa Tab para aceptar una sugerencia.",
       "provider": "Proveedor",
       "baseUrl": "URL base",
       "baseUrlPlaceholder": "https://host/v1",

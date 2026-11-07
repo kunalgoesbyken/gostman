@@ -44,13 +44,17 @@
       "payloadHash": "Skrót payloadu",
       "extraData": "Dane dodatkowe",
       "appId": "ID aplikacji",
+      "passwordType": "Typ hasła",
+      "timestampLifetime": "Ważność znacznika czasu",
       "delegation": "Delegowanie"
     },
     "hints": {
       "generated": "Generowane, gdy puste",
       "commaSeparated": "Rozdzielone przecinkami, opcjonalne",
       "optional": "Opcjonalne",
-      "expiry": "1h lub sekundy"
+      "expiry": "1h lub sekundy",
+      "jwtExpiry": "Opcjonalnie: dodaje iat i exp, na przykład 1h lub 900",
+      "wsseTimestamp": "Opcjonalnie: dodaje Timestamp ważny 5m lub podaną liczbę sekund"
     },
     "options": {
       "authorizationHeader": "Nagłówek Authorization",
@@ -58,6 +62,7 @@
       "formBody": "Treść formularza",
       "plainText": "Zwykły tekst",
       "doNotInclude": "Nie uwzględniaj",
+      "passwordDigest": "Digest (SHA-1 z nonce i czasem utworzenia)",
       "include": "Uwzględnij"
     },
     "notes": {
@@ -68,7 +73,8 @@
       "edgegrid": "Do podpisania żądania wymagane są token klienta, sekret klienta i token dostępu.",
       "jwt": "Token jest podpisywany ponownie przy każdym żądaniu, więc {{timestamp}} w payloadzie pozostaje aktualny.",
       "asap": "Wymagane są wystawca, odbiorca, ID klucza i klucz prywatny. Nowy token z własnymi iat, exp i jti jest wysyłany jako token Bearer z każdym żądaniem.",
-      "hawk": "Do podpisania żądania wymagane są ID uwierzytelniania i klucz."
+      "hawk": "Do podpisania żądania wymagane są ID uwierzytelniania i klucz.",
+      "wssecurity": "Wstawia nagłówek wsse:Security do koperty SOAP treści typu SOAP. Podaj nazwę użytkownika, ważność znacznika czasu lub oba."
     }
   }
 }

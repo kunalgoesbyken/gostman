@@ -37,6 +37,7 @@
     "clear": "クリア",
     "closeTab": "タブを閉じる",
     "closeTabMessage": "「{{name}}」には未保存の変更があります。閉じる前に保存しますか？",
-    "dontSave": "保存しない"
+    "dontSave": "保存しない",
+    "openFirstRequest": "最初のリクエストを開く"
   }
 }

@@ -4,8 +4,26 @@
     "timeoutPlaceholder": "{{milliseconds}} (domyślnie)",
     "followRedirects": "Podążaj za przekierowaniami",
     "verifyTls": "Weryfikuj certyfikaty TLS",
+    "httpVersion": "Wersja HTTP",
+    "rpcTransport": "Transport gRPC",
+    "rpcTransports": {
+      "grpc": "gRPC (HTTP/2)",
+      "grpcWeb": "gRPC-Web",
+      "grpcWebText": "gRPC-Web, tekst base64",
+      "connect": "Connect"
+    },
+    "httpVersions": {
+      "auto": "Automatycznie",
+      "http11": "HTTP/1.1",
+      "http2": "HTTP/2"
+    },
     "sendCookies": "Wysyłaj cookies z magazynu cookies",
     "storeCookies": "Zapisuj cookies ustawiane przez odpowiedź",
+    "opensIn": "Otwiera się w",
+    "opensInFull": "Pełny edytor",
+    "opensInVariables": "Widok zmiennych",
+    "jsonDepth": "Rozwijanie odpowiedzi JSON",
+    "jsonDepthDefault": "Domyślne ustawienie aplikacji",
     "tags": "Tagi",
     "tagsPlaceholder": "smoke, regresja",
     "description": "Opis",

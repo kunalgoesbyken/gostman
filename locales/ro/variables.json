@@ -12,7 +12,11 @@
       "folder": "Dosar",
       "request": "Cerere",
       "process": "Fișier .env",
-      "session": "Sesiune"
+      "session": "Sesiune",
+      "flowLoop": "Element al buclei",
+      "flowSend": "Doar această trimitere",
+      "flowCall": "Transmisă fluxului apelat",
+      "flowRun": "Variabilă de flux, pentru această rulare"
     }
   }
 }

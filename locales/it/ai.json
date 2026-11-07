@@ -76,6 +76,19 @@
         "inputLabel": "Cosa stai cercando",
         "placeholder": "l'endpoint che annulla un ordine"
       },
+      "commit": {
+        "label": "Messaggio di commit dalle modifiche",
+        "section": "Messaggio di commit",
+        "apply": "Usa come messaggio di commit",
+        "nothing": "Non ci sono modifiche da descrivere."
+      },
+      "mock": {
+        "label": "Esempi mock per questa richiesta",
+        "inputLabel": "Descrivi le risposte, o incolla un documento OpenAPI",
+        "placeholder": "Un elenco di ordini, un elenco vuoto e un 404 per un ordine sconosciuto",
+        "section": "Esempi serviti dal server mock",
+        "apply": "Aggiungi agli esempi"
+      },
       "schema": {
         "label": "Richieste da una descrizione API",
         "inputLabel": "Incolla un documento OpenAPI o Swagger, uno schema GraphQL o il testo di una documentazione API",
@@ -106,7 +119,8 @@
       "explain": "Spiega con l'AI",
       "explainError": "Spiega questo errore con l'AI",
       "document": "Scrivi con l'AI",
-      "documentLabel": "Scrivi la descrizione con l'AI"
+      "documentLabel": "Scrivi la descrizione con l'AI",
+      "commitMessage": "Suggerisci messaggio con l'AI"
     },
     "commands": {
       "request": {
@@ -135,6 +149,11 @@
         "description": "Trova le richieste descrivendole",
         "keywords": "cerca trova"
       },
+      "mock": {
+        "label": "AI: esempi mock per questa richiesta",
+        "description": "Proponi risposte di esempio per il server mock da una descrizione, un documento OpenAPI o l'ultima risposta",
+        "keywords": "mock esempi risposte"
+      },
       "schema": {
         "label": "AI: richieste da una descrizione API",
         "description": "I documenti OpenAPI usano l'importatore integrato; le altre descrizioni vanno all'AI",
@@ -154,6 +173,7 @@
       "consent": "Capisco che, quando eseguo un'azione AI, i dettagli della richiesta o della risposta mostrati in anteprima vengono inviati a {{host}} e che la fatturazione riguarda solo me e il provider.",
       "enable": "Attiva le funzioni AI",
       "enableAfterConsent": "Attiva le funzioni AI (prima seleziona la riga qui sopra)",
+      "inlineCompletion": "Suggerisci codice mentre scrivo negli editor di script. Dopo una breve pausa, lo script attorno al cursore e i nomi delle tue variabili, mai i loro valori, vengono inviati a {{host}} senza anteprima. Premi Tab per accettare un suggerimento.",
       "provider": "Provider",
       "baseUrl": "URL di base",
       "baseUrlPlaceholder": "https://host/v1",

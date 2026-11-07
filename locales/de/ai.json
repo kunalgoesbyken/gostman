@@ -76,6 +76,19 @@
         "inputLabel": "Wonach suchen Sie",
         "placeholder": "der Endpunkt, der eine Bestellung storniert"
       },
+      "commit": {
+        "label": "Commit-Nachricht aus den Änderungen",
+        "section": "Commit-Nachricht",
+        "apply": "Als Commit-Nachricht verwenden",
+        "nothing": "Es gibt keine Änderungen zu beschreiben."
+      },
+      "mock": {
+        "label": "Mock-Beispiele für diese Anfrage",
+        "inputLabel": "Beschreiben Sie die Antworten oder fügen Sie ein OpenAPI-Dokument ein",
+        "placeholder": "Eine Liste von Bestellungen, eine leere Liste und ein 404 für eine unbekannte Bestellung",
+        "section": "Vom Mock-Server ausgelieferte Beispiele",
+        "apply": "Zu den Beispielen hinzufügen"
+      },
       "schema": {
         "label": "Anfragen aus einer API-Beschreibung",
         "inputLabel": "Fügen Sie ein OpenAPI- oder Swagger-Dokument, ein GraphQL-Schema oder Text einer API-Dokumentation ein",
@@ -102,7 +115,8 @@
       "explain": "Mit KI erklären",
       "explainError": "Diesen Fehler mit KI erklären",
       "document": "Mit KI schreiben",
-      "documentLabel": "Beschreibung mit KI schreiben"
+      "documentLabel": "Beschreibung mit KI schreiben",
+      "commitMessage": "Nachricht mit KI vorschlagen"
     },
     "commands": {
       "request": {
@@ -131,6 +145,11 @@
         "description": "Anfragen anhand einer Beschreibung finden",
         "keywords": "suchen finden"
       },
+      "mock": {
+        "label": "KI: Mock-Beispiele für diese Anfrage",
+        "description": "Beispielantworten für den Mock-Server aus einer Beschreibung, einem OpenAPI-Dokument oder der letzten Antwort vorschlagen",
+        "keywords": "mock beispiele antworten examples responses"
+      },
       "schema": {
         "label": "KI: Anfragen aus einer API-Beschreibung",
         "description": "OpenAPI-Dokumente nutzen den integrierten Importer; andere Beschreibungen gehen an KI",
@@ -150,6 +169,7 @@
       "consent": "Mir ist bewusst, dass beim Ausführen einer KI-Aktion die in der Vorschau gezeigten Details der Anfrage oder Antwort an {{host}} gesendet werden und die Abrechnung zwischen mir und dem Anbieter erfolgt.",
       "enable": "KI-Funktionen einschalten",
       "enableAfterConsent": "KI-Funktionen einschalten (zuerst die Zeile darüber ankreuzen)",
+      "inlineCompletion": "Beim Tippen in Skript-Editoren Code vorschlagen. Nach einer kurzen Pause werden das Skript um den Cursor und die Namen Ihrer Variablen, nie ihre Werte, ohne Vorschau an {{host}} gesendet. Drücken Sie Tab, um einen Vorschlag anzunehmen.",
       "provider": "Anbieter",
       "baseUrl": "Basis-URL",
       "baseUrlPlaceholder": "https://host/v1",

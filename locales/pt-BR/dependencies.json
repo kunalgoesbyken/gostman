@@ -1,0 +1,29 @@
+{
+  "dependencies": {
+    "title": "Dependências de variáveis",
+    "menuFolder": "Dependências de variáveis",
+    "scopeAll": "Todas as requisições",
+    "scopeFolder": "Pasta: {{name}}",
+    "intro": "Cada variável fica entre as requisições que a definem e as requisições que a leem. Uma requisição define uma variável com uma regra de extração ou um script, e a lê com {{reference}} no endereço, nos cabeçalhos, no corpo ou na autenticação, ou com uma chamada de script.",
+    "showInputs": "Mostrar variáveis que vêm apenas de ambientes",
+    "producers": "Define",
+    "variables": "Variável",
+    "consumers": "Lê",
+    "missingTitle": "Lidas, mas nunca definidas",
+    "missingDetail": "Estas variáveis são lidas por uma requisição, mas nenhuma requisição as define e nenhum ambiente, coleção ou lista global as declara: {{names}}.",
+    "missingMark": "nunca definida",
+    "none": "Nenhum vínculo de variáveis entre requisições",
+    "noneDescription": "Nenhuma requisição neste escopo define, por uma regra de extração ou um script, uma variável que outra requisição lê.",
+    "summary_one": "{{count}} variável",
+    "summary_many": "{{count}} de variáveis",
+    "summary_other": "{{count}} variáveis",
+    "graphLabel": "Grafo de dependências das variáveis",
+    "openRequest": "Abrir {{name}}",
+    "untitled": "Requisição sem título",
+    "command": {
+      "label": "Mostrar dependências de variáveis",
+      "description": "Desenhar quais requisições definem e leem cada variável",
+      "keywords": "grafo cadeia extração fluxo produzir consumir"
+    }
+  }
+}

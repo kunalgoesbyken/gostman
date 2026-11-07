@@ -1,0 +1,675 @@
+{
+  "features": {
+    "title": "探索功能",
+    "intro": "搜索 Gostman 能做什么，就地试用功能，并了解它的工作方式。",
+    "searchLabel": "搜索功能",
+    "searchPlaceholder": "搜索功能，例如 快照、模拟 或 git",
+    "groupsLabel": "功能分组",
+    "allGroups": "全部",
+    "groups": {
+      "requests": "请求",
+      "data": "集合与数据",
+      "variables": "变量与机密",
+      "testing": "检查与规范",
+      "automation": "自动化",
+      "mocking": "模拟与捕获",
+      "git": "Git",
+      "ai": "AI",
+      "app": "应用"
+    },
+    "tryIt": "试用",
+    "tryItLabel": "试用{{title}}",
+    "learnMore": "了解更多",
+    "learnMoreLabel": "进一步了解{{title}}",
+    "newBadge": "新",
+    "platformDesktop": "桌面应用",
+    "platformCli": "命令行",
+    "platformWeb": "网页应用",
+    "desktopOnlyTitle": "{{title}}需要桌面应用",
+    "desktopOnlyBody": "浏览器无法访问本地文件、端口或系统设置，因此此功能仅在桌面应用中提供。",
+    "getDesktop": "获取桌面应用",
+    "nothingMatches": "没有与“{{query}}”匹配的功能。",
+    "results_other": "{{count}} 项功能",
+    "close": "关闭",
+    "commandTitle": "探索功能",
+    "commandDescription": "搜索所有功能，试用并了解其工作方式",
+    "commandKeywords": "功能 索引 能力 发现 Gostman 能做什么 帮助 features index capabilities discover help",
+    "statusLabel": "探索",
+    "statusTitle": "探索功能",
+    "helpHideLabel": "隐藏关于{{title}}的提示",
+    "whatsNewTitle": "新功能",
+    "whatsNewIntro": "{{version}} 版本的新内容",
+    "whatsNewNothing": "此版本没有可列出的新内容。",
+    "whatsNewCommandTitle": "新功能",
+    "whatsNewCommandDescription": "最新版本中新增的功能",
+    "whatsNewKeywords": "发行说明 更新日志 更新 版本 release notes changelog",
+    "whatsNewDot": "{{version}} 版本的新功能",
+    "exploreAll": "探索所有功能",
+    "samplesAdded": "已添加示例集合。",
+    "helpMenu": "帮助",
+    "exploreHint_other": "搜索 Gostman 的 {{count}} 项功能，用示例试用，并了解它们的工作方式。",
+    "copied": "已复制 {{command}}",
+    "copyFailed": "无法复制 {{command}}",
+    "toolsMenu": "工具",
+    "toolsMenuHint": "Gostman 能对你的请求做的一切，按用途分类",
+    "toolGroups": {
+      "build": "构建",
+      "test": "测试",
+      "automate": "自动化",
+      "mockCapture": "模拟与捕获",
+      "shareGit": "分享与 Git"
+    },
+    "cliLine": "在终端中"
+  },
+  "featureWords": {
+    "rest": {
+      "title": "REST 与 HTTP 请求",
+      "blurb": "使用任意方法发送带参数、请求头、请求体和认证的请求，并查看状态、耗时和大小。",
+      "synonyms": "http api get post put delete patch rest request 请求 接口 接口调试 发送请求",
+      "tool": "新建请求"
+    },
+    "graphql": {
+      "title": "GraphQL",
+      "blurb": "借助架构浏览器、查询构建器和变量编写查询。订阅通过 WebSocket 运行。",
+      "synonyms": "graphql query mutation schema introspection subscription apollo 查询 变更 架构 订阅"
+    },
+    "grpc": {
+      "title": "gRPC",
+      "blurb": "通过反射或 .proto 文件加载服务，并调用一元方法和流式方法。",
+      "synonyms": "grpc protobuf proto reflection stream bloomrpc grpcurl 反射 流式"
+    },
+    "websocket": {
+      "title": "WebSocket、Socket.IO 和 MQTT",
+      "blurb": "通过 WebSocket、Socket.IO 或 MQTT 连接、发送已保存的消息并查看消息日志。",
+      "synonyms": "websocket socket.io socketio mqtt realtime ws sse events 实时 长连接 消息 事件"
+    },
+    "mcp": {
+      "title": "MCP 服务器",
+      "blurb": "调用 MCP 服务器的工具、资源和提示词，并检查它返回的内容。",
+      "synonyms": "mcp model context protocol tools agent server inspector 模型上下文协议 工具 智能体 服务器"
+    },
+    "curl": {
+      "title": "粘贴 curl 命令",
+      "blurb": "将 curl 命令粘贴到地址栏，请求就会自动填好。",
+      "synonyms": "curl paste command line import clipboard 粘贴 命令行 导入 剪贴板"
+    },
+    "codegen": {
+      "title": "代码片段",
+      "blurb": "将实际发送的请求复制为 cURL、Python、Go、JavaScript、Java、C# 等代码，包括 axios、httpx、OkHttp、RestSharp、Guzzle、HTTPie 和 wget。",
+      "synonyms": "code snippet generate curl python javascript fetch go java 代码 片段 代码生成 生成代码",
+      "tool": "代码"
+    },
+    "responseViewer": {
+      "title": "响应查看器",
+      "blurb": "以树形查看 JSON，预览 HTML、图片和 PDF，用 JSONPath 过滤并搜索响应体。",
+      "synonyms": "response body json preview filter search jsonpath timeline console visualize 响应 响应体 预览 过滤 搜索 时间线 控制台 可视化"
+    },
+    "examples": {
+      "title": "已保存的示例",
+      "blurb": "将响应保存为命名示例，用于记录请求并提供给模拟服务器。",
+      "synonyms": "example saved response sample documentation 示例 保存 响应 文档"
+    },
+    "oauth": {
+      "title": "认证与 OAuth 2",
+      "blurb": "Basic、Bearer、API 密钥、OAuth 1 和 2、Digest、AWS SigV4、NTLM、JWT 等，支持令牌续期。",
+      "synonyms": "auth authentication oauth oauth2 bearer token basic digest sigv4 ntlm hawk apikey 认证 鉴权 授权 令牌 密钥"
+    },
+    "cookies": {
+      "title": "Cookie 存储",
+      "blurb": "查看、编辑和清除每个域名保存的 Cookie。",
+      "synonyms": "cookie cookies jar session 会话 存储",
+      "tool": "Cookie"
+    },
+    "requestSettings": {
+      "title": "请求设置",
+      "blurb": "为单个请求设置超时、重定向和 TLS 验证。",
+      "synonyms": "settings timeout redirect tls verify ssl follow 设置 超时 重定向 验证 证书"
+    },
+    "hexView": {
+      "title": "十六进制视图",
+      "blurb": "以偏移量、十六进制字节和文本查看响应体。",
+      "synonyms": "hex binary bytes dump 十六进制 二进制 字节"
+    },
+    "msgpackCbor": {
+      "title": "MessagePack 和 CBOR",
+      "blurb": "将 MessagePack 和 CBOR 响应解码为可搜索、可复制的 JSON 文本。",
+      "synonyms": "msgpack messagepack cbor binary decode 二进制 解码"
+    },
+    "certificateViewer": {
+      "title": "证书链与重定向",
+      "blurb": "“时间线”标签页列出服务器出示的证书链，包括有效期、名称和指纹，以及重定向跳转表。",
+      "synonyms": "certificate tls ssl chain x509 https redirect hops timeline expiry 证书 证书链 重定向 时间线 过期"
+    },
+    "jwtSigning": {
+      "title": "JWT 签名",
+      "blurb": "在“认证”标签页中用 JWK 私钥签名 JWT，并设置其过期时间。",
+      "synonyms": "jwt sign jwk token expiry bearer hs256 rs256 签名 令牌 过期 私钥"
+    },
+    "httpVersion": {
+      "title": "HTTP 版本",
+      "blurb": "为请求选择“自动”、HTTP/1.1 或 HTTP/2。“时间线”会显示实际使用的协议。",
+      "synonyms": "http2 http/2 http1 protocol version alpn prior knowledge 协议 版本"
+    },
+    "dnsOverride": {
+      "title": "主机覆盖",
+      "blurb": "像 curl --resolve 一样把主机指向固定地址，并将连接限制为 IPv4 或 IPv6。",
+      "synonyms": "dns resolve host hosts override ip ipv4 ipv6 curl 域名解析 主机 覆盖"
+    },
+    "graphqlUpload": {
+      "title": "GraphQL 文件上传",
+      "blurb": "在“文件”标签页中按 multipart 请求规范在 GraphQL 请求中发送文件。",
+      "synonyms": "graphql upload multipart file files mutation 上传 文件"
+    },
+    "wsSecurity": {
+      "title": "SOAP WS-Security",
+      "blurb": "在“认证”标签页中为 SOAP 请求添加 WS-Security UsernameToken（明文或摘要）和 Timestamp。",
+      "synonyms": "soap wsse ws-security wsdl xml usernametoken digest 安全 摘要"
+    },
+    "grpcWeb": {
+      "title": "gRPC-Web 和 Connect",
+      "blurb": "通过 gRPC-Web 或 Connect 调用 gRPC 服务，在网页应用中也可用。",
+      "synonyms": "grpc-web grpcweb connect browser transport 浏览器 传输"
+    },
+    "signalr": {
+      "title": "SignalR",
+      "blurb": "与 SignalR 集线器协商，通过 WebSocket 连接并调用其方法。",
+      "synonyms": "signalr hub aspnet realtime websocket 集线器 实时"
+    },
+    "tcpUdp": {
+      "title": "TCP 和 UDP",
+      "blurb": "通过 TCP 或 UDP 发送文本或十六进制数据并读取回复。仅限桌面应用和受信任的文件夹。",
+      "synonyms": "tcp udp socket raw bytes hex 套接字 字节 十六进制"
+    },
+    "nats": {
+      "title": "NATS",
+      "blurb": "在 NATS 主题上请求与回复、发布，或等待一条消息。仅限桌面应用和受信任的文件夹。",
+      "synonyms": "nats subject publish subscribe request reply messaging broker 主题 发布 订阅 消息"
+    },
+    "breakpoints": {
+      "title": "暂停的调用",
+      "blurb": "用规则暂停捕获到的请求或响应，编辑后放行或丢弃。",
+      "synonyms": "breakpoint breakpoints pause hold intercept edit release drop debug 断点 暂停 拦截 放行 丢弃 调试"
+    },
+    "jsonRpc": {
+      "title": "JSON-RPC 调用",
+      "blurb": "一键向 JSON 请求体添加 JSON-RPC 2.0 调用或批量调用。",
+      "synonyms": "json-rpc jsonrpc rpc batch method params id 批量 方法 参数"
+    },
+    "responseCompare": {
+      "title": "之前的响应",
+      "blurb": "每个标签页保留最近 10 个响应；可打开其中一个，或与最新响应比较。",
+      "synonyms": "earlier previous responses compare diff history response 之前 历史 响应 比较 对比"
+    },
+    "responseHar": {
+      "title": "将响应导出为 HAR",
+      "blurb": "将标签页保留的响应保存为 HAR 文件，凭据会被遮盖。",
+      "synonyms": "har export responses archive 导出 响应 归档"
+    },
+    "splitView": {
+      "title": "在标签页旁显示响应",
+      "blurb": "在侧边栏的请求菜单中，将另一个标签页的最新响应显示在当前标签页旁边的窗格中。",
+      "synonyms": "split side by side beside pane response compare 分屏 并排 窗格 响应 比较"
+    },
+    "globalSearch": {
+      "title": "全局搜索",
+      "blurb": "在一个地方搜索已保存的请求、历史记录和已打开的响应。",
+      "synonyms": "search find global everywhere requests history responses 搜索 查找 全局 请求 历史记录 响应"
+    },
+    "dependencyGraph": {
+      "title": "变量依赖",
+      "blurb": "查看哪些请求设置了某个变量、哪些请求读取它。",
+      "synonyms": "dependency dependencies graph variables extract set read 依赖 关系图 变量 提取"
+    },
+    "openTabs": {
+      "title": "已打开标签页列表",
+      "blurb": "在侧边栏中以列表显示已打开的标签页，并在它们之间跳转。",
+      "synonyms": "tabs open list sidebar switch 标签页 列表 侧边栏 切换"
+    },
+    "history": {
+      "title": "历史记录",
+      "blurb": "你发送的每个请求都会连同响应状态一起保留，方便再次打开。",
+      "synonyms": "history recent sent previous 历史记录 最近 已发送"
+    },
+    "collections": {
+      "title": "集合与文件夹",
+      "blurb": "用嵌套文件夹组织请求，拖动排列，并可搜索、添加标签和设置颜色。",
+      "synonyms": "collection folder tree sidebar organize tag postman collections 集合 文件夹 目录树 侧边栏 整理 标签"
+    },
+    "folderWorkspace": {
+      "title": "文件夹工作区",
+      "blurb": "将集合以纯 YAML 文件保存在代码旁边，并通过 Git 分享。",
+      "synonyms": "folder workspace yaml files git bruno opencollection 文件夹 工作区 文件 版本控制",
+      "tool": "工作区",
+      "webInstead": "在网页上，你的集合保存在此浏览器中。导出它们即可分享或备份。"
+    },
+    "folderSettings": {
+      "title": "文件夹设置",
+      "blurb": "为文件夹中的所有请求统一设置请求头、认证、变量、脚本和检查。",
+      "synonyms": "folder collection settings inherit headers auth scripts 文件夹 集合 设置 继承 请求头 认证 脚本",
+      "tool": "集合设置"
+    },
+    "import": {
+      "title": "导入",
+      "blurb": "导入 Postman、Bruno、Insomnia、OpenAPI、HAR、WSDL、.http 文件和 curl 命令。",
+      "synonyms": "import postman bruno insomnia openapi swagger har wsdl http curl migrate 导入 迁移"
+    },
+    "firecampImport": {
+      "title": "Firecamp 导入",
+      "blurb": "导入 Firecamp 集合导出文件：文件夹、REST 请求、请求头和脚本。",
+      "synonyms": "firecamp import migrate collection 导入 迁移 集合"
+    },
+    "specImporters": {
+      "title": "更多导入格式",
+      "blurb": "导入 Hoppscotch、Thunder Client、HTTPie、Hurl、RAML 和 API Blueprint 文件。Hurl 也可作为导出格式。不读取 Paw 文件。",
+      "synonyms": "hoppscotch thunder client hurl raml blueprint httpie restfox import migrate 导入 迁移 格式"
+    },
+    "export": {
+      "title": "导出",
+      "blurb": "将集合写为 Postman、OpenAPI、Markdown、.http 文件或备份。",
+      "synonyms": "export postman openapi markdown backup http 导出 备份"
+    },
+    "share": {
+      "title": "分享链接",
+      "blurb": "以加密链接或文件发送集合，无需账号。",
+      "synonyms": "share link encrypted send team collaborate 分享 链接 加密 发送 团队 协作",
+      "tool": "分享"
+    },
+    "versionedDocs": {
+      "title": "分版本文档",
+      "blurb": "gostman docs --versions 为每个 Git 标签构建文档，--logo 和 --accent 用于设置页面样式。",
+      "synonyms": "docs documentation html publish version tags logo accent 文档 发布 版本 标签"
+    },
+    "notes": {
+      "title": "备注",
+      "blurb": "在请求或文件夹上保留备注讨论，保存在其文件中，方便队友在 Git 中审阅。",
+      "synonyms": "notes comments review thread resolve 备注 评论 审阅 讨论 解决"
+    },
+    "recentlyDeleted": {
+      "title": "最近删除",
+      "blurb": "在 30 天内恢复已删除的请求、文件夹和环境。",
+      "synonyms": "trash bin deleted restore undo recover 回收站 删除 恢复 撤销"
+    },
+    "backups": {
+      "title": "备份",
+      "blurb": "每天和每个版本备份你的数据，并可恢复。",
+      "synonyms": "backup restore snapshot recover 备份 恢复 快照"
+    },
+    "environments": {
+      "title": "环境",
+      "blurb": "在本地、预发布和生产环境的变量集之间切换。",
+      "synonyms": "environment variables dev staging prod env 环境 变量 开发 测试 预发布 生产"
+    },
+    "scopes": {
+      "title": "变量作用域",
+      "blurb": "全局、集合、文件夹、环境、会话和请求变量，优先级顺序清晰。",
+      "synonyms": "variables scopes precedence global collection folder request vars 变量 作用域 优先级 全局 集合 文件夹 请求"
+    },
+    "jsonTreeDepth": {
+      "title": "JSON 树深度",
+      "blurb": "将 JSON 响应展开或折叠到任意层级，并让每个请求以你喜欢的深度打开。",
+      "synonyms": "json expand collapse tree depth level fold unfold response viewer 展开 折叠 树 深度 层级 响应查看器"
+    },
+    "typedVariables": {
+      "title": "有类型的变量",
+      "blurb": "为请求变量指定类型，让脚本收到数字、布尔值和 JSON 而不是文本，并在发送前发现错误的值。",
+      "synonyms": "typed variables type number boolean integer json enum validation required 类型 变量 数字 布尔 整数 枚举 校验 必填"
+    },
+    "variablesView": {
+      "title": "变量视图",
+      "blurb": "将请求显示为一个由其变量组成的简短表单，附带“发送”和响应，适合只需填写值的人。",
+      "synonyms": "variables view form simple input fields occasional users template 变量 视图 表单 简单 输入 字段 模板"
+    },
+    "inheritedVariables": {
+      "title": "继承的变量",
+      "blurb": "在请求自身的变量旁，查看它获取的全局、集合、环境、文件夹和会话变量。",
+      "synonyms": "inherited variables scope list show hide request only 继承 变量 作用域 列表 显示 隐藏"
+    },
+    "secrets": {
+      "title": "机密变量",
+      "blurb": "将机密值保存在系统钥匙串中，不写入文件和导出内容。",
+      "synonyms": "secret keychain password token vault 机密 密钥 钥匙串 密码 令牌 保险库"
+    },
+    "secretManagers": {
+      "title": "机密管理器",
+      "blurb": "在发送时从 Vault、AWS、Azure、Google Cloud、1Password、Bitwarden 或 KeePassXC 读取值。",
+      "synonyms": "vault aws azure gcp 1password bitwarden keepassxc secret manager 机密管理器 密钥管理 密码管理器"
+    },
+    "extract": {
+      "title": "提取规则",
+      "blurb": "从响应中取出一个值存入变量，供下一个请求使用。",
+      "synonyms": "extract capture chain variable response jsonpath 提取 捕获 串联 变量 响应"
+    },
+    "network": {
+      "title": "代理与证书",
+      "blurb": "使用代理、客户端证书和自定义 CA 证书。",
+      "synonyms": "proxy certificate mtls ca tls network 代理 证书 客户端证书 网络"
+    },
+    "checks": {
+      "title": "检查",
+      "blurb": "无需写代码即可对状态、请求头、响应体和耗时进行断言。",
+      "synonyms": "checks tests assertions assert postman tests chai 检查 测试 断言"
+    },
+    "scripts": {
+      "title": "脚本",
+      "blurb": "在请求前后运行 JavaScript，提供与 pm、bru 和 insomnia 兼容的 API。",
+      "synonyms": "script pre-request post-response javascript pm bru insomnia 脚本 预请求脚本 响应后脚本"
+    },
+    "contract": {
+      "title": "契约检查",
+      "blurb": "在运行器和 CI 中根据 OpenAPI 规范检查响应。",
+      "synonyms": "contract openapi schema validate conformance dredd 契约 规范 架构 校验 一致性"
+    },
+    "snapshotChecks": {
+      "title": "快照检查",
+      "blurb": "将响应值与保存的快照比较，排除会变化的路径，并可用最近一次响应刷新快照。",
+      "synonyms": "snapshot golden diff regression matches ignore 快照 对比 回归 忽略"
+    },
+    "openapiFuzz": {
+      "title": "OpenAPI 模糊测试",
+      "blurb": "为规范的每个操作发送根据架构生成的有效、边界和无效输入，并报告 5xx 响应、超时和违反契约的情况。",
+      "synonyms": "openapi fuzz fuzzing schemathesis property based boundary invalid inputs swagger 模糊测试 属性测试 边界 无效输入"
+    },
+    "negativeTests": {
+      "title": "负向测试",
+      "blurb": "发送已保存请求的修改副本，并标记对错误输入返回的 2xx、5xx、堆栈跟踪或被回显的载荷。",
+      "synonyms": "negative fuzz fuzzing security injection invalid inputs boundary schemathesis owasp 负向测试 异常测试 模糊测试 安全 注入 无效输入 边界"
+    },
+    "coverage": {
+      "title": "OpenAPI 覆盖率",
+      "blurb": "查看一次运行调用了关联 OpenAPI 规范中的哪些操作，以及哪些已记录的状态从未返回。",
+      "synonyms": "coverage openapi operations untested spec min-coverage 覆盖率 操作 未测试 规范"
+    },
+    "pmPackages": {
+      "title": "包与 pm.vault",
+      "blurb": "用 require 或 pm.require 从工作区的 packages 文件夹加载共享代码，并用 pm.vault 读取机密。",
+      "synonyms": "pm packages require library postman vault shared code 包 库 共享代码 机密"
+    },
+    "specLint": {
+      "title": "OpenAPI 检查器",
+      "blurb": "检查规范中缺失的描述、示例和安全设置。",
+      "synonyms": "lint openapi spectral swagger 规范检查 代码检查 校验",
+      "tool": "规范检查"
+    },
+    "specSync": {
+      "title": "规范同步",
+      "blurb": "让集合与远程 OpenAPI 规范保持同步。",
+      "synonyms": "sync openapi spec update remote 同步 规范 更新 远程"
+    },
+    "runner": {
+      "title": "运行",
+      "blurb": "使用 CSV、JSON 或 XLSX 数据文件按顺序运行文件夹，支持并行运行以及 HTML 或 JUnit 报告。",
+      "synonyms": "runner run collection postman collection runner newman data csv json xlsx iteration 运行器 运行 集合 批量运行 数据 迭代"
+    },
+    "flows": {
+      "title": "流程",
+      "blurb": "绘制带分支、重试和循环的请求序列。",
+      "synonyms": "flow workflow chain retry branch loop scenario 流程 工作流 串联 重试 分支 循环 场景"
+    },
+    "loadTest": {
+      "title": "负载测试",
+      "blurb": "同时发送大量请求，查看延迟百分位数和错误。",
+      "synonyms": "load performance stress k6 benchmark latency 负载 性能 压测 压力测试 基准 延迟",
+      "webInstead": "在网页上，可用数据文件运行集合，并在运行器中查看每个请求的耗时。"
+    },
+    "loadThresholds": {
+      "title": "负载阈值",
+      "blurb": "编写 p95<300 或 errors<1% 这样的阈值，并在负载测试中查看通过或失败。",
+      "synonyms": "threshold slo limit fail load stages ramp 阈值 限制 失败 负载 阶段 加压"
+    },
+    "scan": {
+      "title": "扫描机密",
+      "blurb": "在分享集合之前找出其中的令牌和密码。",
+      "synonyms": "scan secrets leak token password credential gitleaks 扫描 机密 泄露 令牌 密码 凭据"
+    },
+    "cli": {
+      "title": "命令行",
+      "blurb": "用一个程序完成运行、发送、负载测试、扫描和检查，并提供适用于 CI 的退出码。",
+      "synonyms": "cli command line terminal newman bruno cli inso 命令行 终端"
+    },
+    "ci": {
+      "title": "CI 集成",
+      "blurb": "GitHub Action、Docker 镜像，适用于 GitLab、Azure Pipelines、CircleCI、Bitbucket 和 Jenkins 的配置示例，以及 JUnit、HTML 和 Markdown 报告。",
+      "synonyms": "ci github actions gitlab azure circleci bitbucket jenkins docker pipeline junit 持续集成 流水线 报告"
+    },
+    "ciPrComment": {
+      "title": "拉取请求中的结果",
+      "blurb": "GitHub Action 将计数和每项失败的检查写入作业摘要，并可在拉取请求上持续更新一条评论。",
+      "synonyms": "pull request comment pr check job summary markdown report github actions 拉取请求 合并请求 评论 检查 作业摘要 报告"
+    },
+    "ciStarters": {
+      "title": "CI 模板与 pre-commit",
+      "blurb": "gostman init --ci 为 GitHub、GitLab、Azure、CircleCI 或 Bitbucket 写入一个入门流水线。pre-commit 钩子会运行 lint、scan 和 run。",
+      "synonyms": "ci pipeline starter template pre-commit hook makefile azure circleci bitbucket 持续集成 流水线 模板 钩子"
+    },
+    "monitors": {
+      "title": "监控",
+      "blurb": "在应用打开期间按计时器运行文件夹或流程，并保留通过率、历史记录和通知。",
+      "synonyms": "monitor monitors postman monitor schedule cron uptime interval notify 监控 定时 计划 可用性 间隔 通知"
+    },
+    "agents": {
+      "title": "编程智能体",
+      "blurb": "一个 MCP 服务器，让编程智能体发送请求，并提供机密遮盖和主机允许列表。",
+      "synonyms": "agent mcp claude cursor ai coding skill 智能体 代理 编程 人工智能"
+    },
+    "mock": {
+      "title": "模拟服务器",
+      "blurb": "在本地提供已保存的示例或 OpenAPI 规范，并显示实时请求日志。",
+      "synonyms": "mock server stub fake wiremock prism examples 模拟 模拟服务器 桩 假数据 示例",
+      "tool": "模拟服务器",
+      "webInstead": "在网页上，可为请求保存示例；示例随集合保存并包含在导出内容中。要通过 HTTP 提供它们，请从 CLI 或桌面应用运行模拟服务器。"
+    },
+    "mockDataRows": {
+      "title": "用数据文件模拟响应",
+      "blurb": "用 CSV、JSON 或 XLSX 文件中与路径参数、查询值、请求头或请求体字段匹配的那一行作答。",
+      "synonyms": "mock data file csv xlsx json rows lookup fixture wiremock 模拟 数据文件 行 查找 测试数据"
+    },
+    "mockRules": {
+      "title": "模拟规则",
+      "blurb": "按查询、请求头或请求体选择响应，添加延迟并注入故障。",
+      "synonyms": "mock rules conditions delay fault latency 模拟 规则 条件 延迟 故障"
+    },
+    "capture": {
+      "title": "捕获代理",
+      "blurb": "将流量转发到上游，记录下来并转换为请求。",
+      "synonyms": "capture proxy record traffic intercept charles fiddler mitm 捕获 代理 抓包 录制 流量 拦截",
+      "tool": "捕获代理",
+      "webInstead": "在网页上，可粘贴 curl 命令或导入 HAR 文件，根据在别处录制的流量构建请求。"
+    },
+    "captureRules": {
+      "title": "捕获规则",
+      "blurb": "对匹配规则的调用编辑请求头和请求体、在本地作答、注入故障或限速。",
+      "synonyms": "capture rules rewrite block map local throttle slow latency fault 捕获 规则 重写 拦截 本地映射 限速 延迟 故障"
+    },
+    "captureHar": {
+      "title": "捕获为 HAR",
+      "blurb": "将捕获的调用导出为其他工具可读取的 HAR 1.2 文件。",
+      "synonyms": "har capture export archive 捕获 导出 归档"
+    },
+    "gitPanel": {
+      "title": "Git 面板",
+      "blurb": "在应用中查看差异、提交、推送，管理分支、贮藏和历史记录。",
+      "synonyms": "git commit push pull branch stash diff version control 提交 推送 拉取 分支 贮藏 差异 版本控制",
+      "tool": "Git",
+      "webInstead": "在网页上，可用“分享”或“导出”转移集合。如需版本控制，请在桌面应用或 CLI 中使用文件夹工作区。"
+    },
+    "gitFieldDiff": {
+      "title": "字段级差异",
+      "blurb": "查看请求的哪些字段发生了变化，例如 URL、请求头、认证、请求体和检查，并比较文件的两个版本。",
+      "synonyms": "git diff field changes yaml review compare versions 差异 字段 变更 审阅 比较 版本"
+    },
+    "gitCommitGraph": {
+      "title": "提交图",
+      "blurb": "通过分支、合并和标签的泳道图查看历史记录。",
+      "synonyms": "git graph commits branches log history tags merge 提交图 提交 分支 日志 历史记录 标签 合并"
+    },
+    "conflicts": {
+      "title": "冲突解决",
+      "blurb": "用并排编辑器解决请求文件中的合并冲突。",
+      "synonyms": "merge conflict resolve git 合并 冲突 解决"
+    },
+    "repoCreate": {
+      "title": "创建 GitHub 仓库",
+      "blurb": "在“远程”标签页中创建 GitHub 仓库并推送到其中。",
+      "synonyms": "git init repository github publish remote create push 仓库 发布 远程 创建 推送"
+    },
+    "ai": {
+      "title": "AI 助手",
+      "blurb": "使用你自己的密钥生成请求、检查和脚本，并解释响应。",
+      "synonyms": "ai llm openai anthropic claude generate explain postbot 人工智能 大模型 生成 解释 助手"
+    },
+    "aiMock": {
+      "title": "AI 模拟示例",
+      "blurb": "用 AI 为请求生成模拟响应示例，以预览形式显示，由你决定是否接受。",
+      "synonyms": "ai mock generate data fake example response 人工智能 模拟 生成 数据 假数据 示例 响应"
+    },
+    "aiCommit": {
+      "title": "AI 提交信息",
+      "blurb": "在 Git 面板中使用“用 AI 建议提交信息”，根据已暂存的更改起草提交信息。",
+      "synonyms": "ai commit message git draft suggest 人工智能 提交 提交信息 起草 建议"
+    },
+    "aiInline": {
+      "title": "脚本内联建议",
+      "blurb": "在脚本编辑器中以灰色文字显示代码建议，默认关闭，需在 AI 设置中开启。按 Tab 接受。",
+      "synonyms": "ai autocomplete completion copilot ghost text script suggest 人工智能 自动补全 补全 代码建议 脚本"
+    },
+    "palette": {
+      "title": "命令面板",
+      "blurb": "按名称查找任意命令、请求或功能。",
+      "synonyms": "palette command search quick open ctrl k 命令面板 命令 搜索 快速打开"
+    },
+    "shortcuts": {
+      "title": "键盘快捷键",
+      "blurb": "查看所有快捷键，并修改你想改的那些。",
+      "synonyms": "keyboard shortcuts keys hotkeys chords bindings 键盘 快捷键 热键 组合键 按键绑定"
+    },
+    "themes": {
+      "title": "主题与颜色",
+      "blurb": "浅色、深色，以及窗口各部分的自定义颜色。",
+      "synonyms": "theme dark light color colour appearance accent font 主题 深色 浅色 暗色 颜色 外观 强调色 字体"
+    },
+    "languages": {
+      "title": "语言",
+      "blurb": "以其他语言使用本应用，包括从右到左的布局。",
+      "synonyms": "language translation locale i18n localization arabic 语言 翻译 本地化 国际化 中文 阿拉伯语"
+    },
+    "desktop": {
+      "title": "桌面应用",
+      "blurb": "文件夹、Git、模拟服务器、捕获、代理和证书需要桌面应用。",
+      "synonyms": "desktop download install app windows mac linux 桌面 下载 安装 应用 客户端"
+    },
+    "webApp": {
+      "title": "网页应用",
+      "blurb": "在浏览器中使用 Gostman，无需账号，也无需安装。",
+      "synonyms": "web browser online no install pwa 网页 浏览器 在线 免安装 网页版"
+    },
+    "pricing": {
+      "title": "价格",
+      "blurb": "免费，采用 MIT 许可证。",
+      "synonyms": "price free license 价格 免费 开源 许可证"
+    },
+    "vscode": {
+      "title": "VS Code 扩展",
+      "blurb": "VS Code 扩展通过 CLI 运行集合、流程、lint 和 scan。",
+      "synonyms": "vscode extension editor 扩展 插件 编辑器"
+    },
+    "vscodeExtension": {
+      "title": "VS Code 扩展",
+      "blurb": "在编辑器中运行集合、文件夹或流程，检查规范并扫描机密。它调用 Gostman 命令行，因此运行结果与 CI 一致。",
+      "synonyms": "vscode visual studio code extension editor ide marketplace 扩展 插件 编辑器 应用市场"
+    },
+    "xlsxData": {
+      "title": "数据文件",
+      "blurb": "对 CSV、JSON 或 XLSX 文件的每一行运行一次文件夹，可在应用中运行，也可用 gostman run --data。",
+      "synonyms": "data csv json xlsx excel spreadsheet iteration rows data-driven 数据 数据文件 电子表格 表格 迭代 行 数据驱动"
+    },
+    "scheduledRuns": {
+      "title": "定时运行",
+      "blurb": "gostman run --every 按间隔重复运行，保留本地历史记录，并可通知 webhook。",
+      "synonyms": "schedule cron every interval repeat history webhook notify 定时 计划 间隔 重复 历史记录 通知"
+    },
+    "openapiDiff": {
+      "title": "OpenAPI 差异",
+      "blurb": "比较 OpenAPI 规范的两个版本，并在应用中或在 CI 中用 gostman diff 列出破坏性变更。",
+      "synonyms": "openapi diff oasdiff breaking changes compare spec 差异 破坏性变更 比较 规范"
+    },
+    "apiDesign": {
+      "title": "API 设计",
+      "blurb": "在后端存在之前编写 OpenAPI 规范，边写边检查，然后据此生成请求、模拟服务和响应检查。",
+      "synonyms": "openapi swagger design first contract editor stoplight api spec yaml schema 设计 设计优先 契约 编辑器 规范 架构"
+    },
+    "flowCanvas": {
+      "title": "流程画布",
+      "blurb": "从上到下查看流程，分支并排显示，循环带框，可缩放和平移，并显示一次运行经过的路径。",
+      "synonyms": "flow diagram canvas graph workflow designer zoom pan branches join 流程 流程图 画布 工作流 设计器 缩放 平移 分支 汇合"
+    },
+    "flowSwitch": {
+      "title": "多路分支步骤",
+      "blurb": "让流程沿多条路径之一前进，每条路径有自己的一组检查。",
+      "synonyms": "switch case condition branch truth table decision router 多路分支 条件 分支 真值表 决策 路由 多路"
+    },
+    "flowRepeat": {
+      "title": "重复步骤",
+      "blurb": "重复若干步骤，直到某项检查通过或达到指定次数。",
+      "synonyms": "repeat loop while until poll iterate 重复 循环 轮询 迭代 直到"
+    },
+    "nestedFlows": {
+      "title": "流程中的流程",
+      "blurb": "将已保存的流程作为另一个流程的一个步骤运行，使用自己的值，失败时走自己的路径。",
+      "synonyms": "sub-flow subflow nested flow of flows reuse call 子流程 嵌套 复用 调用"
+    },
+    "flowInputs": {
+      "title": "传值给请求",
+      "blurb": "把之前响应中的值放入下一个请求的请求头、查询、JSON 请求体、表单字段或变量。",
+      "synonyms": "chain response mapping data mapping header body form field extract pass value 串联 响应 映射 数据映射 请求头 请求体 表单 字段 提取 传值"
+    },
+    "flowMetrics": {
+      "title": "流程运行指标",
+      "blurb": "每个步骤、每次循环和整个流程的用时，以及发送和接收的字节数，显示在应用、报告和 CLI 中。",
+      "synonyms": "metrics timing duration bytes performance stats 指标 耗时 时长 字节 性能 统计"
+    },
+    "flowParallel": {
+      "title": "并行步骤",
+      "blurb": "同时发送多个请求或运行多个流程，当它们的结果满足条件或达到时间限制时继续。",
+      "synonyms": "parallel concurrent at the same time race fan out join wait for any wait for all timeout Postman Flows 并行 并发 同时 竞速 扇出 汇合 等待任一 等待全部 超时"
+    },
+    "flowConditionGroups": {
+      "title": "分组条件",
+      "blurb": "在一个“如果”“多路分支”“重复”或“并行”步骤中，用 and 和 or 将条件组合成嵌套分组，例如 (A or (B and C)) and D。",
+      "synonyms": "and or nested groups boolean logic parentheses complex condition truth table 与 或 嵌套 分组 布尔逻辑 括号 复杂条件 真值表"
+    },
+    "flowVariables": {
+      "title": "流程变量、输入与输出",
+      "blurb": "声明只在一次运行中存在的有类型变量，将部分标为输入，将值作为输出返回，并在流程运行时观察它们的变化。",
+      "synonyms": "typed variables number boolean json inputs outputs parameters return values flow scope inspect watch 类型 变量 数字 布尔 输入 输出 参数 返回值 流程 作用域 检查 观察"
+    }
+  },
+  "featureSamples": {
+    "collection": "示例集合",
+    "listUsers": "列出用户",
+    "getUser": "获取用户",
+    "createUser": "创建用户",
+    "okExample": "200 OK",
+    "createdExample": "201 Created",
+    "flowName": "示例流程",
+    "scanRequest": "带有虚构令牌的请求",
+    "graphqlRequest": "GraphQL 请求",
+    "websocketRequest": "WebSocket 请求",
+    "grpcRequest": "gRPC 请求",
+    "mcpRequest": "MCP 请求",
+    "flowDescription": "同时发送两个请求，保存一个有类型的流程变量，按分组条件选择路径，把名称传入请求，重复一个步骤直到检查通过，并返回一个值。每个请求都由已保存的示例作答，因此可以离线运行。",
+    "flowDone": "完成",
+    "flowListNote": "用已保存的 **200 OK** 示例作答，因此不会有数据离开此设备。",
+    "flowCheckStatus": "检查状态",
+    "flowCreateNote": "其 `name` 取自列表中的第二个用户，在发送前写入 JSON 请求体。",
+    "flowWaitForUser": "读取直到是 Ada",
+    "flowStopped": "已停止",
+    "flowStoppedMessage": "用户列表没有返回 200 OK。",
+    "binaryRequest": "二进制响应",
+    "jwtRequest": "JWT 请求",
+    "flowFetchTogether": "同时获取列表和 Ada",
+    "flowFetchNote": "两个请求同时发送；两者都通过后流程继续。",
+    "flowFirstUser": "Ada",
+    "flowKeepName": "保存她的名字",
+    "flowCheckNote": "当状态为 200 且第一个或第二个用户是 `firstName` 中保存的那个时通过。"
+  }
+}

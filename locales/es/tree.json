@@ -30,6 +30,7 @@
     "newRequest": "Nueva solicitud",
     "newSubfolder": "Nueva subcarpeta",
     "runFolder": "Ejecutar carpeta",
+    "negativeFolder": "Ejecutar pruebas negativas",
     "shareFolder": "Compartir carpeta",
     "delete": "Eliminar",
     "emptyImport": "Importar",
@@ -68,7 +69,8 @@
     "deleteManyMessage": "¿Eliminar {{subject}}? Esta acción no se puede deshacer.",
     "deleteManyMessageFolders": "¿Eliminar {{subject}}? Todo lo que haya dentro de una carpeta eliminada y no hayas seleccionado sube un nivel. Esta acción no se puede deshacer.",
     "deleteManyFailed": "No se pudieron eliminar los elementos seleccionados",
-    "moreTags": "+{{count}}"
+    "moreTags": "+{{count}}",
+    "more": "Más"
   },
   "label": {
     "folderTitle": "Color y etiquetas: {{name}}",
@@ -83,6 +85,8 @@
     "tagColoursNote": "Una etiqueta conserva su color en todos los sitios donde se usa. Si no eliges ninguno, se elige un color a partir del nombre de la etiqueta. Los colores de las etiquetas se guardan en este dispositivo.",
     "tagColour": "Color de la etiqueta {{tag}}",
     "removeTag": "Quitar la etiqueta {{tag}}",
+    "moveTagUp": "Subir la etiqueta {{tag}}",
+    "moveTagDown": "Bajar la etiqueta {{tag}}",
     "done": "Listo"
   },
   "tab": {
@@ -93,6 +97,8 @@
     "keepOpen": "Mantener abierta la pestaña",
     "revealInTree": "Mostrar en la colección",
     "copyAsCurl": "Copiar como cURL",
+    "showBeside": "Mostrar la respuesta al lado",
+    "hideBeside": "Dejar de mostrar la respuesta al lado",
     "moveLeft": "Mover a la izquierda",
     "moveRight": "Mover a la derecha",
     "previewHint": "Pestaña de vista previa. Edítala o haz doble clic para mantenerla abierta.",

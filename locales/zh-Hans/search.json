@@ -1,0 +1,34 @@
+{
+  "search": {
+    "sidebarTab": "搜索",
+    "placeholder": "搜索请求、历史记录和响应",
+    "label": "搜索全部内容",
+    "hint": "搜索请求名称、URL、请求头、请求体和描述，历史记录，以及每个打开的标签页的最新响应。",
+    "searching": "正在搜索…",
+    "none": "没有与“{{query}}”匹配的内容",
+    "truncated": "仅显示前面的结果。缩小搜索范围以查看更多。",
+    "timedOut": "搜索用时过长，已被停止。请尝试更长或更具体的查询。",
+    "failed": "搜索失败：{{reason}}",
+    "results_other": "{{count}} 个结果",
+    "command": {
+      "label": "全局搜索",
+      "description": "搜索请求名称、URL、请求体、历史记录和打开的响应",
+      "keywords": "find global search responses history 查找 全局 搜索 响应 历史记录"
+    },
+    "kinds": {
+      "request": "请求",
+      "history": "历史记录",
+      "response": "响应"
+    },
+    "fields": {
+      "name": "名称",
+      "url": "URL",
+      "body": "请求体",
+      "headers": "请求头",
+      "description": "描述",
+      "tags": "标签",
+      "responseBody": "响应体",
+      "responseHeaders": "响应头"
+    }
+  }
+}

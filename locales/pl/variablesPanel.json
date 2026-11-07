@@ -1,0 +1,35 @@
+{
+  "variablesPanel": {
+    "type": "Typ",
+    "typeLabel": "Typ zmiennej",
+    "value": "Wartość",
+    "valueChoice": "Wybierz wartość",
+    "fieldOptions": "Opcje pola",
+    "label": "Etykieta",
+    "labelPlaceholder": "Nazwa wyświetlana w widoku zmiennych",
+    "help": "Tekst pomocy",
+    "helpPlaceholder": "Wyświetlany pod polem w widoku zmiennych",
+    "placeholder": "Tekst zastępczy",
+    "placeholderPlaceholder": "Wyświetlany, gdy pole jest puste",
+    "choices": "Opcje do wyboru",
+    "choicesPlaceholder": "czerwony, zielony, niebieski",
+    "required": "Wymagane",
+    "inForm": "Pokaż w widoku zmiennych",
+    "showInherited": "Pokaż dziedziczone zmienne",
+    "inheritedTitle": "Dziedziczone",
+    "inheritedHint": "Tylko do odczytu. Pochodzą z zakresów powyżej tego żądania. Zmienna o tej samej nazwie zdefiniowana powyżej ma tu pierwszeństwo.",
+    "inheritedNone": "Brak dziedziczonych zmiennych.",
+    "hiddenValue": "Ukryta",
+    "typeNote": "Zmienna z typem trafia do skryptów jako wartość tego typu. W adresie URL, nagłówku lub treści nadal jest zapisywana jako tekst."
+  },
+  "variablesView": {
+    "switchLabel": "Widok żądania",
+    "fullEditor": "Pełny edytor",
+    "variables": "Zmienne",
+    "formLabel": "Zmienne żądania",
+    "emptyTitle": "Brak zmiennych do wypełnienia",
+    "emptyDescription": "Zmienne dodane na karcie Zmienne w pełnym edytorze pojawiają się tutaj jako pola do wypełnienia.",
+    "openEditor": "Otwórz pełny edytor",
+    "required": "Wymagane"
+  }
+}

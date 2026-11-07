@@ -30,6 +30,7 @@
     "newRequest": "Cerere nouă",
     "newSubfolder": "Subdosar nou",
     "runFolder": "Rulare dosar",
+    "negativeFolder": "Rulare teste negative",
     "shareFolder": "Partajare dosar",
     "delete": "Ștergere",
     "emptyImport": "Import",
@@ -68,7 +69,8 @@
     "deleteManyMessage": "Ștergeți {{subject}}? Această acțiune nu poate fi anulată.",
     "deleteManyMessageFolders": "Ștergeți {{subject}}? Tot ce se află într-un dosar șters și nu ați selectat urcă un nivel. Această acțiune nu poate fi anulată.",
     "deleteManyFailed": "Elementele selectate nu au putut fi șterse",
-    "moreTags": "+{{count}}"
+    "moreTags": "+{{count}}",
+    "more": "Mai multe"
   },
   "label": {
     "folderTitle": "Culoare și etichete: {{name}}",
@@ -83,6 +85,8 @@
     "tagColoursNote": "O etichetă își păstrează culoarea peste tot unde este folosită. Fără o alegere, o culoare este aleasă după numele etichetei. Culorile etichetelor sunt păstrate pe acest dispozitiv.",
     "tagColour": "Culoarea etichetei {{tag}}",
     "removeTag": "Eliminare etichetă {{tag}}",
+    "moveTagUp": "Mutare eticheta {{tag}} în sus",
+    "moveTagDown": "Mutare eticheta {{tag}} în jos",
     "done": "Gata"
   },
   "tab": {
@@ -93,6 +97,8 @@
     "keepOpen": "Păstrare filă deschisă",
     "revealInTree": "Afișare în colecție",
     "copyAsCurl": "Copiere ca cURL",
+    "showBeside": "Afișare răspuns alăturat",
+    "hideBeside": "Oprire afișare răspuns alăturat",
     "moveLeft": "Mutare la stânga",
     "moveRight": "Mutare la dreapta",
     "previewHint": "Filă de previzualizare. Editați sau faceți dublu clic pentru a o ține deschisă.",

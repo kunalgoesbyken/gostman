@@ -58,7 +58,8 @@
     "fields": {
       "query": "Query",
       "header": "Antet",
-      "body": "Corp"
+      "body": "Corp",
+      "param": "Parametru de cale"
     },
     "ops": {
       "equals": "este egal cu",
@@ -72,6 +73,12 @@
     "headersLabel": "Antete (câte un Nume: valoare pe linie)",
     "bodyLabel": "Corp (gol păstrează corpul rutei)",
     "bodyHint": "Substituenți: {{placeholders}}",
+    "dataTitle": "Fișier de date",
+    "dataHint": "Opțional. O cerere a cărei valoare se potrivește cu o celulă din coloană primește ca răspuns acel rând ca JSON sau corpul de mai sus folosind {{example}}. Fără potrivire, această regulă nu se aplică. CSV, JSON sau XLSX, citit din dosarul spațiului de lucru.",
+    "dataFile": "Fișier din dosarul spațiului de lucru",
+    "dataField": "Potrivire cerere",
+    "dataName": "Nume sau cale JSON",
+    "dataColumn": "Coloană",
     "nth": "Doar a N-a potrivire",
     "nthPlaceholder": "Fiecare potrivire",
     "behaviorTitle": "Comportament",
@@ -107,6 +114,12 @@
       "conflicts": "În conflict: {{count}}",
       "off": "Dezactivate: {{count}}",
       "skipped": "Neservite: {{count}}"
-    }
+    },
+    "importRules": "Importare reguli",
+    "exportRules": "Exportare reguli",
+    "rulesName": "gostman-mock-rules.yaml",
+    "rulesImported_one": "{{count}} regulă importată, dezactivată până când o activați.",
+    "rulesImported_few": "{{count}} reguli importate, dezactivate până când le activați.",
+    "rulesImported_other": "{{count}} de reguli importate, dezactivate până când le activați."
   }
 }

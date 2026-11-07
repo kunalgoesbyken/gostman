@@ -3,6 +3,23 @@
     "name": "请求名称",
     "untitled": "未命名请求",
     "method": "HTTP 方法",
+    "protocol": "协议",
+    "protocols": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "grpc": "gRPC",
+      "websocket": "WebSocket",
+      "sse": "Server-Sent Events",
+      "socketio": "Socket.IO",
+      "mqtt": "MQTT",
+      "soap": "SOAP",
+      "mcp": "MCP",
+      "signalr": "SignalR",
+      "tcp": "TCP",
+      "udp": "UDP",
+      "nats": "NATS"
+    },
+    "detected": "检测到 {{protocol}}",
     "url": "请求 URL",
     "methodPlaceholders": {
       "grpc": {
@@ -14,6 +31,21 @@
         "full": "输入 MCP 服务器 URL",
         "medium": "MCP 服务器 URL",
         "short": "URL"
+      },
+      "tcp": {
+        "full": "输入 host:port，例如 localhost:9000",
+        "medium": "host:port",
+        "short": "host:port"
+      },
+      "udp": {
+        "full": "输入 host:port，例如 localhost:9000",
+        "medium": "host:port",
+        "short": "host:port"
+      },
+      "nats": {
+        "full": "输入 nats://host:4222/subject，可添加 ?mode=publish 或 ?mode=subscribe",
+        "medium": "nats://host:4222/subject",
+        "short": "nats://host/subject"
       }
     },
     "send": "发送",

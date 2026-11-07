@@ -1,0 +1,29 @@
+{
+  "dependencies": {
+    "title": "Dependencias de variables",
+    "menuFolder": "Dependencias de variables",
+    "scopeAll": "Todas las solicitudes",
+    "scopeFolder": "Carpeta: {{name}}",
+    "intro": "Cada variable se sitúa entre las solicitudes que la establecen y las que la leen. Una solicitud establece una variable con una regla de extracción o un script, y la lee con {{reference}} en su dirección, encabezados, cuerpo o autenticación, o con una llamada de script.",
+    "showInputs": "Mostrar las variables que solo vienen de entornos",
+    "producers": "Establece",
+    "variables": "Variable",
+    "consumers": "Lee",
+    "missingTitle": "Se leen pero nunca se establecen",
+    "missingDetail": "Estas variables las lee una solicitud, pero ninguna solicitud las establece y ningún entorno, colección o lista global las define: {{names}}.",
+    "missingMark": "nunca establecida",
+    "none": "No hay variables que enlacen solicitudes",
+    "noneDescription": "Ninguna solicitud de este ámbito establece, mediante una regla de extracción o un script, una variable que lea otra solicitud.",
+    "summary_one": "{{count}} variable",
+    "summary_many": "{{count}} de variables",
+    "summary_other": "{{count}} variables",
+    "graphLabel": "Grafo de dependencias de variables",
+    "openRequest": "Abrir {{name}}",
+    "untitled": "Solicitud sin título",
+    "command": {
+      "label": "Mostrar las dependencias de variables",
+      "description": "Dibujar qué solicitudes establecen y leen cada variable",
+      "keywords": "grafo cadena extraer flujo produce consume dependencias graph chain extract"
+    }
+  }
+}

@@ -37,6 +37,11 @@
         "title": "Uruchom żądania razem",
         "hint": "Moduł uruchamiania wysyła po kolei wszystkie zapisane żądania i raportuje, które sprawdzenia przeszły.",
         "action": "Otwórz moduł uruchamiania"
+      },
+      "explore": {
+        "title": "Poznaj funkcje",
+        "hint": "Przeszukaj wszystkie funkcje, wypróbuj je na przykładzie i przeczytaj, jak działają.",
+        "action": "Poznaj funkcje"
       }
     }
   }

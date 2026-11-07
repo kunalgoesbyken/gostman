@@ -1,0 +1,28 @@
+{
+  "tour": {
+    "label": "Recorrido rápido",
+    "replay": "Mostrar recorrido",
+    "progress": "Paso {{current}} de {{total}}",
+    "next": "Siguiente",
+    "done": "Hecho",
+    "skip": "Omitir recorrido",
+    "steps": {
+      "send": {
+        "title": "Envía una solicitud",
+        "body": "Escribe una URL en la barra de direcciones y pulsa Enviar. La respuesta se abre debajo."
+      },
+      "variables": {
+        "title": "Usa variables",
+        "body": "Escribe un valor como {{example}} y defínelo en un entorno, para que una misma solicitud sirva en local, staging y producción."
+      },
+      "tools": {
+        "title": "Encuentra todas las herramientas",
+        "body": "El menú Herramientas del encabezado agrupa lo que puedes hacer con las solicitudes: ejecutar, simular, analizar, monitorizar y compartir."
+      },
+      "explore": {
+        "title": "Busca lo que sea",
+        "body": "Pulsa {{shortcut}} para abrir la paleta de comandos, o abre Ayuda y elige Explorar funciones."
+      }
+    }
+  }
+}

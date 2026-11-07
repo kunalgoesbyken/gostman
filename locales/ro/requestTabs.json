@@ -16,12 +16,14 @@
       "body": "Corp",
       "auth": "Auth",
       "graphql": "GraphQL",
+      "files": "Fișiere",
       "grpc": "gRPC",
       "mcp": "MCP",
       "websocket": "WebSocket",
       "vars": "Variabile",
       "extract": "Extragere",
       "tests": "Verificări",
+      "notes": "Note",
       "settings": "Setări"
     }
   }

@@ -10,6 +10,7 @@
       "language": "Język",
       "ai": "AI",
       "privacy": "Prywatność",
+      "updates": "Aktualizacje",
       "data": "Dane"
     },
     "fields": {
@@ -21,12 +22,14 @@
       "codeFont": "Czcionka kodu",
       "density": "Gęstość",
       "responseLayout": "Panel odpowiedzi",
+      "tabPlacement": "Otwarte karty",
       "systemTitleBar": "Użyj systemowego paska tytułu",
       "editorFontSize": "Rozmiar czcionki edytora",
       "wrapLines": "Zawijaj długie wiersze",
       "requestTimeout": "Domyślny limit czasu",
       "confirmCloseTab": "Pytaj przed odrzuceniem niezapisanych zmian przy zamykaniu karty",
       "language": "Język",
+      "authorName": "Twoje imię przy notatkach",
       "sidebarViews": "Karty panelu bocznego"
     },
     "themes": {
@@ -54,6 +57,11 @@
       "below": "Poniżej",
       "right": "Po prawej"
     },
+    "tabPlacements": {
+      "bar": "Pasek kart",
+      "sidebar": "Panel boczny"
+    },
+    "tabPlacementHint": "Panel boczny ukrywa pasek kart i wyświetla otwarte karty w panelu bocznym, co sprawdza się na małych ekranach.",
     "seconds": "s",
     "pixels": "px",
     "contrastHint": "Wyższy rysuje mocniejsze obramowania i tekst pomocniczy.",
@@ -152,6 +160,7 @@
       "lowContrast": "Tekst może być trudny do odczytania. Dąż do co najmniej {{minimum}}:1.",
       "resetRow": "Przywróć: {{name}}"
     },
+    "authorNameHint": "Pokazywane przy notatkach dodawanych do żądań i folderów.",
     "timeoutHint_one": "Dotyczy żądań bez własnego limitu czasu. 0 oznacza wbudowany limit: {{count}} sekunda.",
     "timeoutHint_few": "Dotyczy żądań bez własnego limitu czasu. 0 oznacza wbudowany limit: {{count}} sekundy.",
     "timeoutHint_many": "Dotyczy żądań bez własnego limitu czasu. 0 oznacza wbudowany limit: {{count}} sekund.",
@@ -166,6 +175,8 @@
     "accentAdjusted": "Pokazywany jako {{light}} w trybie jasnym i {{dark}} w trybie ciemnym, aby tekst w tym kolorze pozostał czytelny.",
     "sidebarViewsHint": "Wybierz, które karty pokazuje panel boczny i w jakiej kolejności. Kliknij prawym przyciskiem karty w panelu bocznym, aby je tam pokazać lub ukryć.",
     "moveViewUp": "Przesuń w górę: {{name}}",
-    "moveViewDown": "Przesuń w dół: {{name}}"
+    "moveViewDown": "Przesuń w dół: {{name}}",
+    "textScaleHint": "Skaluje interfejs i jego pola wprowadzania. Powiększenie okna jest stosowane dodatkowo do tego rozmiaru: podstawa {{size}} px jest wyświetlana jako {{zoomed}} px przy powiększeniu 125%.",
+    "editorFontSizeHint": "Edytory kodu, w pikselach. Nie zależy od ustawienia Rozmiar tekstu, a powiększenie okna jest stosowane dodatkowo."
   }
 }

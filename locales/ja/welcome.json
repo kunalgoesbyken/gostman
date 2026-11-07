@@ -3,6 +3,7 @@
     "title": "Gostmanへようこそ",
     "intro": "アカウントは不要です。リクエストを送信するまで、このデバイスから何も送信されません。",
     "dismiss": "ようこそ画面を閉じる",
+    "skip": "スキップ",
     "commandTitle": "ようこそ画面を表示",
     "commandDescription": "はじめにのステップ、インポート、ショートカット",
     "otherTitle": "ほかの始め方",
@@ -15,6 +16,7 @@
     "curlTitle": "curlコマンドを貼り付け",
     "curlHint": "アドレスバーに貼り付けると、リクエストが入力されます。",
     "shortcutsTitle": "キーボードショートカット",
-    "sampleRequestName": "サンプルリクエスト"
+    "sampleRequestName": "サンプルリクエスト",
+    "exploreTitle": "機能を探す"
   }
 }

@@ -1,0 +1,90 @@
+{
+  "specEditor": {
+    "createFailed": "Nie udało się utworzyć specyfikacji API",
+    "saveFailed": "Nie udało się zapisać specyfikacji API",
+    "deleteFailed": "Nie udało się usunąć specyfikacji API",
+    "importFailed": "Nie udało się zaimportować specyfikacji API",
+    "convertFailed": "Nie udało się przekonwertować specyfikacji API",
+    "mockFailed": "Nie udało się uruchomić serwera mock",
+    "generateFailed": "Nie udało się wygenerować żądań",
+    "saved": "Zapisano „{{name}}”.",
+    "renameTitle": "Zmień nazwę specyfikacji API",
+    "nameLabel": "Nazwa",
+    "deleteTitle": "Usuń specyfikację API",
+    "deleteMessage": "Usunąć specyfikację API „{{name}}”? Tej operacji nie można cofnąć.",
+    "closeTitle": "Zamknij specyfikację API",
+    "closeMessage": "„{{name}}” ma niezapisane zmiany. Zapisać je przed zamknięciem?",
+    "dontSave": "Nie zapisuj",
+    "save": "Zapisz",
+    "copyName": "{{name}} kopia",
+    "importedName": "Zaimportowane API",
+    "importAddressTitle": "Importuj specyfikację API",
+    "importAddressMessage": "Podaj adres specyfikacji OpenAPI lub Swagger.",
+    "importAddressPlaceholder": "https://example.com/openapi.json",
+    "importAddressConfirm": "Importuj",
+    "checkResponsesTitle": "Sprawdź odpowiedzi",
+    "generateFirst": "Najpierw wygeneruj żądania z tej specyfikacji. Ich odpowiedzi będą wtedy z nią porównywane.",
+    "checkingResponses": "Odpowiedzi w „{{name}}” są sprawdzane względem tej specyfikacji.",
+    "tabLabel": "Specyfikacja API {{name}}",
+    "templates": {
+      "strategies": {
+        "name": "API strategii"
+      },
+      "resource": {
+        "name": "API elementów"
+      },
+      "blank": {
+        "name": "Nowe API"
+      }
+    }
+  },
+  "specList": {
+    "listLabel": "Specyfikacje API",
+    "emptyTitle": "Zaprojektuj API, zanim powstanie",
+    "emptyDescription": "Napisz tu specyfikację OpenAPI, sprawdzaną na bieżąco podczas pisania. Następnie wygeneruj żądania, uruchom serwer mock i sprawdzaj względem niej prawdziwe odpowiedzi.",
+    "count_one": "{{count}} specyfikacja API",
+    "count_few": "{{count}} specyfikacje API",
+    "count_many": "{{count}} specyfikacji API",
+    "count_other": "{{count}} specyfikacji API",
+    "newSpec": "Nowa specyfikacja API",
+    "importSpec": "Importuj specyfikację",
+    "importFile": "Importuj z pliku",
+    "importAddress": "Importuj z adresu",
+    "actions": "Akcje dla {{name}}",
+    "rename": "Zmień nazwę",
+    "duplicate": "Duplikuj",
+    "remove": "Usuń",
+    "sidebarTab": "Specyfikacje"
+  },
+  "specView": {
+    "nameLabel": "Nazwa specyfikacji API",
+    "unsaved": "Niezapisane zmiany",
+    "save": "Zapisz",
+    "formatLabel": "Format pliku",
+    "formatYaml": "YAML",
+    "formatJson": "JSON",
+    "editorLabel": "Specyfikacja OpenAPI",
+    "previewLabel": "Podgląd dokumentacji",
+    "showPreview": "Pokaż podgląd dokumentacji",
+    "hidePreview": "Ukryj podgląd dokumentacji",
+    "viewDocs": "Zobacz dokumentację",
+    "viewDocsHint": "Otwórz dokumentację w większym oknie.",
+    "generate": "Generuj żądania",
+    "generateHint": "Utwórz żądania z tej specyfikacji, z powiązaniem, które utrzymuje ich zgodność z nią.",
+    "update": "Aktualizuj żądania",
+    "updateHint": "Porównaj tę specyfikację z wygenerowanymi z niej żądaniami i zastosuj wybrane zmiany.",
+    "mock": "Uruchom mock",
+    "mockHint": "Udostępniaj przykłady z tej specyfikacji z lokalnego serwera mock.",
+    "check": "Sprawdź odpowiedzi",
+    "checkHint": "Sprawdź odpowiedzi wygenerowanych żądań względem tej specyfikacji.",
+    "compare": "Porównaj",
+    "compareHint": "Porównaj tę specyfikację z inną wersją i wypisz zmiany niezgodne wstecz.",
+    "problems_one": "{{count}} problem",
+    "problems_few": "{{count}} problemy",
+    "problems_many": "{{count}} problemów",
+    "problems_other": "{{count}} problemu",
+    "problemsLabel": "Problemy",
+    "checking": "Sprawdzanie specyfikacji",
+    "cannotRead": "Nie można odczytać specyfikacji"
+  }
+}

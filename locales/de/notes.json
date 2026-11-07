@@ -1,0 +1,16 @@
+{
+  "notes": {
+    "empty": "Noch keine Notizen.",
+    "secretHint": "Notizen werden als Klartext gespeichert und mit dem Arbeitsbereich geteilt. Fügen Sie keine Secrets ein.",
+    "looksLikeCredential": "Das sieht nach Zugangsdaten aus. Notizen werden als Klartext gespeichert, in den Dateien des Ordners und in Exporten.",
+    "inputLabel": "Neue Notiz",
+    "inputPlaceholder": "Schreiben Sie eine Notiz für Ihr Team",
+    "add": "Notiz hinzufügen",
+    "anonymous": "Unbekannt",
+    "resolve": "Erledigt",
+    "reopen": "Wieder öffnen",
+    "resolved": "Erledigt",
+    "delete": "Notiz löschen",
+    "listLabel": "Notizen"
+  }
+}

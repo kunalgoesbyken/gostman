@@ -1,0 +1,36 @@
+{
+  "search": {
+    "sidebarTab": "Buscar",
+    "placeholder": "Buscar solicitudes, historial y respuestas",
+    "label": "Buscar en todo",
+    "hint": "Busca en los nombres, URL, encabezados, cuerpos y descripciones de las solicitudes, en el historial y en la última respuesta de cada pestaña abierta.",
+    "searching": "Buscando…",
+    "none": "Nada coincide con «{{query}}»",
+    "truncated": "Solo se muestran los primeros resultados. Acota la búsqueda para ver más.",
+    "timedOut": "La búsqueda tardó demasiado y se detuvo. Prueba con una consulta más larga o más específica.",
+    "failed": "La búsqueda falló: {{reason}}",
+    "results_one": "{{count}} resultado",
+    "results_many": "{{count}} de resultados",
+    "results_other": "{{count}} resultados",
+    "command": {
+      "label": "Buscar en todas partes",
+      "description": "Buscar en nombres de solicitudes, URL, cuerpos, historial y respuestas abiertas",
+      "keywords": "buscar encontrar global respuestas historial find search"
+    },
+    "kinds": {
+      "request": "Solicitud",
+      "history": "Historial",
+      "response": "Respuesta"
+    },
+    "fields": {
+      "name": "Nombre",
+      "url": "URL",
+      "body": "Cuerpo",
+      "headers": "Encabezados",
+      "description": "Descripción",
+      "tags": "Etiquetas",
+      "responseBody": "Cuerpo de la respuesta",
+      "responseHeaders": "Encabezados de la respuesta"
+    }
+  }
+}

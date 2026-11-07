@@ -76,6 +76,19 @@
         "inputLabel": "你要找什么",
         "placeholder": "取消订单的接口"
       },
+      "commit": {
+        "label": "根据更改生成提交信息",
+        "section": "提交信息",
+        "apply": "用作提交信息",
+        "nothing": "没有可描述的更改。"
+      },
+      "mock": {
+        "label": "为此请求生成模拟示例",
+        "inputLabel": "描述响应，或粘贴 OpenAPI 文档",
+        "placeholder": "订单列表、空列表，以及未知订单的 404",
+        "section": "由模拟服务器提供的示例",
+        "apply": "添加到示例"
+      },
       "schema": {
         "label": "根据 API 描述创建请求",
         "inputLabel": "粘贴 OpenAPI 或 Swagger 文档、GraphQL schema 或 API 文档文本",
@@ -98,7 +111,8 @@
       "explain": "使用 AI 解释",
       "explainError": "使用 AI 解释此错误",
       "document": "用 AI 编写",
-      "documentLabel": "使用 AI 编写描述"
+      "documentLabel": "使用 AI 编写描述",
+      "commitMessage": "用 AI 建议提交信息"
     },
     "commands": {
       "request": {
@@ -127,6 +141,11 @@
         "description": "通过描述来查找请求",
         "keywords": "搜索 查找 search find"
       },
+      "mock": {
+        "label": "AI：为此请求生成模拟示例",
+        "description": "根据描述、OpenAPI 文档或上一个响应，为模拟服务器提出示例响应",
+        "keywords": "mock examples responses 模拟 示例 响应"
+      },
       "schema": {
         "label": "AI：根据 API 描述创建请求",
         "description": "OpenAPI 文档使用内置导入器，其他描述交给 AI",
@@ -146,6 +165,7 @@
       "consent": "我了解，运行 AI 操作时，预览中的请求或响应详情会发送到 {{host}}，费用由我与提供商结算。",
       "enable": "开启 AI 功能",
       "enableAfterConsent": "开启 AI 功能（请先勾选上一行）",
+      "inlineCompletion": "在脚本编辑器中输入时建议代码。短暂停顿后，光标附近的脚本和变量的名称（绝不包括其值）会不经预览发送到 {{host}}。按 Tab 接受建议。",
       "provider": "提供商",
       "baseUrl": "基础 URL",
       "baseUrlPlaceholder": "https://host/v1",

@@ -57,7 +57,8 @@
     "fields": {
       "query": "Query",
       "header": "Header",
-      "body": "Body"
+      "body": "Body",
+      "param": "Pfadparameter"
     },
     "ops": {
       "equals": "ist gleich",
@@ -71,6 +72,12 @@
     "headersLabel": "Header (eine Zeile „Name: Wert“ pro Header)",
     "bodyLabel": "Body (leer behält den Body der Route)",
     "bodyHint": "Platzhalter: {{placeholders}}",
+    "dataTitle": "Datendatei",
+    "dataHint": "Optional. Eine Anfrage, deren Wert mit einer Zelle der Spalte übereinstimmt, wird mit dieser Zeile als JSON beantwortet oder mit dem Body oben über {{example}}. Ohne Übereinstimmung greift diese Regel nicht. CSV, JSON oder XLSX, gelesen aus dem Arbeitsbereichsordner.",
+    "dataFile": "Datei im Arbeitsbereichsordner",
+    "dataField": "Anfrage abgleichen",
+    "dataName": "Name oder JSON-Pfad",
+    "dataColumn": "Spalte",
     "nth": "Nur der N-te Treffer",
     "nthPlaceholder": "Jeder Treffer",
     "behaviorTitle": "Verhalten",
@@ -105,6 +112,11 @@
       "conflicts": "{{count}} im Konflikt",
       "off": "{{count}} ausgeschaltet",
       "skipped": "{{count}} nicht ausgeliefert"
-    }
+    },
+    "importRules": "Regeln importieren",
+    "exportRules": "Regeln exportieren",
+    "rulesName": "gostman-mock-rules.yaml",
+    "rulesImported_one": "{{count}} Regel importiert, ausgeschaltet, bis Sie sie einschalten.",
+    "rulesImported_other": "{{count}} Regeln importiert, ausgeschaltet, bis Sie sie einschalten."
   }
 }

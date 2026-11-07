@@ -58,7 +58,8 @@
     "fields": {
       "query": "Paramètre",
       "header": "En-tête",
-      "body": "Corps"
+      "body": "Corps",
+      "param": "Paramètre de chemin"
     },
     "ops": {
       "equals": "est égal à",
@@ -72,6 +73,12 @@
     "headersLabel": "En-têtes (un Nom: valeur par ligne)",
     "bodyLabel": "Corps (vide : garde celui de la route)",
     "bodyHint": "Espaces réservés : {{placeholders}}",
+    "dataTitle": "Fichier de données",
+    "dataHint": "Facultatif. Une requête dont la valeur correspond à une cellule de la colonne reçoit cette ligne en JSON, ou le corps ci-dessus avec {{example}}. Sans correspondance, cette règle ne s’applique pas. CSV, JSON ou XLSX, lu dans le dossier de l’espace de travail.",
+    "dataFile": "Fichier dans le dossier de l’espace de travail",
+    "dataField": "Valeur de la requête",
+    "dataName": "Nom ou chemin JSON",
+    "dataColumn": "Colonne",
     "nth": "Seulement la Nᵉ correspondance",
     "nthPlaceholder": "Chaque correspondance",
     "behaviorTitle": "Comportement",
@@ -107,6 +114,12 @@
       "conflicts": "{{count}} en conflit",
       "off": "{{count}} désactivées",
       "skipped": "{{count}} non servies"
-    }
+    },
+    "importRules": "Importer des règles",
+    "exportRules": "Exporter les règles",
+    "rulesName": "gostman-mock-rules.yaml",
+    "rulesImported_one": "{{count}} règle importée, désactivée tant que vous ne l’activez pas.",
+    "rulesImported_many": "{{count}} de règles importées, désactivées tant que vous ne les activez pas.",
+    "rulesImported_other": "{{count}} règles importées, désactivées tant que vous ne les activez pas."
   }
 }

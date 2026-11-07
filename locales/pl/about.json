@@ -9,7 +9,8 @@
       "website": "Strona internetowa",
       "source": "Kod źródłowy",
       "releases": "Wydania",
-      "issues": "Zgłoś problem"
+      "issues": "Zgłoś problem",
+      "sponsor": "Wesprzyj"
     },
     "diagnosticsHint": "Diagnostyka zawiera tylko wersję, platformę i liczniki. Nigdy nie obejmuje żądań, adresów URL, zmiennych, tokenów ani sekretów.",
     "copyDiagnostics": "Kopiuj diagnostykę",

@@ -1,0 +1,22 @@
+{
+  "requestVariables": {
+    "types": {
+      "none": "任意",
+      "string": "テキスト",
+      "number": "数値",
+      "integer": "整数",
+      "boolean": "trueまたはfalse",
+      "json": "JSON",
+      "enum": "リストから1つ"
+    },
+    "problems": {
+      "required": "{{name}}に値が必要です。",
+      "number": "{{name}}は数値でなければなりません。",
+      "integer": "{{name}}は整数でなければなりません。",
+      "boolean": "{{name}}はtrueまたはfalseでなければなりません。",
+      "json": "{{name}}は有効なJSONでなければなりません。",
+      "enum": "{{name}}は{{choices}}のいずれかでなければなりません。"
+    },
+    "blocked": "変数に問題があるため、リクエストは送信されませんでした。\n{{problems}}"
+  }
+}

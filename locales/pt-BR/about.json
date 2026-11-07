@@ -9,7 +9,8 @@
       "website": "Site",
       "source": "Código-fonte",
       "releases": "Versões",
-      "issues": "Informar um problema"
+      "issues": "Informar um problema",
+      "sponsor": "Patrocinar"
     },
     "diagnosticsHint": "O diagnóstico lista apenas versão, plataforma e contagens. Nunca inclui requisições, URLs, variáveis, tokens ou segredos.",
     "copyDiagnostics": "Copiar diagnóstico",

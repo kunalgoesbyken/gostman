@@ -2,7 +2,8 @@
   "realtime": {
     "targets": {
       "topic": "Topic",
-      "event": "Eveniment"
+      "event": "Eveniment",
+      "method": "Metodă"
     },
     "browser": {
       "closed": "Conexiune închisă (cod {{code}})",
@@ -22,6 +23,17 @@
       "binary": "Pachetele Socket.IO binare nu sunt decodate.",
       "noEvent": "Introduceți un nume de eveniment de emis.",
       "ack": "ack {{id}}"
+    },
+    "signalR": {
+      "badNegotiate": "Răspunsul negotiate nu are un token de conexiune.",
+      "negotiateFailed": "Cererea SignalR negotiate a eșuat: {{reason}}",
+      "handshake": "Handshake SignalR încheiat (protocol JSON)",
+      "handshakeRefused": "Hub-ul a refuzat handshake-ul: {{reason}}",
+      "streamItem": "flux {{id}}",
+      "completion": "rezultat {{id}}",
+      "closed": "Hub-ul a închis conexiunea",
+      "closedWith": "Hub-ul a închis conexiunea: {{reason}}",
+      "noTarget": "Introduceți metoda hub-ului de invocat."
     },
     "mqtt": {
       "connected": "Conectat la broker",

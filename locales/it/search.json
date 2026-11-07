@@ -1,0 +1,36 @@
+{
+  "search": {
+    "sidebarTab": "Cerca",
+    "placeholder": "Cerca richieste, cronologia e risposte",
+    "label": "Cerca ovunque",
+    "hint": "Cerca nei nomi, negli URL, negli header, nei corpi e nelle descrizioni delle richieste, nella cronologia e nell'ultima risposta di ogni scheda aperta.",
+    "searching": "Ricerca…",
+    "none": "Nessun risultato per \"{{query}}\"",
+    "truncated": "Vengono mostrati solo i primi risultati. Restringi la ricerca per vederne altri.",
+    "timedOut": "La ricerca ha richiesto troppo tempo ed è stata interrotta. Prova una query più lunga o più specifica.",
+    "failed": "La ricerca non è riuscita: {{reason}}",
+    "results_one": "{{count}} risultato",
+    "results_many": "{{count}} di risultati",
+    "results_other": "{{count}} risultati",
+    "command": {
+      "label": "Cerca ovunque",
+      "description": "Cerca nei nomi, negli URL e nei corpi delle richieste, nella cronologia e nelle risposte aperte",
+      "keywords": "trova ricerca globale risposte cronologia find global search"
+    },
+    "kinds": {
+      "request": "Richiesta",
+      "history": "Cronologia",
+      "response": "Risposta"
+    },
+    "fields": {
+      "name": "Nome",
+      "url": "URL",
+      "body": "Corpo",
+      "headers": "Header",
+      "description": "Descrizione",
+      "tags": "Tag",
+      "responseBody": "Corpo della risposta",
+      "responseHeaders": "Header della risposta"
+    }
+  }
+}

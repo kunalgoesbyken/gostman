@@ -31,6 +31,7 @@
     "newRequest": "Nowe żądanie",
     "newSubfolder": "Nowy podfolder",
     "runFolder": "Uruchom folder",
+    "negativeFolder": "Uruchom testy negatywne",
     "shareFolder": "Udostępnij folder",
     "delete": "Usuń",
     "emptyImport": "Importuj",
@@ -74,7 +75,8 @@
     "deleteManyMessage": "Usunąć: {{subject}}? Tej operacji nie można cofnąć.",
     "deleteManyMessageFolders": "Usunąć: {{subject}}? Wszystko, co jest w usuwanym folderze i nie zostało zaznaczone, przesuwa się o jeden poziom wyżej. Tej operacji nie można cofnąć.",
     "deleteManyFailed": "Nie udało się usunąć zaznaczonych elementów",
-    "moreTags": "+{{count}}"
+    "moreTags": "+{{count}}",
+    "more": "Więcej"
   },
   "label": {
     "folderTitle": "Kolor i tagi: {{name}}",
@@ -89,6 +91,8 @@
     "tagColoursNote": "Tag zachowuje swój kolor wszędzie, gdzie jest używany. Bez wyboru kolor jest dobierany na podstawie nazwy tagu. Kolory tagów są przechowywane na tym urządzeniu.",
     "tagColour": "Kolor tagu {{tag}}",
     "removeTag": "Usuń tag {{tag}}",
+    "moveTagUp": "Przenieś tag {{tag}} w górę",
+    "moveTagDown": "Przenieś tag {{tag}} w dół",
     "done": "Gotowe"
   },
   "tab": {
@@ -99,6 +103,8 @@
     "keepOpen": "Zachowaj kartę",
     "revealInTree": "Pokaż w kolekcji",
     "copyAsCurl": "Kopiuj jako cURL",
+    "showBeside": "Pokaż odpowiedź obok",
+    "hideBeside": "Przestań pokazywać odpowiedź obok",
     "moveLeft": "Przesuń w lewo",
     "moveRight": "Przesuń w prawo",
     "previewHint": "Karta podglądu. Edytuj lub kliknij dwukrotnie, aby zachować ją otwartą.",

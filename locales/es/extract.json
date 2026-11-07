@@ -24,6 +24,8 @@
     "source": "Origen del valor",
     "scope": "Dónde se guarda el valor",
     "remove": "Quitar extractor",
-    "runNow": "Ejecutar ahora"
+    "runNow": "Ejecutar ahora",
+    "environmentNamed": "Entorno: {{name}}",
+    "alreadyDefined": "Ya está definida ({{source}}); el valor extraído se guarda en el ámbito elegido en esta fila."
   }
 }

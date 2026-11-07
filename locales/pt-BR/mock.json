@@ -58,7 +58,8 @@
     "fields": {
       "query": "Consulta",
       "header": "Cabeçalho",
-      "body": "Corpo"
+      "body": "Corpo",
+      "param": "Parâmetro de caminho"
     },
     "ops": {
       "equals": "é igual a",
@@ -72,6 +73,12 @@
     "headersLabel": "Cabeçalhos (um Nome: valor por linha)",
     "bodyLabel": "Corpo (vazio mantém o corpo da rota)",
     "bodyHint": "Placeholders: {{placeholders}}",
+    "dataTitle": "Arquivo de dados",
+    "dataHint": "Opcional. Uma requisição cujo valor corresponde a uma célula da coluna é respondida com essa linha em JSON, ou com o corpo acima usando {{example}}. Sem correspondência, esta regra não se aplica. CSV, JSON ou XLSX, lido da pasta do espaço de trabalho.",
+    "dataFile": "Arquivo na pasta do espaço de trabalho",
+    "dataField": "Corresponder à requisição",
+    "dataName": "Nome ou caminho JSON",
+    "dataColumn": "Coluna",
     "nth": "Somente a N-ésima correspondência",
     "nthPlaceholder": "Toda correspondência",
     "behaviorTitle": "Comportamento",
@@ -107,6 +114,12 @@
       "conflicts": "{{count}} em conflito",
       "off": "{{count}} desativadas",
       "skipped": "{{count}} não servidas"
-    }
+    },
+    "importRules": "Importar regras",
+    "exportRules": "Exportar regras",
+    "rulesName": "gostman-mock-rules.yaml",
+    "rulesImported_one": "{{count}} regra importada, desligada até você ativá-la.",
+    "rulesImported_many": "{{count}} de regras importadas, desligadas até você ativá-las.",
+    "rulesImported_other": "{{count}} regras importadas, desligadas até você ativá-las."
   }
 }

@@ -7,7 +7,8 @@
     "window": {
       "minimize": "最小化",
       "maximize": "最大化",
-      "restore": "还原"
+      "restore": "还原",
+      "resize": "调整窗口大小"
     },
     "crash": {
       "title": "Gostman 遇到错误",

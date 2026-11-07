@@ -1,0 +1,27 @@
+{
+  "dependencies": {
+    "title": "変数の依存関係",
+    "menuFolder": "変数の依存関係",
+    "scopeAll": "すべてのリクエスト",
+    "scopeFolder": "フォルダー：{{name}}",
+    "intro": "各変数は、それを設定するリクエストと読み取るリクエストの間に表示されます。リクエストは抽出ルールまたはスクリプトで変数を設定し、アドレス、ヘッダー、ボディ、認証の{{reference}}またはスクリプトの呼び出しで変数を読み取ります。",
+    "showInputs": "環境からのみ来る変数を表示",
+    "producers": "設定",
+    "variables": "変数",
+    "consumers": "読み取り",
+    "missingTitle": "読み取られるが設定されない変数",
+    "missingDetail": "これらの変数はリクエストに読み取られますが、設定するリクエストがなく、環境、コレクション、グローバルのいずれのリストにも定義されていません：{{names}}。",
+    "missingMark": "未設定",
+    "none": "リクエスト間の変数のつながりはありません",
+    "noneDescription": "このスコープには、抽出ルールやスクリプトで別のリクエストが読み取る変数を設定するリクエストがありません。",
+    "summary_other": "{{count}}個の変数",
+    "graphLabel": "変数の依存関係グラフ",
+    "openRequest": "{{name}}を開く",
+    "untitled": "無題のリクエスト",
+    "command": {
+      "label": "変数の依存関係を表示",
+      "description": "各変数をどのリクエストが設定し、読み取るかを図示",
+      "keywords": "graph chain extract flow produce consume 依存 グラフ 抽出"
+    }
+  }
+}

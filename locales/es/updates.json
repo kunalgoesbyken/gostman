@@ -1,8 +1,55 @@
 {
   "updates": {
+    "installedLabel": "Versión instalada",
+    "checkNow": "Comprobar ahora",
+    "checking": "Comprobando…",
+    "neverChecked": "Aún no se ha comprobado.",
+    "checkedAt": "Última comprobación: {{when}}.",
+    "upToDate": "Es la versión más reciente.",
+    "checkFailed": "No se pudo conectar con el servidor de actualizaciones. Comprueba tu conexión e inténtalo de nuevo.",
     "checksLabel": "Buscar versiones nuevas",
+    "checksHint": "Una vez al día, consulta la última versión publicada en GitHub y la muestra en la barra de estado.",
+    "autoLabel": "Instalar actualizaciones automáticamente",
+    "autoHint": "Descarga las versiones nuevas en segundo plano y las instala cuando Gostman se cierra o se reinicia.",
+    "autoHintInstaller": "Descarga las versiones nuevas en segundo plano y las instala cuando reinicias Gostman y Windows pide permiso.",
     "available": "Hay una versión {{version}} disponible",
+    "availableDetail": "Gostman la descarga, comprueba que ha llegado intacta y la instala cuando reinicies.",
+    "availableUnverified": "Esta versión no se puede instalar automáticamente, así que descárgala desde la página de versiones.",
+    "update": "Actualizar Gostman",
+    "updateHint": "Descargar la versión {{version}}, comprobarla e instalarla",
+    "downloading": "Descargando {{version}}… {{percent}}",
+    "downloadingDetail": "{{received}} de {{total}}",
+    "verifying": "Comprobando que la descarga está completa…",
+    "installing": "Instalando…",
+    "ready": "Reiniciar para actualizar",
+    "readyHint": "La versión {{version}} está descargada y comprobada. Reinicia Gostman para instalarla.",
+    "readyDetail": "La versión {{version}} está descargada y comprobada.",
+    "restartNow": "Reiniciar ahora",
+    "restartTitle": "¿Reiniciar Gostman?",
+    "restartMessage": "Gostman se cierra y se vuelve a abrir en la versión {{version}}. Las pestañas abiertas y los borradores sin guardar se conservan.",
+    "restartMessageInstaller": "Gostman se cierra, Windows pide permiso para instalar la versión {{version}} y Gostman se vuelve a abrir. Las pestañas abiertas y los borradores sin guardar se conservan.",
+    "cancel": "Cancelar descarga",
+    "tryAgain": "Reintentar",
+    "releaseNotes": "Notas de la versión",
+    "openRelease": "Abrir la página de versiones",
+    "download": "Descargar",
+    "downloadHint": "Abre las notas de la versión y las descargas en GitHub",
     "dismiss": "Ocultar hasta la próxima versión",
-    "downloadHint": "Abre las notas de la versión y las descargas en GitHub"
+    "failed": "La actualización falló",
+    "failedHint": "Consulta qué salió mal en Preferencias, Actualizaciones",
+    "failures": {
+      "network": "No se pudo conectar con el servidor de actualizaciones. Comprueba tu conexión e inténtalo de nuevo.",
+      "unsupported": "Aún no hay actualización automática para este sistema, así que descárgala desde la página de versiones.",
+      "unverified": "Gostman no pudo confirmar que esta actualización sea auténtica, así que no se instaló. Descárgala desde la página de versiones.",
+      "mismatch": "La descarga no llegó correctamente, así que no se instaló. Inténtalo de nuevo.",
+      "storage": "Gostman no pudo guardar la descarga en este equipo. Libera algo de espacio e inténtalo de nuevo.",
+      "install": "Gostman no pudo instalar la actualización. Ciérralo y ejecuta el instalador desde la página de versiones."
+    },
+    "manual": {
+      "scoop": "Instalado con Scoop. Actualízalo con {{command}}.",
+      "homebrew": "Instalado con Homebrew. Actualízalo con {{command}}.",
+      "system": "Instalado como paquete del sistema, así que descarga el paquete nuevo desde la página de versiones e instálalo.",
+      "other": "Esta copia de Gostman no puede actualizarse sola, así que descarga las versiones nuevas desde la página de versiones."
+    }
   }
 }

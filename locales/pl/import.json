@@ -11,7 +11,13 @@
     "postman": "Plik Postman",
     "openapi": "Specyfikacja OpenAPI",
     "gostman": "Eksport Gostman",
-    "http": "Plik .http"
+    "http": "Plik .http",
+    "hoppscotch": "Kolekcja Hoppscotch",
+    "thunder": "Kolekcja Thunder Client",
+    "httpie": "Kolekcja HTTPie",
+    "hurl": "Plik Hurl",
+    "raml": "Specyfikacja RAML",
+    "blueprint": "API Blueprint"
   },
   "import": {
     "chooseFiles": "Wybierz pliki",
@@ -99,13 +105,22 @@
       "http": {
         "label": "Pliki .http",
         "description": "Żądania dla VS Code REST Client i JetBrains HTTP Client, jeden plik na folder, ze środowiskami http-client.env.json"
+      },
+      "hurl": {
+        "label": "Pliki Hurl",
+        "description": "Jeden plik .hurl na folder, ze sprawdzeniami jako [Asserts] i regułami wyodrębniania jako [Captures]"
       }
     },
     "docs": {
       "titlePlaceholder": "Tytuł (domyślnie: API documentation)",
       "titleLabel": "Tytuł dokumentacji",
       "includeExamples": "Dołącz przykładowe odpowiedzi",
-      "playground": "Dołącz panel Wypróbuj"
+      "playground": "Dołącz panel Wypróbuj",
+      "accentLabel": "Kolor linków",
+      "accentPlaceholder": "Kolor linków, na przykład #0b6bcb",
+      "logoChoose": "Wybierz logo",
+      "logoRemove": "Usuń logo",
+      "logoTooLarge": "Logo musi mieć mniej niż 300 KB."
     }
   },
   "transfer": {
@@ -179,12 +194,14 @@
       "scripts": "skrypty",
       "oauth": "ustawienia OAuth 2.0",
       "commands": "polecenia uruchamiające lokalne serwery MCP",
+      "sockets": "surowe żądania TCP, UDP i NATS",
       "files": "odczyty plików wysyłające pliki z tego komputera"
     },
     "titleOne": {
       "scripts": "Zaimportować skrypty?",
       "oauth": "Zaimportować ustawienia OAuth?",
       "commands": "Zaimportować polecenia?",
+      "sockets": "Zaimportować żądania TCP, UDP i NATS?",
       "files": "Zaimportować odczyty plików?"
     },
     "titleMany": "Przejrzyj przed importem",
@@ -192,6 +209,7 @@
       "scripts": "Importuj ze skryptami",
       "oauth": "Importuj z ustawieniami OAuth",
       "commands": "Importuj z poleceniami",
+      "sockets": "Importuj z żądaniami TCP, UDP i NATS",
       "files": "Importuj z odczytami plików"
     },
     "withMany": "Importuj wszystko",
@@ -199,6 +217,7 @@
       "scripts": "Importuj bez skryptów",
       "oauth": "Importuj bez ustawień OAuth",
       "commands": "Importuj bez poleceń",
+      "sockets": "Importuj bez adresów żądań TCP, UDP i NATS",
       "files": "Importuj bez odczytów plików"
     },
     "withoutMany": "Importuj bez nich",
@@ -206,6 +225,7 @@
       "scripts": "Skrypty zostały pominięte.",
       "oauth": "Ustawienia OAuth 2.0 zostały pominięte.",
       "commands": "Polecenia uruchamiające lokalne serwery MCP zostały pominięte.",
+      "sockets": "Pominięto adresy surowych żądań TCP, UDP i NATS.",
       "files": "Odczyty plików wysyłające pliki z tego komputera zostały pominięte."
     },
     "leftOut": "Pominięto: {{kinds}}.",

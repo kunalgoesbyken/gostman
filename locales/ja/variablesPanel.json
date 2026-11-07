@@ -1,0 +1,35 @@
+{
+  "variablesPanel": {
+    "type": "型",
+    "typeLabel": "変数の型",
+    "value": "値",
+    "valueChoice": "値を選択",
+    "fieldOptions": "フィールドのオプション",
+    "label": "ラベル",
+    "labelPlaceholder": "変数ビューに表示する名前",
+    "help": "ヘルプテキスト",
+    "helpPlaceholder": "変数ビューでフィールドの下に表示",
+    "placeholder": "プレースホルダー",
+    "placeholderPlaceholder": "フィールドが空のときに表示",
+    "choices": "選択肢",
+    "choicesPlaceholder": "red, green, blue",
+    "required": "必須",
+    "inForm": "変数ビューに表示",
+    "showInherited": "継承した変数を表示",
+    "inheritedTitle": "継承",
+    "inheritedHint": "読み取り専用。このリクエストより上のスコープから来る変数です。上で同じ名前の変数があれば、ここではそちらが優先されます。",
+    "inheritedNone": "継承した変数はありません。",
+    "hiddenValue": "非表示",
+    "typeNote": "型を指定した変数は、スクリプトにはその型で渡されます。URL、ヘッダー、ボディの中では引き続きテキストとして書き込まれます。"
+  },
+  "variablesView": {
+    "switchLabel": "リクエストの表示",
+    "fullEditor": "フルエディター",
+    "variables": "変数",
+    "formLabel": "リクエスト変数",
+    "emptyTitle": "入力する変数はありません",
+    "emptyDescription": "フルエディターのVarsタブで追加した変数が、ここに入力欄として表示されます。",
+    "openEditor": "フルエディターを開く",
+    "required": "必須"
+  }
+}

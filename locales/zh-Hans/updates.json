@@ -1,8 +1,55 @@
 {
   "updates": {
+    "installedLabel": "已安装版本",
+    "checkNow": "立即检查",
+    "checking": "正在检查…",
+    "neverChecked": "尚未检查。",
+    "checkedAt": "上次检查于 {{when}}。",
+    "upToDate": "已是最新版本。",
+    "checkFailed": "无法连接更新服务器。请检查网络连接后重试。",
     "checksLabel": "检查新版本",
+    "checksHint": "每天从 GitHub 读取一次最新发布版本，并在状态栏中显示。",
+    "autoLabel": "自动安装更新",
+    "autoHint": "在后台下载新版本，并在 Gostman 关闭或重启时安装。",
+    "autoHintInstaller": "在后台下载新版本，然后在你重启 Gostman 且 Windows 请求权限时安装。",
     "available": "有新版本 {{version}}",
+    "availableDetail": "Gostman 会下载它、确认其完整无损，并在你重启时安装。",
+    "availableUnverified": "此版本无法自动安装，请从发布页面下载。",
+    "update": "更新 Gostman",
+    "updateHint": "下载版本 {{version}}，检查并安装",
+    "downloading": "正在下载 {{version}}… {{percent}}",
+    "downloadingDetail": "{{received}} / {{total}}",
+    "verifying": "正在确认下载是否完整…",
+    "installing": "正在安装…",
+    "ready": "重启以更新",
+    "readyHint": "版本 {{version}} 已下载并通过检查。重启 Gostman 即可安装。",
+    "readyDetail": "版本 {{version}} 已下载并通过检查。",
+    "restartNow": "立即重启",
+    "restartTitle": "重启 Gostman？",
+    "restartMessage": "Gostman 会关闭并以版本 {{version}} 重新打开。打开的标签页和未保存的草稿会保留。",
+    "restartMessageInstaller": "Gostman 会关闭，Windows 会请求安装版本 {{version}} 的权限，然后 Gostman 重新打开。打开的标签页和未保存的草稿会保留。",
+    "cancel": "取消下载",
+    "tryAgain": "重试",
+    "releaseNotes": "发布说明",
+    "openRelease": "打开发布页面",
+    "download": "下载",
+    "downloadHint": "在 GitHub 上打开发行说明和下载页面",
     "dismiss": "到下一个版本前不再显示",
-    "downloadHint": "在 GitHub 上打开发行说明和下载页面"
+    "failed": "更新失败",
+    "failedHint": "在“偏好设置 > 更新”中查看出错原因",
+    "failures": {
+      "network": "无法连接更新服务器。请检查网络连接后重试。",
+      "unsupported": "此系统暂不支持自动更新，请从发布页面下载。",
+      "unverified": "Gostman 无法确认此更新是正版，因此未安装。请从发布页面下载。",
+      "mismatch": "下载内容不正确，因此未安装。请重试。",
+      "storage": "Gostman 无法在这台计算机上保存下载内容。请释放一些空间后重试。",
+      "install": "Gostman 无法安装更新。请关闭它，然后从发布页面运行安装程序。"
+    },
+    "manual": {
+      "scoop": "通过 Scoop 安装。请用 {{command}} 更新。",
+      "homebrew": "通过 Homebrew 安装。请用 {{command}} 更新。",
+      "system": "作为系统软件包安装，请从发布页面下载新的软件包并安装。",
+      "other": "此 Gostman 副本无法自行更新，请从发布页面下载新版本。"
+    }
   }
 }

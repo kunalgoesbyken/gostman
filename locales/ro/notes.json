@@ -1,0 +1,16 @@
+{
+  "notes": {
+    "empty": "Încă nu există note.",
+    "secretHint": "Notele sunt salvate ca text simplu și partajate cu spațiul de lucru. Nu lipiți secrete.",
+    "looksLikeCredential": "Aceasta pare o credențială. Notele sunt salvate ca text simplu, în fișierele dosarului și în exporturi.",
+    "inputLabel": "Notă nouă",
+    "inputPlaceholder": "Scrieți o notă pentru echipă",
+    "add": "Adăugare notă",
+    "anonymous": "Necunoscut",
+    "resolve": "Rezolvare",
+    "reopen": "Redeschidere",
+    "resolved": "Rezolvată",
+    "delete": "Ștergere notă",
+    "listLabel": "Note"
+  }
+}

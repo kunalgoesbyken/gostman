@@ -28,6 +28,7 @@
     "newRequest": "新しいリクエスト",
     "newSubfolder": "新しいサブフォルダー",
     "runFolder": "フォルダーを実行",
+    "negativeFolder": "ネガティブテストを実行",
     "shareFolder": "フォルダーを共有",
     "delete": "削除",
     "emptyImport": "インポート",
@@ -56,7 +57,8 @@
     "deleteManyMessage": "{{subject}}を削除しますか？この操作は元に戻せません。",
     "deleteManyMessageFolders": "{{subject}}を削除しますか？削除するフォルダー内で選択していない項目は、1つ上の階層に移動します。この操作は元に戻せません。",
     "deleteManyFailed": "選択した項目を削除できませんでした",
-    "moreTags": "+{{count}}"
+    "moreTags": "+{{count}}",
+    "more": "その他"
   },
   "label": {
     "folderTitle": "色とタグ：{{name}}",
@@ -71,6 +73,8 @@
     "tagColoursNote": "タグは使われるすべての場所で同じ色になります。選択しない場合は、タグ名から色が選ばれます。タグの色はこのデバイスに保存されます。",
     "tagColour": "{{tag}}タグの色",
     "removeTag": "タグ{{tag}}を削除",
+    "moveTagUp": "タグ{{tag}}を上へ移動",
+    "moveTagDown": "タグ{{tag}}を下へ移動",
     "done": "完了"
   },
   "tab": {
@@ -81,6 +85,8 @@
     "keepOpen": "タブを開いたままにする",
     "revealInTree": "コレクションで表示",
     "copyAsCurl": "cURLとしてコピー",
+    "showBeside": "レスポンスを横に表示",
+    "hideBeside": "横へのレスポンス表示をやめる",
     "moveLeft": "左へ移動",
     "moveRight": "右へ移動",
     "previewHint": "プレビュータブです。編集するかダブルクリックすると開いたままになります。",

@@ -43,6 +43,7 @@
     "clear": "Borrar",
     "closeTab": "Cerrar pestaña",
     "closeTabMessage": "«{{name}}» tiene cambios sin guardar. ¿Guardarlos antes de cerrar?",
-    "dontSave": "No guardar"
+    "dontSave": "No guardar",
+    "openFirstRequest": "Abrir la primera solicitud"
   }
 }

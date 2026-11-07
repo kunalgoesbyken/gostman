@@ -1,0 +1,16 @@
+{
+  "notes": {
+    "empty": "メモはまだありません。",
+    "secretHint": "メモはプレーンテキストで保存され、ワークスペースで共有されます。シークレットは貼り付けないでください。",
+    "looksLikeCredential": "認証情報のようです。メモはプレーンテキストとして、フォルダーのファイルやエクスポートに保存されます。",
+    "inputLabel": "新しいメモ",
+    "inputPlaceholder": "チーム向けのメモを書く",
+    "add": "メモを追加",
+    "anonymous": "不明",
+    "resolve": "解決済みにする",
+    "reopen": "再開",
+    "resolved": "解決済み",
+    "delete": "メモを削除",
+    "listLabel": "メモ"
+  }
+}

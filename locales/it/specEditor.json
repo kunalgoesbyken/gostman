@@ -1,0 +1,88 @@
+{
+  "specEditor": {
+    "createFailed": "Impossibile creare la specifica API",
+    "saveFailed": "Impossibile salvare la specifica API",
+    "deleteFailed": "Impossibile eliminare la specifica API",
+    "importFailed": "Impossibile importare la specifica API",
+    "convertFailed": "Impossibile convertire la specifica API",
+    "mockFailed": "Impossibile avviare il server mock",
+    "generateFailed": "Impossibile generare le richieste",
+    "saved": "\"{{name}}\" è stata salvata.",
+    "renameTitle": "Rinomina specifica API",
+    "nameLabel": "Nome",
+    "deleteTitle": "Elimina specifica API",
+    "deleteMessage": "Eliminare la specifica API \"{{name}}\"? L'operazione non può essere annullata.",
+    "closeTitle": "Chiudi specifica API",
+    "closeMessage": "\"{{name}}\" ha modifiche non salvate. Salvarle prima di chiudere?",
+    "dontSave": "Non salvare",
+    "save": "Salva",
+    "copyName": "{{name}} copia",
+    "importedName": "API importata",
+    "importAddressTitle": "Importa una specifica API",
+    "importAddressMessage": "Inserisci l'indirizzo di una specifica OpenAPI o Swagger.",
+    "importAddressPlaceholder": "https://example.com/openapi.json",
+    "importAddressConfirm": "Importa",
+    "checkResponsesTitle": "Verifica risposte",
+    "generateFirst": "Genera prima le richieste da questa specifica. Le loro risposte vengono poi verificate rispetto ad essa.",
+    "checkingResponses": "Le risposte in \"{{name}}\" vengono verificate rispetto a questa specifica.",
+    "tabLabel": "Specifica API {{name}}",
+    "templates": {
+      "strategies": {
+        "name": "API Strategie"
+      },
+      "resource": {
+        "name": "API Elementi"
+      },
+      "blank": {
+        "name": "Nuova API"
+      }
+    }
+  },
+  "specList": {
+    "listLabel": "Specifiche API",
+    "emptyTitle": "Progetta un'API prima che esista",
+    "emptyDescription": "Scrivi qui una specifica OpenAPI, con controlli mentre digiti. Poi genera le richieste, avvia un server mock e verifica le risposte reali rispetto ad essa.",
+    "count_one": "{{count}} specifica API",
+    "count_many": "{{count}} di specifiche API",
+    "count_other": "{{count}} specifiche API",
+    "newSpec": "Nuova specifica API",
+    "importSpec": "Importa una specifica",
+    "importFile": "Importa da un file",
+    "importAddress": "Importa da un indirizzo",
+    "actions": "Azioni per {{name}}",
+    "rename": "Rinomina",
+    "duplicate": "Duplica",
+    "remove": "Elimina",
+    "sidebarTab": "Specifiche"
+  },
+  "specView": {
+    "nameLabel": "Nome della specifica API",
+    "unsaved": "Modifiche non salvate",
+    "save": "Salva",
+    "formatLabel": "Formato del file",
+    "formatYaml": "YAML",
+    "formatJson": "JSON",
+    "editorLabel": "Specifica OpenAPI",
+    "previewLabel": "Anteprima della documentazione",
+    "showPreview": "Mostra l'anteprima della documentazione",
+    "hidePreview": "Nascondi l'anteprima della documentazione",
+    "viewDocs": "Vedi documentazione",
+    "viewDocsHint": "Apri la documentazione in una finestra più grande.",
+    "generate": "Genera richieste",
+    "generateHint": "Crea richieste da questa specifica, con un collegamento che le mantiene allineate ad essa.",
+    "update": "Aggiorna richieste",
+    "updateHint": "Confronta questa specifica con le richieste generate da essa e applica le modifiche che scegli.",
+    "mock": "Avvia mock",
+    "mockHint": "Servi gli esempi di questa specifica da un server mock locale.",
+    "check": "Verifica risposte",
+    "checkHint": "Verifica le risposte delle richieste generate rispetto a questa specifica.",
+    "compare": "Confronta",
+    "compareHint": "Confronta questa specifica con un'altra versione ed elenca le modifiche incompatibili.",
+    "problems_one": "{{count}} problema",
+    "problems_many": "{{count}} di problemi",
+    "problems_other": "{{count}} problemi",
+    "problemsLabel": "Problemi",
+    "checking": "Verifica della specifica",
+    "cannotRead": "Impossibile leggere la specifica"
+  }
+}

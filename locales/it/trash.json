@@ -1,0 +1,32 @@
+{
+  "trash": {
+    "title": "Eliminati di recente",
+    "command": "Eliminati di recente",
+    "commandDescription": "Ripristina una richiesta, una cartella o un ambiente che hai eliminato",
+    "commandKeywords": "cestino ripristina annulla recupera trash bin restore undo recover",
+    "empty": "Nulla è stato eliminato di recente.",
+    "note_one": "Gli elementi eliminati vengono conservati per {{count}} giorno. I valori segreti non vengono conservati; le variabili segrete ripristinate tornano vuote.",
+    "note_many": "Gli elementi eliminati vengono conservati per {{count}} di giorni. I valori segreti non vengono conservati; le variabili segrete ripristinate tornano vuote.",
+    "note_other": "Gli elementi eliminati vengono conservati per {{count}} giorni. I valori segreti non vengono conservati; le variabili segrete ripristinate tornano vuote.",
+    "listLabel": "Elementi eliminati",
+    "kinds": {
+      "request": "Richiesta",
+      "folder": "Cartella",
+      "environment": "Ambiente"
+    },
+    "daysLeft_one": "{{count}} giorno rimanente",
+    "daysLeft_many": "{{count}} di giorni rimanenti",
+    "daysLeft_other": "{{count}} giorni rimanenti",
+    "restore": "Ripristina",
+    "restored": "{{name}} ripristinato.",
+    "deleteForever": "Elimina definitivamente",
+    "emptyBin": "Svuota cestino",
+    "emptyBinTitle": "Svuotare il cestino?",
+    "emptyBinMessage": "Tutto ciò che è nel cestino viene eliminato definitivamente.",
+    "emptyBinConfirm": "Svuota cestino",
+    "readFailed": "Impossibile leggere il cestino: {{detail}}",
+    "saveFailed": "Impossibile conservare l'elemento eliminato nel cestino: {{detail}}",
+    "restoreFailed": "Impossibile ripristinare l'elemento: {{detail}}",
+    "unnamed": "Senza nome"
+  }
+}

@@ -2,13 +2,17 @@
   "sidebar": {
     "views": "サイドバーの表示",
     "collections": "コレクション",
+    "openTabs": "開いているタブ",
     "history": "履歴",
     "newFolder": "新しいフォルダー",
+    "add": "追加",
     "newRequest": "新しいリクエスト",
     "toggle": "サイドバーの表示を切り替え",
     "close": "サイドバーを閉じる",
     "resize": "サイドバーのサイズを変更",
     "viewsMenu": "サイドバーのタブ",
+    "more": "その他",
+    "moreHint": "サイドバーのほかのビューを表示",
     "resetViews": "すべてのタブを既定の順序で表示"
   },
   "history": {
@@ -31,6 +35,25 @@
       "hours_other": "{{count}}時間前に送信",
       "days_other": "{{count}}日前に送信",
       "date": "{{date}}に送信"
+    },
+    "range": "期間",
+    "folder": "フォルダー",
+    "tag": "タグ",
+    "allFolders": "すべてのフォルダー",
+    "allTags": "すべてのタグ",
+    "groupByDate": "日付でグループ化",
+    "ranges": {
+      "any": "すべての期間",
+      "today": "今日",
+      "week": "過去7日間",
+      "month": "過去30日間"
+    },
+    "groups": {
+      "today": "今日",
+      "yesterday": "昨日",
+      "week": "今週の前半",
+      "month": "今月の前半",
+      "older": "それ以前"
     }
   }
 }

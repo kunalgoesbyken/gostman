@@ -12,6 +12,19 @@
     "dataFile": "データファイル（CSVまたはJSON）",
     "clearData": "データファイルを削除",
     "report": "HTMLレポートをダウンロード",
+    "reportFormat": "レポート形式",
+    "formats": {
+      "html": "HTML",
+      "junit": "JUnit",
+      "json": "JSON"
+    },
+    "schedule": "この実行をスケジュール",
+    "cliLine": "ターミナルで同じ実行を行うコマンド",
+    "shells": {
+      "posix": "macOSとLinux",
+      "powershell": "PowerShell"
+    },
+    "cliUnsafe": "フォルダー名またはデータファイル名に、改行、二重引用符、末尾のバックスラッシュなど、どのシェルでも安全に渡せない文字が含まれているため、コマンドは表示されません。名前を変更すると表示されます。",
     "includeTags": "対象タグ",
     "excludeTags": "除外タグ",
     "anyTag": "すべて",
@@ -54,6 +67,12 @@
     "progressPassed": "成功 {{count}}",
     "progressFailed": "失敗 {{count}}",
     "progressSkipped": "スキップ {{count}}",
-    "socketSkipped": "WebSocketリクエストは実行の対象外です。"
+    "socketSkipped": "WebSocketリクエストは実行の対象外です。",
+    "coverageTitle": "OpenAPIカバレッジ",
+    "coverageOperations": "{{total}}件中{{covered}}件のオペレーション（{{percent}}%）",
+    "coverageResponses": "ドキュメント化された{{total}}件中{{covered}}件のレスポンス（{{percent}}%）",
+    "coverageNotCalled": "未呼び出し",
+    "coverageMissing": "レスポンスなし：{{codes}}",
+    "coverageUndocumented": "ドキュメントにないステータス：{{codes}}"
   }
 }

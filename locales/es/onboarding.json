@@ -37,6 +37,11 @@
         "title": "Ejecuta tus solicitudes juntas",
         "hint": "El ejecutor envía en orden todas las solicitudes guardadas e indica qué pruebas han pasado.",
         "action": "Abrir el ejecutor"
+      },
+      "explore": {
+        "title": "Explorar funciones",
+        "hint": "Busca cualquier función, pruébala con un ejemplo y lee cómo funciona.",
+        "action": "Explorar funciones"
       }
     }
   }

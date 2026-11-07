@@ -2,13 +2,17 @@
   "sidebar": {
     "views": "侧边栏视图",
     "collections": "集合",
+    "openTabs": "打开的标签页",
     "history": "历史记录",
     "newFolder": "新建文件夹",
+    "add": "添加",
     "newRequest": "新建请求",
     "toggle": "切换侧边栏",
     "close": "关闭侧边栏",
     "resize": "调整侧边栏大小",
     "viewsMenu": "侧边栏标签页",
+    "more": "更多",
+    "moreHint": "显示其他侧边栏视图",
     "resetViews": "按默认顺序显示所有标签页"
   },
   "history": {
@@ -31,6 +35,25 @@
       "hours_other": "{{count}} 小时前发送",
       "days_other": "{{count}} 天前发送",
       "date": "发送于 {{date}}"
+    },
+    "range": "日期范围",
+    "folder": "文件夹",
+    "tag": "标签",
+    "allFolders": "所有文件夹",
+    "allTags": "所有标签",
+    "groupByDate": "按日期分组",
+    "ranges": {
+      "any": "任意时间",
+      "today": "今天",
+      "week": "最近 7 天",
+      "month": "最近 30 天"
+    },
+    "groups": {
+      "today": "今天",
+      "yesterday": "昨天",
+      "week": "本周早些时候",
+      "month": "本月早些时候",
+      "older": "更早"
     }
   }
 }

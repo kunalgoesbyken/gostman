@@ -3,6 +3,23 @@
     "name": "Name der Anfrage",
     "untitled": "Unbenannte Anfrage",
     "method": "HTTP-Methode",
+    "protocol": "Protokoll",
+    "protocols": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "grpc": "gRPC",
+      "websocket": "WebSocket",
+      "sse": "Server-Sent Events",
+      "socketio": "Socket.IO",
+      "mqtt": "MQTT",
+      "soap": "SOAP",
+      "mcp": "MCP",
+      "signalr": "SignalR",
+      "tcp": "TCP",
+      "udp": "UDP",
+      "nats": "NATS"
+    },
+    "detected": "{{protocol}} erkannt",
     "url": "URL der Anfrage",
     "methodPlaceholders": {
       "grpc": {
@@ -14,6 +31,21 @@
         "full": "URL des MCP-Servers eingeben",
         "medium": "URL des MCP-Servers",
         "short": "URL"
+      },
+      "tcp": {
+        "full": "host:port eingeben, zum Beispiel localhost:9000",
+        "medium": "host:port",
+        "short": "host:port"
+      },
+      "udp": {
+        "full": "host:port eingeben, zum Beispiel localhost:9000",
+        "medium": "host:port",
+        "short": "host:port"
+      },
+      "nats": {
+        "full": "nats://host:4222/subject eingeben, ?mode=publish oder ?mode=subscribe anhängen",
+        "medium": "nats://host:4222/subject",
+        "short": "nats://host/subject"
       }
     },
     "send": "Senden",

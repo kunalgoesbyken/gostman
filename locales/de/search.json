@@ -1,0 +1,35 @@
+{
+  "search": {
+    "sidebarTab": "Suche",
+    "placeholder": "Anfragen, Verlauf und Antworten durchsuchen",
+    "label": "Alles durchsuchen",
+    "hint": "Durchsucht Namen, URLs, Header, Bodys und Beschreibungen von Anfragen, den Verlauf und die letzte Antwort jedes geöffneten Tabs.",
+    "searching": "Suche läuft…",
+    "none": "Nichts passt zu „{{query}}“",
+    "truncated": "Es werden nur die ersten Ergebnisse angezeigt. Grenzen Sie die Suche ein, um mehr zu sehen.",
+    "timedOut": "Die Suche hat zu lange gedauert und wurde abgebrochen. Versuchen Sie einen längeren oder genaueren Suchbegriff.",
+    "failed": "Die Suche ist fehlgeschlagen: {{reason}}",
+    "results_one": "{{count}} Ergebnis",
+    "results_other": "{{count}} Ergebnisse",
+    "command": {
+      "label": "Überall suchen",
+      "description": "Namen, URLs und Bodys von Anfragen, den Verlauf und geöffnete Antworten durchsuchen",
+      "keywords": "finden globale suche antworten verlauf find global search responses history"
+    },
+    "kinds": {
+      "request": "Anfrage",
+      "history": "Verlauf",
+      "response": "Antwort"
+    },
+    "fields": {
+      "name": "Name",
+      "url": "URL",
+      "body": "Body",
+      "headers": "Header",
+      "description": "Beschreibung",
+      "tags": "Tags",
+      "responseBody": "Antwort-Body",
+      "responseHeaders": "Antwort-Header"
+    }
+  }
+}

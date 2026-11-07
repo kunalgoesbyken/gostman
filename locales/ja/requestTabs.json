@@ -16,12 +16,14 @@
       "body": "ボディ",
       "auth": "認証",
       "graphql": "GraphQL",
+      "files": "ファイル",
       "grpc": "gRPC",
       "mcp": "MCP",
       "websocket": "WebSocket",
       "vars": "変数",
       "extract": "抽出",
       "tests": "チェック",
+      "notes": "メモ",
       "settings": "設定"
     }
   }

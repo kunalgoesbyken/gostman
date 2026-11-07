@@ -1,0 +1,32 @@
+{
+  "trash": {
+    "title": "Eliminados recientemente",
+    "command": "Eliminados recientemente",
+    "commandDescription": "Restaurar una solicitud, carpeta o entorno que eliminaste",
+    "commandKeywords": "papelera restaurar deshacer recuperar trash bin restore undo",
+    "empty": "No se eliminó nada recientemente.",
+    "note_one": "Los elementos eliminados se conservan {{count}} día. Los valores secretos no se conservan; las variables secretas restauradas vuelven vacías.",
+    "note_many": "Los elementos eliminados se conservan {{count}} de días. Los valores secretos no se conservan; las variables secretas restauradas vuelven vacías.",
+    "note_other": "Los elementos eliminados se conservan {{count}} días. Los valores secretos no se conservan; las variables secretas restauradas vuelven vacías.",
+    "listLabel": "Elementos eliminados",
+    "kinds": {
+      "request": "Solicitud",
+      "folder": "Carpeta",
+      "environment": "Entorno"
+    },
+    "daysLeft_one": "Queda {{count}} día",
+    "daysLeft_many": "Quedan {{count}} de días",
+    "daysLeft_other": "Quedan {{count}} días",
+    "restore": "Restaurar",
+    "restored": "Se restauró {{name}}.",
+    "deleteForever": "Eliminar definitivamente",
+    "emptyBin": "Vaciar papelera",
+    "emptyBinTitle": "¿Vaciar la papelera?",
+    "emptyBinMessage": "Todo lo que hay en la papelera se elimina definitivamente.",
+    "emptyBinConfirm": "Vaciar papelera",
+    "readFailed": "No se pudo leer la papelera: {{detail}}",
+    "saveFailed": "No se pudo conservar el elemento eliminado en la papelera: {{detail}}",
+    "restoreFailed": "No se pudo restaurar el elemento: {{detail}}",
+    "unnamed": "Sin nombre"
+  }
+}

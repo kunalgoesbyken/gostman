@@ -3,6 +3,23 @@
     "name": "Nome da requisição",
     "untitled": "Requisição sem título",
     "method": "Método HTTP",
+    "protocol": "Protocolo",
+    "protocols": {
+      "http": "HTTP",
+      "graphql": "GraphQL",
+      "grpc": "gRPC",
+      "websocket": "WebSocket",
+      "sse": "Server-Sent Events",
+      "socketio": "Socket.IO",
+      "mqtt": "MQTT",
+      "soap": "SOAP",
+      "mcp": "MCP",
+      "signalr": "SignalR",
+      "tcp": "TCP",
+      "udp": "UDP",
+      "nats": "NATS"
+    },
+    "detected": "{{protocol}} detectado",
     "url": "URL da requisição",
     "methodPlaceholders": {
       "grpc": {
@@ -14,6 +31,21 @@
         "full": "Informe a URL do servidor MCP",
         "medium": "URL do servidor MCP",
         "short": "URL"
+      },
+      "tcp": {
+        "full": "Informe host:porta, por exemplo localhost:9000",
+        "medium": "host:porta",
+        "short": "host:porta"
+      },
+      "udp": {
+        "full": "Informe host:porta, por exemplo localhost:9000",
+        "medium": "host:porta",
+        "short": "host:porta"
+      },
+      "nats": {
+        "full": "Informe nats://host:4222/assunto, adicione ?mode=publish ou ?mode=subscribe",
+        "medium": "nats://host:4222/assunto",
+        "short": "nats://host/assunto"
       }
     },
     "send": "Enviar",

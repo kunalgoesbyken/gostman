@@ -1,0 +1,16 @@
+{
+  "notes": {
+    "empty": "还没有备注。",
+    "secretHint": "备注以纯文本保存，并在工作区中共享。请勿粘贴机密。",
+    "looksLikeCredential": "这看起来像凭据。备注会以纯文本形式保存在文件夹的文件和导出内容中。",
+    "inputLabel": "新备注",
+    "inputPlaceholder": "为团队写一条备注",
+    "add": "添加备注",
+    "anonymous": "未知",
+    "resolve": "标记为已解决",
+    "reopen": "重新打开",
+    "resolved": "已解决",
+    "delete": "删除备注",
+    "listLabel": "备注"
+  }
+}

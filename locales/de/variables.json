@@ -12,7 +12,11 @@
       "folder": "Ordner",
       "request": "Anfrage",
       "process": ".env-Datei",
-      "session": "Sitzung"
+      "session": "Sitzung",
+      "flowLoop": "Schleifenelement",
+      "flowSend": "Nur für dieses Senden",
+      "flowCall": "An den aufgerufenen Ablauf übergeben",
+      "flowRun": "Ablaufvariable, für diesen Durchlauf"
     }
   }
 }

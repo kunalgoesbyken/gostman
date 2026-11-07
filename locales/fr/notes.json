@@ -1,0 +1,16 @@
+{
+  "notes": {
+    "empty": "Aucune note pour l’instant.",
+    "secretHint": "Les notes sont enregistrées en texte brut et partagées avec l’espace de travail. N’y collez pas de secrets.",
+    "looksLikeCredential": "Ceci ressemble à un identifiant. Les notes sont enregistrées en texte brut, dans les fichiers du dossier et dans les exports.",
+    "inputLabel": "Nouvelle note",
+    "inputPlaceholder": "Écrivez une note pour votre équipe",
+    "add": "Ajouter une note",
+    "anonymous": "Inconnu",
+    "resolve": "Résoudre",
+    "reopen": "Rouvrir",
+    "resolved": "Résolue",
+    "delete": "Supprimer la note",
+    "listLabel": "Notes"
+  }
+}

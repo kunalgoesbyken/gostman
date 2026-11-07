@@ -1,9 +1,12 @@
 {
   "tabBar": {
     "openRequests": "Solicitudes abiertas",
+    "scrollStart": "Desplazar las pestañas hacia el principio",
+    "scrollEnd": "Desplazar las pestañas hacia el final",
     "newRequest": "Nueva solicitud",
     "untitled": "Sin título",
     "unsaved": "Cambios sin guardar",
+    "fromHistory": "Abierta desde el historial",
     "close": "Cerrar {{title}}"
   }
 }

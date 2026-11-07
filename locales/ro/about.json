@@ -9,7 +9,8 @@
       "website": "Site web",
       "source": "Cod sursă",
       "releases": "Versiuni",
-      "issues": "Raportați o problemă"
+      "issues": "Raportați o problemă",
+      "sponsor": "Sponsorizare"
     },
     "diagnosticsHint": "Diagnosticul include doar versiunea, platforma și numărul de elemente. Nu include niciodată cereri, URL-uri, variabile, tokenuri sau secrete.",
     "copyDiagnostics": "Copiere diagnostic",

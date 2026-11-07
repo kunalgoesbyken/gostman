@@ -1,0 +1,22 @@
+{
+  "requestVariables": {
+    "types": {
+      "none": "Oricare",
+      "string": "Text",
+      "number": "Număr",
+      "integer": "Număr întreg",
+      "boolean": "Adevărat sau fals",
+      "json": "JSON",
+      "enum": "Unul dintr-o listă"
+    },
+    "problems": {
+      "required": "{{name}} necesită o valoare.",
+      "number": "{{name}} trebuie să fie un număr.",
+      "integer": "{{name}} trebuie să fie un număr întreg.",
+      "boolean": "{{name}} trebuie să fie true sau false.",
+      "json": "{{name}} trebuie să fie JSON valid.",
+      "enum": "{{name}} trebuie să fie unul dintre {{choices}}."
+    },
+    "blocked": "Cererea nu a fost trimisă din cauza variabilelor sale.\n{{problems}}"
+  }
+}

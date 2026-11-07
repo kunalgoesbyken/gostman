@@ -1,0 +1,675 @@
+{
+  "features": {
+    "title": "機能を探す",
+    "intro": "Gostmanでできることを検索し、その場で機能を試して、仕組みを確認できます。",
+    "searchLabel": "機能を検索",
+    "searchPlaceholder": "機能を検索（例：スナップショット、モック、Git）",
+    "groupsLabel": "機能のグループ",
+    "allGroups": "すべて",
+    "groups": {
+      "requests": "リクエスト",
+      "data": "コレクションとデータ",
+      "variables": "変数とシークレット",
+      "testing": "チェックと仕様",
+      "automation": "自動化",
+      "mocking": "モックとキャプチャ",
+      "git": "Git",
+      "ai": "AI",
+      "app": "アプリ"
+    },
+    "tryIt": "試す",
+    "tryItLabel": "{{title}}を試す",
+    "learnMore": "詳しく見る",
+    "learnMoreLabel": "{{title}}について詳しく見る",
+    "newBadge": "新機能",
+    "platformDesktop": "デスクトップアプリ",
+    "platformCli": "コマンドライン",
+    "platformWeb": "Webアプリ",
+    "desktopOnlyTitle": "{{title}}にはデスクトップアプリが必要です",
+    "desktopOnlyBody": "ブラウザーはローカルファイル、ポート、システム設定にアクセスできないため、この機能はデスクトップアプリでのみ使用できます。",
+    "getDesktop": "デスクトップアプリを入手",
+    "nothingMatches": "「{{query}}」に一致する機能はありません。",
+    "results_other": "{{count}}件の機能",
+    "close": "閉じる",
+    "commandTitle": "機能を探す",
+    "commandDescription": "すべての機能を検索し、試して、仕組みを確認します",
+    "commandKeywords": "機能 一覧 できること 探す ヘルプ features index capabilities discover what can gostman do help",
+    "statusLabel": "機能",
+    "statusTitle": "機能を探す",
+    "helpHideLabel": "{{title}}のヒントを非表示",
+    "whatsNewTitle": "新機能",
+    "whatsNewIntro": "バージョン{{version}}の新機能",
+    "whatsNewNothing": "このバージョンで紹介する新機能はありません。",
+    "whatsNewCommandTitle": "新機能",
+    "whatsNewCommandDescription": "最新バージョンで追加された機能",
+    "whatsNewKeywords": "リリースノート 変更履歴 更新 バージョン release notes changelog updates version",
+    "whatsNewDot": "バージョン{{version}}の新機能",
+    "exploreAll": "すべての機能を見る",
+    "samplesAdded": "サンプルコレクションを追加しました。",
+    "helpMenu": "ヘルプ",
+    "exploreHint_other": "Gostmanの{{count}}個の機能を検索し、サンプルで試して、仕組みを確認できます。",
+    "copied": "{{command}}をコピーしました",
+    "copyFailed": "{{command}}をコピーできませんでした",
+    "toolsMenu": "ツール",
+    "toolsMenuHint": "リクエストに対してGostmanでできること（用途別）",
+    "toolGroups": {
+      "build": "作成",
+      "test": "テスト",
+      "automate": "自動化",
+      "mockCapture": "モックとキャプチャ",
+      "shareGit": "共有とGit"
+    },
+    "cliLine": "ターミナルで"
+  },
+  "featureWords": {
+    "rest": {
+      "title": "RESTとHTTPリクエスト",
+      "blurb": "任意のメソッドをパラメーター、ヘッダー、ボディ、認証付きで送信し、ステータス、所要時間、サイズを確認します。",
+      "synonyms": "http api get post put delete patch rest request リクエスト 送信 メソッド",
+      "tool": "新しいリクエスト"
+    },
+    "graphql": {
+      "title": "GraphQL",
+      "blurb": "スキーマブラウザー、クエリビルダー、変数を使ってクエリを書けます。サブスクリプションはWebSocket上で実行されます。",
+      "synonyms": "graphql query mutation schema introspection subscription apollo クエリ ミューテーション スキーマ サブスクリプション"
+    },
+    "grpc": {
+      "title": "gRPC",
+      "blurb": "リフレクションまたは.protoファイルからサービスを読み込み、単項メソッドとストリーミングメソッドを呼び出します。",
+      "synonyms": "grpc protobuf proto reflection stream bloomrpc grpcurl リフレクション ストリーミング"
+    },
+    "websocket": {
+      "title": "WebSocket、Socket.IO、MQTT",
+      "blurb": "WebSocket、Socket.IO、MQTTで接続し、保存したメッセージを送信して、メッセージログを確認します。",
+      "synonyms": "websocket socket.io socketio mqtt realtime ws sse events リアルタイム ソケット メッセージ イベント"
+    },
+    "mcp": {
+      "title": "MCPサーバー",
+      "blurb": "MCPサーバーのツール、リソース、プロンプトを呼び出し、返される内容を確認します。",
+      "synonyms": "mcp model context protocol tools agent server inspector ツール エージェント サーバー"
+    },
+    "curl": {
+      "title": "curlコマンドの貼り付け",
+      "blurb": "curlコマンドをアドレスバーに貼り付けると、リクエストが入力されます。",
+      "synonyms": "curl paste command line import clipboard 貼り付け コマンド インポート クリップボード"
+    },
+    "codegen": {
+      "title": "コードスニペット",
+      "blurb": "送信されるリクエストを、cURL、Python、Go、JavaScript、Java、C#など（axios、httpx、OkHttp、RestSharp、Guzzle、HTTPie、wgetを含む）としてコピーします。",
+      "synonyms": "code snippet generate curl python javascript fetch go java コード スニペット 生成",
+      "tool": "コード"
+    },
+    "responseViewer": {
+      "title": "レスポンスビューアー",
+      "blurb": "JSONをツリーで表示し、HTML、画像、PDFをプレビューし、JSONPathで絞り込み、ボディを検索します。",
+      "synonyms": "response body json preview filter search jsonpath timeline console visualize レスポンス ボディ プレビュー 絞り込み 検索 タイムライン"
+    },
+    "examples": {
+      "title": "保存済みの例",
+      "blurb": "レスポンスを名前付きの例として保存し、リクエストのドキュメントやモックサーバーに使います。",
+      "synonyms": "example saved response sample documentation 例 保存 レスポンス サンプル ドキュメント"
+    },
+    "oauth": {
+      "title": "認証とOAuth 2",
+      "blurb": "Basic、Bearer、APIキー、OAuth 1と2、Digest、AWS SigV4、NTLM、JWTなどに対応し、トークンを更新します。",
+      "synonyms": "auth authentication oauth oauth2 bearer token basic digest sigv4 ntlm hawk apikey 認証 トークン APIキー"
+    },
+    "cookies": {
+      "title": "Cookie jar",
+      "blurb": "ドメインごとに保持されているCookieを確認、編集、削除します。",
+      "synonyms": "cookie cookies jar session クッキー セッション",
+      "tool": "Cookie"
+    },
+    "requestSettings": {
+      "title": "リクエストの設定",
+      "blurb": "1件のリクエストに対して、タイムアウト、リダイレクト、TLS検証を設定します。",
+      "synonyms": "settings timeout redirect tls verify ssl follow 設定 タイムアウト リダイレクト 検証"
+    },
+    "hexView": {
+      "title": "16進表示",
+      "blurb": "レスポンスボディをオフセット、16進バイト、テキストで表示します。",
+      "synonyms": "hex binary bytes dump 16進 バイナリ バイト ダンプ"
+    },
+    "msgpackCbor": {
+      "title": "MessagePackとCBOR",
+      "blurb": "MessagePackとCBORのレスポンスを、検索やコピーができるJSONテキストにデコードします。",
+      "synonyms": "msgpack messagepack cbor binary decode バイナリ デコード"
+    },
+    "certificateViewer": {
+      "title": "証明書チェーンとリダイレクト",
+      "blurb": "「タイムライン」タブに、サーバーが提示した証明書チェーン（有効期間、名前、フィンガープリント）と、リダイレクトの経路の表が表示されます。",
+      "synonyms": "certificate tls ssl chain x509 https redirect hops timeline expiry 証明書 チェーン リダイレクト タイムライン 有効期限"
+    },
+    "jwtSigning": {
+      "title": "JWT署名",
+      "blurb": "「認証」タブでJWKの秘密鍵を使ってJWTに署名し、有効期限を設定します。",
+      "synonyms": "jwt sign jwk token expiry bearer hs256 rs256 署名 トークン 有効期限 秘密鍵"
+    },
+    "httpVersion": {
+      "title": "HTTPバージョン",
+      "blurb": "リクエストごとに自動、HTTP/1.1、HTTP/2を選択します。使用されたプロトコルは「タイムライン」に表示されます。",
+      "synonyms": "http2 http/2 http1 protocol version alpn prior knowledge プロトコル バージョン"
+    },
+    "dnsOverride": {
+      "title": "ホストの上書き",
+      "blurb": "curl --resolveと同じように、ホストを固定のアドレスへ送り、接続をIPv4またはIPv6に限定します。",
+      "synonyms": "dns resolve host hosts override ip ipv4 ipv6 curl ホスト 上書き 名前解決"
+    },
+    "graphqlUpload": {
+      "title": "GraphQLのファイルアップロード",
+      "blurb": "「ファイル」タブから、マルチパートリクエスト仕様でGraphQLリクエストにファイルを含めて送信します。",
+      "synonyms": "graphql upload multipart file files mutation アップロード ファイル マルチパート"
+    },
+    "wsSecurity": {
+      "title": "SOAP WS-Security",
+      "blurb": "「認証」タブから、SOAPリクエストにWS-SecurityのUsernameToken（平文またはダイジェスト）とTimestampを追加します。",
+      "synonyms": "soap wsse ws-security wsdl xml usernametoken digest ダイジェスト"
+    },
+    "grpcWeb": {
+      "title": "gRPC-WebとConnect",
+      "blurb": "gRPC-WebまたはConnectでgRPCサービスを呼び出します。Webアプリでも使用できます。",
+      "synonyms": "grpc-web grpcweb connect browser transport ブラウザー"
+    },
+    "signalr": {
+      "title": "SignalR",
+      "blurb": "SignalRハブとネゴシエートし、WebSocketで接続して、そのメソッドを呼び出します。",
+      "synonyms": "signalr hub aspnet realtime websocket ハブ リアルタイム"
+    },
+    "tcpUdp": {
+      "title": "TCPとUDP",
+      "blurb": "TCPまたはUDPでテキストや16進データを送信し、応答を確認します。デスクトップアプリの信頼済みフォルダーでのみ使用できます。",
+      "synonyms": "tcp udp socket raw bytes hex ソケット バイト 16進"
+    },
+    "nats": {
+      "title": "NATS",
+      "blurb": "NATSのサブジェクトで、リクエスト／リプライ、パブリッシュ、1件のメッセージの待ち受けを行います。デスクトップアプリの信頼済みフォルダーでのみ使用できます。",
+      "synonyms": "nats subject publish subscribe request reply messaging broker サブジェクト パブリッシュ サブスクライブ メッセージング ブローカー"
+    },
+    "breakpoints": {
+      "title": "保留した通信",
+      "blurb": "ルールに従ってキャプチャしたリクエストやレスポンスを保留し、編集してから、送出または破棄します。",
+      "synonyms": "breakpoint breakpoints pause hold intercept edit release drop debug ブレークポイント 一時停止 保留 傍受 編集 デバッグ"
+    },
+    "jsonRpc": {
+      "title": "JSON-RPC呼び出し",
+      "blurb": "ボタン1つで、JSONボディにJSON-RPC 2.0の呼び出しやバッチを追加します。",
+      "synonyms": "json-rpc jsonrpc rpc batch method params id バッチ メソッド"
+    },
+    "responseCompare": {
+      "title": "以前のレスポンス",
+      "blurb": "各タブは直近10件のレスポンスを保持します。開いたり、最新のレスポンスと比較したりできます。",
+      "synonyms": "earlier previous responses compare diff history response 以前 過去 レスポンス 比較 差分 履歴"
+    },
+    "responseHar": {
+      "title": "レスポンスをHARとしてエクスポート",
+      "blurb": "タブに保持されたレスポンスを、資格情報を伏せたHARファイルとして保存します。",
+      "synonyms": "har export responses archive エクスポート レスポンス アーカイブ"
+    },
+    "splitView": {
+      "title": "タブの横にレスポンスを表示",
+      "blurb": "サイドバーのリクエストメニューから、別のタブの最新レスポンスを開いているタブの横のペインに表示します。",
+      "synonyms": "split side by side beside pane response compare 分割 横並び ペイン レスポンス 比較"
+    },
+    "globalSearch": {
+      "title": "全体検索",
+      "blurb": "保存済みリクエスト、履歴、開いているレスポンスを1か所で検索します。",
+      "synonyms": "search find global everywhere requests history responses 検索 全体 リクエスト 履歴 レスポンス"
+    },
+    "dependencyGraph": {
+      "title": "変数の依存関係",
+      "blurb": "どのリクエストが変数を設定し、どのリクエストが読み取るかを確認します。",
+      "synonyms": "dependency dependencies graph variables extract set read 依存関係 グラフ 変数 抽出"
+    },
+    "openTabs": {
+      "title": "開いているタブの一覧",
+      "blurb": "開いているタブをサイドバーに一覧表示し、タブ間を移動します。",
+      "synonyms": "tabs open list sidebar switch タブ 一覧 サイドバー 切り替え"
+    },
+    "history": {
+      "title": "履歴",
+      "blurb": "送信したリクエストはすべてレスポンスのステータスとともに保持され、もう一度開けます。",
+      "synonyms": "history recent sent previous 履歴 最近 送信済み"
+    },
+    "collections": {
+      "title": "コレクションとフォルダー",
+      "blurb": "リクエストを入れ子のフォルダーにまとめ、ドラッグで並べ替え、検索し、タグや色を付けます。",
+      "synonyms": "collection folder tree sidebar organize tag postman collections コレクション フォルダー ツリー 整理 タグ"
+    },
+    "folderWorkspace": {
+      "title": "フォルダーワークスペース",
+      "blurb": "コレクションをコードの隣にプレーンなYAMLファイルとして保存し、Gitで共有します。",
+      "synonyms": "folder workspace yaml files git bruno opencollection フォルダー ワークスペース ファイル",
+      "tool": "ワークスペース",
+      "webInstead": "Webでは、コレクションはこのブラウザーに保存されます。共有やバックアップにはエクスポートしてください。"
+    },
+    "folderSettings": {
+      "title": "フォルダーの設定",
+      "blurb": "ヘッダー、認証、変数、スクリプト、チェックを一度設定するだけで、フォルダー内のすべてのリクエストに適用します。",
+      "synonyms": "folder collection settings inherit headers auth scripts フォルダー コレクション 設定 継承 ヘッダー 認証 スクリプト",
+      "tool": "コレクション設定"
+    },
+    "import": {
+      "title": "インポート",
+      "blurb": "Postman、Bruno、Insomnia、OpenAPI、HAR、WSDL、.httpファイル、curlコマンドを取り込みます。",
+      "synonyms": "import postman bruno insomnia openapi swagger har wsdl http curl migrate インポート 取り込み 移行"
+    },
+    "firecampImport": {
+      "title": "Firecampのインポート",
+      "blurb": "Firecampのコレクションのエクスポート（フォルダー、RESTリクエスト、ヘッダー、スクリプト）をインポートします。",
+      "synonyms": "firecamp import migrate collection インポート 移行 コレクション"
+    },
+    "specImporters": {
+      "title": "その他のインポート形式",
+      "blurb": "Hoppscotch、Thunder Client、HTTPie、Hurl、RAML、API Blueprintのファイルをインポートします。Hurlはエクスポート形式としても使えます。Pawのファイルは読み込めません。",
+      "synonyms": "hoppscotch thunder client hurl raml blueprint httpie restfox import migrate インポート 移行"
+    },
+    "export": {
+      "title": "エクスポート",
+      "blurb": "コレクションをPostman、OpenAPI、Markdown、.httpファイル、またはバックアップとして書き出します。",
+      "synonyms": "export postman openapi markdown backup http エクスポート 書き出し バックアップ"
+    },
+    "share": {
+      "title": "共有リンク",
+      "blurb": "アカウントなしで、コレクションを暗号化されたリンクやファイルとして送ります。",
+      "synonyms": "share link encrypted send team collaborate 共有 リンク 暗号化 チーム 共同作業",
+      "tool": "共有"
+    },
+    "versionedDocs": {
+      "title": "バージョン別のドキュメント",
+      "blurb": "gostman docs --versionsはGitのタグごとにドキュメントを生成し、--logoと--accentでページの見た目を設定します。",
+      "synonyms": "docs documentation html publish version tags logo accent ドキュメント 公開 バージョン タグ ロゴ"
+    },
+    "notes": {
+      "title": "ノート",
+      "blurb": "リクエストやフォルダーにノートのスレッドを残します。ファイルに保存されるため、チームメイトがGitでレビューできます。",
+      "synonyms": "notes comments review thread resolve ノート メモ コメント レビュー スレッド 解決"
+    },
+    "recentlyDeleted": {
+      "title": "最近削除した項目",
+      "blurb": "削除したリクエスト、フォルダー、環境を30日間復元できます。",
+      "synonyms": "trash bin deleted restore undo recover ごみ箱 削除 復元 元に戻す"
+    },
+    "backups": {
+      "title": "バックアップ",
+      "blurb": "データを毎日およびバージョンごとにバックアップし、復元できます。",
+      "synonyms": "backup restore snapshot recover バックアップ 復元 スナップショット"
+    },
+    "environments": {
+      "title": "環境",
+      "blurb": "ローカル、ステージング、本番などの変数セットを切り替えます。",
+      "synonyms": "environment variables dev staging prod env 環境 変数 開発 ステージング 本番"
+    },
+    "scopes": {
+      "title": "変数のスコープ",
+      "blurb": "グローバル、コレクション、フォルダー、環境、セッション、リクエストの変数を、明確な優先順位で扱います。",
+      "synonyms": "variables scopes precedence global collection folder request vars 変数 スコープ 優先順位 グローバル"
+    },
+    "jsonTreeDepth": {
+      "title": "JSONツリーの深さ",
+      "blurb": "JSONレスポンスを任意の階層まで展開または折りたたみ、リクエストごとに好みの深さで開くようにできます。",
+      "synonyms": "json expand collapse tree depth level fold unfold response viewer 展開 折りたたみ ツリー 深さ 階層"
+    },
+    "typedVariables": {
+      "title": "型付き変数",
+      "blurb": "リクエスト変数に型を付けると、スクリプトはテキストではなく数値、真偽値、JSONを受け取り、不正な値は送信前に検出されます。",
+      "synonyms": "typed variables type number boolean integer json enum validation required 型 変数 数値 真偽値 検証 必須"
+    },
+    "variablesView": {
+      "title": "変数ビュー",
+      "blurb": "値を入力するだけの人向けに、リクエストを変数の簡単なフォームと「送信」ボタン、レスポンスで表示します。",
+      "synonyms": "variables view form simple input fields occasional users template 変数 ビュー フォーム 入力 テンプレート"
+    },
+    "inheritedVariables": {
+      "title": "継承された変数",
+      "blurb": "リクエストが取り込むグローバル、コレクション、環境、フォルダー、セッションの変数を、リクエスト自身の変数と並べて確認します。",
+      "synonyms": "inherited variables scope list show hide request only 継承 変数 スコープ 一覧"
+    },
+    "secrets": {
+      "title": "シークレット変数",
+      "blurb": "シークレットの値をOSのキーチェーンに保存し、ファイルやエクスポートに含めません。",
+      "synonyms": "secret keychain password token vault シークレット キーチェーン パスワード トークン 機密"
+    },
+    "secretManagers": {
+      "title": "シークレットマネージャー",
+      "blurb": "送信時にVault、AWS、Azure、Google Cloud、1Password、Bitwarden、KeePassXCから値を読み取ります。",
+      "synonyms": "vault aws azure gcp 1password bitwarden keepassxc secret manager シークレットマネージャー パスワード管理"
+    },
+    "extract": {
+      "title": "抽出ルール",
+      "blurb": "レスポンスから値を取り出して変数に入れ、次のリクエストで使います。",
+      "synonyms": "extract capture chain variable response jsonpath 抽出 連携 変数 レスポンス"
+    },
+    "network": {
+      "title": "プロキシと証明書",
+      "blurb": "プロキシ、クライアント証明書、カスタムCA証明書を使用します。",
+      "synonyms": "proxy certificate mtls ca tls network プロキシ 証明書 ネットワーク"
+    },
+    "checks": {
+      "title": "チェック",
+      "blurb": "コードを書かずに、ステータス、ヘッダー、ボディ、所要時間を検証します。",
+      "synonyms": "checks tests assertions assert postman tests chai チェック テスト アサーション 検証"
+    },
+    "scripts": {
+      "title": "スクリプト",
+      "blurb": "pm、bru、insomnia互換のAPIで、リクエストの前後にJavaScriptを実行します。",
+      "synonyms": "script pre-request post-response javascript pm bru insomnia スクリプト リクエスト前 レスポンス後"
+    },
+    "contract": {
+      "title": "コントラクトチェック",
+      "blurb": "ランナーとCIで、レスポンスをOpenAPI仕様に照らして確認します。",
+      "synonyms": "contract openapi schema validate conformance dredd コントラクト 契約 スキーマ 検証 準拠"
+    },
+    "snapshotChecks": {
+      "title": "スナップショットチェック",
+      "blurb": "レスポンスの値を保存済みのスナップショットと比較し、変化するパスを除外し、最後のレスポンスから更新します。",
+      "synonyms": "snapshot golden diff regression matches ignore スナップショット 差分 回帰 比較"
+    },
+    "openapiFuzz": {
+      "title": "OpenAPIファジング",
+      "blurb": "仕様のすべてのオペレーションに、スキーマから導いた有効な入力、境界値、不正な入力を送り、5xxの応答、タイムアウト、コントラクト違反を報告します。",
+      "synonyms": "openapi fuzz fuzzing schemathesis property based boundary invalid inputs swagger ファジング 境界値 不正な入力"
+    },
+    "negativeTests": {
+      "title": "ネガティブテスト",
+      "blurb": "保存済みリクエストを改変したコピーを送り、不正な入力に対する2xx、5xx、スタックトレース、反射されたペイロードを検出します。",
+      "synonyms": "negative fuzz fuzzing security injection invalid inputs boundary schemathesis owasp ネガティブ ファジング セキュリティ インジェクション 不正な入力"
+    },
+    "coverage": {
+      "title": "OpenAPIカバレッジ",
+      "blurb": "リンクしたOpenAPI仕様のどのオペレーションを実行が呼び出したか、ドキュメントにあるどのステータスが一度も返らなかったかを確認します。",
+      "synonyms": "coverage openapi operations untested spec min-coverage カバレッジ 網羅率 未テスト 仕様"
+    },
+    "pmPackages": {
+      "title": "パッケージとpm.vault",
+      "blurb": "ワークスペースのpackagesフォルダーから、requireまたはpm.requireで共有コードを読み込み、pm.vaultでシークレットを読み取ります。",
+      "synonyms": "pm packages require library postman vault shared code パッケージ ライブラリ 共有コード"
+    },
+    "specLint": {
+      "title": "OpenAPIリンター",
+      "blurb": "仕様に説明、例、セキュリティの抜けがないか確認します。",
+      "synonyms": "lint openapi spectral swagger リント リンター 仕様",
+      "tool": "仕様のリント"
+    },
+    "specSync": {
+      "title": "仕様の同期",
+      "blurb": "コレクションをリモートのOpenAPI仕様に合わせた状態に保ちます。",
+      "synonyms": "sync openapi spec update remote 同期 仕様 更新 リモート"
+    },
+    "runner": {
+      "title": "実行",
+      "blurb": "CSV、JSON、XLSXのデータファイル、並列実行、HTMLまたはJUnitのレポートを使って、フォルダーを順に実行します。",
+      "synonyms": "runner run collection postman collection runner newman data csv json xlsx iteration ランナー 実行 コレクション データ イテレーション"
+    },
+    "flows": {
+      "title": "フロー",
+      "blurb": "分岐、再試行、ループを含む一連のリクエストを図で組み立てます。",
+      "synonyms": "flow workflow chain retry branch loop scenario フロー ワークフロー 連携 再試行 分岐 ループ シナリオ"
+    },
+    "loadTest": {
+      "title": "負荷テスト",
+      "blurb": "多数のリクエストを一度に送信し、レイテンシーのパーセンタイルとエラーを確認します。",
+      "synonyms": "load performance stress k6 benchmark latency 負荷 性能 パフォーマンス ストレス ベンチマーク レイテンシー",
+      "webInstead": "Webでは、データファイルを使ってコレクションを実行し、ランナーで各リクエストの所要時間を確認してください。"
+    },
+    "loadThresholds": {
+      "title": "負荷のしきい値",
+      "blurb": "p95<300やerrors<1%のようなしきい値を書き、負荷テストで成功か失敗かを確認します。",
+      "synonyms": "threshold slo limit fail load stages ramp しきい値 閾値 上限 負荷 ステージ"
+    },
+    "scan": {
+      "title": "シークレットのスキャン",
+      "blurb": "共有する前に、コレクション内のトークンやパスワードを見つけます。",
+      "synonyms": "scan secrets leak token password credential gitleaks スキャン シークレット 漏洩 トークン パスワード 資格情報"
+    },
+    "cli": {
+      "title": "コマンドライン",
+      "blurb": "1つのバイナリで実行、送信、負荷テスト、スキャン、リントを行い、CI向けの終了コードを返します。",
+      "synonyms": "cli command line terminal newman bruno cli inso コマンドライン ターミナル"
+    },
+    "ci": {
+      "title": "CI連携",
+      "blurb": "GitHub Action、Dockerイメージ、GitLab、Azure Pipelines、CircleCI、Bitbucket、Jenkins向けの手順、JUnit、HTML、Markdownのレポートを用意しています。",
+      "synonyms": "ci github actions gitlab azure circleci bitbucket jenkins docker pipeline junit パイプライン 連携"
+    },
+    "ciPrComment": {
+      "title": "プルリクエストへの結果表示",
+      "blurb": "GitHub Actionは件数と失敗したすべてのチェックをジョブサマリーに書き込み、プルリクエストのコメント1件を最新の状態に保つこともできます。",
+      "synonyms": "pull request comment pr check job summary markdown report github actions プルリクエスト コメント ジョブサマリー レポート"
+    },
+    "ciStarters": {
+      "title": "CIのひな形とpre-commit",
+      "blurb": "gostman init --ciは、GitHub、GitLab、Azure、CircleCI、Bitbucket向けのひな形パイプラインを書き出します。pre-commitフックはlint、scan、runを実行します。",
+      "synonyms": "ci pipeline starter template pre-commit hook makefile azure circleci bitbucket パイプライン ひな形 テンプレート フック"
+    },
+    "monitors": {
+      "title": "モニター",
+      "blurb": "アプリを開いている間、フォルダーやフローをタイマーで実行し、成功率、履歴、通知を記録します。",
+      "synonyms": "monitor monitors postman monitor schedule cron uptime interval notify モニター 監視 スケジュール 定期実行 稼働 通知"
+    },
+    "agents": {
+      "title": "コーディングエージェント",
+      "blurb": "コーディングエージェントがリクエストを送信できるMCPサーバー。シークレットの伏せ字とホストの許可リストに対応しています。",
+      "synonyms": "agent mcp claude cursor ai coding skill エージェント コーディング スキル"
+    },
+    "mock": {
+      "title": "モックサーバー",
+      "blurb": "保存済みの例やOpenAPI仕様をローカルで提供し、リクエストログをリアルタイムで表示します。",
+      "synonyms": "mock server stub fake wiremock prism examples モック サーバー スタブ 例",
+      "tool": "モックサーバー",
+      "webInstead": "Webでは、リクエストに例を保存してください。例はコレクションと一緒に保持され、エクスポートにも含まれます。HTTPで提供するには、CLIまたはデスクトップアプリでモックサーバーを実行してください。"
+    },
+    "mockDataRows": {
+      "title": "データファイルによるモックレスポンス",
+      "blurb": "パスパラメーター、クエリの値、ヘッダー、ボディのフィールドに一致する、CSV、JSON、XLSXファイルの行で応答します。",
+      "synonyms": "mock data file csv xlsx json rows lookup fixture wiremock モック データファイル 行 検索 フィクスチャ"
+    },
+    "mockRules": {
+      "title": "モックのルール",
+      "blurb": "クエリ、ヘッダー、ボディに応じてレスポンスを選び、遅延を加え、障害を発生させます。",
+      "synonyms": "mock rules conditions delay fault latency モック ルール 条件 遅延 障害 レイテンシー"
+    },
+    "capture": {
+      "title": "キャプチャプロキシ",
+      "blurb": "トラフィックを上流へ転送して記録し、リクエストに変換します。",
+      "synonyms": "capture proxy record traffic intercept charles fiddler mitm キャプチャ プロキシ 記録 トラフィック 傍受",
+      "tool": "キャプチャプロキシ",
+      "webInstead": "Webでは、curlコマンドを貼り付けるかHARファイルをインポートして、他の場所で記録したトラフィックからリクエストを作成してください。"
+    },
+    "captureRules": {
+      "title": "キャプチャのルール",
+      "blurb": "ルールに一致する通信について、ヘッダーやボディを編集し、ローカルで応答し、障害を発生させ、速度を制限します。",
+      "synonyms": "capture rules rewrite block map local throttle slow latency fault キャプチャ ルール 書き換え ブロック 帯域制限 遅延 障害"
+    },
+    "captureHar": {
+      "title": "キャプチャをHARへ",
+      "blurb": "キャプチャした通信を、他のツールで読めるHAR 1.2ファイルとしてエクスポートします。",
+      "synonyms": "har capture export archive キャプチャ エクスポート アーカイブ"
+    },
+    "gitPanel": {
+      "title": "Gitパネル",
+      "blurb": "差分、コミット、プッシュ、ブランチ、スタッシュ、履歴をアプリ内で扱います。",
+      "synonyms": "git commit push pull branch stash diff version control コミット プッシュ プル ブランチ スタッシュ 差分 バージョン管理",
+      "tool": "Git",
+      "webInstead": "Webでは、「共有」または「エクスポート」でコレクションを移動してください。バージョン管理には、デスクトップアプリまたはCLIでフォルダーワークスペースを使ってください。"
+    },
+    "gitFieldDiff": {
+      "title": "フィールド単位の差分",
+      "blurb": "URL、ヘッダー、認証、ボディ、チェックなど、リクエストのどのフィールドが変わったかを確認し、ファイルの2つのバージョンを比較します。",
+      "synonyms": "git diff field changes yaml review compare versions 差分 フィールド 変更 レビュー 比較 バージョン"
+    },
+    "gitCommitGraph": {
+      "title": "コミットグラフ",
+      "blurb": "ブランチ、マージ、タグをレーンで描いたグラフで履歴を確認します。",
+      "synonyms": "git graph commits branches log history tags merge グラフ コミット ブランチ ログ 履歴 タグ マージ"
+    },
+    "conflicts": {
+      "title": "競合の解決",
+      "blurb": "リクエストファイルのマージ競合を、左右に並べたエディターで解決します。",
+      "synonyms": "merge conflict resolve git マージ 競合 コンフリクト 解決"
+    },
+    "repoCreate": {
+      "title": "GitHubリポジトリの作成",
+      "blurb": "「リモート」タブからGitHubリポジトリを作成し、プッシュします。",
+      "synonyms": "git init repository github publish remote create push リポジトリ 公開 リモート 作成 プッシュ"
+    },
+    "ai": {
+      "title": "AIアシスタント",
+      "blurb": "自分のキーを使って、リクエスト、チェック、スクリプトを生成し、レスポンスを説明させます。",
+      "synonyms": "ai llm openai anthropic claude generate explain postbot アシスタント 生成 説明"
+    },
+    "aiMock": {
+      "title": "AIによるモックの例",
+      "blurb": "AIでリクエストのモックレスポンスの例を生成し、プレビューを確認してから採用します。",
+      "synonyms": "ai mock generate data fake example response モック 生成 データ ダミー 例 レスポンス"
+    },
+    "aiCommit": {
+      "title": "AIによるコミットメッセージ",
+      "blurb": "Gitパネルの「AIでメッセージを提案」で、ステージした変更からコミットメッセージの下書きを作成します。",
+      "synonyms": "ai commit message git draft suggest コミット メッセージ 下書き 提案"
+    },
+    "aiInline": {
+      "title": "スクリプトのインライン提案",
+      "blurb": "スクリプトエディターにゴーストテキストでコードを提案します。AI設定で有効にするまでオフです。Tabキーで確定します。",
+      "synonyms": "ai autocomplete completion copilot ghost text script suggest 自動補完 補完 ゴーストテキスト スクリプト 提案"
+    },
+    "palette": {
+      "title": "コマンドパレット",
+      "blurb": "コマンド、リクエスト、機能を名前で探します。",
+      "synonyms": "palette command search quick open ctrl k パレット コマンド 検索 クイックオープン"
+    },
+    "shortcuts": {
+      "title": "キーボードショートカット",
+      "blurb": "すべてのショートカットを確認し、好きなものを変更します。",
+      "synonyms": "keyboard shortcuts keys hotkeys chords bindings キーボード ショートカット キー ホットキー キー割り当て"
+    },
+    "themes": {
+      "title": "テーマと色",
+      "blurb": "ライト、ダーク、ウィンドウの部分ごとのカスタムカラー。",
+      "synonyms": "theme dark light color colour appearance accent font テーマ ダーク ライト 色 カラー 外観 アクセント フォント"
+    },
+    "languages": {
+      "title": "言語",
+      "blurb": "アプリを別の言語で使えます。右から左へのレイアウトにも対応しています。",
+      "synonyms": "language translation locale i18n localization arabic 言語 翻訳 ロケール 多言語 日本語 アラビア語"
+    },
+    "desktop": {
+      "title": "デスクトップアプリ",
+      "blurb": "フォルダー、Git、モックサーバー、キャプチャ、プロキシ、証明書にはデスクトップアプリが必要です。",
+      "synonyms": "desktop download install app windows mac linux デスクトップ ダウンロード インストール アプリ"
+    },
+    "webApp": {
+      "title": "Webアプリ",
+      "blurb": "アカウントもインストールも不要で、ブラウザーでGostmanを使えます。",
+      "synonyms": "web browser online no install pwa ブラウザー オンライン インストール不要"
+    },
+    "pricing": {
+      "title": "価格",
+      "blurb": "無料で、MITライセンスです。",
+      "synonyms": "price free license 価格 料金 無料 ライセンス"
+    },
+    "vscode": {
+      "title": "VS Code拡張機能",
+      "blurb": "VS Code拡張機能が、CLIを通してコレクション、フロー、リント、スキャンを実行します。",
+      "synonyms": "vscode extension editor 拡張機能 エディター"
+    },
+    "vscodeExtension": {
+      "title": "VS Code拡張機能",
+      "blurb": "エディターから、コレクション、フォルダー、フローの実行、仕様のリント、シークレットのスキャンを行います。Gostmanのコマンドラインを呼び出すため、実行結果はCIと一致します。",
+      "synonyms": "vscode visual studio code extension editor ide marketplace 拡張機能 エディター マーケットプレイス"
+    },
+    "xlsxData": {
+      "title": "データファイル",
+      "blurb": "アプリ内またはgostman run --dataで、CSV、JSON、XLSXファイルの行ごとにフォルダーを1回ずつ実行します。",
+      "synonyms": "data csv json xlsx excel spreadsheet iteration rows data-driven データ エクセル スプレッドシート イテレーション 行 データ駆動"
+    },
+    "scheduledRuns": {
+      "title": "スケジュール実行",
+      "blurb": "gostman run --everyは実行を一定間隔で繰り返し、ローカルに履歴を保持し、Webhookに通知できます。",
+      "synonyms": "schedule cron every interval repeat history webhook notify スケジュール 定期実行 間隔 繰り返し 履歴 通知"
+    },
+    "openapiDiff": {
+      "title": "OpenAPIの差分",
+      "blurb": "OpenAPI仕様の2つのバージョンを比較し、互換性のない変更をアプリ内、またはCIでgostman diffを使って一覧表示します。",
+      "synonyms": "openapi diff oasdiff breaking changes compare spec 差分 破壊的変更 互換性 比較 仕様"
+    },
+    "apiDesign": {
+      "title": "API設計",
+      "blurb": "バックエンドができる前にOpenAPI仕様を書き、入力中にチェックを受け、そこからリクエスト、モック、レスポンスのチェックを生成します。",
+      "synonyms": "openapi swagger design first contract editor stoplight api spec yaml schema 設計 デザインファースト 仕様 エディター スキーマ"
+    },
+    "flowCanvas": {
+      "title": "フローキャンバス",
+      "blurb": "フローを上から下へ表示し、分岐を横に並べ、ループを枠で囲みます。ズームやパンができ、実行がたどった経路も表示されます。",
+      "synonyms": "flow diagram canvas graph workflow designer zoom pan branches join フロー 図 キャンバス グラフ ワークフロー ズーム 分岐"
+    },
+    "flowSwitch": {
+      "title": "スイッチステップ",
+      "blurb": "それぞれ独自のチェックを持つ複数の経路のうち、1つへフローを進めます。",
+      "synonyms": "switch case condition branch truth table decision router スイッチ ケース 条件 分岐 真理値表 判定"
+    },
+    "flowRepeat": {
+      "title": "反復ステップ",
+      "blurb": "チェックが成功するか、指定回数に達するまで、複数のステップを繰り返します。",
+      "synonyms": "repeat loop while until poll iterate 反復 繰り返し ループ ポーリング"
+    },
+    "nestedFlows": {
+      "title": "フローの入れ子",
+      "blurb": "保存済みのフローを別のフローの1ステップとして実行します。値も失敗時の経路もそのステップ独自に設定できます。",
+      "synonyms": "sub-flow subflow nested flow of flows reuse call サブフロー 入れ子 ネスト 再利用 呼び出し"
+    },
+    "flowInputs": {
+      "title": "リクエストへの値の受け渡し",
+      "blurb": "前のレスポンスの値を、次のリクエストのヘッダー、クエリ、JSONボディ、フォームフィールド、変数に入れます。",
+      "synonyms": "chain response mapping data mapping header body form field extract pass value 連携 マッピング ヘッダー ボディ フォーム 抽出 値 受け渡し"
+    },
+    "flowMetrics": {
+      "title": "フロー実行のメトリクス",
+      "blurb": "ステップ、ループの各回、フローごとの所要時間と、送受信したバイト数を、アプリ、レポート、CLIで確認できます。",
+      "synonyms": "metrics timing duration bytes performance stats メトリクス 所要時間 バイト パフォーマンス 統計"
+    },
+    "flowParallel": {
+      "title": "並列ステップ",
+      "blurb": "複数のリクエストの送信や複数のフローの実行を同時に行い、その結果に対する条件が成立するか時間制限に達したら次へ進みます。",
+      "synonyms": "parallel concurrent at the same time race fan out join wait for any wait for all timeout Postman Flows 並列 同時 同時実行 待機 タイムアウト"
+    },
+    "flowConditionGroups": {
+      "title": "グループ化した条件",
+      "blurb": "(A or (B and C)) and Dのように、入れ子のグループでandとorを組み合わせた条件を、1つの「条件分岐」「スイッチ」「反復」「並列」ステップで使えます。",
+      "synonyms": "and or nested groups boolean logic parentheses complex condition truth table 入れ子 グループ 論理 括弧 複合条件 真理値表"
+    },
+    "flowVariables": {
+      "title": "フロー変数、入力、出力",
+      "blurb": "1回の実行の間だけ存在する型付き変数を宣言し、一部を入力として指定し、値を出力として返し、フローの実行中にその変化を確認します。",
+      "synonyms": "typed variables number boolean json inputs outputs parameters return values flow scope inspect watch 型 変数 入力 出力 パラメーター 戻り値 スコープ 監視"
+    }
+  },
+  "featureSamples": {
+    "collection": "サンプルコレクション",
+    "listUsers": "ユーザー一覧",
+    "getUser": "ユーザーを取得",
+    "createUser": "ユーザーを作成",
+    "okExample": "200 OK",
+    "createdExample": "201 Created",
+    "flowName": "サンプルフロー",
+    "scanRequest": "偽のトークンを含むリクエスト",
+    "graphqlRequest": "GraphQLリクエスト",
+    "websocketRequest": "WebSocketリクエスト",
+    "grpcRequest": "gRPCリクエスト",
+    "mcpRequest": "MCPリクエスト",
+    "flowDescription": "2つのリクエストを同時に送信し、型付きのフロー変数を保持し、グループ化した条件で経路を選び、名前をリクエストに渡し、チェックが成功するまでステップを繰り返し、値を返します。すべてのリクエストは保存済みの例から応答するため、オフラインで実行できます。",
+    "flowDone": "完了",
+    "flowListNote": "保存済みの例 **200 OK** で応答するため、このデバイスから何も送信されません。",
+    "flowCheckStatus": "ステータスを確認",
+    "flowCreateNote": "`name` は一覧の2人目のユーザーから取得し、送信の直前にJSONボディへ入れます。",
+    "flowWaitForUser": "Adaになるまで読み取る",
+    "flowStopped": "停止",
+    "flowStoppedMessage": "ユーザー一覧が200 OKを返しませんでした。",
+    "binaryRequest": "バイナリレスポンス",
+    "jwtRequest": "JWTリクエスト",
+    "flowFetchTogether": "一覧とAdaを同時に取得",
+    "flowFetchNote": "両方のリクエストを同時に送信し、両方が成功するとフローが次へ進みます。",
+    "flowFirstUser": "Ada",
+    "flowKeepName": "名前を保持",
+    "flowCheckNote": "ステータスが200で、1人目または2人目のユーザーが `firstName` に保持した人物であれば成功します。"
+  }
+}

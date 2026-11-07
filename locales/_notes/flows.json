@@ -107,5 +107,9 @@
   "flowView.stop": "Button that stops a running flow. Verb.",
   "flowView.save": "Button that saves the flow. Verb.",
   "flowView.runTab": "Name of the tab that shows the result of running the flow. Noun.",
-  "flowView.description": "Label of the field for the description of a flow. Noun."
+  "flowView.description": "Label of the field for the description of a flow. Noun.",
+  "flowEditor.branchStateWords.passed": "A value that a Done when condition compares a branch with. Keep it in English, the condition only matches these words.",
+  "flowEditor.branchStateWords.failed": "A value that a Done when condition compares a branch with. Keep it in English, the condition only matches these words.",
+  "flowEditor.branchStateWords.cancelled": "A value that a Done when condition compares a branch with. Keep it in English, the condition only matches these words.",
+  "flowEditor.branchStateWords.running": "A value that a Done when condition compares a branch with. Keep it in English, the condition only matches these words."
 }

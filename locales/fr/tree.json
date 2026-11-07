@@ -30,6 +30,7 @@
     "newRequest": "Nouvelle requête",
     "newSubfolder": "Nouveau sous-dossier",
     "runFolder": "Exécuter le dossier",
+    "negativeFolder": "Lancer des tests négatifs",
     "shareFolder": "Partager le dossier",
     "delete": "Supprimer",
     "emptyImport": "Importer",
@@ -68,7 +69,8 @@
     "deleteManyMessage": "Supprimer {{subject}} ? Cette action est irréversible.",
     "deleteManyMessageFolders": "Supprimer {{subject}} ? Tout ce qui se trouve dans un dossier supprimé et que vous n’avez pas sélectionné remonte d’un niveau. Cette action est irréversible.",
     "deleteManyFailed": "Impossible de supprimer les éléments sélectionnés",
-    "moreTags": "+{{count}}"
+    "moreTags": "+{{count}}",
+    "more": "Plus"
   },
   "label": {
     "folderTitle": "Couleur et tags : {{name}}",
@@ -83,6 +85,8 @@
     "tagColoursNote": "Un tag garde sa couleur partout où il est utilisé. Sans choix, une couleur est choisie d’après le nom du tag. Les couleurs des tags sont conservées sur cet appareil.",
     "tagColour": "Couleur du tag {{tag}}",
     "removeTag": "Retirer le tag {{tag}}",
+    "moveTagUp": "Monter le tag {{tag}}",
+    "moveTagDown": "Descendre le tag {{tag}}",
     "done": "Terminé"
   },
   "tab": {
@@ -93,6 +97,8 @@
     "keepOpen": "Garder l’onglet ouvert",
     "revealInTree": "Afficher dans la collection",
     "copyAsCurl": "Copier en cURL",
+    "showBeside": "Afficher la réponse à côté",
+    "hideBeside": "Ne plus afficher la réponse à côté",
     "moveLeft": "Déplacer à gauche",
     "moveRight": "Déplacer à droite",
     "previewHint": "Onglet d’aperçu. Modifiez-le ou double-cliquez pour le garder ouvert.",

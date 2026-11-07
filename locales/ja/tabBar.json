@@ -1,9 +1,12 @@
 {
   "tabBar": {
     "openRequests": "開いているリクエスト",
+    "scrollStart": "タブを先頭方向へスクロール",
+    "scrollEnd": "タブを末尾方向へスクロール",
     "newRequest": "新しいリクエスト",
     "untitled": "無題",
     "unsaved": "未保存の変更",
+    "fromHistory": "履歴から開いたタブ",
     "close": "{{title}}を閉じる"
   }
 }

@@ -1,0 +1,60 @@
+{
+  "negative": {
+    "title": "Test negativi",
+    "intro": "Invia copie alterate delle tue richieste salvate: credenziali mancanti o non valide, corpi errati, valori limite e stringhe di injection. È un controllo di base, non uno strumento di penetration testing. Eseguilo su un ambiente di test o di staging.",
+    "scope": "Richieste da testare",
+    "allRequests": "Tutte le richieste",
+    "hostsTitle": "Host che riceveranno le richieste",
+    "noHosts": "Non è stato possibile risolvere gli indirizzi di queste richieste in un host. Controlla le variabili d'ambiente che usano.",
+    "confirm": "Posso inviare richieste alterate a questi host",
+    "rate": "Richieste al secondo",
+    "limit": "Fermati dopo (richieste)",
+    "start": "Avvia",
+    "stop": "Ferma",
+    "plan_one": "Verrà inviata {{count}} copia alterata delle tue richieste.",
+    "plan_many": "Verranno inviate {{count}} di copie alterate delle tue richieste.",
+    "plan_other": "Verranno inviate {{count}} copie alterate delle tue richieste.",
+    "variantsTitle": "Copie alterate",
+    "progress": "Inviate {{sent}} di {{total}}",
+    "done_one": "Inviate {{sent}} richieste, {{count}} risultato.",
+    "done_many": "Inviate {{sent}} richieste, {{count}} di risultati.",
+    "done_other": "Inviate {{sent}} richieste, {{count}} risultati.",
+    "noFindings": "Non sono state trovate risposte sospette.",
+    "noFindingsHint": "Questo non dimostra che l'API sia sicura. Verifica solo alcuni errori comuni.",
+    "emptyAction": "Aggiungi una raccolta di esempio",
+    "severity": {
+      "high": "Alta",
+      "medium": "Media",
+      "low": "Bassa"
+    },
+    "variant": {
+      "credentialsMissing": "nessuna credenziale",
+      "credentialsInvalid": "credenziali non valide",
+      "bodyTruncated": "JSON troncato",
+      "fieldRemoved": "campo {{name}} rimosso",
+      "fieldWrongType": "campo {{name}} con il tipo sbagliato",
+      "fieldValue": "campo {{name}} = {{value}}",
+      "fieldEmpty": "campo {{name}} vuoto",
+      "fieldLong_one": "campo {{name}} con {{count}} carattere",
+      "fieldLong_many": "campo {{name}} con {{count}} di caratteri",
+      "fieldLong_other": "campo {{name}} con {{count}} caratteri",
+      "bodyLarge": "un corpo da 1 MB",
+      "injectionField": "campo {{name}} con un payload {{injection}}",
+      "injectionParameter": "parametro {{name}} con un payload {{injection}}"
+    },
+    "injection": {
+      "sql": "SQL injection",
+      "xss": "script",
+      "traversal": "path traversal",
+      "header": "header injection",
+      "expression": "espressione"
+    },
+    "finding": {
+      "accepted": "{{label}}: il server ha risposto {{status}}, era atteso un rifiuto (4xx)",
+      "serverError": "{{label}}: il server ha risposto {{status}}",
+      "stackTrace": "{{label}}: il corpo della risposta mostra uno stack trace",
+      "sqlError": "{{label}}: il corpo della risposta mostra un errore del database",
+      "reflected": "{{label}}: il payload viene restituito invariato nel corpo della risposta"
+    }
+  }
+}

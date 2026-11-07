@@ -1,0 +1,16 @@
+{
+  "notes": {
+    "empty": "Brak notatek.",
+    "secretHint": "Notatki są zapisywane jako zwykły tekst i udostępniane razem z obszarem roboczym. Nie wklejaj sekretów.",
+    "looksLikeCredential": "To wygląda na dane uwierzytelniające. Notatki są zapisywane jako zwykły tekst w plikach folderu i w eksportach.",
+    "inputLabel": "Nowa notatka",
+    "inputPlaceholder": "Napisz notatkę dla zespołu",
+    "add": "Dodaj notatkę",
+    "anonymous": "Nieznany",
+    "resolve": "Rozwiąż",
+    "reopen": "Otwórz ponownie",
+    "resolved": "Rozwiązana",
+    "delete": "Usuń notatkę",
+    "listLabel": "Notatki"
+  }
+}

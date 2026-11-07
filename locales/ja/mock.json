@@ -56,7 +56,8 @@
     "fields": {
       "query": "クエリ",
       "header": "ヘッダー",
-      "body": "ボディ"
+      "body": "ボディ",
+      "param": "パスパラメーター"
     },
     "ops": {
       "equals": "等しい",
@@ -70,6 +71,12 @@
     "headersLabel": "ヘッダー（1行に1つ、Name: value形式）",
     "bodyLabel": "ボディ（空欄でルートのボディを使用）",
     "bodyHint": "プレースホルダー：{{placeholders}}",
+    "dataTitle": "データファイル",
+    "dataHint": "任意。値が列のいずれかのセルに一致するリクエストには、その行をJSONとして、または{{example}}を使った上のボディで応答します。一致しない場合、このルールは適用されません。CSV、JSON、XLSXに対応し、ワークスペースフォルダーから読み込みます。",
+    "dataFile": "ワークスペースフォルダー内のファイル",
+    "dataField": "照合するリクエストの値",
+    "dataName": "名前またはJSONパス",
+    "dataColumn": "列",
     "nth": "N回目の一致のみ",
     "nthPlaceholder": "毎回",
     "behaviorTitle": "動作",
@@ -103,6 +110,10 @@
       "conflicts": "競合 {{count}}",
       "off": "オフ {{count}}",
       "skipped": "応答しない {{count}}"
-    }
+    },
+    "importRules": "ルールをインポート",
+    "exportRules": "ルールをエクスポート",
+    "rulesName": "gostman-mock-rules.yaml",
+    "rulesImported_other": "{{count}}件のルールをインポートしました。有効にするまでオフのままです。"
   }
 }

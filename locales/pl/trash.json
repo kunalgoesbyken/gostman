@@ -1,0 +1,34 @@
+{
+  "trash": {
+    "title": "Ostatnio usunięte",
+    "command": "Ostatnio usunięte",
+    "commandDescription": "Przywróć usunięte żądanie, folder lub środowisko",
+    "commandKeywords": "kosz przywróć cofnij odzyskaj trash bin restore undo recover",
+    "empty": "Ostatnio nic nie usunięto.",
+    "note_one": "Usunięte elementy są przechowywane przez {{count}} dzień. Wartości sekretne nie są przechowywane; przywrócone zmienne sekretne wracają puste.",
+    "note_few": "Usunięte elementy są przechowywane przez {{count}} dni. Wartości sekretne nie są przechowywane; przywrócone zmienne sekretne wracają puste.",
+    "note_many": "Usunięte elementy są przechowywane przez {{count}} dni. Wartości sekretne nie są przechowywane; przywrócone zmienne sekretne wracają puste.",
+    "note_other": "Usunięte elementy są przechowywane przez {{count}} dnia. Wartości sekretne nie są przechowywane; przywrócone zmienne sekretne wracają puste.",
+    "listLabel": "Usunięte elementy",
+    "kinds": {
+      "request": "Żądanie",
+      "folder": "Folder",
+      "environment": "Środowisko"
+    },
+    "daysLeft_one": "Pozostał {{count}} dzień",
+    "daysLeft_few": "Pozostały {{count}} dni",
+    "daysLeft_many": "Pozostało {{count}} dni",
+    "daysLeft_other": "Pozostało {{count}} dnia",
+    "restore": "Przywróć",
+    "restored": "Przywrócono {{name}}.",
+    "deleteForever": "Usuń trwale",
+    "emptyBin": "Opróżnij kosz",
+    "emptyBinTitle": "Opróżnić kosz?",
+    "emptyBinMessage": "Wszystko w koszu zostanie trwale usunięte.",
+    "emptyBinConfirm": "Opróżnij kosz",
+    "readFailed": "Nie udało się odczytać kosza: {{detail}}",
+    "saveFailed": "Nie udało się zachować usuniętego elementu w koszu: {{detail}}",
+    "restoreFailed": "Nie udało się przywrócić elementu: {{detail}}",
+    "unnamed": "Bez nazwy"
+  }
+}

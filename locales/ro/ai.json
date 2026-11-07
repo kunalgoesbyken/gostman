@@ -76,6 +76,19 @@
         "inputLabel": "Ce căutați",
         "placeholder": "endpointul care anulează o comandă"
       },
+      "commit": {
+        "label": "Mesaj de commit din modificări",
+        "section": "Mesaj de commit",
+        "apply": "Folosire ca mesaj de commit",
+        "nothing": "Nu există modificări de descris."
+      },
+      "mock": {
+        "label": "Exemple mock pentru această cerere",
+        "inputLabel": "Descrieți răspunsurile sau lipiți un document OpenAPI",
+        "placeholder": "O listă de comenzi, o listă goală și un 404 pentru o comandă necunoscută",
+        "section": "Exemple servite de serverul mock",
+        "apply": "Adăugare la exemple"
+      },
       "schema": {
         "label": "Cereri dintr-o descriere a API-ului",
         "inputLabel": "Lipiți un document OpenAPI sau Swagger, o schemă GraphQL sau textul documentației unui API",
@@ -106,7 +119,8 @@
       "explain": "Explicare cu AI",
       "explainError": "Explicați această eroare cu AI",
       "document": "Scriere cu AI",
-      "documentLabel": "Scrieți descrierea cu AI"
+      "documentLabel": "Scrieți descrierea cu AI",
+      "commitMessage": "Sugerare mesaj cu AI"
     },
     "commands": {
       "request": {
@@ -135,6 +149,11 @@
         "description": "Găsește cereri după descriere",
         "keywords": "căutare găsire"
       },
+      "mock": {
+        "label": "AI: exemple mock pentru această cerere",
+        "description": "Propune răspunsuri exemplu pentru serverul mock dintr-o descriere, un document OpenAPI sau ultimul răspuns",
+        "keywords": "mock exemple răspunsuri examples responses"
+      },
       "schema": {
         "label": "AI: cereri dintr-o descriere a API-ului",
         "description": "Documentele OpenAPI folosesc importatorul încorporat; alte descrieri sunt trimise la AI",
@@ -154,6 +173,7 @@
       "consent": "Înțeleg că, atunci când rulez o acțiune AI, detaliile cererii sau ale răspunsului din previzualizare sunt trimise către {{host}}, iar facturarea se face între mine și furnizor.",
       "enable": "Activare funcții AI",
       "enableAfterConsent": "Activare funcții AI (bifați mai întâi rândul de mai sus)",
+      "inlineCompletion": "Sugerează cod în timp ce scriu în editoarele de scripturi. După o scurtă pauză, scriptul din jurul cursorului și numele variabilelor dvs., niciodată valorile lor, sunt trimise la {{host}} fără previzualizare. Apăsați Tab pentru a accepta o sugestie.",
       "provider": "Furnizor",
       "baseUrl": "URL de bază",
       "baseUrlPlaceholder": "https://host/v1",

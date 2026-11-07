@@ -4,8 +4,26 @@
     "timeoutPlaceholder": "{{milliseconds}} (implicit)",
     "followRedirects": "Urmărire redirecționări",
     "verifyTls": "Verificare certificate TLS",
+    "httpVersion": "Versiune HTTP",
+    "rpcTransport": "Transport gRPC",
+    "rpcTransports": {
+      "grpc": "gRPC (HTTP/2)",
+      "grpcWeb": "gRPC-Web",
+      "grpcWebText": "gRPC-Web, text base64",
+      "connect": "Connect"
+    },
+    "httpVersions": {
+      "auto": "Automat",
+      "http11": "HTTP/1.1",
+      "http2": "HTTP/2"
+    },
     "sendCookies": "Trimitere cookie-uri din cookie jar",
     "storeCookies": "Stocare cookie-uri setate de răspuns",
+    "opensIn": "Se deschide în",
+    "opensInFull": "Editorul complet",
+    "opensInVariables": "Vizualizarea variabilelor",
+    "jsonDepth": "Extindere răspunsuri JSON",
+    "jsonDepthDefault": "Implicit în aplicație",
     "tags": "Etichete",
     "tagsPlaceholder": "smoke, regresie",
     "description": "Descriere",

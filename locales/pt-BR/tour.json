@@ -1,0 +1,28 @@
+{
+  "tour": {
+    "label": "Tour rápido",
+    "replay": "Mostrar tour",
+    "progress": "Etapa {{current}} de {{total}}",
+    "next": "Próximo",
+    "done": "Concluir",
+    "skip": "Pular tour",
+    "steps": {
+      "send": {
+        "title": "Enviar uma requisição",
+        "body": "Digite uma URL na barra de endereço e pressione Enviar. A resposta abre logo abaixo."
+      },
+      "variables": {
+        "title": "Usar variáveis",
+        "body": "Escreva um valor como {{example}} e defina-o em um ambiente, para que uma requisição funcione em local, staging e produção."
+      },
+      "tools": {
+        "title": "Encontrar todas as ferramentas",
+        "body": "O menu Ferramentas no cabeçalho reúne o que você pode fazer com as requisições: executar, mock, procurar, monitorar e compartilhar."
+      },
+      "explore": {
+        "title": "Pesquisar qualquer coisa",
+        "body": "Pressione {{shortcut}} para abrir a paleta de comandos, ou abra Ajuda e escolha Explorar recursos."
+      }
+    }
+  }
+}

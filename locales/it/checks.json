@@ -117,6 +117,9 @@
       "status": "Codice di stato",
       "contentType": "Tipo di contenuto",
       "schema": "Forma del corpo, come JSON Schema: tipi dei campi, campi presenti e null dove è stato visto null. Un campo null accetta qualsiasi valore.",
+      "snapshot": "Snapshot del corpo: il controllo fallisce quando il corpo differisce da questa risposta. I valori dei campi con nomi che sembrano segreti, token, date e id che sembrano generati vengono ignorati e non salvati. Modifica i percorsi ignorati nel controllo.",
+      "headersSnapshot": "Snapshot degli header, senza cookie e credenziali. Gli header che cambiano a ogni risposta, come date ed etag, vengono ignorati.",
+      "exampleSnapshot": "Snapshot dell'esempio salvato \"{{name}}\": il controllo fallisce quando il corpo differisce da quell'esempio. Campi che sembrano segreti, token, date e id generati vengono ignorati e non salvati.",
       "responseTime": "Tempo di risposta massimo di {{budget}} ms, il doppio di quello impiegato da questa risposta, arrotondato per eccesso."
     },
     "nothingNew": "La scheda Controlli contiene già questi controlli.",
@@ -178,6 +181,21 @@
     "filterTimedOut_one": "Il filtro è rimasto in esecuzione per più di {{count}} secondo ed è stato interrotto. Controllalo alla ricerca di un'espressione regolare lenta.",
     "filterTimedOut_many": "Il filtro è rimasto in esecuzione per più di {{count}} di secondi ed è stato interrotto. Controllalo alla ricerca di un'espressione regolare lenta.",
     "filterTimedOut_other": "Il filtro è rimasto in esecuzione per più di {{count}} secondi ed è stato interrotto. Controllalo alla ricerca di un'espressione regolare lenta."
+  },
+  "snapshot": {
+    "operator": "corrisponde allo snapshot",
+    "edit": "Modifica snapshot",
+    "editorTitle": "Modifica snapshot",
+    "editorHint": "Un oggetto JSON. expected è il valore salvato, ignore elenca i JSONPath che non vengono confrontati (come $.id o $.items[*].createdAt), e ignoreOrder true confronta gli array senza tenere conto dell'ordine dei loro elementi.",
+    "update": "Aggiorna snapshot dall'ultima risposta",
+    "notice": "Gli snapshot sono testo in chiaro nella richiesta e, in una cartella del workspace, finiscono in Git. Controllali prima di fare commit. I campi con nomi da credenziale (incluso tutto ciò che contengono), i valori che sembrano token, JWT o chiavi API, le date, gli id generati e i valori dei percorsi ignorati vengono sostituiti da (ignored) e non vengono salvati.",
+    "invalid": "Lo snapshot non è valido: deve essere un oggetto JSON con un valore expected.",
+    "changed": "{{path}}: atteso {{expected}}, ottenuto {{actual}}",
+    "missing": "{{path}}: atteso {{expected}}, ma è assente",
+    "extra": "{{path}}: non presente nello snapshot, ottenuto {{actual}}",
+    "more_one": "…e {{count}} altra differenza.",
+    "more_many": "…e altre {{count}} di differenze.",
+    "more_other": "…e altre {{count}} differenze."
   },
   "operators": {
     "eq": "è uguale a",

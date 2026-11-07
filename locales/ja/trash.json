@@ -1,0 +1,28 @@
+{
+  "trash": {
+    "title": "最近削除した項目",
+    "command": "最近削除した項目",
+    "commandDescription": "削除したリクエスト、フォルダー、環境を復元",
+    "commandKeywords": "trash bin restore undo recover ゴミ箱 復元 元に戻す",
+    "empty": "最近削除された項目はありません。",
+    "note_other": "削除した項目は{{count}}日間保持されます。シークレットの値は保持されないため、復元したシークレット変数は空になります。",
+    "listLabel": "削除した項目",
+    "kinds": {
+      "request": "リクエスト",
+      "folder": "フォルダー",
+      "environment": "環境"
+    },
+    "daysLeft_other": "残り{{count}}日",
+    "restore": "復元",
+    "restored": "{{name}}を復元しました。",
+    "deleteForever": "完全に削除",
+    "emptyBin": "ゴミ箱を空にする",
+    "emptyBinTitle": "ゴミ箱を空にしますか？",
+    "emptyBinMessage": "ゴミ箱の中身はすべて完全に削除されます。",
+    "emptyBinConfirm": "ゴミ箱を空にする",
+    "readFailed": "ゴミ箱を読み取れませんでした：{{detail}}",
+    "saveFailed": "削除した項目をゴミ箱に保持できませんでした：{{detail}}",
+    "restoreFailed": "項目を復元できませんでした：{{detail}}",
+    "unnamed": "名前なし"
+  }
+}

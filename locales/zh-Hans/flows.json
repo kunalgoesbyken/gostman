@@ -12,9 +12,21 @@
       "label": "如果",
       "description": "检查响应或变量并分支。"
     },
+    "switch": {
+      "label": "多路分支",
+      "description": "从上到下检查各个情形，按第一个匹配的情形转到对应步骤。"
+    },
     "forEach": {
       "label": "遍历",
       "description": "对响应中列表的每一项重复执行步骤。"
+    },
+    "repeat": {
+      "label": "重复",
+      "description": "多次运行步骤，或运行到条件通过为止。"
+    },
+    "flow": {
+      "label": "运行流程",
+      "description": "把另一个已保存的流程作为一个步骤运行。"
     },
     "delay": {
       "label": "等待",
@@ -26,13 +38,19 @@
     },
     "unknown": {
       "label": "未知步骤"
+    },
+    "parallel": {
+      "label": "并行",
+      "description": "同时发送多个请求或运行多个流程。"
     }
   },
   "flowField": {
     "next": "然后转到",
     "onFailure": "失败时转到",
     "then": "为真时转到",
-    "else": "为假时转到"
+    "else": "为假时转到",
+    "case": "“{{label}}”匹配时转到",
+    "otherwise": "没有情形匹配时转到"
   },
   "flowEngine": {
     "noSteps": "此流程没有步骤。请添加一个再运行。",
@@ -49,6 +67,13 @@
     "noList": "请选择响应中包含该列表的“发送请求”步骤。",
     "noPath": "请给出该列表的 JSONPath，例如 $.items。",
     "emptyLoop": "请在“遍历”内添加要重复的步骤。",
+    "emptyRepeat": "请在“重复”内添加要重复的步骤。",
+    "noCases": "请至少添加一个情形。",
+    "caseNoConditions": "请为情形“{{label}}”至少添加一个条件。",
+    "noFlow": "请选择此步骤要运行的已保存流程。",
+    "missingFlow": "没有与“{{reference}}”匹配的已保存流程。请重新选择。",
+    "flowCycle": "从这里运行“{{name}}”会回到一个正在运行的流程。流程不能直接或通过其他流程运行自身。",
+    "flowTooDeep": "从此步骤运行的流程嵌套超过 {{max}} 层。请减少流程之间的嵌套。",
     "problem": "{{title}}：{{message}}",
     "cannotRun_other": "修复 {{count}} 个问题之前，流程无法运行。",
     "notRunYet": "{{title}} 尚未发送其请求，因此无法使用它的响应。",
@@ -56,6 +81,8 @@
     "noHeader": "{{title}} 的响应中没有 {{name}} 请求头。",
     "notAList": "{{title}} 的响应中，{{path}} 不是列表。",
     "budget_other": "流程已发送 {{count}} 个请求，达到上限，因此已停止。请让循环有结束的条件，或在流程设置中调高上限（最多 {{cap}}）。",
+    "budgetOf_other": "流程“{{name}}”已达到 {{count}} 个请求的上限，因此运行已停止。请让其循环有结束的条件，或在“{{name}}”的设置中调高上限（最多 {{cap}}）。",
+    "budgetAbove": "运行达到了调用此流程的上层流程的请求上限，因此已停止。",
     "endless_other": "流程经过 {{count}} 个步骤都没有发送请求，因此已停止。请检查各步骤接下来转到哪里。",
     "timedOut": "选择下一步用时超过 {{seconds}} s，因此流程已停止。",
     "passed": "流程已走到结尾。",
@@ -76,14 +103,73 @@
     },
     "endOfFlow": "流程结尾",
     "nextItem": "下一项",
+    "nextPass": "下一轮",
     "iteration": "第 {{position}}/{{count}} 项。",
+    "pass": "第 {{position}}/{{count}} 轮。",
+    "untilMet_other": "条件在 {{count}} 轮后通过。",
+    "untilNever_other": "条件在 {{count}} 轮内都没有通过。",
+    "untilNeverRerouted_other": "条件在 {{count}} 轮内都没有通过；转到 {{target}}。",
+    "repeatFailed_other": "{{title}} 运行了 {{count}} 次，条件始终没有通过，并且没有设置失败时要转到的步骤。",
+    "caseName": "情形 {{position}}",
+    "caseCheck": "{{label}}：{{name}}",
+    "noCaseMatched": "没有情形匹配",
+    "flowPassed_other": "已通过；发送了 {{count}} 个请求。",
     "emptyList": "列表为空，因此跳过了其中的步骤。",
     "waited": "已等待 {{duration}}。",
     "untilCheck": "直到 {{name}}",
-    "milliseconds": "{{value}} ms"
+    "milliseconds": "{{value}} ms",
+    "inputsFailed": "{{title}} 无法为本次发送填入其值。",
+    "unknownInput": "“{{target}}”不是可以放置值的位置。请使用 header、query、body、form 或 variable。",
+    "noInputName": "本次发送的每个值都需要名称：请求头、查询参数、指向请求体的 JSONPath、表单字段或变量。",
+    "notEarlierStep": "“{{target}}”不会在此步骤之前运行，因此这里无法使用它的响应。",
+    "inputBadPath": "“{{name}}”不是此步骤可以写入的请求体路径。请写作 $.customer.id、$.items[0].id 或 $['a name']。",
+    "inputNotJson": "“{{name}}”设置的是 JSON 请求体中的字段，但该请求的请求体不是 JSON。",
+    "inputNotForm": "“{{name}}”设置的是表单字段，但该请求的请求体不是表单。",
+    "inputBodyNotJson": "该请求的请求体不是有效的 JSON，因此无法在其中设置“{{name}}”。请在请求体中给 {{example}} 加上引号，或改为在这里设置该值。",
+    "inputPastEnd_other": "“{{name}}”指向的位置超出了包含 {{count}} 项的列表末尾。",
+    "inAllGroup": "全部满足：{{name}}",
+    "inAnyGroup": "任一满足：{{name}}",
+    "typeNames": {
+      "string": "文本",
+      "number": "数字",
+      "boolean": "true 或 false",
+      "json": "JSON"
+    },
+    "notOfType": "{{name}} 应为 {{type}}，但得到的是“{{value}}”。请修改该值，或在流程设置中修改 {{name}} 的类型。",
+    "outputFailed": "流程已通过，但无法填入其输出 {{name}}：{{message}}",
+    "inputMissing": "此流程需要 {{name}} 的值。请在“运行流程”步骤中、用 --var name=value 或在当前环境中提供。",
+    "noVariableName": "有一个流程变量没有名称。请为它命名，或移除该行。",
+    "variableTwice": "有两个流程变量都叫 {{name}}。请重命名或移除其中一个。",
+    "variablesLoop": "{{names}} 的初始值互相引用，因此都无法求值。请给其中一个设置不依赖其他变量的值。",
+    "loopHidesVariable": "{{name}} 也是流程变量，因此循环不能使用这个名称。请重命名其中一个。",
+    "groupsTooDeep": "分组最多嵌套 {{levels}} 层。请把最深层的条件上移一层。",
+    "emptyParallel": "请在“并行”内添加要运行的请求或流程。",
+    "branchKind": "“并行”内只能运行“发送请求”和“运行流程”步骤。",
+    "branchJump": "“并行”内的步骤不能转到其他步骤；请在“并行”步骤上设置路径。",
+    "branchRetry": "“并行”内的步骤只发送一次；如需重试，请把它放进一个流程，并在这里运行该流程。",
+    "siblingBranch": "“{{target}}”与此步骤同时运行，因此这里无法使用它的响应。",
+    "intoBranch": "{{field}}“{{target}}”，但它是“并行”内部的步骤。请改为转到该“并行”步骤。",
+    "branchInputs": "{{title}}：{{message}}",
+    "branchStates": {
+      "running": "仍在运行",
+      "passed": "已通过",
+      "failed": "已失败",
+      "cancelled": "已停止"
+    },
+    "branchFact": "{{title}} {{timing}}",
+    "branchTook": "{{state}}，用时 {{duration}}",
+    "branchPassed": "已通过。",
+    "branchFailed": "失败。",
+    "branchCancelled": "已停止，因为“并行”步骤已经完成。",
+    "branchTimedOut": "已停止，因为“并行”步骤已超时。",
+    "parallelPassed_other": "{{count}} 个中有 {{passed}} 个通过；用时 {{duration}} 完成。",
+    "parallelFailed_other": "{{count}} 个中有 {{passed}} 个通过，但“完成条件”始终没有成立。",
+    "parallelTimedOut": "{{duration}} 后仍未完成，因此仍在运行的步骤已被停止。"
   },
   "flowImport": {
-    "missingRequests": "流程“{{name}}”的步骤发送的请求不在导入内容中；运行之前请重新选择它们。"
+    "missingRequests": "流程“{{name}}”的步骤发送的请求不在导入内容中；运行之前请重新选择它们。",
+    "missingFlows": "流程“{{name}}”的步骤运行的流程不在导入内容中；运行之前请重新选择它们。",
+    "missingFlowsNamed_other": "流程“{{name}}”运行的流程 {{flows}} 不在导入内容中。请一并导入这些流程，或在其“运行流程”步骤中选择其他流程，然后再运行“{{name}}”。"
   },
   "flowTemplate": {
     "description": "登录，等待订单就绪，如果始终没有就绪就取消订单。请为每个“发送请求”步骤选择请求，使其成为你自己的流程。",
@@ -147,14 +233,22 @@
     "fromResponse": "{{title}} {{source}}",
     "fromResponsePath": "{{title}} {{source}} {{path}}",
     "noValues": "还没有值",
+    "inputs_other": "为本次发送设置 {{count}} 个值",
     "conditionAnd_other": "{{condition}} 等 {{count}} 个条件",
     "conditionOr_other": "{{condition}} 等 {{count}} 个条件",
     "noCondition": "还没有条件",
     "variablesCondition": "变量：{{condition}}",
+    "caseLine": "{{label}}：{{condition}}",
+    "noCases": "还没有情形",
     "loop": "{{title}} 的 {{path}}",
     "loopBody": "对每一项",
     "emptyLoop": "添加要重复的步骤",
     "nextItem": "下一项",
+    "repeatBody": "重复这些步骤",
+    "passes_other": "{{count}} 轮",
+    "passesApart_other": "{{count}} 轮，间隔 {{delay}}",
+    "runsFlow": "运行 {{name}}",
+    "noFlow": "未选择流程",
     "wait": "等待 {{duration}}",
     "seconds": "{{value}} s",
     "milliseconds": "{{value}} ms",
@@ -164,9 +258,11 @@
     },
     "edges": {
       "next": "转到",
+      "passes": "通过",
       "onFailure": "失败",
       "then": "真",
-      "else": "假"
+      "else": "假",
+      "otherwise": "否则"
     },
     "toEnd": "{{label}} → 结束",
     "attempt": "{{attempt}}/{{attempts}}",
@@ -184,19 +280,74 @@
     "remove": "删除步骤",
     "removeTitle": "删除步骤",
     "removeMessage": "要删除步骤“{{title}}”吗？原本转到它的步骤将改为继续执行下一步。",
-    "stepActions": "{{title}} 的操作"
+    "stepActions": "{{title}} 的操作",
+    "tags": {
+      "request": "请求",
+      "set": "设置",
+      "if": "如果",
+      "switch": "多路分支",
+      "forEach": "遍历",
+      "repeat": "重复",
+      "flow": "流程",
+      "delay": "等待",
+      "end": "结束"
+    },
+    "endPill": "结束",
+    "moreLines_other": "还有 {{count}} 条",
+    "note": "备注",
+    "zoomControls": "缩放",
+    "zoomIn": "放大",
+    "zoomOut": "缩小",
+    "fit": "缩放以显示整个流程",
+    "showHidden_other": "显示 {{count}} 个隐藏的步骤",
+    "actualSize": "缩放到 100%",
+    "joiners": {
+      "all": "且",
+      "any": "或"
+    },
+    "parallelBody": "同时运行",
+    "together_other": "同时运行 {{count}} 个分支",
+    "doneWhen": "当 {{condition}} 时完成",
+    "doneWhenAll": "全部通过时完成",
+    "timeout": "{{duration}} 后停止"
   },
   "flowPicker": {
     "title": "选择请求",
     "search": "搜索已保存的请求",
     "noMatch": "没有匹配的已保存请求",
     "noRequests": "还没有已保存的请求",
-    "noRequestsHint": "请先保存一个请求；流程发送的是已保存的请求。"
+    "noRequestsHint": "请先保存一个请求；流程发送的是已保存的请求。",
+    "flowTitle": "选择流程",
+    "flowSearch": "搜索已保存的流程",
+    "noFlowMatch": "没有匹配的已保存流程",
+    "noFlows": "还没有其他流程",
+    "noFlowsHint": "请先保存另一个流程；此步骤运行的是已保存的流程。",
+    "noCollection": "不在任何集合中"
   },
   "flowEditor": {
     "label": "标签",
     "stepId": "步骤 ID",
+    "note": "备注",
+    "notePlaceholder": "用 Markdown 说明为什么需要这个步骤。鼠标悬停在画布上的步骤时显示。",
     "request": "请求",
+    "inputs": "本次发送的值",
+    "inputsHint": "在请求发送前把值放入请求中：请求头、查询参数、按 JSONPath 指定的 JSON 请求体字段、表单字段或变量。来自响应的值在请求体中保持其 JSON 类型；文本按原样发送，其中的 {{variables}} 会被填入。",
+    "inputTarget": "目标",
+    "inputTargets": {
+      "header": "请求头",
+      "query": "查询参数",
+      "body": "JSON 请求体",
+      "form": "表单字段",
+      "variable": "变量"
+    },
+    "inputName": "名称",
+    "inputPlaceholders": {
+      "header": "Authorization",
+      "query": "page",
+      "body": "$.customer.id",
+      "form": "name",
+      "variable": "token"
+    },
     "variableName": "名称",
     "variableValue": "值",
     "removeRow": "移除",
@@ -234,6 +385,27 @@
     "itemName": "项变量",
     "indexName": "索引变量",
     "loopHint": "在内部，{{item}} 是当前项，{{field}} 是其中的某个字段，{{index}} 是其位置（从 0 开始）。",
+    "cases": "情形",
+    "caseLabel": "情形标签",
+    "addCase": "添加情形",
+    "removeCase": "移除情形",
+    "moveCaseUp": "上移情形",
+    "moveCaseDown": "下移情形",
+    "whenMatched": "匹配时转到",
+    "whenNoCase": "没有情形匹配时转到",
+    "casesHint": "情形从上到下检查；第一个匹配的情形决定转到哪里。",
+    "passes": "轮数",
+    "passDelay": "每轮间隔（ms）",
+    "passName": "轮次变量",
+    "repeatHint": "在内部，{{index}} 是从 0 开始的轮次编号。没有条件时，每一轮都会运行这些步骤。",
+    "repeatUntilHint": "每轮结束后检查；条件一通过，循环就结束。",
+    "whenNeverMet": "条件始终没有通过时转到",
+    "afterRepeat": "循环结束后转到",
+    "flow": "流程",
+    "openFlow": "打开流程",
+    "flowVariables": "本次运行的变量",
+    "flowScope": "仅供该流程的步骤使用，之后移除。",
+    "flowVariablesHint": "值中可以使用 {{variables}}。该流程用“设置变量”设置的值会保留在会话中，与这里相同。",
     "values": "值",
     "valuesHint": "这些值在本次运行的剩余过程中保存在会话中，与提取规则相同，并且不会被保存。",
     "valueSource": "来源",
@@ -257,7 +429,41 @@
       "failed": "失败"
     },
     "message": "消息",
-    "messagePlaceholder": "显示在运行摘要中"
+    "messagePlaceholder": "显示在运行摘要中",
+    "sendScope": "仅供本次发送使用，之后移除。",
+    "sessionScope": "在本次运行的剩余过程中保留。",
+    "loopScope": "可供此循环内的步骤使用。",
+    "groupTitle": "分组",
+    "addGroup": "添加分组",
+    "removeGroup": "移除分组",
+    "reads": "读作：",
+    "typeLabels": {
+      "string": "文本",
+      "number": "数字",
+      "boolean": "真或假",
+      "json": "JSON"
+    },
+    "required": "必填",
+    "requiredPlaceholder": "必填",
+    "defaultPlaceholder": "留空则使用默认值",
+    "flowInputs": "流程的输入",
+    "otherVariables": "本次运行的其他变量",
+    "givesBack": "通过时返回 {{names}}。",
+    "branchNote": "“并行”内的步骤只运行一次，与其他步骤同时运行。由“并行”步骤决定流程接下来转到哪里。",
+    "branches": "分支",
+    "branchesHint_other": "内部同时运行 {{count}} 个请求或流程。点击框内的 + 添加更多。",
+    "timeout": "停止前等待（ms）",
+    "timeoutHint": "0 表示一直等到完成。时间到后，仍在运行的分支会被停止。",
+    "doneWhen": "完成条件",
+    "doneWhenEmpty": "没有条件时，该步骤会等待所有分支，全部通过时即通过。",
+    "factsHint": "每个分支名称的值为 {{states}}；加上 .status 可取其 HTTP 状态码，加上 .ms 可取其用时。",
+    "branchStateWords": {
+      "passed": "passed",
+      "failed": "failed",
+      "cancelled": "cancelled",
+      "running": "running"
+    },
+    "whenParallelFails": "未完成时转到"
   },
   "flowView": {
     "start": "开始",
@@ -278,7 +484,27 @@
     "maxSendsHint": "运行发送这么多个请求后会停止，因此没有终点的循环不会一直运行下去（最多 {{cap}}）。",
     "selectHint": "选择一个步骤即可编辑，或点击 + 添加步骤。步骤从上到下运行；分支画在右侧。",
     "problems_other": "有 {{count}} 处需要处理，流程才能运行",
-    "cliHint": "在工作区文件夹中，从终端或 CI 运行："
+    "cliHint": "在工作区文件夹中，从终端或 CI 运行：",
+    "floatPanel": "浮动面板",
+    "dockPanel": "停靠面板",
+    "showSettings": "流程设置",
+    "closePanel": "关闭面板",
+    "panelTitle": "步骤和运行",
+    "variablesTitle": "变量",
+    "variablesHint": "流程变量只在一次运行中存在：每个步骤都能读取，“设置变量”可以修改，运行结束后即消失。将其标记为输入后，可以由“运行流程”步骤、--var 或环境提供其值。",
+    "variableType": "类型",
+    "initialValue": "初始值",
+    "initialPlaceholders": {
+      "string": "初始值",
+      "number": "0",
+      "boolean": "true 或 false",
+      "json": "{\"key\": \"value\"}"
+    },
+    "isInput": "输入",
+    "isRequired": "必填",
+    "outputsTitle": "输出",
+    "outputsHint": "此流程通过时返回的值。“运行流程”步骤会把它们放进自己的变量中；从这里运行时，它们会保留在会话中。",
+    "cliTitle": "命令行"
   },
   "flowRun": {
     "idle": "尚未运行",
@@ -294,7 +520,29 @@
     "report": "报告",
     "resultsLabel": "已运行的步骤",
     "wrote": "已设置",
-    "hidden": "已隐藏"
+    "hidden": "已隐藏",
+    "truthTable": "已检查的条件",
+    "checkTrue": "真",
+    "checkFalse": "假",
+    "variables": "变量",
+    "outputs": "输出",
+    "sessionValue": "会话"
+  },
+  "flowMetrics": {
+    "title": "指标",
+    "totalTime": "总用时",
+    "requests": "请求",
+    "sent": "已发送",
+    "received": "已接收",
+    "slowest": "最慢的步骤",
+    "columns": {
+      "step": "步骤",
+      "count": "次数",
+      "total": "合计",
+      "min": "最短",
+      "max": "最长",
+      "average": "平均"
+    }
   },
   "flowScript": {
     "skipped": "已被脚本跳过。",

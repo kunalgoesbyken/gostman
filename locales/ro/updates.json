@@ -1,8 +1,55 @@
 {
   "updates": {
+    "installedLabel": "Versiune instalată",
+    "checkNow": "Verificare acum",
+    "checking": "Se verifică…",
+    "neverChecked": "Nu a fost verificat încă.",
+    "checkedAt": "Ultima verificare {{when}}.",
+    "upToDate": "Aceasta este cea mai recentă versiune.",
+    "checkFailed": "Serverul de actualizări nu a putut fi contactat. Verificați conexiunea și încercați din nou.",
     "checksLabel": "Verificare versiuni noi",
+    "checksHint": "O dată pe zi, citește cea mai recentă versiune de pe GitHub și o afișează în bara de stare.",
+    "autoLabel": "Instalare automată a actualizărilor",
+    "autoHint": "Descarcă versiunile noi în fundal și le instalează când Gostman se închide sau repornește.",
+    "autoHintInstaller": "Descarcă versiunile noi în fundal, apoi le instalează când reporniți Gostman și Windows cere permisiunea.",
     "available": "Versiunea {{version}} este disponibilă",
+    "availableDetail": "Gostman o descarcă, se asigură că a sosit intactă și o instalează când reporniți.",
+    "availableUnverified": "Această versiune nu poate fi instalată automat, deci descărcați-o de pe pagina de versiuni.",
+    "update": "Actualizare Gostman",
+    "updateHint": "Descarcă versiunea {{version}}, o verifică și o instalează",
+    "downloading": "Se descarcă {{version}}… {{percent}}",
+    "downloadingDetail": "{{received}} din {{total}}",
+    "verifying": "Se verifică dacă descărcarea este completă…",
+    "installing": "Se instalează…",
+    "ready": "Reporniți pentru actualizare",
+    "readyHint": "Versiunea {{version}} este descărcată și verificată. Reporniți Gostman pentru a o instala.",
+    "readyDetail": "Versiunea {{version}} este descărcată și verificată.",
+    "restartNow": "Repornire acum",
+    "restartTitle": "Reporniți Gostman?",
+    "restartMessage": "Gostman se închide și se redeschide la versiunea {{version}}. Filele deschise și ciornele nesalvate sunt păstrate.",
+    "restartMessageInstaller": "Gostman se închide, Windows cere permisiunea de a instala versiunea {{version}}, iar Gostman se redeschide. Filele deschise și ciornele nesalvate sunt păstrate.",
+    "cancel": "Anulare descărcare",
+    "tryAgain": "Reîncercare",
+    "releaseNotes": "Note de versiune",
+    "openRelease": "Deschidere pagină de versiuni",
+    "download": "Descărcare",
+    "downloadHint": "Deschide notele de lansare și descărcările pe GitHub",
     "dismiss": "Ascundere până la versiunea următoare",
-    "downloadHint": "Deschide notele de lansare și descărcările pe GitHub"
+    "failed": "Actualizarea a eșuat",
+    "failedHint": "Vedeți ce nu a mers în Preferințe, Actualizări",
+    "failures": {
+      "network": "Serverul de actualizări nu a putut fi contactat. Verificați conexiunea și încercați din nou.",
+      "unsupported": "Încă nu există actualizare automată pentru acest sistem, deci descărcați-o de pe pagina de versiuni.",
+      "unverified": "Gostman nu a putut confirma că această actualizare este autentică, deci nu a fost instalată. Descărcați-o de pe pagina de versiuni.",
+      "mismatch": "Descărcarea nu a ajuns corect, deci nu a fost instalată. Încercați din nou.",
+      "storage": "Gostman nu a putut salva descărcarea pe acest computer. Eliberați spațiu și încercați din nou.",
+      "install": "Gostman nu a putut instala actualizarea. Închideți-l și rulați programul de instalare de pe pagina de versiuni."
+    },
+    "manual": {
+      "scoop": "Instalat cu Scoop. Actualizați-l cu {{command}}.",
+      "homebrew": "Instalat cu Homebrew. Actualizați-l cu {{command}}.",
+      "system": "Instalat ca pachet de sistem, deci descărcați pachetul nou de pe pagina de versiuni și instalați-l.",
+      "other": "Această copie a Gostman nu se poate actualiza singură, deci descărcați versiunile noi de pe pagina de versiuni."
+    }
   }
 }

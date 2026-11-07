@@ -62,7 +62,22 @@
     "views": {
       "pretty": "Formateado",
       "raw": "Sin formato",
-      "preview": "Vista previa"
+      "preview": "Vista previa",
+      "info": "Resumen",
+      "hex": "Hex",
+      "msgpack": "MessagePack",
+      "cbor": "CBOR"
+    },
+    "hex": {
+      "label": "Vista hexadecimal del cuerpo",
+      "offset": "Desplazamiento",
+      "text": "Texto"
+    },
+    "decode": {
+      "working": "Decodificando…",
+      "failed": "No se pudo leer el cuerpo como {{format}}: {{reason}}",
+      "timedOut": "Leer el cuerpo como {{format}} tardó más de {{seconds}} segundos, así que se detuvo. Usa Hex o guárdalo en un archivo.",
+      "tooLarge": "Este cuerpo ocupa {{size}}. Gostman decodifica hasta {{limit}}, así que usa Hex o guárdalo en un archivo."
     },
     "bodyView": "Vista del cuerpo",
     "checksPassed": "{{passed}} de {{total}} pruebas superadas",
@@ -76,7 +91,8 @@
       "compareParts": "Comparar",
       "comparedWith": "comparada con",
       "bodyPart": "Cuerpo",
-      "headersPart": "Encabezados"
+      "headersPart": "Encabezados",
+      "exportHar": "Exportar como HAR"
     },
     "columns": {
       "name": "Nombre",
@@ -115,6 +131,15 @@
     "treeTrimmed_one": "Se muestra el principio de este árbol. Hay {{count}} valor más oculto. Usa Sin formato o el filtro para ver el resto.",
     "treeTrimmed_many": "Se muestra el principio de este árbol. Hay {{count}} de valores más ocultos. Usa Sin formato o el filtro para ver el resto.",
     "treeTrimmed_other": "Se muestra el principio de este árbol. Hay {{count}} valores más ocultos. Usa Sin formato o el filtro para ver el resto.",
+    "tree": {
+      "expandAll": "Expandir todo",
+      "collapseAll": "Contraer todo",
+      "depth": "Profundidad de expansión",
+      "level": "Nivel {{count}}",
+      "allLevels": "Todos los niveles",
+      "remember": "Abrir siempre esta solicitud con esta profundidad",
+      "remembered": "Esta solicitud ya se abre con esta profundidad"
+    },
     "requestFailed": "La solicitud falló",
     "error": "Error",
     "milliseconds": "{{value}} ms",
