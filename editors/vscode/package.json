@@ -2,7 +2,7 @@
   "name": "gostman",
   "displayName": "Gostman",
   "description": "%description%",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "publisher": "Gostman",
   "license": "MIT",
   "icon": "media/icon.png",
@@ -13,8 +13,9 @@
   "categories": ["Testing", "Other"],
   "keywords": ["api", "rest", "graphql", "grpc", "websocket", "http client", "postman", "bruno", "mcp"],
   "main": "./extension.js",
+  "extensionKind": ["workspace"],
   "l10n": "./l10n",
-  "activationEvents": ["workspaceContains:gostman.yaml"],
+  "activationEvents": ["workspaceContains:**/gostman.yaml"],
   "capabilities": {
     "untrustedWorkspaces": { "supported": false, "description": "%capabilities.untrustedWorkspaces%" },
     "virtualWorkspaces": { "supported": false, "description": "%capabilities.virtualWorkspaces%" }

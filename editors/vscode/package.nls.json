@@ -12,6 +12,6 @@
   "command.scan": "Gostman: Scan the collection for leaked secrets",
   "command.init": "Gostman: Create a collection in this folder",
   "command.docs": "Gostman: Open the documentation",
-  "config.path": "Command that starts the Gostman CLI. Use a full path when `gostman` is not on the PATH.",
-  "config.environment": "Environment name passed as `--env`. Empty uses the first environment of the collection. **Gostman: Select environment** and the status bar item change it."
+  "config.path": "Command that starts the Gostman CLI. Use a full path when `gostman` is neither on the PATH nor in `GOBIN`, `GOPATH/bin` or `~/go/bin`.",
+  "config.environment": "Environment name passed as `--env` for collections where no environment was chosen with **Gostman: Select environment** or the status bar item. Empty uses the first environment of the collection."
 }

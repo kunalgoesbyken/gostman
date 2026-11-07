@@ -4,9 +4,11 @@ Send requests, run collections and check their results from the editor. The exte
 
 ## Requirements
 
-Install the Gostman CLI and put `gostman` on the PATH, or set `gostman.path` to the full path. Downloads: https://github.com/kunalgoesbyken/gostman/releases
+Install the Gostman CLI. The extension starts `gostman` from the PATH, or from `GOBIN`, `GOPATH/bin` or `~/go/bin` where `go install` puts it (and `/opt/homebrew/bin`, `/usr/local/bin` or `~/.local/bin` on macOS and Linux); anywhere else, set `gostman.path` to the full path. Downloads: https://github.com/kunalgoesbyken/gostman/releases
 
-The collection is the workspace folder that holds `gostman.yaml`. With several folders open, the Testing view, the status bar item and the commands use the first one that has it; the Send lens works in any of them. A collection in a subfolder of a workspace folder is not found, and the extension does not run in virtual workspaces.
+## Collections
+
+A collection is a folder that holds `gostman.yaml`. The extension finds every collection in every workspace folder, at its root or up to four folders below it, such as the `gostman` folder that `gostman init` creates in a repository. Hidden folders, `node_modules`, `bower_components`, `vendor` and `__pycache__` are skipped. With several collections, the Testing view shows one item per collection, the status bar shows the environment of the active editor's collection, and the commands use that collection or ask which one. The extension does not run in virtual workspaces.
 
 ## Send from the file
 
@@ -14,11 +16,11 @@ Open a request file of the collection. A **Send** lens above the first line runs
 
 ## Test Explorer
 
-The folders and requests of the collection appear in the Testing view. Run everything, a folder or a request: the extension runs `gostman run . --reporter json --redact` with `--folder` or `--only` and marks each request passed or failed. A failed request shows the failed checks, or the error, as its message.
+The folders and requests of each collection appear in the Testing view. Run everything, a collection, a folder or a request: the extension runs `gostman run . --reporter json --redact` in each collection, with `--folder` or `--only`, and marks each request passed or failed. A failed request shows the failed checks, or the error, as its message.
 
 ## Environment
 
-The status bar shows the environment passed as `--env`. Select it, or run **Gostman: Select environment**, to choose one of the files in the collection's `environments` folder. The choice is stored in the `gostman.environment` workspace setting, which is `.vscode/settings.json` in a single folder, so add that file to `.gitignore` if the choice should stay personal. The setting is used by Run collection, Run a folder, Send a saved request, Run a flow, the Send lens and the Test Explorer; Scan, Lint, Create a collection and Open the documentation do not take an environment. The status bar item shows a warning when the stored name is not one of the collection's environments.
+The status bar shows the environment passed as `--env`. Select it, or run **Gostman: Select environment**, to choose one of the files in the collection's `environments` folder. Each collection keeps its own choice in VS Code's workspace storage, never in a committed file; a collection with no choice uses the `gostman.environment` setting, which a team can commit as a shared default. The environment is used by Run collection, Run a folder, Send a saved request, Run a flow, the Send lens and the Test Explorer; Scan, Lint, Create a collection and Open the documentation do not take an environment. The status bar item shows a warning when the stored name is not one of the collection's environments.
 
 ## Commands
 
@@ -36,12 +38,12 @@ Open the Command Palette and type `Gostman`.
 | Scan the collection for leaked secrets | `gostman scan .` |
 | Create a collection in this folder | `gostman init .` |
 
-The commands that are not the lens or the Testing view show their output in the Gostman terminal.
+The commands that are not the lens or the Testing view show their output in a terminal named after the collection. Create a collection in this folder asks for the workspace folder when there are several.
 
 ## Settings
 
 - `gostman.path`: command that starts the CLI.
-- `gostman.environment`: environment name passed as `--env`; empty uses the first environment of the collection.
+- `gostman.environment`: environment name passed as `--env` for collections where none was selected; empty uses the first environment of the collection.
 
 ## Trust
 

@@ -1,7 +1,8 @@
 const vscode = require("vscode");
 const { capture } = require("./cli");
-const { environmentArgs, rootFor } = require("./settings");
-const { requestReference, belongsTo } = require("./workspaceFiles");
+const { environmentArgs } = require("./settings");
+const { collectionOf } = require("./collections");
+const { requestReference } = require("./workspaceFiles");
 const { parseOutcome, describeCheck } = require("./report");
 
 const PANEL_BODY_BYTES = 256 * 1024;
@@ -129,8 +130,8 @@ function showPanel(title, html) {
   panel.reveal(undefined, true);
 }
 
-function sendArguments(reference) {
-  return ["send", "--json", "--workspace", ".", "--max-body", String(PANEL_BODY_BYTES), "--include-headers", ...environmentArgs(), "--", reference];
+function sendArguments(reference, root) {
+  return ["send", "--json", "--workspace", ".", "--max-body", String(PANEL_BODY_BYTES), "--include-headers", ...environmentArgs(root), "--", reference];
 }
 
 async function sendSaved(reference, cwd) {
@@ -140,7 +141,7 @@ async function sendSaved(reference, cwd) {
     const abort = new AbortController();
     token.onCancellationRequested(() => abort.abort());
     try {
-      const { stdout, stderr } = await capture(sendArguments(reference), { cwd, signal: abort.signal });
+      const { stdout, stderr } = await capture(sendArguments(reference, cwd), { cwd, signal: abort.signal });
       const outcome = parseOutcome(stdout);
       if (outcome) showPanel(title, renderOutcome(outcome, stderr.trim()));
       else vscode.window.showErrorMessage(vscode.l10n.t("Gostman: {0}", stderr.trim() || vscode.l10n.t("The send produced no result.")));
@@ -153,10 +154,10 @@ async function sendSaved(reference, cwd) {
 async function sendFile(uri) {
   const target = uri ?? vscode.window.activeTextEditor?.document.uri;
   if (!target) return;
-  const root = rootFor(target);
+  const root = target.scheme === "file" ? collectionOf(target.fsPath)?.root : undefined;
   const document = await vscode.workspace.openTextDocument(target);
   if (document.isDirty) await document.save();
-  const reference = root && belongsTo(root, target.fsPath) ? await requestReference(root, target.fsPath) : undefined;
+  const reference = root ? await requestReference(root, target.fsPath) : undefined;
   if (!reference) {
     vscode.window.showWarningMessage(vscode.l10n.t("Gostman: this file is not a request of the collection."));
     return;

@@ -1,42 +1,81 @@
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
 const { execFile } = require("child_process");
 const vscode = require("vscode");
-const { settings, rootFolder } = require("./settings");
+const { settings } = require("./settings");
 const { SETTINGS } = require("./constants");
 
 const CONTROL = /\p{Cc}/u;
 const OUTPUT_LIMIT = 64 * 1024 * 1024;
+const DEFAULT_COMMAND = "gostman";
+const WINDOWS = process.platform === "win32";
+const EXECUTABLE = WINDOWS ? `${DEFAULT_COMMAND}.exe` : DEFAULT_COMMAND;
+
+function isExecutable(file) {
+  try {
+    if (!fs.statSync(file).isFile()) return false;
+    if (!WINDOWS) fs.accessSync(file, fs.constants.X_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function listed(value) {
+  return (value ?? "").split(path.delimiter).filter(Boolean);
+}
+
+function onPath() {
+  const names = WINDOWS ? [EXECUTABLE, `${DEFAULT_COMMAND}.com`] : [DEFAULT_COMMAND];
+  return listed(process.env.PATH ?? process.env.Path).some((directory) => names.some((name) => isExecutable(path.join(directory, name))));
+}
+
+function installPlaces() {
+  const home = os.homedir();
+  const goPaths = listed(process.env.GOPATH).map((directory) => path.join(directory, "bin"));
+  const common = WINDOWS ? [] : ["/opt/homebrew/bin", "/usr/local/bin", path.join(home, ".local", "bin")];
+  return [process.env.GOBIN, ...goPaths, path.join(home, "go", "bin"), ...common].filter(Boolean);
+}
 
 function cliPath() {
-  return settings().get(SETTINGS.path, "gostman");
+  const configured = settings().get(SETTINGS.path, DEFAULT_COMMAND).trim() || DEFAULT_COMMAND;
+  if (configured !== DEFAULT_COMMAND || onPath()) return configured;
+  return installPlaces().map((directory) => path.join(directory, EXECUTABLE)).find(isExecutable) ?? configured;
 }
 
 function present(args) {
   return args.filter(Boolean);
 }
 
-function startFailure(error) {
-  if (error.code === "ENOENT") return new Error(vscode.l10n.t("Could not start \"{0}\". Install the Gostman CLI or set gostman.path.", cliPath()));
+function startFailure(error, command) {
+  if (error.code === "ENOENT") return new Error(vscode.l10n.t("Could not start \"{0}\". Install the Gostman CLI or set gostman.path.", command));
   return error;
 }
 
-function execute(args) {
+function hasControl(parts) {
+  if (!parts.some((part) => CONTROL.test(part))) return false;
+  vscode.window.showErrorMessage(vscode.l10n.t("Gostman: the value contains control characters."));
+  return true;
+}
+
+function execute(args, { cwd, scope, name }) {
   const parts = present(args);
-  if (parts.some((part) => CONTROL.test(part))) {
-    vscode.window.showErrorMessage(vscode.l10n.t("Gostman: the value contains control characters."));
-    return;
-  }
-  const execution = new vscode.ProcessExecution(cliPath(), parts, { cwd: rootFolder() });
-  const task = new vscode.Task({ type: "gostman" }, vscode.TaskScope.Workspace, "Gostman", "gostman", execution);
+  if (hasControl(parts)) return;
+  const command = cliPath();
+  const execution = new vscode.ProcessExecution(command, parts, { cwd });
+  const task = new vscode.Task({ type: "gostman" }, scope ?? vscode.TaskScope.Workspace, name ?? "Gostman", "gostman", execution);
   task.presentationOptions = { reveal: vscode.TaskRevealKind.Always, clear: true };
-  vscode.tasks.executeTask(task);
+  vscode.tasks.executeTask(task).then(undefined, (error) => vscode.window.showErrorMessage(vscode.l10n.t("Gostman: {0}", startFailure(error, command).message)));
 }
 
 function capture(args, { cwd, signal }) {
+  const command = cliPath();
   return new Promise((resolve, reject) => {
     const options = { cwd, signal, maxBuffer: OUTPUT_LIMIT, windowsHide: true, encoding: "utf8" };
-    execFile(cliPath(), present(args), options, (error, stdout, stderr) => {
+    execFile(command, present(args), options, (error, stdout, stderr) => {
       if (error && typeof error.code !== "number") {
-        reject(startFailure(error));
+        reject(startFailure(error, command));
         return;
       }
       resolve({ code: error ? error.code : 0, stdout, stderr });
@@ -44,4 +83,4 @@ function capture(args, { cwd, signal }) {
   });
 }
 
-module.exports = { execute, capture };
+module.exports = { execute, capture, cliPath };

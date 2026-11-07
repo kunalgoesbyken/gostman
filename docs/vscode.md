@@ -7,10 +7,21 @@ The extension does three things: a **Send** lens above each request file, the co
 ## Requirements and install
 
 - VS Code 1.85 or later, or a compatible editor such as VSCodium or Cursor.
-- The Gostman command line, with `gostman` on the PATH. Downloads are on the [releases page](https://github.com/kunalgoesbyken/gostman/releases); see [Command line](cli.md). If `gostman` is not on the PATH, set `gostman.path` to its full path.
-- A collection folder: a folder that holds `gostman.yaml`. Create one with `gostman init`, or with **Gostman: Create a collection in this folder**, or open a folder you already use in the desktop app.
+- The Gostman command line. Downloads are on the [releases page](https://github.com/kunalgoesbyken/gostman/releases); see [Command line](cli.md). The extension starts `gostman` from the PATH; when it is not there, it also looks in `GOBIN`, the `bin` folder of each `GOPATH` entry and `~/go/bin` (where `go install` puts it), and on macOS and Linux in `/opt/homebrew/bin`, `/usr/local/bin` and `~/.local/bin`. Anywhere else, set `gostman.path` to its full path.
+- A collection: a folder that holds `gostman.yaml`. Create one with `gostman init`, or with **Gostman: Create a collection in this folder**, or open a folder you already use in the desktop app.
 
-Install the extension from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=Gostman.gostman), or run `ext install Gostman.gostman` in the Quick Open box (`Ctrl+P`). Then open the collection folder with **File > Open Folder**. The extension starts when the opened folder contains `gostman.yaml`, and the status bar shows the environment on the left.
+Install the extension from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=Gostman.gostman), or run `ext install Gostman.gostman` in the Quick Open box (`Ctrl+P`). Then open the collection folder, or a repository that holds one, with **File > Open Folder**. The extension starts when a `gostman.yaml` is anywhere in the workspace, and the status bar shows the environment on the left.
+
+## Collections in a workspace
+
+The extension finds every collection in every folder of the workspace: each folder that holds `gostman.yaml`, at the root of a workspace folder or up to four folders below it, such as the `gostman` folder that `gostman init` creates in a repository that already holds other files. Hidden folders (`.git`, `.venv`), `node_modules`, `bower_components`, `vendor` and `__pycache__` are not searched, and the search does not look inside a collection for another one. A collection created, moved or deleted while VS Code is open is picked up on its own.
+
+A collection is named after its workspace folder and the path below it, such as `api` or `shop/services/billing`. With one collection the extension works as before. With several:
+
+- the Testing view shows one item per collection, with its folders and requests under it;
+- the Send lens and **Send this request** use the collection the file is in;
+- the status bar shows the environment of the collection of the active editor;
+- the commands that run the CLI in a terminal use the collection of the active editor, and ask which collection to use when the active editor is not in one.
 
 ## Send a request from its file
 
@@ -40,7 +51,7 @@ The folders and requests of the collection appear in the Testing view, in the or
 - **One folder** runs `gostman run . --folder <folder>`.
 - **One or several requests**, or a folder with some requests excluded, runs `gostman run . --only <request>` once for each request, in a single run.
 
-Every run adds `--reporter json` and `--redact` and the selected environment, and reads the JSON report. Each request becomes one test item:
+Every run adds `--reporter json` and `--redact` and the selected environment of the collection, and reads the JSON report. A run that covers several collections runs the CLI once per collection, one after the other, in the collection folder; the test output starts each part with the collection name. Each request becomes one test item:
 
 | Result | Meaning |
 | --- | --- |
@@ -53,18 +64,15 @@ A 4xx or 5xx status alone is not a failure, as in `gostman run`; add a check suc
 
 ## Choose an environment
 
-The status bar item on the left shows the environment passed as `--env`. Select it, or run **Gostman: Select environment**, to pick one of the environments of the collection. The list is read from the files in the collection's `environments` folder, in the order the CLI uses, with **Collection default** first, which leaves `--env` out so the CLI uses the first environment. A name is the file's `name:` value, or the file name without its extension.
+The status bar item on the left shows the environment passed as `--env`; with several collections it shows the collection name first. Select it, or run **Gostman: Select environment**, to pick one of the environments of the collection. The list is read from the files in the collection's `environments` folder, in the order the CLI uses, with **Collection default** first, which leaves `--env` out so the CLI uses the first environment. A name is the file's `name:` value, or the file name without its extension.
 
-The choice is stored in the `gostman.environment` setting, at workspace scope, and every command below reads it. If the stored name is not one of the collection's environments, the status bar item turns to a warning and its tooltip says so; select another, or **Collection default**.
-
-> [!NOTE]
-> In a single folder, the workspace setting is `.vscode/settings.json`, which many teams commit. The chosen environment then lands in Git. Add that file to `.gitignore`, or commit the setting only when the whole team should share the choice. In a multi-root workspace it is stored in the `.code-workspace` file.
+Each collection keeps its own choice, stored in VS Code's storage for this workspace, so it never lands in a file you commit. A collection where you have not chosen yet uses the `gostman.environment` setting, which a team can commit in `.vscode/settings.json` to share a default; when that is empty too, `--env` is left out. If the name in use is not one of the collection's environments, the status bar item turns to a warning and its tooltip says so; select another, or **Collection default**.
 
 These use the selected environment: Run collection, Run a folder, Send a saved request, Run a flow, the Send lens and the Test Explorer. Scan, Lint, Create a collection and Open the documentation take none.
 
 ## Commands
 
-Open the Command Palette (`Ctrl+Shift+P`) and type `Gostman`. Commands that do not use the lens or the Testing view run the CLI in a Gostman terminal task, so you see its normal output.
+Open the Command Palette (`Ctrl+Shift+P`) and type `Gostman`. Commands that do not use the lens or the Testing view run the CLI in a terminal task named after the collection, in the collection folder, so you see its normal output. With several collections they use the collection of the active editor, or ask which one.
 
 | Command | Runs |
 | --- | --- |
@@ -76,15 +84,15 @@ Open the Command Palette (`Ctrl+Shift+P`) and type `Gostman`. Commands that do n
 | Run a flow | asks for a flow name, then `gostman flow run <name> --workspace .`; see [Flows](flows.md) |
 | Lint an OpenAPI spec | `gostman lint <file>`; also in the Explorer context menu of `.yaml`, `.yml` and `.json` files |
 | Scan the collection for leaked secrets | `gostman scan .`; see [Runner, load and scan](runner-load-and-scan.md) |
-| Create a collection in this folder | `gostman init .` |
+| Create a collection in this folder | `gostman init .` in the workspace folder, asking which one when there are several; in a folder that already holds files, the collection goes in a new `gostman` folder, which the extension finds |
 | Open the documentation | opens https://gostman.com/docs |
 
 ## Settings
 
 | Setting | Default | Meaning |
 | --- | --- | --- |
-| `gostman.path` | `gostman` | Command that starts the CLI. Use a full path when `gostman` is not on the PATH. A machine-scoped setting: a workspace cannot set it, so a repository cannot choose which program the extension starts. |
-| `gostman.environment` | empty | Environment name passed as `--env`. Empty uses the first environment of the collection. **Gostman: Select environment** and the status bar item change it. |
+| `gostman.path` | `gostman` | Command that starts the CLI. Use a full path when `gostman` is neither on the PATH nor in one of the folders listed in [Requirements and install](#requirements-and-install). A machine-scoped setting: a workspace cannot set it, so a repository cannot choose which program the extension starts. |
+| `gostman.environment` | empty | Environment name passed as `--env` for collections where no environment was selected in the status bar. Empty uses the first environment of the collection. |
 
 ## Trust and safety
 
@@ -99,7 +107,7 @@ Open the Command Palette (`Ctrl+Shift+P`) and type `Gostman`. Commands that do n
 
 ## Limits
 
-- The collection is the root of a workspace folder: the first folder with a `gostman.yaml` in it. With several folders open, the Testing view, the status bar item and the commands use that one, and the Send lens works in any folder that has `gostman.yaml`. A collection in a subfolder of a workspace folder is not found; open that subfolder instead.
+- The search for collections stops four folders below each workspace folder and after 5,000 folders. The Send lens still works in a collection deeper than that, but the Testing view and the commands do not list it; add its folder to the workspace instead.
 - Virtual workspaces, such as `vscode.dev` and remote repositories without a local folder, are not supported: the CLI needs the files on disk.
 - The tree and the references are read from the first lines of each YAML file: top-level `id`, `name` and `order` written on one line. A name or an id written as a multi-line block, or a file in flow style (`{...}`), is shown under its file name. The CLI itself reads every file in full, so a run is unaffected.
 - `gostman.path` must start an executable. A `.cmd` or `.bat` wrapper does not start without a shell.
@@ -108,11 +116,11 @@ Open the Command Palette (`Ctrl+Shift+P`) and type `Gostman`. Commands that do n
 
 ## Troubleshooting
 
-- **`Could not start "gostman"`.** The CLI is not on the PATH of VS Code. Install it, restart VS Code after changing the PATH, or set `gostman.path` to the full path of the executable.
+- **`Could not start "gostman"`.** The CLI is neither on the PATH of VS Code nor in the folders listed in [Requirements and install](#requirements-and-install). Install it, restart VS Code after changing the PATH, or set `gostman.path` to the full path of the executable.
 - **The Send lens does not appear.** The file must be inside the collection folder, outside hidden folders such as `.git`, and have a `method` or a `url` key. Files of `environments`, `flows` and `specs`, and `folder.yaml`, are not requests.
-- **The Testing view is empty.** The folder must contain `gostman.yaml` at its root. Refresh the view if you created the files from outside VS Code.
+- **The Testing view is empty.** No collection was found: a `gostman.yaml` must be in a workspace folder or up to four folders below it, outside hidden folders, `node_modules`, `bower_components`, `vendor` and `__pycache__`. See [Collections in a workspace](#collections-in-a-workspace).
 - **A literal `{{token}}` or `{{base_url}}` in a result.** The selected environment does not define it. Check the status bar, then the Placeholders section of the panel.
-- **An error about an unknown environment.** The name in `gostman.environment` is not among the environments of the collection; the CLI lists the ones that exist. Select one from the status bar item.
+- **An error about an unknown environment.** The selected name, or the one in `gostman.environment`, is not among the environments of the collection; the CLI lists the ones that exist. Select one from the status bar item.
 - **Exit codes.** In the terminal, `gostman run` and `gostman send` exit with 0 when everything passed, 1 when a check or a script failed, 2 when the command or its input is wrong and 3 when a request got no response. The Send panel shows results for 0, 1 and 3; with 2 it shows an error notification with what the CLI printed. In the Testing view a run with no report marks the requests as errored with that same text. See [Exit codes](cli.md#exit-codes).
 
 ## Translating

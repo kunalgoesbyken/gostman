@@ -53,12 +53,6 @@ function isRequestText(text) {
   return isRequest(readValues(text, REQUEST_MARKERS));
 }
 
-function belongsTo(root, file) {
-  const relative = path.relative(root, file);
-  if (relative === "" || path.isAbsolute(relative)) return false;
-  return relative.split(path.sep).every((part) => part !== ".." && !isHidden(part));
-}
-
 async function listEnvironments(root) {
   const directory = path.join(root, ENVIRONMENTS);
   const files = (await entriesOf(directory)).filter((entry) => entry.isFile() && !isHidden(entry.name) && isYamlFile(entry.name));
@@ -133,4 +127,4 @@ async function requestReference(root, file) {
   return found?.reference;
 }
 
-module.exports = { listEnvironments, readCollection, requestReference, isRequestText, belongsTo, ENVIRONMENTS, REFERENCE_SEPARATOR };
+module.exports = { listEnvironments, readCollection, requestReference, isRequestText, entriesOf, REFERENCE_SEPARATOR };
