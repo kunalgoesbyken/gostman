@@ -4,10 +4,23 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.15.2] - 2026-11-07
+
 ### Changed
 
+- Variables view: a request is sent with exactly what the full editor would send. A value is sent as typed, an empty field leaves a session value in place, a hidden variable shows up in the form only when it needs a value, and a bad value marks its field instead of sending.
+- Typed request variables: a Number value follows the JSON number grammar (`1.50` and `2e3` are sent as typed, `007` and `1,5` are refused), integers too large to keep exactly are refused rather than rounded, and an empty optional Number, Whole number or JSON variable gives scripts `null`.
+- JSON responses: the tree keeps its depth and the folders you opened or closed per response, through search, Raw and Pretty, and tab switches; the toggle reads **Collapse to level N**.
+- The VS Code extension (0.3.0) finds collections at any depth and in multi-root workspaces, keeps an environment per collection, lists requests in its own Requests view and shows responses in the Gostman look.
 - The documentation shows more of the app: clips of a first request, of the Explore features search and of a collection run, a tour of the Tools menu, and terminal screenshots of `gostman run`, `flow run`, `scan` and `mcp` on the command line, CI, tutorial and coding agent pages.
 - The AlternativeTo badge is back in the site footer.
+
+### Fixed
+
+- Curl import: bundled short flags such as `-sX GET` and `-LfX` are read one letter at a time, every curl option that takes a value is known, and the URL no longer picks up the method.
+- Curl import: Chrome and Firefox **Copy as cURL** for Windows (cmd), `curl.exe` and paths to curl are read, `$'...'` strings decode every escape, and `-d ''` sends a POST.
+- Curl import errors are translated.
+- Translations: every language has every message, including the namespaces added since the languages were seeded.
 
 ## [1.15.1] - 2026-11-04
 
