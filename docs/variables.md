@@ -15,7 +15,9 @@ When a name is defined in more than one place, the most specific scope wins. Fro
 | Request | **Vars** tab of a request | Rows can be switched off without deleting them. |
 | Session | Environments, **Session values** | Set by scripts and Extract rules for this session only. Never written to disk. |
 
-Values you give when you start a run or a send win over everything saved in the collection: `--var`, `--var-from-env` and `--env-file` in the CLI, each row of a data file (in the CLI and in the runner), and the `variables` of an agent's `send_request`. They are kept as session values, so a script or Extract rule that writes the same name later in the run replaces them, and each new data row replaces what the previous iteration left. In the runner they last for the run only: when it ends, the session values it set go back to what they were.
+A session value wins over a request variable with the same name, so a token that a login request extracts replaces a placeholder value in the Vars tab. The Vars tab says so under a row that a session value replaces.
+
+Values you give when you start a run or a send win over everything saved in the collection: `--var`, `--var-from-env` and `--env-file` in the CLI, each row of a data file (in the CLI and in the runner), the fields of the [Variables view](requests-and-responses.md#variables-view) when you send from it, and the `variables` of an agent's `send_request`. A script or Extract rule that writes the same name later replaces them. The others are kept as session values, so such a write lasts for the rest of the run, and each new data row replaces what the previous iteration left; in the runner they last for the run only: when it ends, the session values it set go back to what they were. The fields of the Variables view apply to that one send only and are never kept as session values, so the next send starts again from what the fields show.
 
 ### Typed request variables
 

@@ -8,6 +8,8 @@
     "extractedBy": "{{reference}} is set by an extract rule on \"{{request}}\", so send that request first.",
     "extractedByOnly": "It is set by an extract rule on \"{{request}}\", so send that request first.",
     "openSource": "Open \"{{request}}\"",
-    "define": "Add {{reference}} to the active environment"
+    "define": "Add {{reference}} to the active environment",
+    "switchedOff": "{{reference}} is switched off in the Vars tab of this request.",
+    "openVars": "Open the Vars tab"
   }
 }
