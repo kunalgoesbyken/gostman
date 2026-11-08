@@ -168,6 +168,9 @@ func (c *schedule) recordPassedOver(position int, current unit, progress unitPro
 }
 
 func (s *session) runAll(ctx context.Context, planned plan, options Options, observe func(Result)) []Result {
+	if observe == nil {
+		observe = func(Result) {}
+	}
 	units, waves := planUnits(options.iterationCount(), len(planned.requests), options.Parallel)
 	run := &schedule{planned: planned, options: options, units: units, outputs: make([][]Result, len(units)), observe: observe}
 	crew := s.crew(min(max(options.Parallel, 1), max(len(planned.requests), 1)))
