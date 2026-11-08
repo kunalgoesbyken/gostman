@@ -10,6 +10,7 @@ export const DOCS_URL = `${REPOSITORY_URL}/blob/main/docs`
 export const HOMEBREW_TAP = `${OWNER}/tap`
 export const SCOOP_BUCKET_URL = `https://github.com/${OWNER}/scoop-gostman`
 export const GO_MODULE = `github.com/${REPOSITORY}`
+export const SEEDFALL_URL = `https://github.com/${OWNER}/seedfall`
 export const ALTERNATIVETO_URL = "https://alternativeto.net/software/gostman/about/?utm_source=badge&utm_medium=referral"
 export const ALTERNATIVETO_BADGE_URL = "https://alternativeto.net/static/badges/badge-wide-dark.svg"
 

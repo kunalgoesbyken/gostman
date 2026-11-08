@@ -85,6 +85,7 @@ Open the same folder in the desktop app with **Open folder** to see the requests
 - [Tutorial: run your API tests in CI](docs/tutorial-ci.md) runs it on every pull request with secrets kept out of the files.
 - [Guides by task](docs/guides.md): migrate from Postman, mock a backend before it exists, record real traffic, load test, publish docs, let a coding agent call your API.
 - [Script reference and examples](docs/scripting-and-settings.md#checks-and-scripts): JSON Schema checks, request signing, fetching a token, polling.
+- [Fault-test your API with seedfall](docs/seedfall.md): run a collection's checks against a Go service while [seedfall](https://github.com/kunalgoesbyken/seedfall), a sibling project, crashes it and partitions its network.
 - [Troubleshooting](docs/troubleshooting.md)
 
 ## Features
@@ -188,7 +189,7 @@ The same pages are published at [gostman.com/docs](https://gostman.com/docs). Th
 - Start: [Getting started](docs/getting-started.md), [What is free in Gostman](docs/free-features.md), and coming from [Postman](docs/coming-from-postman.md), [Bruno](docs/coming-from-bruno.md) or [Insomnia](docs/coming-from-insomnia.md)
 - Requests: [Requests and responses](docs/requests-and-responses.md), [Protocols](docs/protocols.md)
 - Variables and secrets: [Variables](docs/variables.md), [Secrets and network settings](docs/secrets-and-network.md)
-- Testing and automation: [Scripts and checks](docs/scripting-and-settings.md), [Running, load testing and scanning](docs/runner-load-and-scan.md), [Gostman in CI](docs/ci.md)
+- Testing and automation: [Scripts and checks](docs/scripting-and-settings.md), [Running, load testing and scanning](docs/runner-load-and-scan.md), [Gostman in CI](docs/ci.md), [Fault testing with seedfall](docs/seedfall.md)
 - Collections and Git: [Collections, tabs and Git](docs/collections-and-git.md), [Folder and collection settings](docs/folder-settings.md), [Folders, mock server and capture](docs/workspaces-and-mock.md), [Import, export and OpenAPI specs](docs/import-export-and-specs.md), [Sharing and documentation](docs/sharing-and-docs.md)
 - Agents and AI: [Use from a coding agent](docs/agents.md), [VS Code extension](docs/vscode.md), [AI features](docs/ai.md)
 - Reference: [Command line](docs/cli.md), [Preferences, shortcuts and the command palette](docs/preferences-and-shortcuts.md)

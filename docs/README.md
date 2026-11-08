@@ -33,6 +33,7 @@ Gostman is an API client for REST, GraphQL, gRPC and WebSocket that you, your CI
 - [Running, load testing and scanning](runner-load-and-scan.md): the in-app runner, monitors, OpenAPI coverage, negative tests, and the dialogs for load tests and scans.
 - [Flows](flows.md): chain requests with retries, other paths on failure, conditions and loops, drawn in the app and run from the command line.
 - [Gostman in CI](ci.md): exit codes, reports, recipes and starter pipelines for several CI systems, scheduled runs, and a run against the mock server.
+- [Fault-test your API with seedfall](seedfall.md): run a collection's checks against a Go service while seedfall crashes it, tears its writes and partitions its network.
 
 ## Collections and Git
 

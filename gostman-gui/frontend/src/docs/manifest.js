@@ -40,6 +40,7 @@ export const docSections = [
       { file: "runner-load-and-scan.md", label: "Run, load test and scan" },
       { file: "flows.md", outline: true, keywords: ["workflow", "chain", "retry", "scenario", "branch", "loop", "parallel", "concurrent", "inputs", "outputs"] },
       { file: "ci.md", label: "CI", outline: true },
+      { file: "seedfall.md", label: "Fault testing with seedfall", keywords: ["chaos", "fault injection", "crash", "partition", "durability", "simulation", "deterministic", "seedfall"] },
     ],
   },
   {

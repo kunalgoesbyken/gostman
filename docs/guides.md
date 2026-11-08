@@ -59,6 +59,12 @@ Add checks to each request, then run the folder in CI with `gostman run` or the 
 
 Walk-through: [Tutorial: run your API tests in CI](tutorial-ci.md). Reference: [Gostman in CI](ci.md).
 
+## Check that an API survives crashes
+
+For a Go service, [seedfall](https://github.com/kunalgoesbyken/seedfall) can run the collection's checks while it crashes the service, tears its disk writes and cuts its network, and replay any failure from one seed.
+
+Walk-through: [Fault-test your API with seedfall](seedfall.md).
+
 ## Test with many inputs
 
 Put the inputs in a CSV or JSON file, reference the columns as `{{column}}` and run once per row:

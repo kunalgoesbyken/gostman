@@ -32,6 +32,12 @@ import windows from "@iconify-icons/simple-icons/windows"
 import { lookup } from "../../lib/dataUtils"
 import { cn } from "../../lib/utils"
 
+const seedfall = {
+  width: 44,
+  height: 44,
+  body: '<g fill="#ff9a5a"><rect x="2" y="26" width="11" height="18" rx="5.5" opacity="0.55"/><rect x="17" y="2" width="11" height="42" rx="5.5"/><rect x="32" y="15" width="11" height="29" rx="5.5" opacity="0.75"/></g>',
+}
+
 const BRAND_ICONS = {
   github,
   "github-actions": githubActions,
@@ -65,6 +71,7 @@ const BRAND_ICONS = {
   windows,
   linux,
   docker,
+  seedfall,
 }
 
 const ICON_SIZE = "h-3.5 w-3.5 shrink-0"
