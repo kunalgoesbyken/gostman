@@ -305,6 +305,7 @@ gostman serve --dir gostman-gui/frontend/dist-web --addr 0.0.0.0:8080
 
 - `--dir path` is the folder `npm run build:web` wrote. It is required.
 - `--addr host:port` is where it listens (default `127.0.0.1:8080`).
+- `--host name` is a name people reach the server by, such as `api-client.example.com`; repeat it for each name. `localhost` and IP addresses always work. A request for any other name is refused with 421, which stops a website from pointing its own domain at your server (DNS rebinding) to use its proxy.
 - `--allow-private` lets the proxy reach `localhost` and private network addresses. Without it the proxy follows the hosted rules: those addresses are refused and responses are cut at 3 MB. Anyone who can open the page can then use the server to reach your network, so use it only behind authentication, a VPN or a firewall.
 
 [Self-hosting the web app](self-hosting.md) covers the prebuilt Docker image `ghcr.io/kunalgoesbyken/gostman-web`, HTTPS, Vercel and updates. To send requests from your own computer instead, use [`gostman relay`](#local-relay-for-the-web-app).

@@ -8,7 +8,7 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ### Added
 
-- Self-hosting: `gostman serve --dir <dist-web>` runs the web app and its request proxy on your own server with the same headers as gostman.com; `--allow-private` lets it reach internal APIs. Each release publishes it as the Docker image `ghcr.io/kunalgoesbyken/gostman-web` (`docker run -p 8080:8080 ghcr.io/kunalgoesbyken/gostman-web`), built from `Dockerfile.web`. The [self-hosting guide](docs/self-hosting.md) compares Docker, `gostman serve`, your own Vercel project and the local relay.
+- Self-hosting: `gostman serve --dir <dist-web>` runs the web app and its request proxy on your own server with the same headers as gostman.com; `--allow-private` lets it reach internal APIs. It answers only to `localhost`, IP addresses and the names given with `--host`, so a website that points its own domain at your server (DNS rebinding) cannot use its proxy. Each release publishes it as the Docker image `ghcr.io/kunalgoesbyken/gostman-web` (`docker run -p 8080:8080 ghcr.io/kunalgoesbyken/gostman-web`), built from `Dockerfile.web`. The [self-hosting guide](docs/self-hosting.md) compares Docker, `gostman serve`, your own Vercel project and the local relay.
 
 ### Changed
 

@@ -26,7 +26,59 @@ const (
 	immutableCache     = "public, max-age=31536000, immutable"
 	sandboxPolicy      = "default-src 'none'; script-src 'unsafe-eval'"
 	allowPrivateNotice = "Warning: --allow-private lets anyone who can reach this server send requests to this computer and its network through it."
+	refusedServeHost   = "this server does not answer to %s; start gostman serve with --host %s to allow that name"
 )
+
+type hostFlags []string
+
+func (h *hostFlags) String() string {
+	return strings.Join(*h, ",")
+}
+
+func (h *hostFlags) Set(value string) error {
+	name := strings.ToLower(strings.TrimSpace(value))
+	if name == "" || strings.ContainsAny(name, "/:") {
+		return fmt.Errorf("--host %q is not a host name; give a name such as api-client.example.com", value)
+	}
+	*h = append(*h, name)
+	return nil
+}
+
+type hostGuard struct {
+	names map[string]bool
+	next  http.Handler
+}
+
+func newHostGuard(names []string, next http.Handler) hostGuard {
+	guard := hostGuard{names: map[string]bool{}, next: next}
+	for _, name := range names {
+		guard.names[name] = true
+	}
+	return guard
+}
+
+func hostName(hostport string) string {
+	if name, _, err := net.SplitHostPort(hostport); err == nil {
+		return strings.ToLower(name)
+	}
+	return strings.ToLower(strings.Trim(hostport, "[]"))
+}
+
+func (g hostGuard) allows(hostport string) bool {
+	name := hostName(hostport)
+	return name == "localhost" || net.ParseIP(name) != nil || g.names[name]
+}
+
+func (g hostGuard) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	for _, hostport := range []string{r.Host, r.Header.Get("X-Forwarded-Host")} {
+		if hostport != "" && !g.allows(hostport) {
+			name := hostName(hostport)
+			http.Error(w, fmt.Sprintf(refusedServeHost, name, name), http.StatusMisdirectedRequest)
+			return
+		}
+	}
+	g.next.ServeHTTP(w, r)
+}
 
 type headerRule struct {
 	exact   string
@@ -151,14 +203,14 @@ func proxyPolicy(allowPrivate bool) engine.Policy {
 	return policy
 }
 
-func serveWebApp(root *os.Root, addr string, allowPrivate bool, stdout, stderr io.Writer) error {
+func serveWebApp(root *os.Root, addr string, hosts []string, allowPrivate bool, stdout, stderr io.Writer) error {
 	handler.Policy = proxyPolicy(allowPrivate)
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		return fmt.Errorf("--addr %q could not be opened: %w", addr, err)
 	}
 	server := &http.Server{
-		Handler:           newServeHandler(site{root: root}),
+		Handler:           newHostGuard(hosts, newServeHandler(site{root: root})),
 		ReadHeaderTimeout: headerTimeout,
 		ReadTimeout:       serveReadTimeout,
 		WriteTimeout:      serveWriteTimeout,
@@ -177,6 +229,8 @@ func serveCommand(arguments []string, stdout, stderr *os.File) int {
 	dir := flags.String("dir", "", "")
 	addr := flags.String("addr", serveDefaultAddr, "")
 	allowPrivate := flags.Bool("allow-private", false, "")
+	var hosts hostFlags
+	flags.Var(&hosts, "host", "")
 	positional, err := parseInterspersed(flags, arguments)
 	switch {
 	case err != nil:
@@ -191,7 +245,7 @@ func serveCommand(arguments []string, stdout, stderr *os.File) int {
 		return misuse(stderr, err.Error())
 	}
 	defer root.Close()
-	if err := serveWebApp(root, *addr, *allowPrivate, stdout, stderr); err != nil {
+	if err := serveWebApp(root, *addr, hosts, *allowPrivate, stdout, stderr); err != nil {
 		return complain(stderr, err)
 	}
 	return exitPassed

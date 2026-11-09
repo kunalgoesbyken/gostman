@@ -405,7 +405,10 @@ serve
   --dir <folder>        the built web app (required; must hold index.html)
   --addr <host:port>    address to listen on (default 127.0.0.1:8080; :8080
                         listens on every network interface)
-  --allow-private       let the proxy reach localhost and private network
+  --host <name>         a name people reach the server by, such as
+                        api-client.example.com (repeatable); localhost and IP
+                        addresses always work, any other name is refused
+  --allow-private      let the proxy reach localhost and private network
                         addresses, which it refuses by default; for a server
                         inside a private network that only people you trust
                         can reach

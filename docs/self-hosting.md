@@ -32,6 +32,12 @@ Open `http://localhost:8080`. The container listens on port 8080 on every interf
 docker run -p 8080:8080 ghcr.io/kunalgoesbyken/gostman-web --allow-private
 ```
 
+On a domain name, pass it with `--host`, as with [`gostman serve`](#gostman-serve):
+
+```bash
+docker run -p 8080:8080 ghcr.io/kunalgoesbyken/gostman-web --host api-client.example.com
+```
+
 For anything other than your own computer, put it behind HTTPS, see [Put it behind HTTPS](#put-it-behind-https).
 
 The prebuilt image was built with the default `SITE_URL`, so its canonical, Open Graph, sitemap and `robots.txt` addresses, and the links the app shows to itself, point at gostman.com. That does not matter for private or internal use. For a public instance on your own domain, build the image yourself with `Dockerfile.web` (see [Set the public address](#set-the-public-address)), from a clone:
@@ -73,6 +79,7 @@ go build -o gostman ./cmd/gostman
 
 - `--dir path` is the folder `npm run build:web` wrote, `gostman-gui/frontend/dist-web`.
 - `--addr host:port` is where it listens. The default is `127.0.0.1:8080`, which only this computer can reach. Use `0.0.0.0:8080` to accept connections from other machines, and put it behind a reverse proxy with TLS, see [Put it behind HTTPS](#put-it-behind-https).
+- `--host name` is a name people reach the server by, such as `api-client.example.com`; repeat it for each name. `localhost` and IP addresses always work. A request for any other name is refused with 421, which stops a website from pointing its own domain at your server (DNS rebinding) to use its proxy.
 - `--allow-private` lets the proxy reach private network addresses, see [Reach internal APIs](#reach-internal-apis).
 
 It prints a warning when `--allow-private` is on. It sends the same headers as gostman.com, including the Content-Security-Policy that stops scripts in the sandbox worker from using the network, so a script in a request cannot send data anywhere.
@@ -112,6 +119,8 @@ api-client.example.com {
 	reverse_proxy 127.0.0.1:8080
 }
 ```
+
+Start the server with `--host` and the public name, or every request through the reverse proxy is refused with 421.
 
 The proxy refuses a request whose `Origin` header names a different host than the one it was reached through, with a 403 and the message `cross-site requests are not allowed`. It takes that host from `X-Forwarded-Host` when present, and from `Host` otherwise. Your reverse proxy must therefore pass the host name people typed, with its port if it is not the default, unchanged: Caddy does by default, and in nginx set `proxy_set_header Host $http_host;`. A proxy that rewrites `Host` can set `X-Forwarded-Host` to the original value instead.
 
