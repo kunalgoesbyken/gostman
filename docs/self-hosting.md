@@ -16,6 +16,19 @@ You can run the Gostman web app on your own server, so your team opens it at an 
 - Managed hosting with no operations work: use [your own Vercel project](#your-own-vercel-project).
 - No server at all, requests from your own computer: use [`gostman relay`](#gostman-relay-with-gostmancom) with the hosted web app.
 
+## What the server needs
+
+The server only hands out the built web app and passes requests on; collections, environments and history stay in each browser, so the server keeps no data and needs no database.
+
+| | Measured | Plan for |
+| --- | --- | --- |
+| Memory, idle | About 20 MB | |
+| Memory, 50 requests at once, each with a 3 MB response | About 90 MB at the peak | 256 MB for a team, 128 MB for a few people |
+| Processor | Barely used; requests mostly wait on the APIs they call | Any single core, including a Raspberry Pi with a 64-bit system |
+| Disk | 26 MB to download the image, 25 MB for the built web app | 100 MB |
+
+Memory grows with the number of requests in flight, not with the number of people who have the page open, and each response is capped at 3 MB. The image runs on `linux/amd64` and `linux/arm64`. Building the web app yourself needs Node.js and more memory than running it; the prebuilt image skips that step.
+
 ## Docker image
 
 **Requirements.** Docker, and a host that can run a container. Node.js and Go are not needed on the host.
