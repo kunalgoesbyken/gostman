@@ -6,6 +6,7 @@ import { execFileSync } from 'child_process'
 import { tmpdir } from 'os'
 import { join, relative, resolve, sep } from 'path'
 import { guidePages } from './src/guides/pages.js'
+import { productPages } from './src/guides/productPages.js'
 import { docFiles, docOutputFile, docPath, docSlug } from './src/docs/manifest.js'
 import { loadDocs } from './site-docs.js'
 import { CLIENT_METADATA_PATH, clientMetadata } from './src/lib/mcpClientMetadata.js'
@@ -30,6 +31,7 @@ const appVersion = JSON.parse(readFileSync(resolve('../wails.json'), 'utf8')).in
 
 const LANDING_SOURCE = resolve('src/components/LandingPage.jsx')
 const GUIDES_SOURCE = resolve('src/guides/pages.js')
+const PRODUCT_PAGES_SOURCE = resolve('src/guides/productPages.js')
 
 const lastCommitDate = (file) => {
   try {
@@ -41,6 +43,7 @@ const lastCommitDate = (file) => {
 
 const sitemapPages = () => [
   { path: '', source: LANDING_SOURCE },
+  ...productPages.map((page) => ({ path: page.path, source: PRODUCT_PAGES_SOURCE })),
   ...guidePages.map((page) => ({ path: page.path, source: GUIDES_SOURCE })),
   ...docFiles.map((file) => ({ path: docPath(docSlug(file)).slice(1), source: join(DOCS_DIR, file) })),
 ]
@@ -77,7 +80,7 @@ function llmsTxt(url, docs) {
     `> ${pagesByPath.get(docPath('')).description}`,
     '',
     '## Guides',
-    ...guidePages.map((page) => llmsLink(url, `/${page.path}`, page.heading, page.description)),
+    ...[...productPages, ...guidePages].map((page) => llmsLink(url, `/${page.path}`, page.heading, page.description)),
     '',
     '## Docs',
     ...docs.nav.flatMap((section) => ['', `### ${section.title}`, ...section.items.map((item) => docLink(item.href))]),
@@ -147,10 +150,16 @@ ${stylesheets.map((href) => `<link rel="stylesheet" href="${href}">`).join('')}
 
 const docPaths = new Set(docFiles.map((file) => docPath(docSlug(file))))
 
-const guideLinks = (page) => [...(page.links ?? []), ...page.sections.flatMap((section) => section.links ?? [])]
+const linkTargets = (node) =>
+  node && typeof node === 'object'
+    ? Object.entries(node).flatMap(([key, value]) => (key === 'href' && typeof value === 'string' ? [value] : linkTargets(value)))
+    : []
 
 const missingGuideDocs = () =>
-  guidePages.flatMap(guideLinks).map((link) => link.href).filter((href) => href.startsWith(docPath('')) && !docPaths.has(href))
+  [...guidePages, ...productPages]
+    .flatMap(linkTargets)
+    .map((href) => href.split('#')[0])
+    .filter((href) => href.startsWith(docPath('')) && !docPaths.has(href))
 
 const contentHash = (source) => createHash('sha256').update(source).digest('hex')
 
@@ -192,13 +201,13 @@ async function buildGuideRenderer(bundle) {
   const script = outputFiles.find((file) => file.path.endsWith('.js'))
   const scriptPath = join(outdir, 'render.cjs')
   writeFileSync(scriptPath, script.text)
-  const { renderGuidePage, renderDocsPage, renderLandingMarkup, renderAppSkeletonMarkup } = createRequire(scriptPath)(scriptPath)
+  const { renderGuidePage, renderProductPage, renderDocsPage, renderLandingMarkup, renderAppSkeletonMarkup } = createRequire(scriptPath)(scriptPath)
   rmSync(outdir, { recursive: true, force: true })
 
   const assets = outputFiles
     .filter((file) => file !== script)
     .map((file) => ({ fileName: relative(outdir, file.path).split(sep).join('/'), source: file.contents }))
-  return { renderGuidePage, renderDocsPage, renderLandingMarkup, renderAppSkeletonMarkup, assets }
+  return { renderGuidePage, renderProductPage, renderDocsPage, renderLandingMarkup, renderAppSkeletonMarkup, assets }
 }
 
 const RAW_IMPORT = /\?raw$/
@@ -293,7 +302,7 @@ export function siteMeta() {
       this.emitFile({ type: 'asset', fileName: 'robots.txt', source: robotsTxt(siteUrl) })
       this.emitFile({ type: 'asset', fileName: CLIENT_METADATA_PATH.slice(1), source: JSON.stringify(clientMetadata(siteUrl), null, 2) })
 
-      const { renderGuidePage, renderDocsPage, renderLandingMarkup, renderAppSkeletonMarkup, assets } = await buildGuideRenderer(bundle)
+      const { renderGuidePage, renderProductPage, renderDocsPage, renderLandingMarkup, renderAppSkeletonMarkup, assets } = await buildGuideRenderer(bundle)
       const docs = loadDocs(DOCS_DIR)
       const stylesheets = stylesheetsOf(bundle)
       const emit = (fileName, source) => this.emitFile({ type: 'asset', fileName, source })
@@ -303,6 +312,7 @@ export function siteMeta() {
       assets.forEach((asset) => emit(asset.fileName, asset.source))
       docs.images.forEach((image) => emit(image.fileName, image.source))
       guidePages.forEach((page) => emit(`${page.path}/index.html`, renderGuidePage(page, { siteUrl, stylesheets })))
+      productPages.forEach((page) => emit(`${page.path}/index.html`, renderProductPage(page, { siteUrl, stylesheets })))
       const searchRef = this.emitFile({ type: 'asset', name: 'docs-search.json', source: JSON.stringify(docs.search) })
       const searchUrl = `/${this.getFileName(searchRef)}`
       const scripts = docsScripts(bundle)

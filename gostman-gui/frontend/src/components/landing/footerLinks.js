@@ -11,8 +11,9 @@ export const FOOTER_COLUMNS = [
     links: [
       internal("Web app", "/web"),
       external("Download", RELEASES_URL),
+      internal("Features", "/features"),
+      internal("AI agents", "/ai-agents"),
       internal("Command line", docPath("cli")),
-      internal("Coding agents", docPath("agents")),
       internal("VS Code extension", docPath("vscode")),
     ],
   },

@@ -1,4 +1,3 @@
-import { docPath } from "../../docs/manifest"
 import { useClipboardCopy } from "../../hooks/useClipboardCopy"
 import { BrandStrip } from "../ui/brandIcon"
 import { Check, Copy } from "./icons"
@@ -12,7 +11,7 @@ export function AgentStart({ className }) {
   return (
     <div className={`flex flex-wrap items-center justify-center gap-x-4 gap-y-3 ${className ?? ""}`}>
       <BrandStrip brands={AGENT_BRANDS} className="gap-4" />
-      <a href={docPath("agents")} className="landing-eyebrow hover:text-foreground">
+      <a href="/ai-agents" className="landing-eyebrow hover:text-foreground">
         For your coding agent
       </a>
       <button type="button" onClick={copy} aria-label={`Copy ${SETUP_COMMAND}`} className="inline-flex items-center gap-2 font-mono text-sm text-foreground">

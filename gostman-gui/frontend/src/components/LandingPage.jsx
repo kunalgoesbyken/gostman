@@ -43,6 +43,7 @@ const SECTION_LINKS = [
   { href: "#features", label: "Features" },
   { href: "#compare", label: "Compare" },
   { href: "#faq", label: "FAQ" },
+  { href: "/ai-agents", label: "AI agents", showFrom: "lg" },
 ]
 
 const PLATFORMS = [...groupByOs(DOWNLOADS).map((group) => group.name), "the web"]
@@ -137,7 +138,7 @@ export function LandingPage({ onGetStarted }) {
           <Brand />
           <div className="flex items-center gap-1 sm:gap-2">
             {SECTION_LINKS.map((link) => (
-              <a key={link.href} href={link.href} className={cn(NAV_LINK, "max-md:hidden")}>
+              <a key={link.href} href={link.href} className={cn(NAV_LINK, link.showFrom === "lg" ? "max-lg:hidden" : "max-md:hidden")}>
                 {link.label}
               </a>
             ))}

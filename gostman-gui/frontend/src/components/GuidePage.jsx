@@ -1,27 +1,10 @@
-import { BrandIcon, BrandStrip } from "./ui/brandIcon"
-import { buttonVariants } from "./ui/button"
-import { cn } from "../lib/utils"
+import { BrandStrip } from "./ui/brandIcon"
+import { LinkRow } from "./landing/LinkRow"
+import { PageActions } from "./landing/PageActions"
+import { PageShell } from "./landing/PageShell"
 import { PointList } from "./landing/PointList"
-import { SiteFooter } from "./landing/SiteFooter"
-import { SiteHeader } from "./landing/SiteHeader"
-import { RELEASES_URL } from "../lib/siteLinks"
 
 const BODY_TEXT = "mt-4 leading-relaxed text-muted-foreground"
-
-const DESKTOP_PLATFORMS = ["windows", "macos", "linux"]
-
-function LinkRow({ links }) {
-  return (
-    <p className={cn(BODY_TEXT, "flex flex-wrap gap-x-6 gap-y-2")}>
-      {links.map((link) => (
-        <a key={link.href} href={link.href} rel="noopener" className="inline-flex items-center gap-2 text-primary underline-offset-4 hover:underline">
-          <BrandIcon brand={link.brand} className="h-4 w-4" />
-          {link.label}
-        </a>
-      ))}
-    </p>
-  )
-}
 
 function Section({ block }) {
   return (
@@ -32,16 +15,14 @@ function Section({ block }) {
       ))}
       {block.items ? <PointList points={block.items} className="mt-5 space-y-3" /> : null}
       <BrandStrip brands={block.brands} className="mt-5" />
-      {block.links ? <LinkRow links={block.links} /> : null}
+      {block.links ? <LinkRow links={block.links} className={BODY_TEXT} /> : null}
     </section>
   )
 }
 
 export function GuidePage({ page }) {
   return (
-    <div className="dark min-h-screen bg-background text-foreground overflow-x-clip">
-      <SiteHeader />
-
+    <PageShell>
       <main className="relative mx-auto max-w-3xl px-6 pt-36 pb-20">
         <h1 className="text-4xl md:text-5xl font-semibold tracking-tight leading-[1.1] [text-wrap:balance]">{page.heading}</h1>
         <p className="mt-6 text-lg leading-relaxed text-muted-foreground">{page.intro}</p>
@@ -51,22 +32,12 @@ export function GuidePage({ page }) {
             <code>{page.code}</code>
           </pre>
         ) : null}
-        <div className="mt-8 flex flex-col sm:flex-row gap-3">
-          <a href="/web" className={cn(buttonVariants({ size: "lg" }), "text-base px-6")}>
-            Open the web app
-          </a>
-          <a href={RELEASES_URL} rel="noopener" className={cn(buttonVariants({ variant: "outline", size: "lg" }), "text-base px-6 border-border/60 hover:bg-muted/50")}>
-            <BrandStrip brands={DESKTOP_PLATFORMS} className="gap-1.5 text-current" />
-            Download for Windows, macOS and Linux
-          </a>
-        </div>
+        <PageActions className="mt-8" />
         {page.sections.map((block) => (
           <Section key={block.heading} block={block} />
         ))}
-        {page.links ? <LinkRow links={page.links} /> : null}
+        {page.links ? <LinkRow links={page.links} className={BODY_TEXT} /> : null}
       </main>
-
-      <SiteFooter />
-    </div>
+    </PageShell>
   )
 }

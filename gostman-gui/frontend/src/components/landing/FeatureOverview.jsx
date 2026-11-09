@@ -1,3 +1,4 @@
+import { ArrowRight } from "./icons"
 import { SplitHeading } from "./SplitHeading"
 import { FEATURE_GROUPS } from "./featureGroups"
 import { revealStep } from "./revealStep"
@@ -35,6 +36,10 @@ export function FeatureOverview() {
           </section>
         ))}
       </div>
+      <a href="/features" className="mt-10 inline-flex items-center gap-2 text-primary underline-offset-4 hover:underline">
+        See all features
+        <ArrowRight className="h-4 w-4" aria-hidden="true" />
+      </a>
     </div>
   )
 }

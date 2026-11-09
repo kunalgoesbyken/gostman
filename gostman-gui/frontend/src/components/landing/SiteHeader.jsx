@@ -15,6 +15,8 @@ export function SiteHeader() {
         <Brand />
       </a>
       <div className="flex items-center gap-1 sm:gap-2">
+        <a href="/features" className={cn(NAV_LINK, "max-md:hidden")}>Features</a>
+        <a href="/ai-agents" className={cn(NAV_LINK, "max-md:hidden")}>AI agents</a>
         <a href={docPath("")} className={NAV_LINK}>Docs</a>
         <a href="/web" className={NAV_LINK}>Web app</a>
         <a href={RELEASES_URL} rel="noopener" className={cn(NAV_LINK, "max-sm:hidden")}>Download</a>

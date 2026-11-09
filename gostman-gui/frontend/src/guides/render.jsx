@@ -3,6 +3,8 @@ import { renderToStaticMarkup, renderToString } from "react-dom/server"
 import { DocsContent } from "../components/docs/DocsContent"
 import { DocsShell } from "../components/docs/DocsShell"
 import { GuidePage } from "../components/GuidePage"
+import { AgentsPage } from "../components/landing/agents/AgentsPage"
+import { FeaturesPage } from "../components/landing/features/FeaturesPage"
 import { LandingPage } from "../components/LandingPage"
 import { AppSkeletonFrame } from "../components/AppSkeletonFrame"
 import { SiteFooter } from "../components/landing/SiteFooter"
@@ -55,7 +57,9 @@ function PageDocument({ title, description, url, siteUrl, stylesheets, scripts =
 
 const renderDocument = (props) => `<!DOCTYPE html>${renderToStaticMarkup(<PageDocument {...props} />)}`
 
-export function renderGuidePage(page, { siteUrl, stylesheets }) {
+const PRODUCT_PAGES = { "ai-agents": AgentsPage, features: FeaturesPage }
+
+function renderWebPage(page, { siteUrl, stylesheets }, children) {
   const url = `${siteUrl}/${page.path}`
 
   return renderDocument({
@@ -72,8 +76,15 @@ export function renderGuidePage(page, { siteUrl, stylesheets }) {
       url,
       isPartOf: webSite(siteUrl),
     },
-    children: <GuidePage page={page} />,
+    children,
   })
+}
+
+export const renderGuidePage = (page, options) => renderWebPage(page, options, <GuidePage page={page} />)
+
+export function renderProductPage(page, options) {
+  const Body = PRODUCT_PAGES[page.path]
+  return renderWebPage(page, options, <Body page={page} />)
 }
 
 const breadcrumbItem = (position, name, url) => ({ "@type": "ListItem", position, name, item: url })
