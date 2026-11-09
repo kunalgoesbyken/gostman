@@ -24,6 +24,7 @@ import { isNarrowViewport, rememberSidebarOpen, rememberedSidebarOpen } from '..
 import { reorderTabs, stepTab } from '../lib/tabOrder'
 import { SCOPE_COLLECTION, SCOPE_ENVIRONMENT, SCOPE_GLOBAL, SCOPE_SESSION } from '../lib/scripting/scopes'
 import { promptLayer, resolveLayers, scopeLayers, scriptLayers, variableText, withSecretMarks } from '../lib/variableScopes'
+import { currentFormValues } from '../lib/variablesForm'
 import { choiceFor, chosenEnvironment, isSameScope, isScoped, variableHolderFor } from '../lib/environmentScope'
 import { isWelcomeDismissed, rememberWelcomeDismissed } from '../lib/welcome'
 import { rememberSteps, rememberedSteps } from '../lib/onboarding'
@@ -501,7 +502,9 @@ export const useAppStore = create(
           tabs: mapTabRequests(state.tabs, (request) => (request.id === id ? { ...request, ...changes } : request)),
         })),
         resolveDiskChange: (tabId, loadsDisk) => set((state) => mapTab(state, tabId, (tab) => (
-          loadsDisk && tab.diskChange ? { ...tab, request: tab.diskChange, bodyDrafts: {}, diskChange: null } : { ...tab, diskChange: null }
+          loadsDisk && tab.diskChange
+            ? { ...tab, request: tab.diskChange, formValues: currentFormValues(tab.formValues, tab.diskChange.vars), bodyDrafts: {}, diskChange: null }
+            : { ...tab, diskChange: null }
         ))),
 
         addFolder: (name, parentId = '') => set((state) => ({
@@ -631,7 +634,12 @@ export const useAppStore = create(
           return tab ? { activeTabId: tab.id } : state
         }),
         updateTabRequest: (tabId, updates) => set((state) => (
-          mapTab(state, tabId, (tab) => ({ ...tab, isPreview: false, request: { ...tab.request, ...updates } }))
+          mapTab(state, tabId, (tab) => ({
+            ...tab,
+            isPreview: false,
+            request: { ...tab.request, ...updates },
+            ...(Object.hasOwn(updates, 'vars') && { formValues: currentFormValues(tab.formValues, updates.vars) }),
+          }))
         )),
         updateActiveRequest: (updates) => get().updateTabRequest(get().activeTabId, updates),
         setActiveBodyDrafts: (bodyDrafts) => set((state) => (

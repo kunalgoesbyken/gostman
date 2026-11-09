@@ -137,13 +137,6 @@ func (r Request) OwnVariables() map[string]string {
 	return requestScope(r.Vars).plain()
 }
 
-func (r Request) scriptScope() variables {
-	if r.typedVars != nil {
-		return r.typedVars
-	}
-	return requestScope(r.Vars)
-}
-
 func requestScope(text string) variables {
 	scope := variables{}
 	var rows []variableRow

@@ -1,6 +1,6 @@
 import { isPlainObject, parseJSON } from './dataUtils'
 import { placeholderNames } from './placeholders'
-import { isTypedReference, sentText, typedValue } from './requestVariables'
+import { declaredValues, isTyped, sentText } from './requestVariables'
 import { isSentRow, parseRows } from './rows'
 import { connectionDirectory } from './secretOrigins'
 import { chosenEnvironment, variableHolders } from './environmentScope'
@@ -80,7 +80,7 @@ export function withoutSecretValues(environments) {
 }
 
 const referenceEntry = (entry, referenced) => (
-  entry.ref ? { ...entry, secret: true, value: referenced[entry.name] ?? '' } : entry
+  entry.ref ? { ...entry, secret: true, value: referenced[entry.name] ?? '', unresolved: !Object.hasOwn(referenced, entry.name) } : entry
 )
 
 const environmentLayers = (source, environments, environment, referenced) => (
@@ -102,20 +102,31 @@ const listLayer = (source, variables, meta) => ({
   entries: environmentEntries({ variables, meta }).filter((entry) => entry.enabled),
 })
 
-const rowEntries = (rows) => rows.filter(isSentRow).map((row) => ({ name: row.key, value: typedValue(row), text: sentText(row), row }))
+const rowEntries = (rows) => rows.filter(isSentRow).map((row) => ({ name: row.key, value: sentText(row), row }))
 
-const rowsLayer = (text) => ({ source: 'request', entries: rowEntries(parseRows(text)) })
+const rowsLayer = (rows) => ({ source: 'request', entries: rowEntries(rows) })
 
-const givenLayer = (rows) => ({ source: 'session', entries: rowEntries(rows) })
+const givenLayer = (rows, names) => ({ source: 'session', entries: rowEntries(rows.filter((row) => names.includes(row.key))) })
 
-const hasTypedReference = (layer) => layer.entries.some((entry) => entry.row && isTypedReference(entry.row))
+export const checkValues = (resolved) => new Map(Array.from(resolved, ([name, { value, unresolved }]) => [name, unresolved ? undefined : value]))
 
-function withTypedReferences(layers) {
-  if (!layers.some(hasTypedReference)) return layers
-  const resolved = resolveLayers(layers)
-  const valueOf = (name) => resolved.get(name)?.value
-  const typed = (entry) => (entry.row && isTypedReference(entry.row) ? { ...entry, value: typedValue(entry.row, valueOf) } : entry)
-  return layers.map((layer) => (hasTypedReference(layer) ? { ...layer, entries: layer.entries.map(typed) } : layer))
+const winningLayers = (layers) => {
+  const winners = new Map()
+  layers.forEach((layer, index) => layer.entries.forEach(({ name }) => winners.set(name, index)))
+  return winners
+}
+
+function withDeclaredTypes(layers) {
+  const rows = layers.flatMap((layer) => layer.entries.flatMap((entry) => (entry.row ? [entry.row] : [])))
+  if (!rows.some(isTyped)) return layers
+  const declared = declaredValues(rows, checkValues(resolveLayers(layers)))
+  const winners = winningLayers(layers)
+  const typed = (entry, index) => (
+    Object.hasOwn(declared, entry.name) && winners.get(entry.name) === index
+      ? { ...entry, text: entry.text ?? asText(entry.value), value: declared[entry.name] }
+      : entry
+  )
+  return layers.map((layer, index) => ({ ...layer, entries: layer.entries.map((entry) => typed(entry, index)) }))
 }
 
 export const dotEnvEntries = (dotEnv) => (
@@ -149,25 +160,26 @@ export const scopeState = (state) => Object.fromEntries(SCOPE_KEYS.map((key) => 
 export function scopeLayers(state, request, referenced = {}) {
   const activeGlobal = state.isRestricted ? undefined : findById(state.globalEnvironments, state.activeGlobalEnvironmentId)
   const activeEnvironment = chosenEnvironment(state, request?.folderId || '')
-  return withTypedReferences([
+  const rows = parseRows(request?.vars)
+  return withDeclaredTypes([
     dotEnvLayer(state.dotEnv),
     ...(activeGlobal ? environmentLayers('global', state.globalEnvironments, activeGlobal, referenced) : [emptyLayer('global')]),
     listLayer('collection', state.collectionVariables, state.collectionVariablesMeta),
     ...variableHolders(state.folders, request?.folderId).map((folder) => ({ ...listLayer('collection', folder.collectionVariables, folder.collectionVariablesMeta), owner: folder.name })),
     ...(activeEnvironment ? environmentLayers('environment', state.environments, activeEnvironment, referenced) : [emptyLayer('environment')]),
     ...folderLayers(state.folders, request?.folderId),
-    rowsLayer(request?.vars),
+    rowsLayer(rows),
     sessionLayer(state.sessionVariables),
     ...(request?.flowGiven ? [sessionLayer(request.flowGiven)] : []),
-    ...(Array.isArray(request?.formGiven) ? [givenLayer(request.formGiven)] : []),
+    ...(Array.isArray(request?.formGiven) ? [givenLayer(rows, request.formGiven)] : []),
   ])
 }
 
 export function resolveLayers(layers) {
   const resolved = new Map()
   for (const layer of layers) {
-    for (const { name, value, text, secret, ref } of layer.entries) {
-      resolved.set(name, { value: text ?? asText(value), typed: value, secret: secret === true, source: layer.source, owner: layer.owner, ref })
+    for (const { name, value, text, secret, ref, unresolved } of layer.entries) {
+      resolved.set(name, { value: text ?? asText(value), typed: value, secret: secret === true, source: layer.source, owner: layer.owner, ref, unresolved: unresolved === true })
     }
   }
   return resolved

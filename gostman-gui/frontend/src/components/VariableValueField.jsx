@@ -5,7 +5,7 @@ import { BOOLEAN_FALSE, BOOLEAN_TRUE, TYPE_JSON, choicesOf, typeOf, usesCheckbox
 import { VARIABLES_PANEL_TEXT as TEXT } from "../lib/variablesPanelText"
 
 const JSON_ROWS = 4
-const isTrue = (row) => String(row.value ?? "").trim().toLowerCase() === BOOLEAN_TRUE
+const isTrue = (row) => row.value === BOOLEAN_TRUE
 
 export function VariableValueField({ row, label, placeholder, multiline = false, onChange, ...props }) {
   const type = typeOf(row)
@@ -26,7 +26,7 @@ export function VariableValueField({ row, label, placeholder, multiline = false,
 
   if (usesChoiceList(row)) {
     return (
-      <Select value={String(row.value ?? "").trim()} onChange={(event) => onChange({ value: event.target.value })} aria-label={label} {...props}>
+      <Select value={String(row.value ?? "")} onChange={(event) => onChange({ value: event.target.value })} aria-label={label} {...props}>
         <option value="">{placeholder || TEXT.valueChoice}</option>
         {choices.map((choice) => <option key={choice} value={choice}>{choice}</option>)}
       </Select>

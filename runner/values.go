@@ -114,23 +114,21 @@ func (v *values) scriptLayers(request Request, once variables) []scriptLayer {
 		{Scope: scopeGlobal, Values: layered(v.globals)},
 		{Scope: scopeCollection, Values: layered(v.collectionLists(request.Lineage)...)},
 		{Scope: scopeEnvironment, Values: layered(environment.inherited, environment.own)},
-		{Values: layered(append(request.folderScopes(), request.scriptScope())...)},
+		{Values: layered(append(request.folderScopes(), requestScope(request.Vars))...)},
 		{Scope: scopeSession, Values: layered(v.session)},
 		{Values: layered(once)},
 	}
 }
 
-func (v *values) overriding(once variables) []string {
-	v.mu.Lock()
-	defer v.mu.Unlock()
-	names := make([]string, 0, len(v.session)+len(once))
-	for name := range v.session {
-		names = append(names, name)
+func declare(layers []scriptLayer, declared variables) {
+	for name, value := range declared {
+		for index := len(layers) - 1; index >= 0; index-- {
+			if _, held := layers[index].Values[name]; held {
+				layers[index].Values[name] = value
+				break
+			}
+		}
 	}
-	for name := range once {
-		names = append(names, name)
-	}
-	return names
 }
 
 func (v *values) known() variables {

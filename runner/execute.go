@@ -99,7 +99,11 @@ func (s *session) scoped(request Request) variables {
 }
 
 func (s *session) runStage(ctx context.Context, stage string, work job, request Request) stageRun {
-	work.Layers = s.scriptLayers(request)
+	layers, err := s.scriptLayers(request)
+	if err != nil {
+		return stageRun{Error: stage + ": " + err.Error()}
+	}
+	work.Layers = layers
 	work.Modules = s.modules
 	work.Environment = s.values.environmentName(request.Lineage)
 	if err := s.scripts.Call("scriptCookies", &work.Cookies, s.cookiesFor(request), s.hosts); err != nil {
@@ -152,7 +156,6 @@ func (s *session) runPreRequest(ctx context.Context, request Request, scripted s
 		return request, false, err
 	}
 	edited.Lineage = request.Lineage
-	edited.typedVars = request.typedVars
 	return edited, true, nil
 }
 
@@ -318,10 +321,9 @@ func (s *session) isSocket(request Request) (bool, error) {
 	return socket, err
 }
 
-type typedVariables struct {
-	Vars    string    `json:"vars"`
-	Typed   variables `json:"typed"`
-	Message string    `json:"message"`
+type pendingGeneration struct {
+	Key  string `json:"key"`
+	Text string `json:"text"`
 }
 
 func hasVariableRows(text string) bool {
@@ -329,17 +331,52 @@ func hasVariableRows(text string) bool {
 	return trimmed != "" && trimmed != "{}" && trimmed != "[]"
 }
 
+func (s *session) generatedValues(request Request) (map[string]string, error) {
+	var pending []pendingGeneration
+	if err := s.scripts.Call("pendingGenerations", &pending, request.Vars, s.scoped(request).text()); err != nil {
+		return nil, err
+	}
+	texts := make([]string, len(pending))
+	for index, generation := range pending {
+		texts[index] = generation.Text
+	}
+	generated := make(map[string]string, len(pending))
+	if len(texts) == 0 {
+		return generated, nil
+	}
+	expanded, err := engine.ExpandTexts(texts, "{}")
+	if err != nil {
+		return nil, err
+	}
+	for index, generation := range pending {
+		generated[generation.Key] = expanded[index]
+	}
+	return generated, nil
+}
+
+func (s *session) declaredValues(request Request) (variables, error) {
+	declared := variables{}
+	if !hasVariableRows(request.Vars) {
+		return declared, nil
+	}
+	err := s.scripts.Call("declaredVariables", &declared, request.Vars, s.scoped(request).text())
+	return declared, err
+}
+
 func (s *session) withTypedVariables(request Request) (Request, string, error) {
 	if !hasVariableRows(request.Vars) {
 		return request, "", nil
 	}
-	var typed typedVariables
-	if err := s.scripts.Call("requestVariables", &typed, request.Vars, s.values.overriding(s.once), s.scoped(request).text()); err != nil {
+	generated, err := s.generatedValues(request)
+	if err != nil {
 		return request, "", err
 	}
-	request.Vars = typed.Vars
-	request.typedVars = typed.Typed
-	return request, typed.Message, nil
+	if err := s.scripts.Call("sentVariables", &request.Vars, request.Vars, generated); err != nil {
+		return request, "", err
+	}
+	var message string
+	err = s.scripts.Call("variableMessage", &message, request.Vars, s.scoped(request).text())
+	return request, message, err
 }
 
 func (s *session) execute(ctx context.Context, request Request) (exchange, error) {

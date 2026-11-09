@@ -81,7 +81,6 @@ type Request struct {
 	SocketMessages   string         `json:"socketMessages"`
 	Vars             string         `json:"vars"`
 	Lineage          []Folder       `json:"-"`
-	typedVars        variables
 }
 
 type exportFile struct {

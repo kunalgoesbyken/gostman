@@ -128,19 +128,24 @@ func (s *session) signable(request Request) bool {
 	return s.confine.Signs(originOf(request.URL, s.scoped(request)), TokenIdentity(effective.OAuth2))
 }
 
-func (s *session) scriptLayers(request Request) []scriptLayer {
+func (s *session) scriptLayers(request Request) ([]scriptLayer, error) {
 	layers := s.values.scriptLayers(request, s.once)
+	declared, err := s.declaredValues(request)
+	if err != nil {
+		return nil, err
+	}
+	declare(layers, declared)
 	if s.confine == nil {
-		return layers
+		return layers, nil
 	}
 	origin := originOf(request.URL, s.scoped(request))
 	if s.confine.RunsScripts(origin) {
-		return layers
+		return layers, nil
 	}
 	for index := range layers {
 		layers[index].Values, _ = s.confined(origin, layers[index].Values)
 	}
-	return layers
+	return layers, nil
 }
 
 func (s *session) keepWrites(request Request, writes scopedWrites) {

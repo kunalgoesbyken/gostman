@@ -15,9 +15,9 @@ When a name is defined in more than one place, the most specific scope wins. Fro
 | Request | **Vars** tab of a request | Rows can be switched off without deleting them. |
 | Session | Environments, **Session values** | Set by scripts and Extract rules for this session only. Never written to disk. |
 
-A session value wins over a request variable with the same name, so a token that a login request extracts replaces a placeholder value in the Vars tab. The Vars tab says so under a row that a session value replaces.
+A session value wins over a request variable with the same name, so a token that a login request extracts replaces a placeholder value in the Vars tab. The Vars tab says so under a row that a session value replaces. If the row has a type, the session value is read with it: it has to fit, and a script gets it as that type (see [Typed request variables](#typed-request-variables)).
 
-Values you give when you start a run or a send win over everything saved in the collection: `--var`, `--var-from-env` and `--env-file` in the CLI, each row of a data file (in the CLI and in the runner), the fields of the [Variables view](requests-and-responses.md#variables-view) when you send from it, and the `variables` of an agent's `send_request`. A script or Extract rule that writes the same name later replaces them. The others are kept as session values, so such a write lasts for the rest of the run, and each new data row replaces what the previous iteration left; in the runner they last for the run only: when it ends, the session values it set go back to what they were. The fields of the Variables view apply to that one send only and are never kept as session values, so the next send starts again from what the fields show.
+Values you give when you start a run or a send win over everything saved in the collection: `--var`, `--var-from-env` and `--env-file` in the CLI, each row of a data file (in the CLI and in the runner), the fields of the [Variables view](requests-and-responses.md#variables-view) when you send from it, and the `variables` of an agent's `send_request`. A script or Extract rule that writes the same name later replaces them. The others are kept as session values, so such a write lasts for the rest of the run, and each new data row replaces what the previous iteration left; in the runner they last for the run only: when it ends, the session values it set go back to what they were. The fields of the Variables view apply to that one send only and are never kept as session values, so the next send starts again from what the fields show. A field is always the value of its variable, even when it is empty: a session value with that name is not used in its place.
 
 ### Typed request variables
 
@@ -28,21 +28,23 @@ Every variable is text unless you give it a type. In the **Vars** tab of a reque
 | Any (default) and Text | text | anything | `""` |
 | Number | a number | a number written as in JSON: an optional `-`, digits without a leading zero, an optional `.` followed by digits, and an optional exponent: `42`, `-1.5`, `0.25`, `2e3` | `null` |
 | Whole number | a number | an optional `-` and digits without a leading zero, from -9007199254740991 to 9007199254740991 | `null` |
-| True or false | `true` or `false` | `true` or `false`, in any case | `false` |
+| True or false | `true` or `false` | `true` or `false`, in lowercase | `false` |
 | JSON | the parsed object, array or value | valid JSON whose numbers a script can hold exactly | `null` |
-| One of a list | text | one of the comma-separated choices of the row | `""` |
+| One of a list | text | one of the comma-separated choices of the row; a choice listed twice appears once, and a choice cannot contain a comma | `""` |
 
 ![The Vars tab with a whole number, a true or false and a one of a list variable](../screenshots/variables-typed.png)
 
-`env.get("count")`, `pm.variables.get("count")` and `bru.getVar("count")` return the typed value, in the apps and in the CLI. The type never changes what is sent: `{{count}}` in a URL, header or body is filled in with the text exactly as you wrote it, so `1.50` and `2e3` are sent as written. Only an empty True or false is sent as `false`, the value its unticked box shows.
+`env.get("count")`, `pm.variables.get("count")` and `bru.getVar("count")` return the typed value, in the apps and in the CLI. The type never changes what is sent: `{{count}}` in a URL, header or body is filled in with the text exactly as you wrote it, so `1.50` and `2e3` are sent as written. Only an empty True or false is sent as `false`, the value its unticked box shows. Because the text is used as written, it is never trimmed or case-folded: spaces before or after a Number, Whole number, True or false or choice, and `TRUE` or `True` for True or false, are refused, so that a field shows exactly what is sent and the script and the request receive the same value. Spaces around a JSON value are part of its formatting and are kept.
 
 Any and Text behave the same: the value reaches scripts as text. Any means that no type was chosen, Text says that the value is meant as text.
 
 Numbers are never guessed. A leading `+`, a leading zero such as `007`, `0x1F`, `.5`, spaces inside the number and a decimal comma are refused: `1,5` is `1.5` in some languages and `1,500` is fifteen hundred in others, so write `1.5` or `1500`. A number that a script cannot hold exactly is refused too rather than rounded: a whole number beyond 9007199254740991 (`2^53 - 1`), a number with more significant digits than a double keeps, or such a number inside a JSON value. Use Text for codes, long IDs and account numbers, or put them in quotes inside JSON.
 
-A typed value may refer to other variables, such as `{{base}}`. The field shows what you wrote, the reference is filled in when the request is sent, and the type applies to the result: a script gets `1.5` for a Number whose value is `{{base}}` when `base` is `1.5`, and the send stops with a message naming the variable when the result does not match its type.
+A typed value may refer to other variables, such as `{{base}}`, and to [dynamic variables](#dynamic-variables) such as `{{$randomInt}}`, `{{$timestamp}}` or `{{$randomBoolean}}`, also inside JSON. The field shows what you wrote, the references are filled in when the request is sent, and the type applies to the result: a script gets `1.5` for a Number whose value is `{{base}}` when `base` is `1.5`, and the send stops with a message naming the variable when the result does not match its type. A typed variable that holds a dynamic variable is generated once per send, and that one value goes to the script and into the request, so `env.get("ts")` and `{{ts}}` agree. A variable of type Any or Text keeps the usual rule: the text is passed on as written, and each `{{$...}}` in it is generated where it is filled into the request. Dynamic variables are filled in for values written in the Vars tab or the Variables view; a session value that holds one is passed on as it is, and a `{{$file(...)}}` reference is not read for a typed value.
 
-An empty optional Number, Whole number or JSON value reaches scripts as `null`, so `env.get("count") ?? 10` gives a default; Gostman 1.15.1 and earlier gave an empty string. Mark a row **Required** under **Field options** to ask for a value.
+The type applies to the value that is used, wherever it comes from. A session value (an Extract rule or a script that wrote the name), a `--var`, a data file row or a flow value that replaces a typed variable is read with the same type: `42` from a response reaches a Whole number as the number `42`, `{"a":1}` reaches a JSON variable as an object, and `abc` for a Whole number stops the send with a message that says the value replaces the one in the Vars tab. The runner and the CLI do the same as the apps.
+
+An empty optional Number, Whole number or JSON value reaches scripts as `null`, so `env.get("count") ?? 10` gives a default; Gostman 1.15.1 and earlier gave an empty string. Mark a row **Required** under **Field options** to ask for a value. Required works the same for every type and checks the value that would be sent: a value that is only spaces is empty, and so is a reference that gives no value, such as `{{token}}` when `token` is empty or not defined anywhere.
 
 A value that does not match its type, or an empty required value, stops the send before any script runs. The request is not sent, the response says which variable is wrong, and the CLI counts it as a request without a response. When you change the type of a row that has a value, the field keeps showing that value next to the message, until you change it. Rows that are switched off are not checked. Only request variables have types; environment, collection and global values keep the JSON type they were saved with.
 
@@ -124,7 +126,7 @@ A variable can read its value from HashiCorp Vault, AWS Secrets Manager, Azure K
 
 ## Dynamic variables
 
-Dynamic variables are generated by the engine every time a request is sent, so each occurrence gets its own value. They are the same in the apps and the CLI. Type `{{$` in any field or editor to pick one; every suggestion says what it produces.
+Dynamic variables are generated by the engine every time a request is sent, so each occurrence gets its own value; a typed request variable that holds one is generated once, see [Typed request variables](#typed-request-variables). They are the same in the apps and the CLI. Type `{{$` in any field or editor to pick one; every suggestion says what it produces.
 
 | Variable | Value |
 | --- | --- |

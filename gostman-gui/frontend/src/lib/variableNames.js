@@ -33,8 +33,12 @@ export const filePathOf = (name) => FILE_REFERENCE.exec(name)?.[2].trim() || ''
 
 export const isDynamicName = (name) => DESCRIPTIONS.has(templateOf(name))
 
+export const isGeneratedName = (name) => isDynamicName(name) && !isFileName(name)
+
 export const describeDynamic = (name) => DESCRIPTIONS.get(templateOf(name)) || ''
 
 export const isFakerQuery = (query) => query.startsWith(DYNAMIC_PREFIX + FAKER_PREFIX) || query.startsWith(FAKER_PREFIX)
 
 export const isPromptName = (name) => name.startsWith(PROMPT_PREFIX) && name.length > PROMPT_PREFIX.length
+
+export const isEngineName = (name) => isDynamicName(name) || isPromptName(name)

@@ -23,11 +23,12 @@ import { applyRequestEdits, extractInSandbox, requestSubject, responseSubject, r
 import { acceptedCookies, scriptCookies } from './scripting/scriptCookies'
 import { scriptedRequest } from './scripting/subjects'
 import { rememberResolved } from './resolvedSecrets'
-import { blockedMessage } from './requestVariables'
+import { blockedMessage, generationsFor, sentVariables } from './requestVariables'
+import { parseRows } from './rows'
 import { sentProblems, withoutGiven, writtenNames } from './variablesForm'
 import { SECRETS_TEXT } from './secretsText'
 import { ENTRY_KINDS, exchangeEntry, scriptEntry, secretsEntry, withActivity } from './timeline'
-import { promptNames, referenceTargets, resolveLayers, scopeLayers, usedVariableNames } from './variableScopes'
+import { checkValues, promptNames, referenceTargets, resolveLayers, scopeLayers, usedVariableNames } from './variableScopes'
 import { shownUrl } from './shownUrl'
 import { sampleTransport } from './sampleResponses'
 import { isSampleRequest } from './samples'
@@ -171,9 +172,18 @@ const namesInUse = (lineage, request) => (
   runsScripts(lineage, request) ? undefined : usedVariableNames([request, lineage.map(({ settings }) => settings)])
 )
 
-const requestVariableProblems = (request, referenced) => (
-  sentProblems(request, store().sessionVariables, referenced && resolveLayers(scopeLayers(store(), request, referenced)))
-)
+const requestVariableProblems = (request, referenced) => sentProblems(request, resolveLayers(scopeLayers(store(), request, referenced)))
+
+const NO_VARIABLES = '{}'
+
+async function withGeneratedValues(backend, request, referenced) {
+  const resolved = resolveLayers(scopeLayers(store(), request, referenced))
+  const pending = generationsFor(parseRows(request.vars), checkValues(resolved))
+  if (pending.length === 0) return request
+  const texts = await backend.expand(pending.map(({ text }) => text), NO_VARIABLES)
+  const generated = Object.fromEntries(pending.map(({ key }, index) => [key, texts[index]]))
+  return { ...request, vars: sentVariables(request.vars, generated) }
+}
 
 async function resolveReferences(backend, request, lineage, trace) {
   const targets = referenceTargets(store(), request, namesInUse(lineage, request))
@@ -262,6 +272,7 @@ export function createExecutor(backend) {
     let referenced
     try {
       referenced = await resolveReferences(backend, request, lineage, trace)
+      request = await withGeneratedValues(backend, request, referenced)
     } catch (error) {
       return stop(request, error.message)
     }

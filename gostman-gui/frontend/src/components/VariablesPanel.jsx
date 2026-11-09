@@ -159,7 +159,7 @@ function Table({ rows, onChange }) {
   const [openAt, setOpenAt] = useState(NONE_OPEN)
   const sessionVariables = useAppStore((state) => state.sessionVariables)
   const resolved = useAppStore(selectResolvedVariables)
-  const shownNames = useMemo(() => problemNames(sentProblems({ vars: serializeRows(rows) }, sessionVariables, resolved)), [rows, sessionVariables, resolved])
+  const shownNames = useMemo(() => problemNames(sentProblems({ vars: serializeRows(rows) }, resolved)), [rows, resolved])
   const shown = [...rows, draftRow()]
   const commit = (next) => onChange(next.filter((row) => !isEmptyRow(row)))
   const replaceRow = (index, patch) => commit(shown.map((row, at) => (at === index ? { ...row, ...patch } : row)))

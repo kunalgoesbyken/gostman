@@ -4,6 +4,11 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Changed
+
+- Variables view: an empty field is sent empty, a session value with the same name no longer replaces it, and an empty required field is always marked. A value that Required checks is the one that would be sent, so a reference without a value counts as empty, for every type and for hidden variables too. A typed value that an author's change replaced does not come back when the author changes it back (#23).
+- Typed request variables: the type applies to the value that is used, so a session value, a `--var` or a data file row that replaces a typed variable reaches scripts as that type and has to fit it, in the apps and in `gostman run`. Dynamic variables such as `{{$randomInt}}` and `{{$timestamp}}` are filled in before the type is checked, once for the script and the request. Required behaves the same for every type, True or false accepts only `true` and `false`, and spaces around a Number, Whole number, True or false or choice are refused instead of being sent next to a trimmed value for scripts (#24).
+
 ## [1.15.3] - 2026-11-07
 
 ### Changed

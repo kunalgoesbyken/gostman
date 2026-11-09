@@ -3,6 +3,7 @@ import { formatList } from './i18n/format'
 import { fillPlaceholders, parseVariableMap, placeholderNames } from './placeholders'
 import { REQUEST_VARIABLES_TEXT as TEXT } from './requestVariablesText'
 import { isSentRow, parseRows, serializeRows } from './rows'
+import { isEngineName, isGeneratedName } from './variableNames'
 
 export const TYPE_NONE = ''
 export const TYPE_STRING = 'string'
@@ -21,6 +22,7 @@ export const PROBLEM_REQUIRED = 'required'
 const PROBLEM_COMMA = 'numberComma'
 const PROBLEM_INEXACT = 'inexact'
 const PROBLEM_JSON_INEXACT = 'jsonInexact'
+const PROBLEM_SPACES = 'spaces'
 
 const CHOICE_SEPARATOR = ','
 const ROW_BASICS = ['key', 'value', 'enabled']
@@ -34,11 +36,15 @@ const rejected = (problem) => ({ ok: false, problem })
 
 export const typeOf = (row) => (VARIABLE_TYPES.includes(row.type) ? row.type : TYPE_NONE)
 
-export const choicesOf = (row) => String(row.choices ?? '').split(CHOICE_SEPARATOR).map((choice) => choice.trim()).filter((choice) => choice !== '')
+const valueText = (row) => String(row.value ?? '')
 
-export const isBlankValue = (row) => String(row.value ?? '').trim() === ''
+export const choicesOf = (row) => [...new Set(String(row.choices ?? '').split(CHOICE_SEPARATOR).map((choice) => choice.trim()).filter((choice) => choice !== ''))]
+
+const isBlank = (text) => text.trim() === ''
 
 const isTextType = (type) => type === TYPE_NONE || type === TYPE_STRING
+
+export const isTyped = (row) => !isTextType(typeOf(row))
 
 const significant = (digits) => digits.replace(/\D/gu, '').replace(/^0+/u, '').replace(/0+$/u, '')
 
@@ -55,15 +61,14 @@ function isExact(text) {
 }
 
 function readNumber(text, isWhole) {
-  const written = text.trim()
-  if (DECIMAL_COMMA.test(written)) return rejected(PROBLEM_COMMA)
-  if (!(isWhole ? isWholeText : isJsonNumber)(written)) return rejected(isWhole ? TYPE_INTEGER : TYPE_NUMBER)
-  return isExact(written) ? accepted(Number(written)) : rejected(PROBLEM_INEXACT)
+  if (DECIMAL_COMMA.test(text)) return rejected(PROBLEM_COMMA)
+  if (!(isWhole ? isWholeText : isJsonNumber)(text)) return rejected(isWhole ? TYPE_INTEGER : TYPE_NUMBER)
+  return isExact(text) ? accepted(Number(text)) : rejected(PROBLEM_INEXACT)
 }
 
-const isBooleanWord = (text) => [BOOLEAN_TRUE, BOOLEAN_FALSE].includes(text.trim().toLowerCase())
+const isBooleanWord = (text) => text === BOOLEAN_TRUE || text === BOOLEAN_FALSE
 
-const readBoolean = (text) => (isBooleanWord(text) ? accepted(text.trim().toLowerCase() === BOOLEAN_TRUE) : rejected(TYPE_BOOLEAN))
+const readBoolean = (text) => (isBooleanWord(text) ? accepted(text === BOOLEAN_TRUE) : rejected(TYPE_BOOLEAN))
 
 const inexactJsonNumber = (text) => exactNumbersIn(parseExact(text)).find((written) => !isExact(written)) ?? ''
 
@@ -77,26 +82,22 @@ function readJson(text) {
   return inexactJsonNumber(text) === '' ? accepted(parsed) : rejected(PROBLEM_JSON_INEXACT)
 }
 
-function readChoice(text, choices) {
-  const chosen = text.trim()
-  return choices.length === 0 || choices.includes(chosen) ? accepted(chosen) : rejected(TYPE_ENUM)
-}
+const readChoice = (text, choices) => (choices.length === 0 || choices.includes(text) ? accepted(text) : rejected(TYPE_ENUM))
 
-const holdsPlaceholder = (text) => placeholderNames(String(text ?? '')).length > 0
+const holdsPlaceholder = (text) => placeholderNames(text).length > 0
 
-export const isTypedReference = (row) => !isTextType(typeOf(row)) && holdsPlaceholder(row.value)
-
-export const usesCheckbox = (row) => typeOf(row) === TYPE_BOOLEAN && (isBlankValue(row) || isBooleanWord(String(row.value)))
+export const usesCheckbox = (row) => typeOf(row) === TYPE_BOOLEAN && (valueText(row) === '' || isBooleanWord(valueText(row)))
 
 export const usesChoiceList = (row) => {
   const choices = choicesOf(row)
-  return typeOf(row) === TYPE_ENUM && choices.length > 0 && (isBlankValue(row) || choices.includes(String(row.value).trim()))
+  return typeOf(row) === TYPE_ENUM && choices.length > 0 && (valueText(row) === '' || choices.includes(valueText(row)))
 }
 
 function readFilled(row, text) {
   const type = typeOf(row)
   if (isTextType(type)) return accepted(text)
-  const isEmpty = text.trim() === ''
+  if (type !== TYPE_JSON && text !== text.trim()) return rejected(PROBLEM_SPACES)
+  const isEmpty = text === ''
   if (type === TYPE_BOOLEAN) return isEmpty ? accepted(false) : readBoolean(text)
   if (type === TYPE_ENUM) return isEmpty ? accepted('') : readChoice(text, choicesOf(row))
   if (isEmpty) return accepted(null)
@@ -105,38 +106,45 @@ function readFilled(row, text) {
   return readJson(text)
 }
 
-const isFilledReference = (row, valueOf) => Boolean(valueOf) && isTypedReference(row)
+export const sentText = (row) => (typeOf(row) === TYPE_BOOLEAN && valueText(row) === '' ? BOOLEAN_FALSE : valueText(row))
 
-const filledText = (row, valueOf) => {
-  const text = String(row.value ?? '')
-  return isFilledReference(row, valueOf) ? fillPlaceholders(text, valueOf) : text
+const winnerText = (row, values) => values?.get(row.key) ?? sentText(row)
+
+const usedText = (row, values) => {
+  const winner = winnerText(row, values)
+  return values ? fillPlaceholders(winner, (name) => values.get(name)) : winner
 }
 
-const isDeferred = (row, valueOf) => !valueOf && isTypedReference(row)
+const isPending = (text, values) => placeholderNames(text).some((name) => !values || isGeneratedName(name) || values.has(name))
 
-function readTyped(row, valueOf) {
-  return isDeferred(row, valueOf) ? accepted(String(row.value)) : readFilled(row, filledText(row, valueOf))
+const readUsed = (row, text, values) => (isPending(text, values) ? accepted(text) : readFilled(row, text))
+
+function requiredText(winner, values) {
+  if (!values) return winner
+  return fillPlaceholders(winner, (name) => values.get(name) ?? (values.has(name) || isEngineName(name) ? undefined : ''))
 }
 
-export function typedValue(row, valueOf) {
-  const read = readTyped(row, valueOf)
-  return read.ok ? read.value : String(row.value ?? '')
+const isMissing = (row, values) => row.required === true && typeOf(row) !== TYPE_BOOLEAN && isBlank(requiredText(winnerText(row, values), values))
+
+export function typedValue(row, values) {
+  const text = usedText(row, values)
+  const read = readUsed(row, text, values)
+  return read.ok ? read.value : text
 }
 
-export const sentText = (row) => (typeOf(row) === TYPE_BOOLEAN && isBlankValue(row) ? BOOLEAN_FALSE : String(row.value ?? ''))
+export const declaredValues = (rows, values) => Object.fromEntries(
+  rows.filter((row) => isSentRow(row) && isTyped(row)).map((row) => [row.key, typedValue(row, values)])
+)
 
 export const variableName = (row) => (String(row.label ?? '').trim() || row.key.trim())
 
 export const isShownInForm = (row) => isSentRow(row) && row.hidden !== true
 
-function filledProblem(row, text) {
-  const read = readFilled(row, text)
-  if (!read.ok) return read.problem
-  const isMissing = typeOf(row) !== TYPE_BOOLEAN && text.trim() === ''
-  return row.required === true && isMissing ? PROBLEM_REQUIRED : ''
+export function problemOf(row, values) {
+  if (isMissing(row, values)) return PROBLEM_REQUIRED
+  const read = readUsed(row, usedText(row, values), values)
+  return read.ok ? '' : read.problem
 }
-
-export const problemOf = (row, valueOf) => (isDeferred(row, valueOf) ? '' : filledProblem(row, filledText(row, valueOf)))
 
 function filledProblemText(row, text, problem) {
   const name = variableName(row)
@@ -145,15 +153,17 @@ function filledProblemText(row, text, problem) {
   return TEXT.problems[problem](name)
 }
 
-export function problemText(row, problem, valueOf) {
-  const said = filledProblemText(row, filledText(row, valueOf), problem)
-  return isFilledReference(row, valueOf) ? TEXT.fromReference({ problem: said, written: String(row.value).trim() }) : said
+export function problemText(row, problem, values) {
+  const winner = winnerText(row, values)
+  const said = filledProblemText(row, usedText(row, values), problem)
+  if (winner !== sentText(row)) return TEXT.replaced({ problem: said, value: winner })
+  return values && holdsPlaceholder(winner) ? TEXT.fromReference({ problem: said, written: winner.trim() }) : said
 }
 
-export function variableProblems(rows, overridden = [], valueOf) {
-  return rows.filter((row) => isSentRow(row) && !overridden.includes(row.key)).flatMap((row) => {
-    const problem = problemOf(row, valueOf)
-    return problem === '' ? [] : [{ key: row.key, problem, message: problemText(row, problem, valueOf) }]
+export function variableProblems(rows, values) {
+  return rows.filter(isSentRow).flatMap((row) => {
+    const problem = problemOf(row, values)
+    return problem === '' ? [] : [{ key: row.key, problem, message: problemText(row, problem, values) }]
   })
 }
 
@@ -161,16 +171,25 @@ export function blockedMessage(problems) {
   return TEXT.blocked(problems.map((problem) => problem.message).join(BLOCKED_LINE_SEPARATOR))
 }
 
-export function requestVariables(text, overridden = [], known = '') {
-  const rows = parseRows(text)
-  const values = parseVariableMap(known) ?? new Map()
-  const valueOf = (name) => values.get(name)
-  const problems = variableProblems(rows, overridden, valueOf)
-  return {
-    vars: serializeRows(rows.map((row) => (isSentRow(row) ? { ...row, value: sentText(row) } : row))),
-    typed: Object.fromEntries(rows.filter(isSentRow).map((row) => [row.key, typedValue(row, valueOf)])),
-    message: problems.length > 0 ? blockedMessage(problems) : '',
-  }
+export const generationsFor = (rows, values) => rows
+  .filter((row) => isSentRow(row) && isTyped(row) && winnerText(row, values) === sentText(row))
+  .map((row) => ({ key: row.key, text: usedText(row, values) }))
+  .filter(({ text }) => placeholderNames(text).some(isGeneratedName))
+
+const valuesIn = (known) => parseVariableMap(known) ?? new Map()
+
+export const pendingGenerations = (text, known) => generationsFor(parseRows(text), valuesIn(known))
+
+export const declaredVariables = (text, known) => declaredValues(parseRows(text), valuesIn(known))
+
+export function variableMessage(text, known) {
+  const problems = variableProblems(parseRows(text), valuesIn(known))
+  return problems.length > 0 ? blockedMessage(problems) : ''
+}
+
+export function sentVariables(text, generated = {}) {
+  const sent = (row) => (Object.hasOwn(generated, row.key) ? generated[row.key] : sentText(row))
+  return serializeRows(parseRows(text).map((row) => (isSentRow(row) ? { ...row, value: sent(row) } : row)))
 }
 
 const settingsOf = (row) => Object.fromEntries(Object.entries(row).filter(([name]) => !ROW_BASICS.includes(name)))

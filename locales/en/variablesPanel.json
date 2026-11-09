@@ -29,7 +29,7 @@
     "markShown": "Shown in the Variables view",
     "markHidden": "Hidden from the Variables view, still sent",
     "markShownDespiteHidden": "Hidden, but shown in the Variables view until it has a value",
-    "sessionReplaces": "A session value with this name is sent instead of this value, except when you send from the Variables view."
+    "sessionReplaces": "A session value with this name is used instead of this value, and it has to fit the type. A field in the Variables view is used instead of the session value, even when it is empty."
   },
   "variablesView": {
     "switchLabel": "Request view",
