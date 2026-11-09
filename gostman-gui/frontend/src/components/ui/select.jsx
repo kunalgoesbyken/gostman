@@ -96,7 +96,7 @@ export function OptionRow({ id, entry, isSelected, isActive, hasIcons = false, o
 }
 
 const Select = React.forwardRef(function Select(
-  { className, children, controlSize = "sm", value, onChange, disabled, title, dir, ...props },
+  { className, children, controlSize = "sm", value, onChange, notifyReselect = false, disabled, title, dir, ...props },
   forwardedRef
 ) {
   const entries = React.useMemo(() => readEntries(children), [children])
@@ -123,7 +123,7 @@ const Select = React.forwardRef(function Select(
 
   const choose = (entry) => {
     close()
-    if (entry.value !== String(value ?? "")) onChange?.({ target: { value: entry.value } })
+    if (notifyReselect || entry.value !== String(value ?? "")) onChange?.({ target: { value: entry.value } })
   }
 
   const enabledIndexes = () => entries.map((entry, index) => (entry.disabled ? -1 : index)).filter((index) => index !== -1)

@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 
-export function useDebouncedValue(value, delayMs) {
-  const [debounced, setDebounced] = useState(value)
+export function useDebouncedValue(value, delayMs, scope) {
+  const [settled, setSettled] = useState({ scope, value })
 
   useEffect(() => {
-    const timer = setTimeout(() => setDebounced(value), delayMs)
+    const settle = (current) => (current.scope === scope && current.value === value ? current : { scope, value })
+    const timer = setTimeout(() => setSettled(settle), delayMs)
     return () => clearTimeout(timer)
-  }, [value, delayMs])
+  }, [scope, value, delayMs])
 
-  return debounced
+  return settled.scope === scope ? settled.value : value
 }
