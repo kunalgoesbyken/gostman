@@ -479,7 +479,7 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
   const [matchIndex, setMatchIndex] = useState(0)
   const baseDepth = requestDepth(jsonDepth, shown?.protocol === MCP_PROTOCOL)
   const treeView = useTreeView(shown, jsonDepth, baseDepth)
-  const filterPath = treeView?.filterPath ?? ''
+  const filterPath = treeView?.view.filterPath ?? ''
   const debouncedQuery = useDebouncedValue(query, SEARCH_DEBOUNCE_MS)
   const debouncedPath = useDebouncedValue(filterPath, SEARCH_DEBOUNCE_MS, shown)
 
@@ -501,7 +501,7 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
   const treeValue = view === 'pretty' && formatted.text === null && !highlight ? (filtered ? filtered.value : json) : null
   const hasTree = treeValue !== null && typeof treeValue === 'object'
   const depth = shownDepth(treeView, baseDepth)
-  const epoch = useTreeEpoch(treeView, depth, filtered ? debouncedPath : '', hasTree)
+  const epoch = useTreeEpoch(treeView, filtered ? debouncedPath : '', hasTree)
   const rememberDepth = onJsonDepthChange && !past && !docked ? () => {
     const setting = settingOfDepth(depth)
     adoptSetting(treeView, setting)
