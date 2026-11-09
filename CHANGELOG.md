@@ -4,6 +4,10 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Changed
+
+- Site: the AI agents page and the features page are shorter and easier to scan: a centred hero with an example agent session, the two setup commands, six things an agent can do and four safety rules; the features page leads with six highlights followed by every feature as a compact list by group.
+
 ## [1.16.0] - 2026-11-09
 
 ### Added
