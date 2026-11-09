@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/signal"
 	"sync"
+	"syscall"
 	"time"
 
 	handler "github.com/kunalgoesbyken/gostman/api"
@@ -142,11 +143,14 @@ func serveRelay(port int, origins []string, network *engine.Network, stdout, std
 }
 
 func serveUntilInterrupted(listener net.Listener, handler http.Handler) error {
-	server := &http.Server{Handler: handler, ReadHeaderTimeout: headerTimeout}
+	return serveServerUntilInterrupted(listener, &http.Server{Handler: handler, ReadHeaderTimeout: headerTimeout})
+}
+
+func serveServerUntilInterrupted(listener net.Listener, server *http.Server) error {
 	failed := make(chan error, 1)
 	go func() { failed <- server.Serve(listener) }()
 
-	interrupted, release := signal.NotifyContext(context.Background(), os.Interrupt)
+	interrupted, release := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer release()
 	select {
 	case err := <-failed:

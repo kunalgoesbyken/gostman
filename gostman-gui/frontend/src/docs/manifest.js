@@ -62,6 +62,7 @@ export const docSections = [
     title: "Reference",
     docs: [
       { file: "cli.md", outline: true, keywords: ["cli", "terminal", "command"] },
+      { file: "self-hosting.md", outline: true, keywords: ["self-host", "self-hosted", "docker", "on-premise", "own server", "vercel", "deploy", "intranet"] },
       { file: "preferences-and-shortcuts.md", label: "Preferences and shortcuts", outline: true },
     ],
   },

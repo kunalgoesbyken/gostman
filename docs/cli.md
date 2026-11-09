@@ -32,6 +32,7 @@ gostman export orders-api --format openapi --out openapi.json
 - `fuzz` sends inputs derived from the schemas of an OpenAPI spec and reports 5xx answers, timeouts and contract violations; see [Fuzzing from an OpenAPI spec](#fuzzing-from-an-openapi-spec).
 - `docs` writes the collection as one self-contained HTML page, to stdout or to `--output file`. `--title` sets the page title (default `API documentation`), `--no-examples` leaves out saved example responses and `--playground` adds a **Try it** panel, `--logo` and `--accent` brand the page, and `--versions` or `--all-tags` build one page per Git version; see [Generated documentation](#generated-documentation).
 - `relay` lets the web app send its requests from your computer; see [Local relay for the web app](#local-relay-for-the-web-app).
+- `serve` serves the web app and its proxy from your own server; see [Self-hosted web app](#self-hosted-web-app).
 - `import` and `export` convert a workspace from and to other tools' formats; see [Import and export](#import-and-export).
 - `init [folder]` creates an empty workspace and prints how to import a collection into it and run it, and how to register `gostman mcp` with a coding agent, using the workspace's absolute path. `gostman import <file> --out <folder>` accepts a workspace that `init` has just created. When the folder already holds other files, such as a repository root, the workspace goes in a `gostman` folder inside it; nothing is overwritten. `--skill` also writes the Gostman [Agent Skill](agents.md#agent-skill) to `.claude/skills/gostman/SKILL.md`. `--ci github|gitlab|azure|circleci|bitbucket` also writes a starter pipeline in the current folder, never over an existing file; see [Starter pipelines and pre-commit](ci.md#starter-pipelines-and-pre-commit).
 - `mcp` serves a workspace to a coding agent; see [Use from a coding agent](agents.md).
@@ -293,6 +294,20 @@ It prints its address, such as `http://127.0.0.1:4030`. In the web app, open **P
 - Requests get the desktop app's limits rather than the hosted relay's: private and loopback addresses are allowed and responses are read up to 50 MB. It never reads files and never starts local MCP commands.
 - Behind a corporate proxy, a private certificate authority or a server that asks for a client certificate, start it with the same network flags as `run`: `--cacert`, `--client-cert` with `--client-key`, `--client-cert-pass-env`, `--proxy` and `--noproxy`. They apply to every request, gRPC call and OAuth 2.0 token request the web app sends through the relay. Without `--proxy`, `HTTPS_PROXY`, `HTTP_PROXY` and `NO_PROXY` are used.
 - Anything allowed to use it can send requests from your computer, so stop it when you are done, and do not add origins you do not control.
+
+## Self-hosted web app
+
+`gostman serve` serves a built copy of the web app and its `/api/proxy` endpoint, so a team can use the web version from its own address.
+
+```bash
+gostman serve --dir gostman-gui/frontend/dist-web --addr 0.0.0.0:8080
+```
+
+- `--dir path` is the folder `npm run build:web` wrote. It is required.
+- `--addr host:port` is where it listens (default `127.0.0.1:8080`).
+- `--allow-private` lets the proxy reach `localhost` and private network addresses. Without it the proxy follows the hosted rules: those addresses are refused and responses are cut at 3 MB. Anyone who can open the page can then use the server to reach your network, so use it only behind authentication, a VPN or a firewall.
+
+[Self-hosting the web app](self-hosting.md) covers the prebuilt Docker image `ghcr.io/kunalgoesbyken/gostman-web`, HTTPS, Vercel and updates. To send requests from your own computer instead, use [`gostman relay`](#local-relay-for-the-web-app).
 
 ## Import and export
 

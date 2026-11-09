@@ -1,0 +1,17 @@
+.git
+.github
+.claude
+.impeccable
+.playwright-mcp
+.vercel
+.env
+.env.*
+**/node_modules
+**/dist
+**/dist-web
+gostman-gui/build/bin
+gostman-gui/frontend/package.json.md5
+**/*.exe
+benchmarks
+packaging
+vscode

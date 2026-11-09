@@ -34,6 +34,7 @@ const (
   gostman docs <workspace folder | export.json> [flags]
   gostman capture --upstream <url> [flags]
   gostman relay [flags]
+  gostman serve --dir <built web app> [flags]
   gostman scan <workspace folder | export.json> [flags]
   gostman negative <workspace folder | export.json> [flags]
   gostman fuzz <spec file | address> --base-url <url> [flags]
@@ -393,6 +394,23 @@ relay
   --noproxy             as for run; they apply to every request the web app
                         sends through the relay
 
+serve
+  Run your own copy of the Gostman web app: serves a build of the web app
+  (npm run build:web writes it to gostman-gui/frontend/dist-web) and the
+  request proxy at /api/proxy that the hosted app uses. Browsers send their
+  requests through this server, so it reaches what the server reaches. Behind
+  a reverse proxy, forward the Host header (with its port) as the browser sent
+  it, or set X-Forwarded-Host to it.
+
+  --dir <folder>        the built web app (required; must hold index.html)
+  --addr <host:port>    address to listen on (default 127.0.0.1:8080; :8080
+                        listens on every network interface)
+  --allow-private       let the proxy reach localhost and private network
+                        addresses, which it refuses by default; for a server
+                        inside a private network that only people you trust
+                        can reach
+                        Responses are limited to 3 MB, requests to 30 seconds.
+
 scan
   Look for credentials typed into a Gostman workspace folder or a Gostman,
   Postman or other supported export: well-known token formats, random-looking
@@ -611,6 +629,8 @@ func dispatch(arguments []string, stdout, stderr *os.File) int {
 		return captureCommand(arguments[1:], stdout, stderr)
 	case "relay":
 		return relayCommand(arguments[1:], stdout, stderr)
+	case "serve":
+		return serveCommand(arguments[1:], stdout, stderr)
 	case "scan":
 		return scanCommand(arguments[1:], stdout, stderr)
 	case "fuzz":

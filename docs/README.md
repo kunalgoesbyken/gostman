@@ -51,7 +51,8 @@ Gostman is an API client for REST, GraphQL, gRPC and WebSocket that you, your CI
 
 ## Reference
 
-- [Command line](cli.md): `run`, `flow`, `send`, `history`, `load`, `negative`, `fuzz`, `diff`, `mock`, `capture`, `docs`, `relay`, `scan`, `lint`, `mcp`, `init`, `import` and `export`.
+- [Command line](cli.md): `run`, `flow`, `send`, `history`, `load`, `negative`, `fuzz`, `diff`, `mock`, `capture`, `docs`, `relay`, `serve`, `scan`, `lint`, `mcp`, `init`, `import` and `export`.
+- [Self-hosting the web app](self-hosting.md): run the web app and its proxy on your own server with Docker, `gostman serve` or Vercel, behind HTTPS, and reach private addresses.
 - [Preferences, shortcuts and the command palette](preferences-and-shortcuts.md): the command palette, preferences and keyboard shortcuts.
 
 ## Help

@@ -12,7 +12,7 @@ Problems people run into most often, with the reason and the fix. If yours is no
 
 ## Sending requests
 
-**The web app cannot reach `localhost` or a private address.** The web version sends requests through a hosted proxy, which is not allowed to reach your machine or your network. Run `gostman relay` and choose **Local relay on this computer** under **Preferences**, **Privacy** (see [Local relay for the web app](cli.md#local-relay-for-the-web-app)), or use the [desktop app](getting-started.md#install-the-desktop-app) or the command line.
+**The web app cannot reach `localhost` or a private address.** The web version sends requests through a hosted proxy, which is not allowed to reach your machine or your network. Run `gostman relay` and choose **Local relay on this computer** under **Preferences**, **Privacy** (see [Local relay for the web app](cli.md#local-relay-for-the-web-app)), or use the [desktop app](getting-started.md#install-the-desktop-app) or the command line. A team can also [host its own copy](self-hosting.md#reach-internal-apis) of the web app that reaches its network.
 
 **"The local relay at ... did not answer."** The web app is set to send through a relay on your computer and nothing answered at its address. Start `gostman relay` with the port you entered, check the address under **Preferences**, **Privacy** and press **Test**, or switch back to **Hosted relay**. If the browser asked whether the page may reach apps on this device, allow it.
 

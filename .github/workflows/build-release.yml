@@ -314,6 +314,18 @@ jobs:
             ghcr.io/kunalgoesbyken/gostman:${{ needs.plan.outputs.version }}
             ghcr.io/kunalgoesbyken/gostman:latest
 
+      - name: Build and push the self-hosted web app image
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
+        with:
+          context: .
+          file: ./Dockerfile.web
+          platforms: linux/amd64,linux/arm64
+          build-args: VERSION=${{ needs.plan.outputs.version }}
+          push: true
+          tags: |
+            ghcr.io/kunalgoesbyken/gostman-web:${{ needs.plan.outputs.version }}
+            ghcr.io/kunalgoesbyken/gostman-web:latest
+
   packages:
     needs: [plan, release]
     if: needs.plan.outputs.publish == 'true'

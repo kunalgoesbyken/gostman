@@ -110,6 +110,8 @@ Browsers cannot call arbitrary APIs directly, so the web version relays requests
 - A gRPC stream is collected and shown when it ends. Messages for a client stream are written up front as a JSON array.
 - Responses larger than 3 MB are truncated. The desktop app reads up to 50 MB.
 
+To run the web app and its proxy on your own server, see [Self-hosting the web app](self-hosting.md).
+
 ## Next steps
 
 - [Tutorial: test an API](tutorial-first-collection.md), about fifteen minutes from an empty collection to a tested one

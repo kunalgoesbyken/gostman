@@ -1,0 +1,34 @@
+FROM --platform=$BUILDPLATFORM node:20-bookworm-slim AS web
+ARG SITE_URL
+ENV SITE_URL=$SITE_URL
+WORKDIR /src/gostman-gui/frontend
+COPY gostman-gui/frontend/package.json gostman-gui/frontend/package-lock.json ./
+RUN npm ci
+COPY docs /src/docs
+COPY locales /src/locales
+COPY screenshots /src/screenshots
+COPY editors/vscode/media/screenshots/send-dark.png /src/editors/vscode/media/screenshots/send-dark.png
+COPY engine/variables.json /src/engine/variables.json
+COPY redact/sensitive_words.json /src/redact/sensitive_words.json
+COPY scan/placeholder_words.json scan/token_formats.json /src/scan/
+COPY runner/report/report.html /src/runner/report/report.html
+COPY gostman-gui/wails.json /src/gostman-gui/wails.json
+COPY gostman-gui/frontend/ ./
+RUN npm run build:web
+
+FROM --platform=$BUILDPLATFORM golang:1.24.5-alpine AS cli
+ARG VERSION=dev
+ARG TARGETOS
+ARG TARGETARCH
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -trimpath -ldflags "-s -w -X main.version=${VERSION}" -o /out/gostman ./cmd/gostman
+
+FROM gcr.io/distroless/static-debian12:nonroot
+COPY --from=cli /out/gostman /gostman
+COPY --from=web /src/gostman-gui/frontend/dist-web /srv/gostman-web
+EXPOSE 8080
+USER nonroot:nonroot
+ENTRYPOINT ["/gostman", "serve", "--dir", "/srv/gostman-web", "--addr", ":8080"]
