@@ -42,8 +42,8 @@ import { shortcutLabel } from "../lib/platform"
 import { AI_TEXT } from "../lib/aiText"
 import { RESPONSE_CHECKS_TEXT } from "../lib/checksText"
 import { canSaveAsExample } from "../lib/examples"
-import { trimmedTree } from "../lib/jsonTree"
-import { DEPTH_SETTINGS, depthLabel, depthOfSetting, requestDepth, settingOfDepth } from "../lib/jsonDepth"
+import { hasNestedValues, trimmedTree } from "../lib/jsonTree"
+import { DEPTH_SETTINGS, appDefaultDepth, depthLabel, depthOfSetting, requestDepth, settingOfDepth } from "../lib/jsonDepth"
 import { adoptSetting, chooseDepth, collapseTarget, isExpandedIn, noteToggle, opensBeyondLevel, setFilterPath, shownDepth, useTreeEpoch, useTreeView } from "../lib/jsonTreeView"
 import { AUTO_DECODE_BYTES } from "../lib/binary/limits"
 import { LARGE_BODY_CHARS } from "../lib/largeText"
@@ -477,8 +477,9 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
   const [searchOpen, setSearchOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [matchIndex, setMatchIndex] = useState(0)
-  const baseDepth = requestDepth(jsonDepth, shown?.protocol === MCP_PROTOCOL)
-  const treeView = useTreeView(shown, jsonDepth, baseDepth)
+  const isMcp = shown?.protocol === MCP_PROTOCOL
+  const baseDepth = requestDepth(jsonDepth, isMcp)
+  const treeView = useTreeView(shown, tabId, jsonDepth, baseDepth)
   const filterPath = treeView?.view.filterPath ?? ''
   const debouncedQuery = useDebouncedValue(query, SEARCH_DEBOUNCE_MS)
   const debouncedPath = useDebouncedValue(filterPath, SEARCH_DEBOUNCE_MS, shown)
@@ -500,6 +501,7 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
   const copyText = isFormat(view) ? binary.text ?? '' : filtered ? filtered.text : text
   const treeValue = view === 'pretty' && formatted.text === null && !highlight ? (filtered ? filtered.value : json) : null
   const hasTree = treeValue !== null && typeof treeValue === 'object'
+  const canExpand = useMemo(() => hasTree && hasNestedValues(treeValue), [hasTree, treeValue])
   const depth = shownDepth(treeView, baseDepth)
   const epoch = useTreeEpoch(treeView, filtered ? debouncedPath : '', hasTree)
   const rememberDepth = onJsonDepthChange && !past && !docked ? () => {
@@ -680,12 +682,12 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
                 value={view}
                 onChange={setSelectedView}
               />
-              {epoch && (
+              {epoch && canExpand && (
                 <TreeControls
                   depth={depth}
                   isRemembered={depth === baseDepth}
                   isOpenedBeyond={opensBeyondLevel(epoch)}
-                  collapseTo={collapseTarget(treeView)}
+                  collapseTo={collapseTarget(treeView, depth, appDefaultDepth(isMcp))}
                   onChoose={(next) => chooseDepth(treeView, next)}
                   onRemember={rememberDepth}
                 />

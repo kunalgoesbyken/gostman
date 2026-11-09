@@ -1,7 +1,6 @@
 import { RESPONSE_TEXT } from './responseText'
 
 export const DEPTH_ALL = 'all'
-export const COLLAPSED_DEPTH = 1
 
 const JSON_EXPANDED_DEPTH = 2
 const MCP_EXPANDED_DEPTH = 3

@@ -3,6 +3,10 @@ export const MAX_TREE_NODES = 5000
 
 const isContainer = (value) => value !== null && typeof value === 'object'
 
+const hasEntries = (value) => (Array.isArray(value) ? value.length > 0 : Object.keys(value).length > 0)
+
+export const hasNestedValues = (value) => Object.values(value).some((child) => isContainer(child) && hasEntries(child))
+
 const remainder = (count, noun) => `${count} more ${noun} not shown`
 
 const pointerStep = (key) => `/${String(key).replaceAll('~', '~0').replaceAll('/', '~1')}`
