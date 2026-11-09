@@ -1,5 +1,5 @@
 import { memo } from "react"
-import { Activity, Cookie, GitBranch, Radio, Server, Settings, SlidersHorizontal, Newspaper } from "lucide-react"
+import { Activity, Cookie, GitBranch, Radio, Server, Settings, Wifi, Newspaper } from "lucide-react"
 import { cn } from "../lib/utils"
 import { useCaptureStore } from "../lib/captureSession"
 import { openGit, useGitStore } from "../lib/gitSession"
@@ -43,7 +43,7 @@ export const StatusBar = memo(function StatusBar({ showsResizeGrip, onOpenMock, 
   return (
     <footer className="flex h-6 max-sm:h-10 shrink-0 items-center justify-between overflow-hidden border-t border-border bg-background px-1 text-2xs text-muted-foreground">
       <div className="flex h-full items-center">
-        <StatusItem icon={Settings} label={TEXT.network} onClick={openSettings} />
+        <StatusItem icon={Wifi} label={TEXT.network} onClick={openSettings} />
         {isMockRunning && <StatusItem icon={Server} label={TEXT.mock(true, mockPort)} active onClick={onOpenMock} />}
         {isCapturing && <StatusItem icon={Radio} label={TEXT.capture(true)} active onClick={onOpenCapture} />}
         {activeMonitors > 0 && <StatusItem icon={Activity} label={MONITORS_TEXT.statusLabelRunning(activeMonitors)} active onClick={onOpenMonitors} />}
@@ -53,7 +53,7 @@ export const StatusBar = memo(function StatusBar({ showsResizeGrip, onOpenMock, 
         {hasUnseenRelease && <StatusItem icon={Newspaper} label={FEATURES_TEXT.whatsNewTitle} title={FEATURES_TEXT.whatsNewDot(APP_VERSION)} className="text-primary" onClick={openWhatsNew} />}
         <DataNotices updates={updates} remindsExport={remindsExport} onExport={onExport} />
         <StatusItem icon={Cookie} label={TEXT.cookies} onClick={openCookies} />
-        <StatusItem icon={SlidersHorizontal} label={PREFERENCES_TEXT.statusLabel} onClick={openPreferences} />
+        <StatusItem icon={Settings} label={PREFERENCES_TEXT.statusLabel} onClick={openPreferences} />
         <button type="button" title={ABOUT_TEXT.versionButton} onClick={openAbout} className={cn(STATUS_ITEM_CLASS, "font-mono text-3xs")}>v{__APP_VERSION__}<span className="sr-only"> {ABOUT_TEXT.versionButton}</span></button>
         {showsResizeGrip && <ResizeGrip />}
       </div>

@@ -4,6 +4,10 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Changed
+
+- The environments button, Network and Preferences no longer share cog and slider icons: environments use the layers icon, Network the wifi icon and Preferences the cog.
+
 ## [1.15.4] - 2026-11-09
 
 ### Changed

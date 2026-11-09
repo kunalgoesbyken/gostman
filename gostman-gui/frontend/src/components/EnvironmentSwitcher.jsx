@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { Settings2 } from "lucide-react"
+import { Layers } from "lucide-react"
 import { IconButton } from "./ui/button"
 import { Select } from "./ui/select"
 import { ColorDot } from "./ui/colorPicker"
@@ -59,7 +59,7 @@ export function EnvironmentSwitcher() {
         )}
       </Select>
       <span className="sr-only" aria-live="polite">{followed && active ? TEXT.followed(active.name, collectionName) : ""}</span>
-      <IconButton label={TEXT.title} icon={Settings2} size="icon" onClick={openEnvironmentDialog} />
+      <IconButton label={TEXT.title} icon={Layers} size="icon" onClick={openEnvironmentDialog} />
     </div>
   )
 }

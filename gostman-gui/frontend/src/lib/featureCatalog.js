@@ -60,7 +60,7 @@ export const FEATURES = [
   { id: 'notes', group: 'data', since: '1.9.0', docs: 'requests-and-responses#notes', action: { type: 'tab', id: 'notes' }, icon: 'notebook-pen' },
   { id: 'recently-deleted', group: 'data', since: '1.9.0', docs: 'collections-and-git#recently-deleted', action: { type: 'dialog', id: 'trash' }, icon: 'undo-2', palette: true },
   { id: 'backups', group: 'data', docs: 'preferences-and-shortcuts#backups', action: { type: 'dialog', id: 'preferences' }, icon: 'archive' },
-  { id: 'environments', group: 'variables', docs: 'variables#the-environment-table', action: { type: 'dialog', id: 'environments' }, icon: 'globe', palette: true, tool: { group: 'build', order: 3 } },
+  { id: 'environments', group: 'variables', docs: 'variables#the-environment-table', action: { type: 'dialog', id: 'environments' }, icon: 'layers', palette: true, tool: { group: 'build', order: 3 } },
   { id: 'scopes', group: 'variables', docs: 'variables#scopes-and-precedence', action: { type: 'tab', id: 'vars' }, icon: 'layers', empty: ['tab:vars'], landing: { group: 'variables', order: 1 } },
   { id: 'inherited-variables', group: 'variables', since: '1.12.0', docs: 'requests-and-responses#vars', action: { type: 'tab', id: 'vars' }, icon: 'layers' },
   { id: 'typed-variables', group: 'variables', since: '1.12.0', docs: 'variables#typed-request-variables', action: { type: 'tab', id: 'vars' }, icon: 'binary' },

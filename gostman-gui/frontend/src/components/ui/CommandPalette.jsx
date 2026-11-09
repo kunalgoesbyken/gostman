@@ -1,7 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react"
 import {
   ChevronsDownUp, ClipboardPaste, Clock, Compass, MonitorDown, Info, Hand, Folder, FolderOpen, Code, Copy, FileText, FolderPlus, Globe, History, Keyboard, PanelLeft, Pin, Plus, Save, Search, Send,
-  Bot, Settings, Settings2, SlidersHorizontal, Newspaper, Trash2, Undo2, Workflow, X,
+  Bot, Settings, Settings2, Newspaper, Trash2, Undo2, Workflow, X,
 } from "lucide-react"
 import { MethodTag } from "../MethodTag"
 import { SectionLabel } from "./panel"
@@ -70,7 +70,7 @@ const appCommands = (holdsCollections) => [
   { id: "collapse-folders", label: TREE_TEXT.collapseAll, description: TREE_TEXT.collapseAllDescription, icon: ChevronsDownUp, keywords: COMMAND_TEXT.commands.collapseFolders.keywords, action: "collapseFolders" },
   command("collection-settings", COMMAND_TEXT.commands.collectionSettings, "collectionSettings", { icon: Settings2 }),
   ...allCollectionsCommands(holdsCollections),
-  { id: "preferences", label: PREFERENCES_TEXT.title, description: PREFERENCES_TEXT.commandDescription, icon: SlidersHorizontal, action: "preferences" },
+  { id: "preferences", label: PREFERENCES_TEXT.title, description: PREFERENCES_TEXT.commandDescription, icon: Settings, action: "preferences" },
   aiSettingsCommand(),
   { id: "recently-deleted", label: TRASH_TEXT.command, description: TRASH_TEXT.commandDescription, keywords: TRASH_TEXT.commandKeywords, icon: Undo2, action: "recentlyDeleted" },
   command("clear-history", COMMAND_TEXT.commands.clearHistory, "clearHistory", { icon: History }),
