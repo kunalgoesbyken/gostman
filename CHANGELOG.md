@@ -4,6 +4,10 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Changed
+
+- Desktop window: a window whose top edge was above its display after the displays were rearranged reopens moved onto that display instead of centred on the main one, and on Linux with X11 a window larger than its display after a resolution change is placed on that display instead of partly beside it (#34).
+
 ## [1.16.1] - 2026-11-10
 
 ### Added

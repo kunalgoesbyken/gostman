@@ -2,7 +2,6 @@ package main
 
 const (
 	minRememberedSide = 200
-	titleBandHeight   = 32
 	minVisibleWidth   = 120
 	minVisibleHeight  = 16
 )
@@ -36,10 +35,6 @@ func (r windowRect) area() int {
 	return r.width() * r.height()
 }
 
-func (r windowRect) titleBand() windowRect {
-	return windowRect{Left: r.Left, Top: r.Top, Right: r.Right, Bottom: r.Top + titleBandHeight}
-}
-
 func (r windowRect) centredIn(area windowRect) windowRect {
 	left := area.Left + (area.width()-r.width())/2
 	top := area.Top + (area.height()-r.height())/2
@@ -56,8 +51,7 @@ func (r windowRect) insideOf(area windowRect) windowRect {
 
 func mostlyShown(rect windowRect, area windowRect) bool {
 	visible := rect.overlap(area)
-	band := rect.titleBand().overlap(area)
-	return visible.width() >= minVisibleWidth && band.height() >= minVisibleHeight
+	return visible.width() >= minVisibleWidth && visible.height() >= minVisibleHeight
 }
 
 func areaShowingMost(rect windowRect, areas []windowRect) (windowRect, bool) {

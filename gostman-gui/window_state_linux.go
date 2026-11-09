@@ -67,6 +67,8 @@ static struct {
 	Box bounds;
 	gboolean known;
 	gboolean maximiseWhenSettled;
+	gboolean moveWhenSettled;
+	Box target;
 	guint timer;
 } watched;
 
@@ -125,6 +127,10 @@ static void sampleBounds(GtkWindow *window) {
 
 static gboolean settled(gpointer unused) {
 	watched.timer = 0;
+	if (watched.moveWhenSettled) {
+		watched.moveWhenSettled = FALSE;
+		gtk_window_move(watched.window, watched.target.x, watched.target.y);
+	}
 	if (watched.maximiseWhenSettled) {
 		watched.maximiseWhenSettled = FALSE;
 		gtk_window_maximize(watched.window);
@@ -194,6 +200,8 @@ static gboolean placeMainWindow(gpointer data) {
 	gtk_window_resize(window, placement->target.width, placement->target.height);
 	if (!onWayland()) {
 		gtk_window_move(window, placement->target.x, placement->target.y);
+		watched.target = placement->target;
+		watched.moveWhenSettled = TRUE;
 	}
 	watched.bounds = placement->target;
 	watched.known = TRUE;
