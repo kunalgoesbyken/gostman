@@ -48,7 +48,7 @@ export function EnvironmentSwitcher() {
         aria-label={TEXT.active}
         title={label}
         controlSize="md"
-        className={cn("w-auto max-w-32 max-sm:max-w-20 transition-colors duration-500 sm:w-28 sm:max-w-none md:w-44", followed && "border-primary")}
+        className={cn("w-auto max-w-32 max-sm:max-w-20 max-[379px]:max-w-16 transition-colors duration-500 sm:w-28 sm:max-w-none md:w-44", followed && "border-primary")}
       >
         {!active && <option value="">{TEXT.noEnvironment}</option>}
         {own.length === 0 ? options(shared) : (

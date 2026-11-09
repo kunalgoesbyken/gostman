@@ -150,7 +150,7 @@ export function LandingPage({ onGetStarted }) {
             <GitHubStarLink stars={stars} />
             <a href="#download" className={buttonVariants({ size: "sm", className: "gap-2" })}>
               <Download className="h-4 w-4" />
-              Download
+              <span className="max-[379px]:sr-only">Download</span>
             </a>
           </div>
         </NavBar>
