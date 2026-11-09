@@ -3,6 +3,7 @@ import { docPath } from "../../../docs/manifest"
 import { ArrowLink } from "../ArrowLink"
 import { LandingBand } from "../LandingBand"
 import { PageActions } from "../PageActions"
+import { PageHero } from "../PageHero"
 import { PageShell } from "../PageShell"
 import { FeatureItem } from "../FeatureItem"
 import { SectionHeader } from "../SectionHeader"
@@ -49,16 +50,13 @@ export function FeaturesPage({ page }) {
   return (
     <PageShell>
       <main>
-        <section className="px-6 pb-24 pt-36 text-center">
-          <p className="landing-eyebrow">Features</p>
-          <h1 className="mx-auto mt-4 max-w-3xl text-4xl font-semibold leading-[1.1] tracking-tight [text-wrap:balance] md:text-6xl">{page.heading}</h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground [text-wrap:pretty]">{page.intro}</p>
+        <PageHero eyebrow="Features" heading={page.heading} intro={page.intro}>
           <PageActions className="mt-10 justify-center" />
-        </section>
+        </PageHero>
 
         <LandingBand labelledBy="highlights-heading" isEager>
           <SectionHeader id="highlights-heading" title="Where Gostman stands out" isCentered />
-          <ul className="mt-14 grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="mt-10 grid gap-x-10 sm:mt-14 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
             {hub.highlights.map((entry) => (
               <Highlight key={entry.id} entry={entry} />
             ))}
@@ -67,7 +65,7 @@ export function FeaturesPage({ page }) {
 
         <LandingBand labelledBy="all-heading" isTinted isEager>
           <SectionHeader id="all-heading" title={`All ${hub.total} features`} lead="Each one links to its page in the documentation. Features without a label run in both the desktop and web apps." isCentered />
-          <div className="mt-14 gap-x-10 sm:columns-2 lg:columns-3">
+          <div className="mt-10 gap-x-10 sm:mt-14 sm:columns-2 lg:columns-3">
             {hub.groups.map((group) => (
               <FeatureGroup key={group.id} group={group} />
             ))}

@@ -1,46 +1,36 @@
-import { Check, ChevronRight } from "lucide-react"
+import { Check, Wrench } from "lucide-react"
+import { MockFrame } from "../MockFrame"
 
-function TranscriptLine({ line }) {
-  if (line.kind === "prompt") {
-    return (
-      <p className="mt-5 flex gap-2 text-foreground first:mt-0">
-        <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-        {line.text}
+function ToolCall({ turn }) {
+  return (
+    <div className="overflow-hidden rounded-md border border-border/60 font-mono text-xs">
+      <p className="flex min-w-0 items-center gap-2 border-b border-border/50 bg-muted/20 px-3 py-2">
+        <Wrench className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden="true" />
+        <span className="shrink-0 text-foreground">{turn.tool}</span>
+        <span className="min-w-0 truncate text-muted-foreground">{turn.target}</span>
       </p>
-    )
-  }
-  if (line.kind === "tool") {
-    return (
-      <p className="mt-3 pl-6 text-muted-foreground">
-        <span className="text-primary">gostman</span> · {line.tool} <span className="text-foreground/80">{line.target}</span>
-      </p>
-    )
-  }
-  if (line.kind === "result") {
-    return (
-      <p className="mt-1 flex gap-2 pl-6 text-success">
-        <Check className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-        {line.text}
-      </p>
-    )
-  }
-  return <p className="mt-1 pl-12 text-muted-foreground">{line.text}</p>
+      <div className="space-y-1 px-3 py-2.5">
+        <p className="flex gap-2 text-success">
+          <Check className="mt-px h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+          {turn.result}
+        </p>
+        {turn.detail ? <p className="break-words pl-[1.375rem] text-muted-foreground">{turn.detail}</p> : null}
+      </div>
+    </div>
+  )
 }
 
-export function AgentTranscript({ lines }) {
+export function AgentTranscript({ title, turns }) {
   return (
-    <figure className="landing-frame overflow-hidden bg-background text-left shadow-2xl shadow-black/40">
-      <figcaption className="flex h-10 items-center gap-2 border-b border-border/60 px-4">
-        <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/30" aria-hidden="true" />
-        <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/30" aria-hidden="true" />
-        <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/30" aria-hidden="true" />
-        <span className="ml-3 font-mono text-xs text-muted-foreground">claude · gostman mcp</span>
-      </figcaption>
-      <div className="p-5 font-mono text-xs leading-relaxed sm:p-6 sm:text-[0.8125rem]">
-        {lines.map((line, index) => (
-          <TranscriptLine key={index} line={line} />
+    <MockFrame title={title} label={title} className="text-left shadow-2xl shadow-black/40">
+      <ol className="space-y-6 p-4 sm:p-6">
+        {turns.map((turn) => (
+          <li key={turn.prompt} className="space-y-3">
+            <p className="ml-auto w-fit max-w-[85%] rounded-lg bg-muted/50 px-3.5 py-2 text-sm leading-relaxed text-foreground">{turn.prompt}</p>
+            <ToolCall turn={turn} />
+          </li>
         ))}
-      </div>
-    </figure>
+      </ol>
+    </MockFrame>
   )
 }

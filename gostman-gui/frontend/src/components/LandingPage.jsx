@@ -157,7 +157,7 @@ export function LandingPage({ onGetStarted }) {
         </NavBar>
 
         <div className="relative overflow-hidden">
-          <section className="relative pt-36 pb-16 px-6">
+          <section className="relative px-6 pb-16 pt-28 sm:pt-36">
             <div className="relative max-w-4xl mx-auto">
               <div className="text-center space-y-6">
                 <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight leading-[1.1] [text-wrap:balance]">
@@ -201,7 +201,7 @@ export function LandingPage({ onGetStarted }) {
         </Suspense>
 
         <Suspense fallback={null}>
-          <section id="download" className="render-when-visible relative border-t border-border/50 pt-24 text-center">
+          <section id="download" className="render-when-visible relative border-t border-border/50 pt-16 text-center sm:pt-24">
             <div className="mx-auto max-w-6xl px-6">
               <SplitHeading text="Send your first request in a minute" />
               <p className="landing-lead reveal-on-scroll mx-auto mt-5 max-w-lg" style={revealStep(1)}>

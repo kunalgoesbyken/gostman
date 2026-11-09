@@ -3,6 +3,7 @@ import { BrandStrip } from "../../ui/brandIcon"
 import { ArrowLink } from "../ArrowLink"
 import { LandingBand } from "../LandingBand"
 import { PageActions } from "../PageActions"
+import { PageHero } from "../PageHero"
 import { PageShell } from "../PageShell"
 import { FeatureItem } from "../FeatureItem"
 import { SectionHeader } from "../SectionHeader"
@@ -13,10 +14,7 @@ const ICONS = { book: BookOpen, send: Send, pen: PenLine, upload: Upload, server
 
 function AgentsHero({ page }) {
   return (
-    <section className="px-6 pb-24 pt-36 text-center">
-      <p className="landing-eyebrow">MCP server</p>
-      <h1 className="mx-auto mt-4 max-w-3xl text-4xl font-semibold leading-[1.1] tracking-tight [text-wrap:balance] md:text-6xl">{page.heading}</h1>
-      <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground [text-wrap:pretty]">{page.intro}</p>
+    <PageHero eyebrow="MCP server" heading={page.heading} intro={page.intro}>
       <div className="mt-6 flex items-center justify-center gap-3 text-sm text-muted-foreground">
         <span>Works with</span>
         <BrandStrip brands={page.brands} />
@@ -25,10 +23,10 @@ function AgentsHero({ page }) {
         <ArrowLink href="#connect">Connect your agent</ArrowLink>
         <ArrowLink href="#safety">How it stays safe</ArrowLink>
       </div>
-      <div className="mx-auto mt-16 max-w-3xl">
-        <AgentTranscript lines={page.transcript} />
+      <div className="mx-auto mt-12 max-w-2xl sm:mt-16">
+        <AgentTranscript title={page.transcript.title} turns={page.transcript.turns} />
       </div>
-    </section>
+    </PageHero>
   )
 }
 
@@ -36,7 +34,7 @@ function AgentsConnect({ connect }) {
   return (
     <LandingBand id="connect" labelledBy="connect-heading" isEager>
       <SectionHeader id="connect-heading" title={connect.title} lead={connect.lead} isCentered />
-      <ol className="mx-auto mt-14 grid max-w-4xl gap-x-10 gap-y-12 md:grid-cols-2">
+      <ol className="mx-auto mt-10 grid max-w-4xl sm:mt-14 gap-x-10 gap-y-12 md:grid-cols-2">
         {connect.steps.map((step, index) => (
           <li key={step.title} className="flex min-w-0 flex-col">
             <span className="flex h-7 w-7 items-center justify-center rounded-full border border-border/60 font-mono text-xs text-primary" aria-hidden="true">{index + 1}</span>
@@ -67,7 +65,7 @@ function CardSection({ id, section, columns, isTinted }) {
   return (
     <LandingBand id={id} labelledBy={`${id}-heading`} isTinted={isTinted} isEager>
       <SectionHeader id={`${id}-heading`} title={section.title} lead={section.lead} isCentered />
-      <ul className={`mt-14 grid gap-x-10 gap-y-12 sm:grid-cols-2 ${columns}`}>
+      <ul className={`mt-10 grid gap-x-10 sm:mt-14 gap-y-12 sm:grid-cols-2 ${columns}`}>
         {section.items.map((item) => (
           <FeatureItem key={item.title} icon={ICONS[item.icon]} title={item.title} text={item.text}>
             {item.tools ? <ToolChips tools={item.tools} /> : null}

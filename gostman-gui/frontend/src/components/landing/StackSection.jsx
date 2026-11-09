@@ -9,7 +9,7 @@ export function StackSection() {
   const { wrapperRef, hint, tileProps } = useIntegrationHint()
   const activeBrand = hint?.tool.brand
   return (
-    <section className="render-when-visible relative overflow-hidden border-t border-border/50 px-6 py-24" aria-labelledby="stack-heading">
+    <section className="render-when-visible relative overflow-hidden border-t border-border/50 px-6 py-16 sm:py-24" aria-labelledby="stack-heading">
       <div className="mx-auto max-w-6xl text-center">
         <SplitHeading id="stack-heading" text="Works with the tools you already use" />
         <p className="mx-auto mt-5 max-w-xl leading-relaxed text-muted-foreground">

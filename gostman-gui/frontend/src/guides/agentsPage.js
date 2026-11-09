@@ -9,15 +9,13 @@ export const agentsPage = {
   heading: "Let your coding agent call your APIs",
   intro: "gostman mcp gives Claude Code, Cursor and Codex the requests, environments and checks you already have. The server decides which hosts the agent reaches and which secrets it gets.",
   brands: ["claude", "openai", "cursor", "vscode"],
-  transcript: [
-    { kind: "prompt", text: "Check that creating a user still returns 201" },
-    { kind: "tool", tool: "send_request", target: "Users/Create user" },
-    { kind: "result", text: "201 Created · 142 ms · 1 check passed" },
-    { kind: "detail", text: "Authorization: Bearer {{API_TOKEN}}" },
-    { kind: "prompt", text: "Add a request that deletes the user" },
-    { kind: "tool", tool: "save_request", target: "Users/Delete user" },
-    { kind: "result", text: "Saved in Users" },
-  ],
+  transcript: {
+    title: "claude · gostman mcp",
+    turns: [
+      { prompt: "Check that creating a user still returns 201", tool: "send_request", target: "Users/Create user", result: "201 Created · 142 ms · 1 check passed", detail: "Authorization: Bearer {{API_TOKEN}}" },
+      { prompt: "Add a request that deletes the user", tool: "save_request", target: "Users/Delete user", result: "Saved in Users" },
+    ],
+  },
   connect: {
     title: "Connect in two commands",
     lead: "Install the gostman command, create a workspace and register it with your agent. Requests you already have are ready to use.",

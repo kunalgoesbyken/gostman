@@ -23,7 +23,7 @@ function Section({ block }) {
 export function GuidePage({ page }) {
   return (
     <PageShell>
-      <main className="relative mx-auto max-w-3xl px-6 pt-36 pb-20">
+      <main className="relative mx-auto max-w-3xl px-6 pb-20 pt-28 sm:pt-36">
         <h1 className="text-4xl md:text-5xl font-semibold tracking-tight leading-[1.1] [text-wrap:balance]">{page.heading}</h1>
         <p className="mt-6 text-lg leading-relaxed text-muted-foreground">{page.intro}</p>
         <BrandStrip brands={page.brands} className="mt-5" />
