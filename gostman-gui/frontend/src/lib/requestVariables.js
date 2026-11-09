@@ -20,6 +20,7 @@ export const BOOLEAN_FALSE = 'false'
 
 export const PROBLEM_REQUIRED = 'required'
 const PROBLEM_COMMA = 'numberComma'
+const PROBLEM_INTEGER_COMMA = 'integerComma'
 const PROBLEM_INEXACT = 'inexact'
 const PROBLEM_JSON_INEXACT = 'jsonInexact'
 const PROBLEM_SPACES = 'spaces'
@@ -61,7 +62,7 @@ function isExact(text) {
 }
 
 function readNumber(text, isWhole) {
-  if (DECIMAL_COMMA.test(text)) return rejected(PROBLEM_COMMA)
+  if (DECIMAL_COMMA.test(text)) return rejected(isWhole ? PROBLEM_INTEGER_COMMA : PROBLEM_COMMA)
   if (!(isWhole ? isWholeText : isJsonNumber)(text)) return rejected(isWhole ? TYPE_INTEGER : TYPE_NUMBER)
   return isExact(text) ? accepted(Number(text)) : rejected(PROBLEM_INEXACT)
 }
@@ -98,7 +99,7 @@ function readFilled(row, text) {
   if (isTextType(type)) return accepted(text)
   if (type !== TYPE_JSON && text !== text.trim()) return rejected(PROBLEM_SPACES)
   const isEmpty = text === ''
-  if (type === TYPE_BOOLEAN) return isEmpty ? accepted(false) : readBoolean(text)
+  if (type === TYPE_BOOLEAN) return readBoolean(text)
   if (type === TYPE_ENUM) return isEmpty ? accepted('') : readChoice(text, choicesOf(row))
   if (isEmpty) return accepted(null)
   if (type === TYPE_NUMBER) return readNumber(text, false)
@@ -115,13 +116,15 @@ const usedText = (row, values) => {
   return values ? fillPlaceholders(winner, (name) => values.get(name)) : winner
 }
 
-const isPending = (text, values) => placeholderNames(text).some((name) => !values || isEngineName(name) || values.has(name))
+const isUnresolved = (values, name) => values.has(name) && values.get(name) === undefined
+
+const isPending = (text, values) => placeholderNames(text).some((name) => !values || isEngineName(name) || isUnresolved(values, name))
 
 const readUsed = (row, text, values) => (isPending(text, values) ? accepted(text) : readFilled(row, text))
 
 function requiredText(winner, values) {
   if (!values) return winner
-  return fillPlaceholders(winner, (name) => values.get(name) ?? (values.has(name) || isEngineName(name) ? undefined : ''))
+  return fillPlaceholders(winner, (name) => values.get(name) ?? (isUnresolved(values, name) || isEngineName(name) ? undefined : ''))
 }
 
 const isMissing = (row, values) => row.required === true && typeOf(row) !== TYPE_BOOLEAN && isBlank(requiredText(winnerText(row, values), values))
@@ -173,11 +176,17 @@ export function blockedMessage(problems) {
 
 const generatedIn = (text) => placeholderNames(text).filter(isGeneratedName)
 
-export const generationsFor = (rows, values) => rows
-  .filter((row) => isSentRow(row) && isTyped(row) && winnerText(row, values) === sentText(row))
-  .map((row) => ({ key: row.key, text: usedText(row, values) }))
-  .map((pending) => ({ ...pending, placeholders: generatedIn(pending.text).map((name) => `{{${name}}}`) }))
-  .filter(({ placeholders }) => placeholders.length > 0)
+const waitsFor = (candidate, keys) => placeholderNames(candidate.written).some((name) => name !== candidate.key && keys.has(name))
+
+export function generationsFor(rows, values) {
+  const candidates = rows
+    .filter((row) => isSentRow(row) && isTyped(row) && winnerText(row, values) === sentText(row))
+    .map((row) => ({ key: row.key, written: winnerText(row, values), text: usedText(row, values) }))
+    .map((candidate) => ({ ...candidate, placeholders: generatedIn(candidate.text).map((name) => `{{${name}}}`) }))
+    .filter(({ placeholders }) => placeholders.length > 0)
+  const keys = new Set(candidates.map(({ key }) => key))
+  return candidates.filter((candidate) => !waitsFor(candidate, keys))
+}
 
 export function generatedTexts(pending, expanded) {
   const values = [...expanded]

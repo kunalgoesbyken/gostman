@@ -360,24 +360,37 @@ func (s *session) declaredValues(request Request) (variables, error) {
 	return declared, err
 }
 
-func (s *session) withSentVariables(request Request, generated map[string]string) (Request, string, error) {
+func (s *session) withSentRows(request Request, generated map[string]string) (Request, error) {
 	if !request.hasVariables() {
-		return request, "", nil
+		return request, nil
 	}
-	if err := s.scripts.Call("sentVariables", &request.Vars, request.Vars, generated); err != nil {
+	err := s.scripts.Call("sentVariables", &request.Vars, request.Vars, generated)
+	return request, err
+}
+
+func (s *session) withSentVariables(request Request, generated map[string]string) (Request, string, error) {
+	request, err := s.withSentRows(request, generated)
+	if err != nil || !request.hasVariables() {
 		return request, "", err
 	}
 	var message string
-	err := s.scripts.Call("variableMessage", &message, request.Vars, s.scoped(request).text())
+	err = s.scripts.Call("variableMessage", &message, request.Vars, s.scoped(request).text())
 	return request, message, err
 }
 
 func (s *session) withTypedVariables(request Request) (Request, string, error) {
-	generated, err := s.generatedValues(request)
-	if err != nil {
-		return request, "", err
+	for {
+		generated, err := s.generatedValues(request)
+		if err != nil {
+			return request, "", err
+		}
+		if len(generated) == 0 {
+			return s.withSentVariables(request, generated)
+		}
+		if request, err = s.withSentRows(request, generated); err != nil {
+			return request, "", err
+		}
 	}
-	return s.withSentVariables(request, generated)
 }
 
 func (s *session) execute(ctx context.Context, request Request) (exchange, error) {

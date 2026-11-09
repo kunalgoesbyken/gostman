@@ -1,5 +1,5 @@
 import { isPlainObject } from './dataUtils'
-import { isShownInForm, variableProblems } from './requestVariables'
+import { isShownInForm, sentText, variableProblems } from './requestVariables'
 import { isSentRow, parseRows, rowName, serializeRows } from './rows'
 import { checkValues, resolveLayers, scopeLayers } from './variableScopes'
 
@@ -25,10 +25,20 @@ function withFormValue(row, values) {
   return entry ? { ...row, value: entry.value } : row
 }
 
-const formFields = (rows, values, shownNames) => rows
+const winningRow = (row, resolved) => {
+  const winner = resolved.get(row.key)?.value
+  return winner === undefined || winner === sentText(row) ? row : { ...row, value: winner }
+}
+
+const displayedRow = (row, shownNames, resolved) => (isShownDespiteHidden(row, shownNames) ? winningRow(row, resolved) : row)
+
+const formFields = (rows, values, shownNames, resolved) => rows
   .map((row, index) => ({ row, index }))
   .filter(({ row }) => isFormField(row, shownNames))
-  .map(({ row, index }) => ({ index, saved: row, row: withFormValue(row, values) }))
+  .map(({ row, index }) => {
+    const saved = displayedRow(row, shownNames, resolved)
+    return { index, saved, row: withFormValue(saved, values) }
+  })
 
 export const formValueEntry = (saved, value) => ({ value, base: valueText(saved) })
 
@@ -40,8 +50,9 @@ const resolvedFor = (state, request) => resolveLayers(scopeLayers(state, request
 
 export function filledForm(state, request, values) {
   const rows = parseRows(request.vars)
-  const shownNames = problemNames(sentProblems(request, resolvedFor(state, request)))
-  const fields = formFields(rows, values, shownNames)
+  const resolved = resolvedFor(state, request)
+  const shownNames = problemNames(sentProblems(request, resolved))
+  const fields = formFields(rows, values, shownNames, resolved)
   const filledRows = rows.map((row, index) => fields.find((field) => field.index === index)?.row ?? row)
   const filled = { ...request, vars: serializeRows(filledRows), formGiven: fields.map(({ row }) => row.key) }
   return {

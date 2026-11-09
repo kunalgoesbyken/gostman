@@ -18,6 +18,7 @@
       "json": "{{name}} must be valid JSON.",
       "enum": "{{name}} must be one of {{choices}}.",
       "numberComma": "{{name}} must be a number with a dot for decimals and no thousands separator, such as 1.5 or 1500.",
+      "integerComma": "{{name}} must be a whole number written without separators, such as 1500.",
       "inexact": "{{name}} is a number that a script cannot hold exactly. Use the Text type to keep it as written.",
       "jsonInexact": "{{name}} contains the number {{number}}, which a script cannot hold exactly. Write it as a string in quotes.",
       "spaces": "{{name}} has spaces around its value. Remove them: a typed value is used exactly as written."

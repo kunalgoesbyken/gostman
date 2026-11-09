@@ -182,19 +182,19 @@ const requestVariableProblems = (request, referenced) => (
 
 const NO_VARIABLES = '{}'
 
-async function withGeneratedValues(backend, request, resolved) {
+async function withGeneratedValues(backend, request, referenced) {
+  const resolved = resolvedFor(request, referenced)
   const pending = generationsFor(parseRows(request.vars), checkValues(resolved))
-  if (pending.length === 0) return request
+  if (pending.length === 0) return { request, resolved }
   const expanded = await backend.expand(pending.flatMap(({ placeholders }) => placeholders), NO_VARIABLES)
-  return { ...request, vars: sentVariables(request.vars, generatedTexts(pending, expanded)) }
+  const generated = { ...request, vars: sentVariables(request.vars, generatedTexts(pending, expanded)) }
+  return withGeneratedValues(backend, generated, referenced)
 }
 
 async function checkedVariables(backend, request, referenced) {
   if (!hasVariables(request)) return { request, problems: [] }
-  const resolved = resolvedFor(request, referenced)
-  const generated = await withGeneratedValues(backend, request, resolved)
-  if (generated === request) return { request, problems: sentProblems(request, resolved) }
-  return { request: generated, problems: requestVariableProblems(generated, referenced) }
+  const generated = await withGeneratedValues(backend, request, referenced)
+  return { request: generated.request, problems: sentProblems(generated.request, generated.resolved) }
 }
 
 async function resolveReferences(backend, request, lineage, trace) {
