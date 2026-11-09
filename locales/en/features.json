@@ -209,7 +209,7 @@
     },
     "splitView": {
       "title": "Response beside the tab",
-      "blurb": "Show another tab's latest response in a pane beside the open tab, from the request menu in the sidebar.",
+      "blurb": "Show another tab's latest response in a pane beside the open tab, from the menu of its tab.",
       "synonyms": "split side by side beside pane response compare"
     },
     "globalSearch": {
