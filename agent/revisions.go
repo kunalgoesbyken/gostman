@@ -1,7 +1,9 @@
 package agent
 
 import (
+	"crypto/hmac"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"strings"
@@ -25,6 +27,29 @@ func newSession(named string) string {
 	return sessionPrefix + hex.EncodeToString(suffix)
 }
 
+func newRevisionKey() []byte {
+	key := make([]byte, 32)
+	_, _ = rand.Read(key)
+	return key
+}
+
+func (d *Desk) sealed(digest string, err error) (string, error) {
+	if digest == "" || err != nil {
+		return "", err
+	}
+	mac := hmac.New(sha256.New, d.revisionSecret)
+	mac.Write([]byte(digest))
+	return hex.EncodeToString(mac.Sum(nil))[:len(digest)], nil
+}
+
+func (d *Desk) currentRequestRevision(id string) (string, error) {
+	return d.sealed(d.files.RequestRevision(id))
+}
+
+func (d *Desk) currentEnvironmentRevision(name string) (string, error) {
+	return d.sealed(d.files.EnvironmentRevision(name))
+}
+
 func revisionKey(kind, key string) string {
 	return kind + ":" + key
 }
@@ -36,13 +61,13 @@ func (d *Desk) remember(kind, key, digest string) {
 }
 
 func (d *Desk) requestRevision(id string) (string, error) {
-	digest, err := d.files.RequestRevision(id)
+	digest, err := d.currentRequestRevision(id)
 	d.remember(workspace.ChangeRequest, id, digest)
 	return digest, err
 }
 
 func (d *Desk) environmentRevision(name string) (string, error) {
-	digest, err := d.files.EnvironmentRevision(name)
+	digest, err := d.currentEnvironmentRevision(name)
 	d.remember(workspace.ChangeEnvironment, name, digest)
 	return digest, err
 }

@@ -249,7 +249,7 @@ func (d *Desk) setVariables(_ context.Context, current scene, arguments variable
 }
 
 func (d *Desk) refuseStaleEnvironment(name string, created bool, supplied string) (string, error) {
-	before, err := d.files.EnvironmentRevision(name)
+	before, err := d.currentEnvironmentRevision(name)
 	if err != nil || created {
 		return before, err
 	}

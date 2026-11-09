@@ -35,21 +35,22 @@ type Settings struct {
 }
 
 type Desk struct {
-	mu        sync.Mutex
-	busy      sync.Mutex
-	files     *workspace.Workspace
-	client    *Client
-	startup   map[string]string
-	timeout   time.Duration
-	insecure  bool
-	mocking   mocking
-	reach     *destinations
-	responses responseLog
-	exposed   []exposure
-	seen      *snapshot
-	earlier   runner.Collection
-	session   string
-	revisions map[string]string
+	mu             sync.Mutex
+	busy           sync.Mutex
+	files          *workspace.Workspace
+	client         *Client
+	startup        map[string]string
+	timeout        time.Duration
+	insecure       bool
+	mocking        mocking
+	reach          *destinations
+	responses      responseLog
+	exposed        []exposure
+	seen           *snapshot
+	earlier        runner.Collection
+	session        string
+	revisions      map[string]string
+	revisionSecret []byte
 }
 
 type scene struct {
@@ -106,14 +107,15 @@ func Open(settings Settings) (*Desk, error) {
 	client.MarkSecret(settings.Secrets)
 	client.session.Confine(secretScope{client: client, reach: reach})
 	desk := &Desk{
-		files:     files,
-		client:    client,
-		startup:   settings.Variables,
-		timeout:   settings.Timeout,
-		insecure:  settings.Insecure,
-		reach:     reach,
-		session:   newSession(settings.Session),
-		revisions: map[string]string{},
+		files:          files,
+		client:         client,
+		startup:        settings.Variables,
+		timeout:        settings.Timeout,
+		insecure:       settings.Insecure,
+		reach:          reach,
+		session:        newSession(settings.Session),
+		revisions:      map[string]string{},
+		revisionSecret: newRevisionKey(),
 	}
 	current, err := desk.refresh()
 	if err != nil {

@@ -398,7 +398,7 @@ func (d *Desk) refuseStaleRequest(change revision, supplied string) (string, err
 	if change.created {
 		return "", nil
 	}
-	before, err := d.files.RequestRevision(change.request.Id)
+	before, err := d.currentRequestRevision(change.request.Id)
 	if err != nil {
 		return "", err
 	}
