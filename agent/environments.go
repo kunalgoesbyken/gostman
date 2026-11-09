@@ -21,6 +21,7 @@ type environmentLine struct {
 	Active    bool     `json:"active"`
 	Variables []string `json:"variables"`
 	Secret    []string `json:"secret,omitempty"`
+	Revision  string   `json:"revision,omitempty"`
 }
 
 type environmentList struct {
@@ -47,7 +48,9 @@ func (d *Desk) describeEnvironments(environments []runner.Environment) environme
 	}
 	for _, environment := range environments {
 		secret := slices.Sorted(maps.Keys(workspace.SecretNames(environment.Meta)))
+		digest, _ := d.environmentRevision(environment.Name)
 		list.Environments = append(list.Environments, environmentLine{
+			Revision:  digest,
 			Name:      environment.Name,
 			Active:    environment.Name == active,
 			Variables: slices.Compact(sorted(append(variableNames(environment), secret...))),

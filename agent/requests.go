@@ -44,6 +44,7 @@ type exampleLine struct {
 
 type definition struct {
 	ID               string               `json:"id"`
+	Revision         string               `json:"revision"`
 	Name             string               `json:"name"`
 	Folder           string               `json:"folder"`
 	Method           string               `json:"method"`
@@ -234,8 +235,13 @@ func (d *Desk) getRequest(_ context.Context, current scene, arguments getArgumen
 		return definition{}, err
 	}
 	request := entry.Request
+	digest, err := d.requestRevision(request.ID)
+	if err != nil {
+		return definition{}, err
+	}
 	return definition{
 		ID:               request.ID,
+		Revision:         digest,
 		Name:             request.Name,
 		Folder:           entry.Folder,
 		Method:           request.Method,

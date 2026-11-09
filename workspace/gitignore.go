@@ -2,7 +2,7 @@ package workspace
 
 const (
 	GitignoreName    = ".gitignore"
-	gitignoreContent = "# Local secrets, save leftovers and run history stay out of Git\n.env\n.env.*\n!.env.example\n.gostman-*.tmp\n.gostman/runs/\n"
+	gitignoreContent = "# Local secrets, save leftovers and run history stay out of Git\n.env\n.env.*\n!.env.example\n.gostman-*.tmp\n.gostman/runs/\n.gostman/changes.jsonl\n"
 )
 
 func WriteGitignore(root string) (bool, error) {

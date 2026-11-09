@@ -21,11 +21,13 @@ const (
 type variableArguments struct {
 	Environment string            `json:"environment"`
 	Variables   map[string]string `json:"variables"`
+	Revision    string            `json:"revision"`
 }
 
 type variableChange struct {
 	Environment string   `json:"environment"`
 	Created     bool     `json:"created"`
+	Revision    string   `json:"revision"`
 	Set         []string `json:"set"`
 	Active      bool     `json:"active"`
 	Overridden  []string `json:"overriddenByCommandLine,omitempty"`
@@ -208,6 +210,10 @@ func (d *Desk) setVariables(_ context.Context, current scene, arguments variable
 		position, change.Created = len(environments)-1, true
 	}
 	target := &environments[position]
+	before, err := d.refuseStaleEnvironment(name, change.Created, arguments.Revision)
+	if err != nil {
+		return variableChange{}, err
+	}
 	if err := d.checkVariables(arguments.Variables, currentValues(target.Variables), secretNames(environments)); err != nil {
 		return variableChange{}, err
 	}
@@ -226,12 +232,29 @@ func (d *Desk) setVariables(_ context.Context, current scene, arguments variable
 		return variableChange{}, err
 	}
 	change.Set = sortedKeys(written)
+	if change.Revision, err = d.environmentRevision(name); err != nil {
+		return variableChange{}, err
+	}
+	journal := ""
+	if change.Created || change.Revision != before {
+		journal = d.record(changeOf(workspace.ChangeEnvironment, name, "", change.Created))
+	}
 	if change.Active {
 		change.Overridden = d.applyToSession(written)
 	} else {
 		change.Note = fmt.Sprintf("Saved, but %q is not the active environment, so requests in this session do not use these values yet. Call set_environment with %q to use them.", name, name)
 	}
+	change.Note = strings.TrimSpace(change.Note + " " + journal)
 	return change, nil
+}
+
+func (d *Desk) refuseStaleEnvironment(name string, created bool, supplied string) (string, error) {
+	before, err := d.files.EnvironmentRevision(name)
+	if err != nil || created {
+		return before, err
+	}
+	label := fmt.Sprintf("The environment %q", name)
+	return before, d.checkRevision(workspace.ChangeEnvironment, name, label, supplied, before)
 }
 
 func unnamedEnvironment(environments []workspace.Environment) error {

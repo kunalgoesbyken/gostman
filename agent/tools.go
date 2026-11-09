@@ -42,6 +42,8 @@ var (
 
 var requestReference = text("The request's id, or its name. A name that is used twice needs its folder path in front, as list_requests shows it, such as auth/Login.")
 
+var revisionInput = text("The revision you last read (from get_request, list_environments or a save). The save is refused if the item has changed since. Leave out to use the one this session last saw.")
+
 var noInput = object(map[string]schema{})
 
 var listInput = object(map[string]schema{
@@ -103,6 +105,7 @@ var saveInput = object(map[string]schema{
 	"tags":        list("Replaces the request's tags, such as smoke. run_folder runs a tagged subset.", text("A tag.")),
 	"assertions":  list("Replaces the request's checks. They run every time the request is sent, here and in the app.", assertionInput),
 	"extractors":  list("Replaces the request's extraction rules. After each response, every rule stores a value in a session variable, so a login can hand its token to later requests as {{token}} without the token appearing in a result.", extractorInput),
+	"revision":    revisionInput,
 })
 
 var importInput = object(map[string]schema{
@@ -115,7 +118,13 @@ var importInput = object(map[string]schema{
 var variablesInput = object(map[string]schema{
 	"environment": text("The environment to change, as list_environments shows it. Defaults to the active one. A name that does not exist yet creates that environment."),
 	"variables":   textMap("Names and plain values, such as {\"baseUrl\": \"http://localhost:8080\"}. Credentials are refused; the developer sets those in the app or with --var-from-env."),
+	"revision":    revisionInput,
 }, "variables")
+
+var changesInput = object(map[string]schema{
+	"since": text("How far back to look, as a duration such as 5m or 2h. Defaults to 1h."),
+	"mine":  flag("Only the changes this session made."),
+})
 
 var environmentInput = object(map[string]schema{
 	"name": text("The environment's name, as list_environments shows it."),
@@ -166,7 +175,7 @@ func (d *Desk) Tools() []mcp.Tool {
 			Name:  "get_request",
 			Title: "Show request",
 			Description: "Show one saved request in full: URL, headers, body, auth settings, its own variables (vars), assertions, extraction rules, scripts and the names of its saved examples. " +
-				"Credentials are masked; variables appear as {{name}}. options lists only the settings that differ from the defaults.",
+				"Credentials are masked; variables appear as {{name}}. options lists only the settings that differ from the defaults. revision identifies this version for save_request.",
 			InputSchema: getInput,
 			Hints:       readOnly,
 		}, filesOnly, (*Desk).getRequest),
@@ -204,7 +213,8 @@ func (d *Desk) Tools() []mcp.Tool {
 			Name:  "save_request",
 			Title: "Save request",
 			Description: "Create a request in the workspace, or update one by id, so the developer finds it in the Gostman app and it can be re-run later. Only the fields you give are changed. " +
-				"Secrets are refused: a value that matches a variable or a credential must be written as {{name}}. Returns the request's id, name and folder.",
+				"Secrets are refused: a value that matches a variable or a credential must be written as {{name}}. Returns the request's id, name, folder and new revision. " +
+				"An update is refused when the request changed since you read it with get_request; read it again and merge.",
 			InputSchema: saveInput,
 			Hints:       mcp.Hints{Destructive: true},
 		}, filesOnly, (*Desk).saveRequest),
@@ -237,10 +247,18 @@ func (d *Desk) Tools() []mcp.Tool {
 			Name:  "set_variables",
 			Title: "Set environment variables",
 			Description: "Save plain variable values such as baseUrl or userId in an environment file of the workspace, so later requests and the developer's app use them. " +
-				"Credentials are refused, and so are variables the developer marked secret. Values set here never let requests reach a new host.",
+				"Credentials are refused, and so are variables the developer marked secret. Values set here never let requests reach a new host. Refused when the environment changed since list_environments showed it.",
 			InputSchema: variablesInput,
 			Hints:       mcp.Hints{Destructive: true, Idempotent: true},
 		}, withSession, (*Desk).setVariables),
+		tool(d, mcp.Tool{
+			Name:  "changes",
+			Title: "Recent changes",
+			Description: "List the requests and environments agents saved, imported or changed in this workspace recently, oldest first, with the session that did it. " +
+				"Use it to see what other agents changed before you edit the same items.",
+			InputSchema: changesInput,
+			Hints:       readOnly,
+		}, filesOnly, (*Desk).changes),
 		tool(d, mcp.Tool{
 			Name:  "lint_spec",
 			Title: "Lint OpenAPI spec",

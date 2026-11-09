@@ -31,6 +31,7 @@ type Settings struct {
 	Insecure     bool
 	ExposeTags   []string
 	SignIn       engine.Token
+	Session      string
 }
 
 type Desk struct {
@@ -47,6 +48,8 @@ type Desk struct {
 	exposed   []exposure
 	seen      *snapshot
 	earlier   runner.Collection
+	session   string
+	revisions map[string]string
 }
 
 type scene struct {
@@ -103,12 +106,14 @@ func Open(settings Settings) (*Desk, error) {
 	client.MarkSecret(settings.Secrets)
 	client.session.Confine(secretScope{client: client, reach: reach})
 	desk := &Desk{
-		files:    files,
-		client:   client,
-		startup:  settings.Variables,
-		timeout:  settings.Timeout,
-		insecure: settings.Insecure,
-		reach:    reach,
+		files:     files,
+		client:    client,
+		startup:   settings.Variables,
+		timeout:   settings.Timeout,
+		insecure:  settings.Insecure,
+		reach:     reach,
+		session:   newSession(settings.Session),
+		revisions: map[string]string{},
 	}
 	current, err := desk.refresh()
 	if err != nil {

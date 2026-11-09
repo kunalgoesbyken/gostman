@@ -48,6 +48,7 @@ func parseServing(arguments []string) (serving, error) {
 	flags.IntVar(&timeoutMs, "timeout", 0, "")
 	flags.BoolVar(&settings.Insecure, "insecure", false, "")
 	flags.IntVar(&parsed.listen, "listen", 0, "")
+	sessionFlag(flags, &settings.Session)
 	parsed.network = networkFlags(flags)
 	var signIn signInFlags
 	signIn.register(flags)

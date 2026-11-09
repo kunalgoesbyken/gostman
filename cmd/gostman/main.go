@@ -29,6 +29,7 @@ const (
   gostman load <export.json | workspace folder> --request <name> [flags]
   gostman load [flags] <METHOD> <url>
   gostman mcp [flags]
+  gostman changes [workspace folder] [flags]
   gostman mock [workspace folder] [flags]
   gostman docs <workspace folder | export.json> [flags]
   gostman capture --upstream <url> [flags]
@@ -298,6 +299,19 @@ mcp
   --listen <port>       serve over Streamable HTTP at 127.0.0.1:<port>/mcp
                         instead of stdin and stdout; clients send the bearer
                         token printed at start (or GOSTMAN_MCP_TOKEN)
+  --session <name>      name this session in the change journal (default: the
+                        GOSTMAN_SESSION variable, else agent- and four random
+                        characters)
+
+changes
+  List what agents saved in a workspace folder (default: the current folder),
+  oldest first, from .gostman/changes.jsonl: when, which session, and which
+  request or environment.
+
+  --since <duration>    how far back, such as 5m or 2h (default 1h)
+  --mine                only the changes of --session
+  --session <name>      the session --mine means (default: GOSTMAN_SESSION)
+  --json                print the changes and their summary lines as JSON
 
 mock
   Serve the saved examples of a workspace on 127.0.0.1, one route per request,
@@ -587,6 +601,8 @@ func dispatch(arguments []string, stdout, stderr *os.File) int {
 		return loadCommand(arguments[1:], stdout, stderr)
 	case "mcp":
 		return mcpCommand(arguments[1:], stdout, stderr)
+	case "changes":
+		return changesCommand(arguments[1:], stdout, stderr)
 	case "mock":
 		return mockCommand(arguments[1:], stdout, stderr)
 	case "docs":

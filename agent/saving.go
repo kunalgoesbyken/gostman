@@ -55,13 +55,16 @@ type saveArguments struct {
 	Tags        *[]string          `json:"tags"`
 	Assertions  *[]assertion       `json:"assertions"`
 	Extractors  *[]extractor       `json:"extractors"`
+	Revision    string             `json:"revision"`
 }
 
 type saved struct {
-	ID      string `json:"id"`
-	Name    string `json:"name"`
-	Folder  string `json:"folder"`
-	Created bool   `json:"created"`
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Folder   string `json:"folder"`
+	Created  bool   `json:"created"`
+	Revision string `json:"revision"`
+	Note     string `json:"note,omitempty"`
 }
 
 type revision struct {
@@ -391,8 +394,24 @@ func (d *Desk) folderPath(id string) string {
 	return folderPaths(d.files.Collection().Folders)(id)
 }
 
+func (d *Desk) refuseStaleRequest(change revision, supplied string) (string, error) {
+	if change.created {
+		return "", nil
+	}
+	before, err := d.files.RequestRevision(change.request.Id)
+	if err != nil {
+		return "", err
+	}
+	label := fmt.Sprintf("The request %q", change.original.Name)
+	return before, d.checkRevision(workspace.ChangeRequest, change.request.Id, label, supplied, before)
+}
+
 func (d *Desk) saveRequest(_ context.Context, current scene, arguments saveArguments) (saved, error) {
 	change, err := d.startingPoint(arguments, current.files)
+	if err != nil {
+		return saved{}, err
+	}
+	before, err := d.refuseStaleRequest(change, arguments.Revision)
 	if err != nil {
 		return saved{}, err
 	}
@@ -429,5 +448,13 @@ func (d *Desk) saveRequest(_ context.Context, current scene, arguments saveArgum
 		return saved{}, err
 	}
 	request := change.request
-	return saved{ID: request.Id, Name: request.Name, Folder: d.folderPath(request.FolderId), Created: change.created}, nil
+	after, err := d.requestRevision(request.Id)
+	if err != nil {
+		return saved{}, err
+	}
+	result := saved{ID: request.Id, Name: request.Name, Folder: d.folderPath(request.FolderId), Created: change.created, Revision: after}
+	if change.created || after != before {
+		result.Note = d.record(changeOf(workspace.ChangeRequest, request.Name, request.Id, change.created))
+	}
+	return result, nil
 }

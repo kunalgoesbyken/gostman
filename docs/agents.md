@@ -27,6 +27,7 @@ In VS Code, the [VS Code extension](vscode.md) runs collections and flows from t
 | `list_environments` | Lists environments and the names of their variables; `secret` names the ones whose values come from you. |
 | `set_environment` | Switches the active environment for the session. Variables set by earlier requests are cleared; cookies and OAuth 2.0 tokens are kept. |
 | `set_variables` | Saves plain values such as `baseUrl` in an environment file; a new name creates the environment. The session uses them once that environment is active (`set_environment`). |
+| `changes` | Lists what agents saved, imported or changed recently (`since`, such as `5m` or `2h`, default `1h`; `mine` for this session only), oldest first, with the session that did it. See [Safety](#safety). |
 | `lint_spec` | Checks an OpenAPI or Swagger document with the rules of `gostman lint`. |
 | `scan_secrets` | Looks for credentials typed into the workspace, as `gostman scan` does. |
 | `load_test` | Sends one saved request repeatedly: at most 20 at once, 30 seconds and 5,000 requests. Like the other tools, it lists the secrets it left out under `withheld`. |
@@ -57,13 +58,13 @@ gostman mcp --workspace api --expose-tag agent
 - **No local files or commands.** Agent sessions never read files with `{{$file(...)}}` and never run `stdio:` MCP commands.
 - **State carries across calls.** Cookies, OAuth 2.0 tokens and variables last for the session.
 - **Small answers.** Bodies are capped at 8 KB by default. The agent can narrow one with a JSONPath (`select`) or raise the cap up to 256 KB (`max_body_bytes`).
-- **Shared work.** Requests the agent saves are YAML files in the workspace, visible in the app and in Git.
+- **Shared work.** Requests the agent saves are YAML files in the workspace, visible in the app and in Git. Two agents, or an agent and you, can edit the same request, so every request and environment has a `revision`, a short digest of the file that stores it. `get_request`, `list_environments`, `save_request` and `set_variables` return it, the server remembers the last one it showed for each item, and `save_request` or `set_variables` refuses to write over an item that changed since then (or since the `revision` argument, for clients that do not keep a session), telling the agent who changed it and when so it can read the item again and merge. A first write to an item the session never read is allowed. Every write an agent makes is appended to `.gostman/changes.jsonl` (kept out of Git by the `.gitignore` that `gostman init` writes; the last 1,000 entries are kept once it passes 2,000), with the session that made it: name it with `--session <name>` or `GOSTMAN_SESSION`, otherwise it is `agent-` and four random characters. The `changes` tool and `gostman changes [folder] [--since 5m] [--mine --session NAME] [--json]` read that journal. The check covers agents using `gostman mcp`; the Gostman app does not check revisions or write to the journal, so its changes appear in a refusal as made outside an agent session.
 
 The OAuth 2.0 authorization code and device code grants need a person to sign in in a browser, so an agent cannot start them; pass a token you already have with `--oauth-token-env NAME` or `--oauth-refresh-token-env NAME` and it is hidden from the agent like any credential. WebSocket requests are not available to agents.
 
 ## Server options
 
-`gostman mcp` takes `--workspace`, `--env`, `--var`, `--var-from-env`, `--env-file`, `--secrets`, `--secrets-env-file`, `--allow-host`, `--block-private`, `--expose-tag`, `--oauth-token-env` and `--oauth-refresh-token-env`, plus the network flags of `gostman run`: `--timeout`, `--insecure`, `--cacert`, `--client-cert`, `--client-key`, `--client-cert-pass-env`, `--proxy` and `--noproxy`. See [Command line](cli.md).
+`gostman mcp` takes `--workspace`, `--env`, `--var`, `--var-from-env`, `--env-file`, `--secrets`, `--secrets-env-file`, `--allow-host`, `--block-private`, `--expose-tag`, `--oauth-token-env`, `--oauth-refresh-token-env` and `--session`, plus the network flags of `gostman run`: `--timeout`, `--insecure`, `--cacert`, `--client-cert`, `--client-key`, `--client-cert-pass-env`, `--proxy` and `--noproxy`. See [Command line](cli.md).
 
 ### Over HTTP
 

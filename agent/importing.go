@@ -281,6 +281,14 @@ func (d *Desk) storeRequests(requests []workspace.Request) error {
 	return d.files.SaveRequests(requests)
 }
 
+func (d *Desk) recordImported(requests []workspace.Request) string {
+	changes := make([]workspace.Change, 0, len(requests))
+	for _, request := range requests {
+		changes = append(changes, changeOf(workspace.ChangeRequest, request.Name, request.Id, true))
+	}
+	return d.record(changes...)
+}
+
 func withoutReferences(meta string) string {
 	var marks map[string]map[string]json.RawMessage
 	if json.Unmarshal([]byte(meta), &marks) != nil || marks == nil {
@@ -409,6 +417,9 @@ func (d *Desk) importRequests(ctx context.Context, current scene, arguments impo
 	}
 	report := describeImport(result, notes, folderPaths(d.files.Collection().Folders))
 	report.Folder = folder
+	if note := d.recordImported(result.Requests); note != "" {
+		report.Notes = append(report.Notes, note)
+	}
 	if report.Environments, err = d.storeEnvironments(current, result.Environments); err != nil {
 		return importReport{}, err
 	}
