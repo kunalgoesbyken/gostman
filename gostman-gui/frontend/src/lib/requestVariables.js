@@ -8,7 +8,7 @@ import { isEngineName, isGeneratedName } from './variableNames'
 export const TYPE_NONE = ''
 export const TYPE_STRING = 'string'
 export const TYPE_NUMBER = 'number'
-export const TYPE_INTEGER = 'integer'
+const TYPE_INTEGER = 'integer'
 export const TYPE_BOOLEAN = 'boolean'
 export const TYPE_JSON = 'json'
 export const TYPE_ENUM = 'enum'
@@ -115,7 +115,7 @@ const usedText = (row, values) => {
   return values ? fillPlaceholders(winner, (name) => values.get(name)) : winner
 }
 
-const isPending = (text, values) => placeholderNames(text).some((name) => !values || isGeneratedName(name) || values.has(name))
+const isPending = (text, values) => placeholderNames(text).some((name) => !values || isEngineName(name) || values.has(name))
 
 const readUsed = (row, text, values) => (isPending(text, values) ? accepted(text) : readFilled(row, text))
 
@@ -156,7 +156,7 @@ function filledProblemText(row, text, problem) {
 export function problemText(row, problem, values) {
   const winner = winnerText(row, values)
   const said = filledProblemText(row, usedText(row, values), problem)
-  if (winner !== sentText(row)) return TEXT.replaced({ problem: said, value: winner })
+  if (winner !== sentText(row)) return TEXT.replaced(said)
   return values && holdsPlaceholder(winner) ? TEXT.fromReference({ problem: said, written: winner.trim() }) : said
 }
 
@@ -171,10 +171,19 @@ export function blockedMessage(problems) {
   return TEXT.blocked(problems.map((problem) => problem.message).join(BLOCKED_LINE_SEPARATOR))
 }
 
+const generatedIn = (text) => placeholderNames(text).filter(isGeneratedName)
+
 export const generationsFor = (rows, values) => rows
   .filter((row) => isSentRow(row) && isTyped(row) && winnerText(row, values) === sentText(row))
   .map((row) => ({ key: row.key, text: usedText(row, values) }))
-  .filter(({ text }) => placeholderNames(text).some(isGeneratedName))
+  .map((pending) => ({ ...pending, placeholders: generatedIn(pending.text).map((name) => `{{${name}}}`) }))
+  .filter(({ placeholders }) => placeholders.length > 0)
+
+export function generatedTexts(pending, expanded) {
+  const values = [...expanded]
+  const filled = (text) => fillPlaceholders(text, (name) => (isGeneratedName(name) ? values.shift() : undefined))
+  return Object.fromEntries(pending.map(({ key, text }) => [key, filled(text)]))
+}
 
 const valuesIn = (known) => parseVariableMap(known) ?? new Map()
 
@@ -188,8 +197,10 @@ export function variableMessage(text, known) {
 }
 
 export function sentVariables(text, generated = {}) {
+  const rows = parseRows(text)
   const sent = (row) => (Object.hasOwn(generated, row.key) ? generated[row.key] : sentText(row))
-  return serializeRows(parseRows(text).map((row) => (isSentRow(row) ? { ...row, value: sent(row) } : row)))
+  const sentRows = rows.map((row) => (isSentRow(row) ? { ...row, value: sent(row) } : row))
+  return sentRows.some((row, index) => row.value !== rows[index].value) ? serializeRows(sentRows) : text
 }
 
 const settingsOf = (row) => Object.fromEntries(Object.entries(row).filter(([name]) => !ROW_BASICS.includes(name)))

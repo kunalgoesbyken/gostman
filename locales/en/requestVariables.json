@@ -23,7 +23,7 @@
       "spaces": "{{name}} has spaces around its value. Remove them: a typed value is used exactly as written."
     },
     "fromReference": "{{problem}} Its value comes from {{written}}.",
-    "replaced": "{{problem}} Its value, {{value}}, replaces the one in the Vars tab.",
+    "replaced": "{{problem}} A session value, or a value given for this send, replaces the one in the Vars tab.",
     "blocked": "The request was not sent because of its variables.\n{{problems}}"
   }
 }

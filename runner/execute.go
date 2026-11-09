@@ -322,61 +322,62 @@ func (s *session) isSocket(request Request) (bool, error) {
 }
 
 type pendingGeneration struct {
-	Key  string `json:"key"`
-	Text string `json:"text"`
-}
-
-func hasVariableRows(text string) bool {
-	trimmed := strings.TrimSpace(text)
-	return trimmed != "" && trimmed != "{}" && trimmed != "[]"
+	Key          string   `json:"key"`
+	Text         string   `json:"text"`
+	Placeholders []string `json:"placeholders"`
 }
 
 func (s *session) generatedValues(request Request) (map[string]string, error) {
+	generated := map[string]string{}
+	if !request.hasTypedVariables() {
+		return generated, nil
+	}
 	var pending []pendingGeneration
 	if err := s.scripts.Call("pendingGenerations", &pending, request.Vars, s.scoped(request).text()); err != nil {
 		return nil, err
 	}
-	texts := make([]string, len(pending))
-	for index, generation := range pending {
-		texts[index] = generation.Text
+	var placeholders []string
+	for _, generation := range pending {
+		placeholders = append(placeholders, generation.Placeholders...)
 	}
-	generated := make(map[string]string, len(pending))
-	if len(texts) == 0 {
+	if len(placeholders) == 0 {
 		return generated, nil
 	}
-	expanded, err := engine.ExpandTexts(texts, "{}")
+	expanded, err := engine.ExpandTexts(placeholders, "{}")
 	if err != nil {
 		return nil, err
 	}
-	for index, generation := range pending {
-		generated[generation.Key] = expanded[index]
-	}
-	return generated, nil
+	err = s.scripts.Call("generatedTexts", &generated, pending, expanded)
+	return generated, err
 }
 
 func (s *session) declaredValues(request Request) (variables, error) {
 	declared := variables{}
-	if !hasVariableRows(request.Vars) {
+	if !request.hasTypedVariables() {
 		return declared, nil
 	}
 	err := s.scripts.Call("declaredVariables", &declared, request.Vars, s.scoped(request).text())
 	return declared, err
 }
 
-func (s *session) withTypedVariables(request Request) (Request, string, error) {
-	if !hasVariableRows(request.Vars) {
+func (s *session) withSentVariables(request Request, generated map[string]string) (Request, string, error) {
+	if !request.hasVariables() {
 		return request, "", nil
-	}
-	generated, err := s.generatedValues(request)
-	if err != nil {
-		return request, "", err
 	}
 	if err := s.scripts.Call("sentVariables", &request.Vars, request.Vars, generated); err != nil {
 		return request, "", err
 	}
 	var message string
-	err = s.scripts.Call("variableMessage", &message, request.Vars, s.scoped(request).text())
+	err := s.scripts.Call("variableMessage", &message, request.Vars, s.scoped(request).text())
 	return request, message, err
+}
+
+func (s *session) withTypedVariables(request Request) (Request, string, error) {
+	generated, err := s.generatedValues(request)
+	if err != nil {
+		return request, "", err
+	}
+	return s.withSentVariables(request, generated)
 }
 
 func (s *session) execute(ctx context.Context, request Request) (exchange, error) {

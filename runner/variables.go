@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 )
 
@@ -120,9 +121,12 @@ func startingSlot(environments []Environment, environment Environment, overrides
 	return slot, nil
 }
 
+const textVariableType = "string"
+
 type variableRow struct {
 	Key     string          `json:"key"`
 	Value   json.RawMessage `json:"value"`
+	Type    string          `json:"type"`
 	Enabled *bool           `json:"enabled"`
 }
 
@@ -133,20 +137,35 @@ func (r variableRow) encoded() json.RawMessage {
 	return r.Value
 }
 
+func (r variableRow) isTyped() bool {
+	return r.Type != "" && r.Type != textVariableType
+}
+
+func sentRows(text string) []variableRow {
+	var rows []variableRow
+	if json.Unmarshal([]byte(text), &rows) != nil {
+		return nil
+	}
+	return slices.DeleteFunc(rows, func(row variableRow) bool {
+		return strings.TrimSpace(row.Key) == "" || (row.Enabled != nil && !*row.Enabled)
+	})
+}
+
+func (r Request) hasVariables() bool {
+	return len(sentRows(r.Vars)) > 0
+}
+
+func (r Request) hasTypedVariables() bool {
+	return slices.ContainsFunc(sentRows(r.Vars), variableRow.isTyped)
+}
+
 func (r Request) OwnVariables() map[string]string {
 	return requestScope(r.Vars).plain()
 }
 
 func requestScope(text string) variables {
 	scope := variables{}
-	var rows []variableRow
-	if json.Unmarshal([]byte(text), &rows) != nil {
-		return scope
-	}
-	for _, row := range rows {
-		if strings.TrimSpace(row.Key) == "" || (row.Enabled != nil && !*row.Enabled) {
-			continue
-		}
+	for _, row := range sentRows(text) {
 		scope[row.Key] = row.encoded()
 	}
 	return scope

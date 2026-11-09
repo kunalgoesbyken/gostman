@@ -23,9 +23,9 @@ import { applyRequestEdits, extractInSandbox, requestSubject, responseSubject, r
 import { acceptedCookies, scriptCookies } from './scripting/scriptCookies'
 import { scriptedRequest } from './scripting/subjects'
 import { rememberResolved } from './resolvedSecrets'
-import { blockedMessage, generationsFor, sentVariables } from './requestVariables'
+import { blockedMessage, generatedTexts, generationsFor, sentVariables } from './requestVariables'
 import { parseRows } from './rows'
-import { sentProblems, withoutGiven, writtenNames } from './variablesForm'
+import { hasNamedRows, sentProblems, withoutGiven, writtenNames } from './variablesForm'
 import { SECRETS_TEXT } from './secretsText'
 import { ENTRY_KINDS, exchangeEntry, scriptEntry, secretsEntry, withActivity } from './timeline'
 import { checkValues, promptNames, referenceTargets, resolveLayers, scopeLayers, usedVariableNames } from './variableScopes'
@@ -172,17 +172,29 @@ const namesInUse = (lineage, request) => (
   runsScripts(lineage, request) ? undefined : usedVariableNames([request, lineage.map(({ settings }) => settings)])
 )
 
-const requestVariableProblems = (request, referenced) => sentProblems(request, resolveLayers(scopeLayers(store(), request, referenced)))
+const hasVariables = (request) => hasNamedRows(parseRows(request.vars))
+
+const resolvedFor = (request, referenced) => resolveLayers(scopeLayers(store(), request, referenced))
+
+const requestVariableProblems = (request, referenced) => (
+  hasVariables(request) ? sentProblems(request, resolvedFor(request, referenced)) : []
+)
 
 const NO_VARIABLES = '{}'
 
-async function withGeneratedValues(backend, request, referenced) {
-  const resolved = resolveLayers(scopeLayers(store(), request, referenced))
+async function withGeneratedValues(backend, request, resolved) {
   const pending = generationsFor(parseRows(request.vars), checkValues(resolved))
   if (pending.length === 0) return request
-  const texts = await backend.expand(pending.map(({ text }) => text), NO_VARIABLES)
-  const generated = Object.fromEntries(pending.map(({ key }, index) => [key, texts[index]]))
-  return { ...request, vars: sentVariables(request.vars, generated) }
+  const expanded = await backend.expand(pending.flatMap(({ placeholders }) => placeholders), NO_VARIABLES)
+  return { ...request, vars: sentVariables(request.vars, generatedTexts(pending, expanded)) }
+}
+
+async function checkedVariables(backend, request, referenced) {
+  if (!hasVariables(request)) return { request, problems: [] }
+  const resolved = resolvedFor(request, referenced)
+  const generated = await withGeneratedValues(backend, request, resolved)
+  if (generated === request) return { request, problems: sentProblems(request, resolved) }
+  return { request: generated, problems: requestVariableProblems(generated, referenced) }
 }
 
 async function resolveReferences(backend, request, lineage, trace) {
@@ -270,13 +282,15 @@ export function createExecutor(backend) {
     const plainProblems = requestVariableProblems(request)
     if (plainProblems.length > 0) return stop(request, blockedMessage(plainProblems))
     let referenced
+    let problems
     try {
       referenced = await resolveReferences(backend, request, lineage, trace)
-      request = await withGeneratedValues(backend, request, referenced)
+      const checked = await checkedVariables(backend, request, referenced)
+      request = checked.request
+      problems = checked.problems
     } catch (error) {
       return stop(request, error.message)
     }
-    const problems = requestVariableProblems(request, referenced)
     if (problems.length > 0) return stop(request, blockedMessage(problems))
     const variablesOf = (candidate, answers) => variablesText(candidate, answers, referenced)
     const context = { send: createScriptSender(backend, trace), trace, referenced, timeoutMs: lineage[0]?.settings.scriptTimeoutMs }

@@ -29,7 +29,7 @@ func (s *Session) OutgoingWithheld(ctx context.Context, request Request) (engine
 	if socket {
 		return engine.Request{}, nil, errNotHTTP
 	}
-	request, message, err := s.state.withTypedVariables(request)
+	request, message, err := s.state.withSentVariables(request, map[string]string{})
 	if err != nil {
 		return engine.Request{}, nil, err
 	}

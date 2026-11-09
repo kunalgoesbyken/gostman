@@ -1,11 +1,9 @@
 import { isPlainObject, parseJSON } from '../dataUtils'
 import { placeholderNames } from '../placeholders'
 import { isJsonNumber, parseExact, stringifyExact } from '../exactJson'
+import { TYPE_BOOLEAN, TYPE_JSON, TYPE_NUMBER, TYPE_STRING } from '../requestVariables'
 
-export const TYPE_STRING = 'string'
-export const TYPE_NUMBER = 'number'
-export const TYPE_BOOLEAN = 'boolean'
-export const TYPE_JSON = 'json'
+export { TYPE_STRING }
 export const VARIABLE_TYPES = [TYPE_STRING, TYPE_NUMBER, TYPE_BOOLEAN, TYPE_JSON]
 
 const BOOLEANS = ['true', 'false']
