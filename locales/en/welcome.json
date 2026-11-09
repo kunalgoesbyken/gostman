@@ -2,6 +2,7 @@
   "welcome": {
     "title": "Welcome to Gostman",
     "intro": "No account needed. Nothing leaves this device until you send a request.",
+    "hostedRelayNote": "In the web version, a request is forwarded through the hosted relay at gostman.com, which stores neither the request nor the answer. The desktop app sends requests directly, and a local relay sends them from your computer. Change it under Preferences, Privacy.",
     "dismiss": "Skip the welcome. Show it again from the command palette with Show welcome.",
     "skip": "Skip",
     "commandTitle": "Show welcome",

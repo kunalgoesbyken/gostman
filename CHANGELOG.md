@@ -7,6 +7,7 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 ### Changed
 
 - The environments button, Network and Preferences no longer share cog and slider icons: environments use the layers icon, Network the wifi icon and Preferences the cog.
+- Web version: the welcome screen says that requests go through the hosted relay at gostman.com and what it keeps, and the relay setting in Preferences, Privacy describes it in the same words, including the host's standard request logs.
 
 ## [1.15.4] - 2026-11-09
 

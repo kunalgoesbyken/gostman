@@ -4,6 +4,7 @@ import { Button } from "./ui/button"
 import { DisclosureSummary } from "./ui/disclosure"
 import { focusAddress } from "../lib/panes"
 import { usePreferences } from "../lib/preferences"
+import { RELAY_LOCAL, useRelayStore } from "../lib/relay"
 import { shortcutRows } from "../lib/shortcuts"
 import { cn } from "../lib/utils"
 import { SHORTCUT_IDS } from "../lib/welcome"
@@ -79,8 +80,9 @@ function Shortcuts() {
   )
 }
 
-export function WelcomePanel({ actions, onDismiss }) {
+export function WelcomePanel({ actions, relay, onDismiss }) {
   const progress = useOnboardingProgress()
+  const usesHostedRelay = useRelayStore((state) => state.mode !== RELAY_LOCAL)
 
   return (
     <section aria-label={TEXT.title} data-pane="request" className="min-h-0 flex-1 overflow-y-auto border-t border-border">
@@ -92,6 +94,7 @@ export function WelcomePanel({ actions, onDismiss }) {
           </div>
           <Button variant="ghost" size="sm" title={TEXT.dismiss} onClick={onDismiss} className="text-muted-foreground"><X aria-hidden="true" />{TEXT.skip}</Button>
         </header>
+        {relay && usesHostedRelay && <p className="text-xs text-muted-foreground">{TEXT.hostedRelayNote}</p>}
 
         <div className={COLUMNS}>
           <div className="flex min-w-0 flex-col gap-3">

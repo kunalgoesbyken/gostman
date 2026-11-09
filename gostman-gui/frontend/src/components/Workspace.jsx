@@ -470,7 +470,7 @@ export function LoadedWorkspace({ backend, onBack }) {
                 loading={isLoading}
               />
 
-              {showsWelcome ? <WelcomePanel actions={actions} onDismiss={hideWelcome} /> : <div className="flex min-h-0 flex-1">
+              {showsWelcome ? <WelcomePanel actions={actions} relay={backend.relay} onDismiss={hideWelcome} /> : <div className="flex min-h-0 flex-1">
                 <div className="response-split flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden">
                   <section aria-label={APP_TEXT.requestSection} data-pane="request" className="flex min-h-0 flex-1 flex-col" style={REQUEST_AREA_STYLE}>
                     {view === VIEW_VARIABLES ? (

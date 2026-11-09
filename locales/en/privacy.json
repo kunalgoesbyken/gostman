@@ -4,7 +4,7 @@
     "telemetryHint": "Gostman has no telemetry, analytics or crash reporting. It contacts only the hosts you send requests to and the services you set up yourself.",
     "docsLink": "What Gostman connects to",
     "relayLabel": "Send requests through",
-    "relayHint": "The hosted relay cannot reach localhost or private addresses. A local relay sends requests from this computer, with nobody in between.",
+    "relayHint": "The hosted relay at gostman.com forwards each request and its answer and stores neither, but its host keeps standard request logs. It cannot reach localhost or private addresses. A local relay sends requests from this computer, with nobody in between.",
     "relayModes": {
       "hosted": "Hosted relay",
       "local": "Local relay on this computer"
