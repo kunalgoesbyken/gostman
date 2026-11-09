@@ -23,6 +23,8 @@ const EMPTY_ROOT = '<div id="root"></div>'
 const IMAGE_FILES = /\.(png|jpe?g|webp|svg|mp4)$/
 const STARS_TIMEOUT_MS = 4000
 export const DOCS_ENTRY = 'docs'
+export const SITE_ENTRY = 'site'
+export const PAGE_ENTRIES = [DOCS_ENTRY, SITE_ENTRY]
 export const CLIENT_ROUTE = 'web'
 
 export const siteUrl = (process.env.SITE_URL || DEFAULT_SITE_URL).replace(/\/+$/, '')
@@ -277,8 +279,8 @@ export const chunkClosure = (bundle, fileName, seen = new Set()) => {
   return seen
 }
 
-function docsScripts(bundle) {
-  const entry = Object.values(bundle).find((item) => item.type === 'chunk' && item.isEntry && item.name === DOCS_ENTRY)
+function entryScripts(bundle, name) {
+  const entry = Object.values(bundle).find((item) => item.type === 'chunk' && item.isEntry && item.name === name)
   if (!entry) return []
   const imports = [...chunkClosure(bundle, entry.fileName)].filter((fileName) => fileName !== entry.fileName)
   return [{ src: `/${entry.fileName}` }, ...imports.map((fileName) => ({ src: `/${fileName}`, preload: true }))]
@@ -286,7 +288,7 @@ function docsScripts(bundle) {
 
 const stylesheetsOf = (bundle) =>
   Object.values(bundle)
-    .filter((item) => item.type === 'chunk' && item.isEntry && item.name !== DOCS_ENTRY)
+    .filter((item) => item.type === 'chunk' && item.isEntry && !PAGE_ENTRIES.includes(item.name))
     .flatMap((chunk) => [...(chunk.viteMetadata?.importedCss ?? [])])
     .map((fileName) => `/${fileName}`)
 
@@ -312,10 +314,10 @@ export function siteMeta() {
       assets.forEach((asset) => emit(asset.fileName, asset.source))
       docs.images.forEach((image) => emit(image.fileName, image.source))
       guidePages.forEach((page) => emit(`${page.path}/index.html`, renderGuidePage(page, { siteUrl, stylesheets })))
-      productPages.forEach((page) => emit(`${page.path}/index.html`, renderProductPage(page, { siteUrl, stylesheets })))
+      productPages.forEach((page) => emit(`${page.path}/index.html`, renderProductPage(page, { siteUrl, stylesheets, scripts: entryScripts(bundle, SITE_ENTRY) })))
       const searchRef = this.emitFile({ type: 'asset', name: 'docs-search.json', source: JSON.stringify(docs.search) })
       const searchUrl = `/${this.getFileName(searchRef)}`
-      const scripts = docsScripts(bundle)
+      const scripts = entryScripts(bundle, DOCS_ENTRY)
       const shared = { siteUrl, stylesheets, scripts, nav: docs.nav, directory: docs.directory, searchUrl }
       docs.pages.forEach((page) => emit(docOutputFile(page.slug), renderDocsPage(page, shared)))
       const landing = bundle['index.html']

@@ -59,7 +59,7 @@ const renderDocument = (props) => `<!DOCTYPE html>${renderToStaticMarkup(<PageDo
 
 const PRODUCT_PAGES = { "ai-agents": AgentsPage, features: FeaturesPage }
 
-function renderWebPage(page, { siteUrl, stylesheets }, children) {
+function renderWebPage(page, { siteUrl, stylesheets, scripts }, children) {
   const url = `${siteUrl}/${page.path}`
 
   return renderDocument({
@@ -68,6 +68,7 @@ function renderWebPage(page, { siteUrl, stylesheets }, children) {
     url,
     siteUrl,
     stylesheets,
+    scripts,
     structuredData: {
       "@context": "https://schema.org",
       "@type": "WebPage",

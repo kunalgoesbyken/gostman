@@ -4,7 +4,7 @@ import { ArrowLink } from "../ArrowLink"
 import { LandingBand } from "../LandingBand"
 import { PageActions } from "../PageActions"
 import { PageShell } from "../PageShell"
-import { ProductCard } from "../ProductCard"
+import { FeatureItem } from "../FeatureItem"
 import { SectionHeader } from "../SectionHeader"
 import { StaticCode } from "../StaticCode"
 import { AgentTranscript } from "./AgentTranscript"
@@ -36,13 +36,13 @@ function AgentsConnect({ connect }) {
   return (
     <LandingBand id="connect" labelledBy="connect-heading" isEager>
       <SectionHeader id="connect-heading" title={connect.title} lead={connect.lead} isCentered />
-      <ol className="mx-auto mt-14 grid max-w-4xl gap-6 md:grid-cols-2">
+      <ol className="mx-auto mt-14 grid max-w-4xl gap-x-10 gap-y-12 md:grid-cols-2">
         {connect.steps.map((step, index) => (
-          <li key={step.title} className="landing-frame flex min-w-0 flex-col bg-muted/20 p-6">
+          <li key={step.title} className="flex min-w-0 flex-col">
             <span className="flex h-7 w-7 items-center justify-center rounded-full border border-border/60 font-mono text-xs text-primary" aria-hidden="true">{index + 1}</span>
             <h3 className="mt-5 font-medium tracking-tight">{step.title}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{step.text}</p>
-            <StaticCode lines={[step.code]} className="mt-5" />
+            <p className="mb-5 mt-2 text-sm leading-relaxed text-muted-foreground">{step.text}</p>
+            <StaticCode lines={[step.code]} className="mt-auto" />
           </li>
         ))}
       </ol>
@@ -55,9 +55,9 @@ function AgentsConnect({ connect }) {
 
 function ToolChips({ tools }) {
   return (
-    <p className="mt-auto flex flex-wrap gap-1.5 pt-5">
+    <p className="mt-auto flex flex-wrap gap-x-3 gap-y-1 pt-4">
       {tools.map((tool) => (
-        <code key={tool} className="rounded border border-border/60 bg-background px-1.5 py-0.5 font-mono text-[0.6875rem] text-muted-foreground">{tool}</code>
+        <code key={tool} className="font-mono text-xs text-muted-foreground/80">{tool}</code>
       ))}
     </p>
   )
@@ -67,11 +67,11 @@ function CardSection({ id, section, columns, isTinted }) {
   return (
     <LandingBand id={id} labelledBy={`${id}-heading`} isTinted={isTinted} isEager>
       <SectionHeader id={`${id}-heading`} title={section.title} lead={section.lead} isCentered />
-      <ul className={`mt-14 grid gap-4 sm:grid-cols-2 ${columns}`}>
+      <ul className={`mt-14 grid gap-x-10 gap-y-12 sm:grid-cols-2 ${columns}`}>
         {section.items.map((item) => (
-          <ProductCard key={item.title} icon={ICONS[item.icon]} title={item.title} text={item.text}>
+          <FeatureItem key={item.title} icon={ICONS[item.icon]} title={item.title} text={item.text}>
             {item.tools ? <ToolChips tools={item.tools} /> : null}
-          </ProductCard>
+          </FeatureItem>
         ))}
       </ul>
       <p className="mt-10 text-center">

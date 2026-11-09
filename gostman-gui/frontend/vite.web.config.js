@@ -7,7 +7,7 @@ import { createHash } from 'crypto'
 import { readFileSync, writeFileSync } from 'fs'
 import { localesPlugin, isLocaleChunk } from './i18n/plugin.js'
 import { EDITOR_PREFETCH_ID, ROUTE_PREFETCH_ID } from './src/lib/routePrefetch.js'
-import { CLIENT_ROUTE, DOCS_ENTRY, chunkClosure, siteDefine, siteMeta } from './site.config.js'
+import { CLIENT_ROUTE, DOCS_ENTRY, PAGE_ENTRIES, SITE_ENTRY, chunkClosure, siteDefine, siteMeta } from './site.config.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -63,7 +63,7 @@ function chunksBeyondEntry(bundle, module) {
   const chunks = Object.values(bundle).filter((item) => item.type === 'chunk')
   const target = dynamicEntryOf(chunks, module)
   if (!target) return null
-  const loaded = new Set(chunks.filter((chunk) => chunk.isEntry && chunk.name !== DOCS_ENTRY).flatMap((chunk) => [...chunkClosure(bundle, chunk.fileName)]))
+  const loaded = new Set(chunks.filter((chunk) => chunk.isEntry && !PAGE_ENTRIES.includes(chunk.name)).flatMap((chunk) => [...chunkClosure(bundle, chunk.fileName)]))
   return [...chunkClosure(bundle, target.fileName)].filter((fileName) => !loaded.has(fileName))
 }
 
@@ -134,11 +134,12 @@ const linkedChunks = (bundle, fileName, seen = new Set()) => {
   return seen
 }
 
-function docsOnlyChunks(bundle) {
+function pageOnlyChunks(bundle) {
   const entries = Object.values(bundle).filter((item) => item.type === 'chunk' && item.isEntry)
   const reach = (list) => new Set(list.flatMap((entry) => [...linkedChunks(bundle, entry.fileName)]))
-  const app = reach(entries.filter((entry) => entry.name !== DOCS_ENTRY))
-  return new Set([...reach(entries.filter((entry) => entry.name === DOCS_ENTRY))].filter((fileName) => !app.has(fileName)))
+  const isPage = (entry) => PAGE_ENTRIES.includes(entry.name)
+  const app = reach(entries.filter((entry) => !isPage(entry)))
+  return new Set([...reach(entries.filter(isPage))].filter((fileName) => !app.has(fileName)))
 }
 
 function stampServiceWorker() {
@@ -149,10 +150,10 @@ function stampServiceWorker() {
     apply: 'build',
     writeBundle(options, bundle) {
       outDir = options.dir
-      const docsOnly = docsOnlyChunks(bundle)
+      const pageOnly = pageOnlyChunks(bundle)
       assets = Object.values(bundle)
         .filter((item) => (item.type === 'chunk' || item.fileName.endsWith('.css')) && !item.fileName.startsWith(SANDBOX_WORKER_PREFIX))
-        .filter((item) => !docsOnly.has(item.fileName) && !isLocaleChunk(item.fileName))
+        .filter((item) => !pageOnly.has(item.fileName) && !isLocaleChunk(item.fileName))
         .map((item) => `/${item.fileName}`)
         .sort()
     },
@@ -193,9 +194,9 @@ export default defineConfig({
     target: 'es2022',
     assetsInlineLimit: 0,
     rollupOptions: {
-      input: { index: resolve(__dirname, 'index-web.html'), [DOCS_ENTRY]: resolve(__dirname, 'src/docs-main.jsx') },
+      input: { index: resolve(__dirname, 'index-web.html'), [DOCS_ENTRY]: resolve(__dirname, 'src/docs-main.jsx'), [SITE_ENTRY]: resolve(__dirname, 'src/site-main.js') },
       output: {
-        entryFileNames: (chunk) => (chunk.name === DOCS_ENTRY ? 'assets/docs.[hash].js' : 'assets/index.[hash].js'),
+        entryFileNames: (chunk) => (PAGE_ENTRIES.includes(chunk.name) ? `assets/${chunk.name}.[hash].js` : 'assets/index.[hash].js'),
         chunkFileNames: chunkFileName,
         assetFileNames: (assetInfo) =>
           assetInfo.name === 'index-web.css'

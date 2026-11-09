@@ -65,7 +65,7 @@ const collapse = (text) => text.replace(/\s+/g, ' ').trim()
 const icon = ({ body }, className) =>
   `<svg class="${className}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">${body}</svg>`
 
-const COPY_BUTTON = `<button type="button" class="docs-copy" data-copy-code aria-label="${DOCS_TEXT.code.copy}" title="${DOCS_TEXT.code.copy}">${icon(copyIcon, 'docs-copy-idle')}${icon(checkIcon, 'docs-copy-done')}</button>`
+const COPY_BUTTON = `<button type="button" class="code-copy" data-copy-code aria-label="${DOCS_TEXT.code.copy}" title="${DOCS_TEXT.code.copy}">${icon(copyIcon, 'code-copy-idle')}${icon(checkIcon, 'code-copy-done')}</button>`
 
 function shorten(text, limit) {
   if (text.length <= limit) return text
@@ -151,7 +151,7 @@ function renderAlert(parser, tokens, kind) {
 function renderCode(text, lang) {
   const name = (lang ?? '').trim().split(/\s/)[0].toLowerCase()
   const label = DOCS_TEXT.languages[name] ?? name
-  return `<div class="docs-code"><div class="docs-code-bar"><span>${escapeAttribute(label)}</span>${COPY_BUTTON}</div><pre><code>${escapeAttribute(text)}</code></pre></div>\n`
+  return `<div class="docs-code" data-code-block><div class="docs-code-bar"><span>${escapeAttribute(label)}</span>${COPY_BUTTON}</div><pre><code>${escapeAttribute(text)}</code></pre></div>\n`
 }
 
 function createMarked({ file, docsDir, state }) {

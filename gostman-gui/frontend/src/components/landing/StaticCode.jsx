@@ -1,23 +1,25 @@
+import { Fragment } from "react"
+import { Check, Copy } from "lucide-react"
+import { DOCS_TEXT } from "../../lib/docsText"
 import { cn } from "../../lib/utils"
 
-export function StaticCode({ title, lines, className }) {
+export function StaticCode({ lines, className }) {
   return (
-    <figure className={cn("landing-frame min-w-0 overflow-hidden bg-background", className)}>
-      {title ? (
-        <figcaption className="flex h-9 items-center border-b border-border/60 px-4 font-mono text-xs text-muted-foreground">
-          <span className="truncate">{title}</span>
-        </figcaption>
-      ) : null}
-      <pre className="p-4 font-mono text-xs leading-relaxed text-foreground sm:text-[0.8125rem]">
+    <div data-code-block className={cn("landing-frame relative min-w-0 bg-background", className)}>
+      <pre className="whitespace-pre-wrap break-words py-3.5 pl-4 pr-12 font-mono text-xs leading-relaxed text-foreground sm:text-[0.8125rem]">
         <code>
           {lines.map((line, index) => (
-            <span key={index} className="block whitespace-pre-wrap break-words">
-              <span aria-hidden="true" className="select-none text-muted-foreground">$ </span>
-              {line}
-            </span>
+            <Fragment key={index}>
+              {index > 0 ? "\n" : null}
+              <span className="before:select-none before:text-muted-foreground before:content-['$_']">{line}</span>
+            </Fragment>
           ))}
         </code>
       </pre>
-    </figure>
+      <button type="button" data-copy-code className="code-copy absolute right-2 top-2" aria-label={DOCS_TEXT.code.copy} title={DOCS_TEXT.code.copy}>
+        <Copy className="code-copy-idle h-3.5 w-3.5" aria-hidden="true" />
+        <Check className="code-copy-done h-3.5 w-3.5" aria-hidden="true" />
+      </button>
+    </div>
   )
 }

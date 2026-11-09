@@ -4,15 +4,15 @@ import { ArrowLink } from "../ArrowLink"
 import { LandingBand } from "../LandingBand"
 import { PageActions } from "../PageActions"
 import { PageShell } from "../PageShell"
-import { PRODUCT_CARD, ProductCard } from "../ProductCard"
+import { FeatureItem } from "../FeatureItem"
 import { SectionHeader } from "../SectionHeader"
 import { featureHub } from "./featureHub"
 
 function Highlight({ entry }) {
   return (
-    <ProductCard icon={entry.icon} title={entry.title} text={entry.blurb}>
-      <ArrowLink href={entry.href} className="mt-auto pt-5">Learn more</ArrowLink>
-    </ProductCard>
+    <FeatureItem icon={entry.icon} title={entry.title} text={entry.blurb}>
+      <ArrowLink href={entry.href} className="mt-auto pt-4">Learn more</ArrowLink>
+    </FeatureItem>
   )
 }
 
@@ -30,8 +30,8 @@ function FeatureLink({ entry }) {
 function FeatureGroup({ group }) {
   const heading = `group-${group.id}`
   return (
-    <section aria-labelledby={heading} className={`${PRODUCT_CARD} mb-4 break-inside-avoid`}>
-      <h3 id={heading} className="flex items-baseline justify-between font-medium tracking-tight">
+    <section aria-labelledby={heading} className="mb-12 break-inside-avoid">
+      <h3 id={heading} className="flex items-baseline justify-between border-b border-border/50 pb-3 font-medium tracking-tight">
         {group.title}
         <span className="font-mono text-xs tabular-nums text-muted-foreground">{group.entries.length}</span>
       </h3>
@@ -58,7 +58,7 @@ export function FeaturesPage({ page }) {
 
         <LandingBand labelledBy="highlights-heading" isEager>
           <SectionHeader id="highlights-heading" title="Where Gostman stands out" isCentered />
-          <ul className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="mt-14 grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
             {hub.highlights.map((entry) => (
               <Highlight key={entry.id} entry={entry} />
             ))}
@@ -67,7 +67,7 @@ export function FeaturesPage({ page }) {
 
         <LandingBand labelledBy="all-heading" isTinted isEager>
           <SectionHeader id="all-heading" title={`All ${hub.total} features`} lead="Each one links to its page in the documentation. Features without a label run in both the desktop and web apps." isCentered />
-          <div className="mt-14 gap-4 sm:columns-2 lg:columns-3">
+          <div className="mt-14 gap-x-10 sm:columns-2 lg:columns-3">
             {hub.groups.map((group) => (
               <FeatureGroup key={group.id} group={group} />
             ))}

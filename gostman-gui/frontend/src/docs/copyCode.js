@@ -8,7 +8,7 @@ function label(button, text) {
 }
 
 async function copy(button, onCopied) {
-  const code = button.closest(".docs-code")?.querySelector("code")?.textContent ?? ""
+  const code = button.closest("[data-code-block]")?.querySelector("code")?.textContent ?? ""
   try {
     await navigator.clipboard.writeText(code)
   } catch {

@@ -454,16 +454,16 @@
     @apply overflow-x-auto px-4 py-3.5 font-mono text-[0.8125rem] leading-6 text-foreground;
   }
 
-  .docs-copy {
+  .code-copy {
     @apply flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground;
   }
 
-  .docs-copy-done,
-  .docs-copy[data-copied] .docs-copy-idle {
+  .code-copy-done,
+  .code-copy[data-copied] .code-copy-idle {
     @apply hidden;
   }
 
-  .docs-copy[data-copied] .docs-copy-done {
+  .code-copy[data-copied] .code-copy-done {
     @apply block text-success;
   }
 
