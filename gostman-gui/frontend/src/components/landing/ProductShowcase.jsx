@@ -139,7 +139,7 @@ export function ProductShowcase() {
         role="tabpanel"
         id={panelId(active.id)}
         aria-labelledby={tabId(active.id)}
-        className="mt-6 rounded-xl border border-border/50 bg-card/40 p-1.5 shadow-[0_30px_80px_-24px_hsl(var(--primary)/0.4)] sm:p-2"
+        className="mt-6 rounded-xl border border-border/50 bg-card/40 p-1.5 shadow-[0_30px_80px_-24px_rgb(0_0_0/0.45)] sm:p-2"
       >
         <div className="aspect-[8/5] overflow-hidden rounded-lg border border-primary/25 bg-background">
           <AnimatePresence mode="wait" initial={false}>
