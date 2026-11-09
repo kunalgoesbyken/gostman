@@ -6,7 +6,7 @@ const agentsDoc = (anchor) => `${docPath("agents")}#${anchor}`
 export const agentsPage = {
   path: "ai-agents",
   title: "Let coding agents call your APIs safely, over MCP | Gostman",
-  description: "gostman mcp gives Claude Code, Cursor and Codex your collection, with a host allowlist, secrets kept out of the conversation and requests that are plain YAML files in Git.",
+  description: "gostman mcp gives Claude Code, Cursor and Codex your collection, with a host allowlist, secrets kept out of the chat and requests stored as YAML in Git.",
   heading: "Let your coding agent call your APIs, safely",
   intro: "gostman mcp serves a Gostman workspace to Claude Code, Cursor, Codex and any other MCP client. The agent works with the same requests, variables and environments you do, and the server decides which hosts it can reach and which secrets it gets.",
   brands: ["claude", "openai", "cursor", "vscode"],
@@ -165,6 +165,7 @@ export const agentsPage = {
     points: [
       "Every request is one YAML file. What the agent saves shows up in git diff and in a pull request.",
       "The desktop app picks up changes made on disk within a few seconds, for a folder you have open.",
+      "Two agents, or an agent and you, do not overwrite each other: a save is refused when the request or environment changed since the agent read it, and the changes tool lists what each session saved.",
       "Saved requests use the variables, environments and checks you already have.",
       "gostman init --skill writes the Agent Skill to .claude/skills/gostman/SKILL.md, a file you can commit with the rest.",
     ],

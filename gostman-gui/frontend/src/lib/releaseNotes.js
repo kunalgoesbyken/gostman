@@ -1,6 +1,7 @@
 import { compareVersions } from './versions.js'
 
 export const RELEASES = [
+  { version: '1.16.0', ids: ['agent-shared-edits'] },
   { version: '1.15.0', ids: ['flow-parallel', 'flow-condition-groups', 'flow-variables'] },
   { version: '1.14.0', ids: ['ci-pr-comment'] },
   { version: '1.13.0', ids: ['flow-canvas', 'flow-switch', 'flow-repeat', 'nested-flows', 'flow-inputs', 'flow-metrics'] },

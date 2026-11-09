@@ -453,6 +453,11 @@
       "blurb": "An MCP server that lets coding agents send requests, with secret redaction and a host allowlist.",
       "synonyms": "agent mcp claude cursor ai coding skill"
     },
+    "agentSharedEdits": {
+      "title": "Safe shared edits for agents",
+      "blurb": "Two agents, or an agent and you, no longer overwrite each other: a save is refused when the request changed since the agent read it, and a change journal shows who saved what.",
+      "synonyms": "agent mcp revision conflict stale overwrite changes journal session claude cursor multiple agents"
+    },
     "mock": {
       "title": "Mock server",
       "blurb": "Serve saved examples or an OpenAPI spec locally, with a live request log.",

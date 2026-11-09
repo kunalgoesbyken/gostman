@@ -102,6 +102,7 @@ export const FEATURES = [
   { id: 'ci-starters', group: 'automation', since: '1.9.0', platforms: ['cli'], docs: 'ci#starter-pipelines-and-pre-commit', action: { type: 'copy', id: 'ciInit' }, icon: 'workflow' },
   { id: 'monitors', group: 'automation', since: '1.9.0', docs: 'runner-load-and-scan#monitors', action: { type: 'dialog', id: 'monitors' }, icon: 'activity', palette: true, tool: { group: 'automate', order: 2 } },
   { id: 'agents', group: 'automation', docs: 'agents', icon: 'bot', landing: { group: 'data', order: 4 } },
+  { id: 'agent-shared-edits', group: 'automation', since: '1.16.0', platforms: ['cli'], docs: 'agents#safety', icon: 'bot' },
   { id: 'mock', command: 'gostman mock openapi.yaml', group: 'mocking', platforms: ['desktop'], docs: 'workspaces-and-mock#examples-and-the-mock-server-desktop', action: { type: 'dialog', id: 'mock' }, icon: 'server', palette: true, empty: ['mock'], sample: 'collection', landing: { group: 'automate', order: 2 }, tool: { group: 'mockCapture', order: 1 } },
   { id: 'mock-data-rows', group: 'mocking', since: '1.10.0', platforms: ['desktop'], docs: 'workspaces-and-mock#data-file-rules', action: { type: 'dialog', id: 'mock' }, icon: 'file-spreadsheet' },
   { id: 'mock-rules', group: 'mocking', platforms: ['desktop'], docs: 'workspaces-and-mock#examples-and-the-mock-server-desktop', action: { type: 'dialog', id: 'mock' }, icon: 'sliders-horizontal' },

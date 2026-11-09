@@ -4,6 +4,14 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.16.0] - 2026-11-09
+
+### Added
+
+- Coding agents: `save_request` and `set_variables` refuse to write over a request or environment that changed since the agent read it, and say which session changed it and when. `get_request`, `list_environments`, `save_request` and `set_variables` return a `revision` (scrambled with a key only that server process holds), and `save_request` and `set_variables` accept it as an argument for clients that keep no session.
+- Coding agents: every agent write is appended to `.gostman/changes.jsonl` (kept out of Git by the `.gitignore` that `gostman init` writes). The `changes` tool and `gostman changes [--since 5m] [--mine --session NAME] [--json]` read it. Name a session with `gostman mcp --session NAME` or `GOSTMAN_SESSION`.
+- Site: a page for coding agents at `/ai-agents` (connect steps, tools, safety rules, limits, the command line) and a features page at `/features` that lists every feature by group with a link to its documentation, linked from the header, the footer and the landing page.
+
 ### Changed
 
 - The environments button, Network and Preferences no longer share cog and slider icons: environments use the layers icon, Network the wifi icon and Preferences the cog.
