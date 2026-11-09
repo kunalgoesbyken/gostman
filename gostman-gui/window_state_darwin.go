@@ -1,4 +1,4 @@
-//go:build !windows
+//go:build darwin
 
 package main
 
@@ -8,7 +8,12 @@ import (
 	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
-const placesBeforeShow = false
+const (
+	placesBeforeShow = false
+	startsMaximised  = true
+)
+
+func trackWindow(context.Context) {}
 
 func screenArea(screen wailsruntime.Screen) windowRect {
 	return windowRect{Right: screen.Size.Width, Bottom: screen.Size.Height}

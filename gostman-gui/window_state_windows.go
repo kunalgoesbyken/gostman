@@ -11,6 +11,7 @@ import (
 
 const (
 	placesBeforeShow = true
+	startsMaximised  = true
 
 	windowClassName    = "wailsWindow"
 	showHidden         = 0
@@ -59,6 +60,8 @@ var (
 	collectedMonitors  []nativeMonitor
 	enumerationGuard   sync.Mutex
 )
+
+func trackWindow(context.Context) {}
 
 func prepareEnumerations() {
 	enumerationsReady.Do(func() {

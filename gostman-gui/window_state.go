@@ -67,7 +67,7 @@ func startingWindow(state windowState, remembered bool) (width, height int, star
 	if !remembered {
 		return defaultWidth, defaultHeight, options.Normal
 	}
-	if state.Maximised {
+	if state.Maximised && startsMaximised {
 		start = options.Maximised
 	}
 	if placesBeforeShow {
@@ -79,6 +79,7 @@ func startingWindow(state windowState, remembered bool) (width, height int, star
 func (a *App) restoreWindow() {
 	defer func() { _ = recover() }()
 	a.windowRestore.Do(func() {
+		trackWindow(a.ctx)
 		if a.hasSavedWindow {
 			placeWindow(a.ctx, a.savedWindow)
 		}
