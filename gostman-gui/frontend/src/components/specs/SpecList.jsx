@@ -82,7 +82,7 @@ export const SpecList = memo(function SpecList({ actions }) {
 
   const openAddMenu = (event) => {
     const rect = event.currentTarget.getBoundingClientRect()
-    setAddPosition({ x: rect.right, y: rect.bottom })
+    setAddPosition(addPosition ? null : { x: rect.right, y: rect.bottom })
   }
 
   const fileInput = <input ref={fileRef} type="file" accept={SPEC_FILE_TYPES} onChange={pickFile} className="hidden" />
@@ -103,7 +103,7 @@ export const SpecList = memo(function SpecList({ actions }) {
                 <Plus />
                 {TEXT.newSpec}
               </Button>
-              <Button size="sm" variant="ghost" onClick={openAddMenu}>
+              <Button size="sm" variant="ghost" aria-haspopup="menu" aria-expanded={Boolean(addPosition)} onClick={openAddMenu}>
                 <Import />
                 {TEXT.importSpec}
               </Button>

@@ -14,6 +14,7 @@ const MAX_INDENT_LEVELS = 8
 
 const FOCUS_STEPS = { ArrowDown: 1, ArrowUp: -1 }
 const CLOSING_KEYS = ["Escape", "Tab"]
+const OPEN_MENU_OPENER = '[aria-haspopup="menu"][aria-expanded="true"]'
 
 function targetIndex(key, current, count) {
   if (key === "Home") return 0
@@ -94,7 +95,8 @@ export function ContextMenu({ position, title, items, onClose }) {
 
   useEffect(() => {
     const closeWhenOutside = (event) => {
-      if (!menuRef.current.contains(event.target)) onClose()
+      if (menuRef.current.contains(event.target) || event.target.closest(OPEN_MENU_OPENER)) return
+      onClose()
     }
     window.addEventListener("pointerdown", closeWhenOutside)
     window.addEventListener("resize", onClose)

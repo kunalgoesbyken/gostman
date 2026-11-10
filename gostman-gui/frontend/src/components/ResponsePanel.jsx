@@ -546,7 +546,7 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
 
   const openHistory = (event) => {
     const { left, bottom } = event.currentTarget.getBoundingClientRect()
-    setHistoryMenu({ x: left, y: bottom + MENU_GAP_PX })
+    setHistoryMenu(historyMenu ? null : { x: left, y: bottom + MENU_GAP_PX })
   }
 
   const toggleFullscreen = useCallback(() => setIsFullscreen((current) => !current), [])
@@ -643,7 +643,7 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
               </div>
 
               <div className={cn(TOOLBAR_ROW, "flex shrink-0 items-center gap-1")}>
-                {earlier.length > 0 && <IconButton label={HISTORY_TEXT.menu} icon={History} onClick={openHistory} />}
+                {earlier.length > 0 && <IconButton label={HISTORY_TEXT.menu} icon={History} aria-haspopup="menu" aria-expanded={Boolean(historyMenu)} onClick={openHistory} />}
                 {canSearch && (
                   <IconButton
                     label={searchOpen ? RESPONSE_TEXT.closeSearch : RESPONSE_TEXT.searchBody(shortcutLabel("F"))}

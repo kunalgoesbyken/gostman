@@ -4,6 +4,12 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.17.4] - 2026-11-11
+
+### Fixed
+
+- Menu buttons (Explore, Help, the sidebar's Add and views buttons, the response history button and Specs Add) now close their menu when you press them again. Before, the menu closed and opened again straight away (#36).
+
 ## [1.17.3] - 2026-11-11
 
 ### Fixed
