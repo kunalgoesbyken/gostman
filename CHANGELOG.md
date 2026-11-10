@@ -4,7 +4,21 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.17.0] - 2026-11-10
+
+### Added
+
+- Dynamic variables: `{{$uuidV7}}` (and `{{$uuidV4}}`), `{{$date(dd/MM/yyyy)}}` with Unicode date patterns and offsets such as `{{$date(+7d,dd/MM/yyyy)}}`, a pattern on `$isoTimestamp`, `$randomDatePast`, `$randomDateFuture`, `$randomDateRecent`, `$randomDateSoon` and `$randomBirthdate` and on their faker names, `{{$randomFloat(min,max,decimals)}}`, and faker names with arguments such as `{{$faker.number.int(1,10)}}`. Completion lists every argument form. The script `uuid` module has `v7()` (#35).
+
+- Templates and encoding: `{{$base64(name)}}`, `{{$base64Url(name)}}` and `{{$urlEncode(name)}}` encode a variable after its placeholders are filled, so a JSON or XML document with faker values kept in a variable can be sent as base64; `{{$template(path)}}` fills a file the same way (desktop app, and the CLI with `--allow-files`). Environment and collection variables accept multi-line values, and the Code dialog shows the filled request body with **Save as file** (#36).
+
 ### Changed
+
+- JSON tree: Expand all, Collapse to level and the level list act on the filtered tree while a JSONPath filter is active, so clearing the filter brings back the full tree as you left it, and Expand all is off when nothing is left to open (#21).
+
+- Variables view: a hidden required variable that takes its value from a field stays hidden while that field gives it a value, and when the field is empty the field is marked with what is missing instead of Send doing nothing (#23).
+
+- Typed variables: a `{{?prompt}}` answer reaches the pre-request script as the declared type and is checked in the Values needed dialog, which is no longer pre-filled with the placeholder; True or false says when a value is not lowercase or is empty; a value a pre-request script writes is checked on the same send, in the apps and in `gostman run`. The docs name `bru.getRequestVar` for request variables, as in Bruno (#24).
 
 - Desktop window: a window whose top edge was above its display after the displays were rearranged reopens moved onto that display instead of centred on the main one, and on Linux with X11 a window larger than its display after a resolution change is placed on that display instead of partly beside it (#34).
 
