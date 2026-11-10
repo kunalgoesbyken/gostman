@@ -1,7 +1,7 @@
 import { Heart } from "lucide-react"
 import { BrandIcon } from "../ui/brandIcon"
 import { WEB_APP_URL } from "../../lib/constants"
-import { ALTERNATIVETO_BADGE_URL, ALTERNATIVETO_URL, EASYLAUNCH_BADGE_DARK_URL, EASYLAUNCH_URL, FAZIER_BADGE_DARK_URL, FAZIER_URL, NICKLAUNCHES_BADGE_DARK_URL, NICKLAUNCHES_URL, SPONSOR_URL } from "../../lib/siteLinks"
+import { ALTERNATIVETO_BADGE_URL, ALTERNATIVETO_URL, CAPYLAUNCH_BADGE_DARK_URL, CAPYLAUNCH_URL, EASYLAUNCH_BADGE_DARK_URL, EASYLAUNCH_URL, FAZIER_BADGE_DARK_URL, FAZIER_URL, NICKLAUNCHES_BADGE_DARK_URL, NICKLAUNCHES_URL, SPONSOR_URL } from "../../lib/siteLinks"
 import { Brand } from "./Brand"
 import { FOOTER_COLUMNS } from "./footerLinks"
 
@@ -77,6 +77,14 @@ function FazierBadge() {
   )
 }
 
+function CapyLaunchBadge() {
+  return (
+    <a href={CAPYLAUNCH_URL} target="_blank" rel="noopener" className="inline-block">
+      <img src={CAPYLAUNCH_BADGE_DARK_URL} alt="Featured on CapyLaunch" width="200" height="48" loading="lazy" className="h-12 w-[200px] max-w-full" />
+    </a>
+  )
+}
+
 function FooterColumn({ column }) {
   return (
     <nav aria-label={column.title}>
@@ -104,6 +112,7 @@ export function SiteFooter() {
           <EasyLaunchBadge />
           <NickLaunchesBadge />
           <FazierBadge />
+          <CapyLaunchBadge />
           <AlternativeToBadge />
         </div>
       </div>

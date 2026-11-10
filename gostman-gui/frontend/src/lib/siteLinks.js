@@ -19,6 +19,8 @@ export const NICKLAUNCHES_URL = "https://nicklaunches.com/products/gostman/"
 export const NICKLAUNCHES_BADGE_DARK_URL = "https://nicklaunches.com/badges/featured-dark.png"
 export const FAZIER_URL = "https://fazier.com/launches/gostman.com"
 export const FAZIER_BADGE_DARK_URL = "https://fazier.com/api/v1//public/badges/launch_badges.svg?badge_type=featured&theme=dark"
+export const CAPYLAUNCH_URL = "https://capylaunch.com/tools/gostman"
+export const CAPYLAUNCH_BADGE_DARK_URL = "https://capylaunch.com/badge.svg?site=8d7ec4d7-53d9-450b-81e5-accaa028d726&theme=dark"
 
 const DEFAULT_SITE_URL = "https://gostman.com"
 
