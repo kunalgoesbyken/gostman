@@ -17,9 +17,15 @@ function changed(view) {
   listeners.forEach((listener) => listener())
 }
 
-const shownOf = (state) => state.choice ?? state.base
+const freshTree = (lastLevel) => ({ choice: null, lastLevel, generation: 0, opened: new Map() })
 
-const startState = (era, base, lastLevel) => ({ era, base, lastLevel, generation: 0, choice: null, opened: new Map() })
+const startState = (era, base, lastLevel) => ({ era, base, lastLevel, trees: new Map() })
+
+const finiteOrNull = (depth) => (Number.isFinite(depth) ? depth : null)
+
+const treeOf = (state, source) => state.trees.get(source) ?? freshTree(state.lastLevel)
+
+const withTree = (state, source, tree) => new Map(state.trees).set(source, tree)
 
 function eraFor(known, setting) {
   if (!known) return { setting, count: 0 }
@@ -28,8 +34,10 @@ function eraFor(known, setting) {
 
 function stateFor(state, era, base) {
   if (state.era === era.count) return state
-  const before = shownOf(state)
-  return startState(era.count, base, Number.isFinite(before) ? before : null)
+  const levelBefore = (choice) => finiteOrNull(choice ?? state.base)
+  const restarted = startState(era.count, base, levelBefore(null))
+  state.trees.forEach((tree, source) => restarted.trees.set(source, freshTree(levelBefore(tree.choice))))
+  return restarted
 }
 
 function viewOf(owner, era, base) {
@@ -58,32 +66,33 @@ export function useTreeView(owner, scope, setting, base) {
   return treeView
 }
 
-export const shownDepth = (treeView, base) => treeView?.state.choice ?? base
-
 export function useTreeEpoch(treeView, source, isShown) {
   return useMemo(() => {
     if (!isShown || !treeView) return null
     const { view, state, base } = treeView
-    return { id: `${view.id}:${state.era}:${state.generation}:${source}`, depth: state.choice ?? base, source, view, state }
+    const tree = treeOf(state, source)
+    return { id: `${view.id}:${state.era}:${tree.generation}:${source}`, depth: tree.choice ?? base, source, treeView }
   }, [isShown, treeView, source])
 }
 
-export function chooseDepth({ view, state, base }, depth) {
-  const current = state.choice ?? base
+export function chooseDepth({ depth: current, source, treeView: { view, state, base } }, depth) {
+  const tree = treeOf(state, source)
   view.state = {
     ...state,
     base,
-    choice: depth === base ? null : depth,
-    lastLevel: depth === Infinity && current !== Infinity ? current : state.lastLevel,
-    opened: new Map(),
-    generation: state.generation + 1,
+    trees: withTree(state, source, {
+      choice: depth === base ? null : depth,
+      lastLevel: depth === Infinity && current !== Infinity ? current : tree.lastLevel,
+      generation: tree.generation + 1,
+      opened: new Map(),
+    }),
   }
   changed(view)
 }
 
-export function adoptSetting({ view, scope, era, state }, setting) {
+export function adoptSetting({ source, treeView: { view, scope, era, state } }, setting) {
   eras.set(scope, { setting, count: era.count })
-  view.state = { ...state, base: depthOfSetting(setting), choice: null }
+  view.state = { ...state, base: depthOfSetting(setting), trees: withTree(state, source, { ...treeOf(state, source), choice: null }) }
   changed(view)
 }
 
@@ -92,12 +101,12 @@ export function setFilterPath({ view }, path) {
   changed(view)
 }
 
-const openedIn = ({ state, source }) => state.opened.get(source) ?? NONE_OPENED
+const openedIn = ({ source, treeView }) => treeView.state.trees.get(source)?.opened ?? NONE_OPENED
 
 export function noteToggle(epoch, path, byDefault, expanded) {
-  const { state, source, view } = epoch
-  if (!state.opened.has(source)) state.opened.set(source, new Map())
-  const paths = state.opened.get(source)
+  const { source, treeView: { state, view } } = epoch
+  if (!state.trees.has(source)) state.trees.set(source, freshTree(state.lastLevel))
+  const paths = state.trees.get(source).opened
   if (expanded === byDefault) paths.delete(path)
   else paths.set(path, expanded)
   changed(view)
@@ -114,6 +123,8 @@ export function opensBeyondLevel(epoch) {
   return false
 }
 
-export function collapseTarget({ state }, depth, fallback) {
-  return depth === Infinity ? state.lastLevel ?? fallback : depth
+export const hasUnopenedNodes = (epoch, deepestLevel) => deepestLevel >= epoch.depth || openedIn(epoch).size > 0
+
+export function collapseTarget(epoch, fallback) {
+  return epoch.depth === Infinity ? treeOf(epoch.treeView.state, epoch.source).lastLevel ?? fallback : epoch.depth
 }

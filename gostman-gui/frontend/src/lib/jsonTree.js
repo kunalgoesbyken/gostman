@@ -5,7 +5,10 @@ const isContainer = (value) => value !== null && typeof value === 'object'
 
 const hasEntries = (value) => (Array.isArray(value) ? value.length > 0 : Object.keys(value).length > 0)
 
-export const hasNestedValues = (value) => Object.values(value).some((child) => isContainer(child) && hasEntries(child))
+export function deepestLevel(value, level = 0) {
+  if (!isContainer(value) || !hasEntries(value)) return level - 1
+  return Math.max(...Object.values(value).map((child) => deepestLevel(child, level + 1)))
+}
 
 const remainder = (count, noun) => `${count} more ${noun} not shown`
 
