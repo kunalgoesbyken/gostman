@@ -13,6 +13,8 @@ export const GO_MODULE = `github.com/${REPOSITORY}`
 export const SEEDFALL_URL = `https://github.com/${OWNER}/seedfall`
 export const ALTERNATIVETO_URL = "https://alternativeto.net/software/gostman/about/?utm_source=badge&utm_medium=referral"
 export const ALTERNATIVETO_BADGE_URL = "https://alternativeto.net/static/badges/badge-wide-dark.svg"
+export const EASYLAUNCH_URL = "https://easylaunch.dev/dev-tools/gostman"
+export const EASYLAUNCH_BADGE_DARK_URL = "https://easylaunch.dev/badge/easylaunch-badge-dark.svg"
 
 const DEFAULT_SITE_URL = "https://gostman.com"
 
