@@ -1,7 +1,7 @@
 import { Heart } from "lucide-react"
 import { BrandIcon } from "../ui/brandIcon"
 import { WEB_APP_URL } from "../../lib/constants"
-import { ALTERNATIVETO_BADGE_URL, ALTERNATIVETO_URL, EASYLAUNCH_BADGE_DARK_URL, EASYLAUNCH_URL, NICKLAUNCHES_BADGE_DARK_URL, NICKLAUNCHES_URL, SPONSOR_URL } from "../../lib/siteLinks"
+import { ALTERNATIVETO_BADGE_URL, ALTERNATIVETO_URL, EASYLAUNCH_BADGE_DARK_URL, EASYLAUNCH_URL, FAZIER_BADGE_DARK_URL, FAZIER_URL, NICKLAUNCHES_BADGE_DARK_URL, NICKLAUNCHES_URL, SPONSOR_URL } from "../../lib/siteLinks"
 import { Brand } from "./Brand"
 import { FOOTER_COLUMNS } from "./footerLinks"
 
@@ -69,6 +69,14 @@ function NickLaunchesBadge() {
   )
 }
 
+function FazierBadge() {
+  return (
+    <a href={FAZIER_URL} target="_blank" rel="noopener" className="inline-block">
+      <img src={FAZIER_BADGE_DARK_URL} alt="Fazier badge" width="237" height="56" loading="lazy" className="h-14 w-[237px] max-w-full" />
+    </a>
+  )
+}
+
 function FooterColumn({ column }) {
   return (
     <nav aria-label={column.title}>
@@ -95,6 +103,7 @@ export function SiteFooter() {
         <div className="flex flex-wrap items-center gap-4">
           <EasyLaunchBadge />
           <NickLaunchesBadge />
+          <FazierBadge />
           <AlternativeToBadge />
         </div>
       </div>

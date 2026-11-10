@@ -17,6 +17,8 @@ export const EASYLAUNCH_URL = "https://easylaunch.dev/dev-tools/gostman"
 export const EASYLAUNCH_BADGE_DARK_URL = "https://easylaunch.dev/badge/easylaunch-badge-dark.svg"
 export const NICKLAUNCHES_URL = "https://nicklaunches.com/products/gostman/"
 export const NICKLAUNCHES_BADGE_DARK_URL = "https://nicklaunches.com/badges/featured-dark.png"
+export const FAZIER_URL = "https://fazier.com/launches/gostman.com"
+export const FAZIER_BADGE_DARK_URL = "https://fazier.com/api/v1//public/badges/launch_badges.svg?badge_type=featured&theme=dark"
 
 const DEFAULT_SITE_URL = "https://gostman.com"
 
