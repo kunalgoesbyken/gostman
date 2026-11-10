@@ -63,7 +63,7 @@ export const EmptyRow = memo(function EmptyRow({ row, dropPlace }) {
   )
 })
 
-export const TreeRow = memo(function TreeRow({ row, search, isActive, isTabStop, focusRequest, isMenuOpen, isMoving, isSelected, dropPlace, onActivate, onPin, onOpenMenu, onPointerDown, onKeyDown, onFocus }) {
+export const TreeRow = memo(function TreeRow({ row, search, isActive, isTabStop, focusRequest, isMenuOpen, isMoving, isSelected, dropPlace, onActivate, onPin, onOpenMenu, onCloseMenu, onPointerDown, onKeyDown, onFocus }) {
   const isFolder = row.kind === ROW_FOLDER
   const item = isFolder ? row.folder : row.request
   const name = item.name || TREE_TEXT.untitled
@@ -79,7 +79,11 @@ export const TreeRow = memo(function TreeRow({ row, search, isActive, isTabStop,
     event.preventDefault()
     onOpenMenu(row, { x: event.clientX, y: event.clientY })
   }
-  const openMenuBelowButton = (event) => {
+  const toggleMenuBelowButton = (event) => {
+    if (isMenuOpen) {
+      onCloseMenu()
+      return
+    }
     const rect = event.currentTarget.getBoundingClientRect()
     onOpenMenu(row, { x: inlineStart(rect), y: rect.bottom })
   }
@@ -140,7 +144,8 @@ export const TreeRow = memo(function TreeRow({ row, search, isActive, isTabStop,
         data-row-action
         tabIndex={-1}
         aria-haspopup="menu"
-        onClick={openMenuBelowButton}
+        aria-expanded={isMenuOpen}
+        onClick={toggleMenuBelowButton}
         className={cn("hover:bg-muted", !isMenuOpen && "opacity-0 focus-visible:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100")}
       />
     </div>

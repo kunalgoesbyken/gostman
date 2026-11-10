@@ -4,6 +4,12 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.17.5] - 2026-11-11
+
+### Fixed
+
+- The workspace switcher, the "⋯" button on collection rows and the Move button of a multi-selection now close their menu when you press them again instead of closing and reopening it (#36).
+
 ## [1.17.4] - 2026-11-11
 
 ### Fixed

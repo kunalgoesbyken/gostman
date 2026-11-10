@@ -4,6 +4,7 @@ import { createPortal } from "react-dom"
 import { SectionLabel } from "./panel"
 import { focusOrigin, returnFocusTo } from "../../lib/panes"
 import { alignInline } from "../../hooks/direction"
+import { isOpenMenuOpener } from "../../lib/menuOpener"
 import { isFocusLost } from "../../lib/rovingFocus"
 import { cn } from "../../lib/utils"
 
@@ -14,8 +15,6 @@ const MAX_INDENT_LEVELS = 8
 
 const FOCUS_STEPS = { ArrowDown: 1, ArrowUp: -1 }
 const CLOSING_KEYS = ["Escape", "Tab"]
-const OPEN_MENU_OPENER = '[aria-haspopup="menu"][aria-expanded="true"]'
-
 function targetIndex(key, current, count) {
   if (key === "Home") return 0
   if (key === "End") return count - 1
@@ -95,7 +94,7 @@ export function ContextMenu({ position, title, items, onClose }) {
 
   useEffect(() => {
     const closeWhenOutside = (event) => {
-      if (menuRef.current.contains(event.target) || event.target.closest(OPEN_MENU_OPENER)) return
+      if (menuRef.current.contains(event.target) || isOpenMenuOpener(event.target)) return
       onClose()
     }
     window.addEventListener("pointerdown", closeWhenOutside)

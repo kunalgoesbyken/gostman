@@ -172,7 +172,6 @@ function OverflowTabsList({ className, label, items, moreLabel, moreHint }) {
           aria-haspopup="menu"
           aria-expanded={menu !== null}
           title={moreHint}
-          onMouseDown={(event) => event.stopPropagation()}
           onClick={toggleMenu}
           className={cn(TRIGGER_CLASS, IDLE_TRIGGER_CLASS)}
         >

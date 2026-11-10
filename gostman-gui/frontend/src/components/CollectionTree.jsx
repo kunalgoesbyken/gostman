@@ -79,11 +79,11 @@ function dropPlaceFor(drop, row) {
 
 const isToggleClick = (event, isPicking) => event.ctrlKey || event.metaKey || (isPicking && !event.shiftKey)
 
-function SelectionBar({ count, onMove, onDelete, onClear }) {
+function SelectionBar({ count, isMenuOpen, onMove, onDelete, onClear }) {
   return (
     <div role="toolbar" aria-label={TREE_TEXT.selectionBar} className="flex h-8 shrink-0 items-center gap-0.5 border-b border-border bg-accent/50 ps-3 pe-1">
       <span role="status" className="min-w-0 flex-1 truncate text-xs font-medium text-foreground">{TREE_TEXT.selectedCount(count)}</span>
-      <IconButton label={TREE_TEXT.moveSelection} icon={FolderInput} onClick={onMove} aria-haspopup="menu" />
+      <IconButton label={TREE_TEXT.moveSelection} icon={FolderInput} onClick={onMove} aria-haspopup="menu" aria-expanded={isMenuOpen} />
       <IconButton label={TREE_TEXT.deleteSelection} icon={Trash2} onClick={onDelete} className="hover:text-destructive" />
       <IconButton label={TREE_TEXT.clearSelection} icon={X} onClick={onClear} />
     </div>
@@ -263,7 +263,7 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
   }, [selected])
   const openSelectionMenu = useCallback((event, view) => {
     const rect = event.currentTarget.getBoundingClientRect()
-    setMenu({ row: null, owner: MENU_OWNER_SELECTION, position: { x: inlineStart(rect), y: rect.bottom }, view })
+    setMenu((current) => (current ? null : { row: null, owner: MENU_OWNER_SELECTION, position: { x: inlineStart(rect), y: rect.bottom }, view }))
   }, [])
   const closeMenu = useCallback(() => setMenu(null), [])
   const closeLabels = useCallback(() => setLabelTarget(null), [])
@@ -416,6 +416,7 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
         onActivate={chooseRow}
         onPin={pinRow}
         onOpenMenu={openMenu}
+        onCloseMenu={closeMenu}
         onPointerDown={startDrag}
         onKeyDown={handleKeyDown}
         onFocus={trackFocus}
@@ -436,6 +437,7 @@ export const CollectionTree = memo(function CollectionTree({ folders, requests, 
       {hasSelection && (
         <SelectionBar
           count={selected.size}
+          isMenuOpen={menu?.row === null}
           onMove={(event) => openSelectionMenu(event, MENU_MOVE)}
           onDelete={() => actions.deleteItems(selectedEntries, clearSelection)}
           onClear={clearSelection}

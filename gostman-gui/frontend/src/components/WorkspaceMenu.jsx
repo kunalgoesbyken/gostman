@@ -5,6 +5,7 @@ import { IconButton } from "./ui/button"
 import { SectionLabel } from "./ui/panel"
 import { alignInline } from "../hooks/direction"
 import { openGit } from "../lib/gitSession"
+import { isOpenMenuOpener } from "../lib/menuOpener"
 import { APP_TEXT } from "../lib/appText"
 import { WORKSPACE_TEXT as TEXT } from "../lib/workspaceText"
 import { cn } from "../lib/utils"
@@ -132,7 +133,8 @@ export function WorkspaceMenu({ anchor, status, storage, isRestricted, onClose }
 
   useEffect(() => {
     const closeWhenOutside = (event) => {
-      if (!menuRef.current.contains(event.target)) onClose()
+      if (menuRef.current.contains(event.target) || isOpenMenuOpener(event.target)) return
+      onClose()
     }
     window.addEventListener("pointerdown", closeWhenOutside)
     window.addEventListener("resize", onClose)

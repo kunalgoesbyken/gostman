@@ -15,7 +15,6 @@ const GitPanel = lazy(() => import("./GitPanel").then((module) => ({ default: mo
 
 const BUTTON_CLASS = "min-w-0 max-w-[14rem] shrink"
 
-const keepMenuOpenState = (event) => event.stopPropagation()
 
 function useGitState(git, path) {
   const requests = useAppStore((s) => s.requests)
@@ -73,7 +72,6 @@ function FolderStorage({ storage }) {
         aria-expanded={isOpen}
         aria-label={APP_TEXT.labelled(TEXT.switcherLabel, hasFolder ? status.name : TEXT.localLabel)}
         title={title}
-        onMouseDown={keepMenuOpenState}
         onClick={() => setOpen(!isOpen)}
         className={BUTTON_CLASS}
       >
