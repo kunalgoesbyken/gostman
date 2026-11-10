@@ -4,6 +4,20 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.17.1] - 2026-11-10
+
+### Added
+
+- Variables: **Open in editor** on every variable value field opens the value in the request body editor in its own window, with `{{`, `{{$` and `faker.` completion, Format and validation for JSON, XML or text, so a large test data template is easy to edit. Edits save as you type, and a hidden secret opens only after **Show value** (#36).
+
+### Changed
+
+- XML: broken XML is underlined while you type, in request and SOAP bodies and in the value editor. XML checks and Format accept `{{placeholders}}` around the document, as tag names and as unquoted attribute values, and Format keeps them as written (#36).
+
+- JSON tree: when Expand all only reopens nodes you closed by hand, the tree stays at its level, Expand all turns off again and the pin is unchanged; after pinning a deeper level under a filter, the full tree no longer offers Collapse to that level when nothing is open beyond it (#21).
+
+- Dialogs: Esc closes one dialog at a time, also while a dialog is still loading.
+
 ## [1.17.0] - 2026-11-10
 
 ### Added
