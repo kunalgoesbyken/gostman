@@ -52,11 +52,11 @@ export function useDismiss(isOpen, close, anchorRef, listRef) {
     const closeWhenOutside = (event) => {
       if (!isInside(event.target)) close()
     }
-    window.addEventListener("mousedown", closeWhenOutside)
+    window.addEventListener("pointerdown", closeWhenOutside)
     window.addEventListener("resize", close)
     window.addEventListener("scroll", closeWhenOutside, true)
     return () => {
-      window.removeEventListener("mousedown", closeWhenOutside)
+      window.removeEventListener("pointerdown", closeWhenOutside)
       window.removeEventListener("resize", close)
       window.removeEventListener("scroll", closeWhenOutside, true)
     }

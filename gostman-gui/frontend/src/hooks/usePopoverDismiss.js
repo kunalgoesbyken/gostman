@@ -11,11 +11,11 @@ export function usePopoverDismiss(popoverRef, buttonRef, onClose) {
       onClose()
       buttonRef.current?.focus()
     }
-    window.addEventListener("mousedown", closeWhenOutside)
+    window.addEventListener("pointerdown", closeWhenOutside)
     window.addEventListener("keydown", closeOnEscape)
     window.addEventListener("resize", onClose)
     return () => {
-      window.removeEventListener("mousedown", closeWhenOutside)
+      window.removeEventListener("pointerdown", closeWhenOutside)
       window.removeEventListener("keydown", closeOnEscape)
       window.removeEventListener("resize", onClose)
     }

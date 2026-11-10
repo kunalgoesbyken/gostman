@@ -4,6 +4,12 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.17.3] - 2026-11-11
+
+### Fixed
+
+- Dropdowns inside movable windows (Code, Environments, Preferences, Run requests and the others): an option can be chosen with a single click again, and an open list closes when you start moving or resizing the window instead of staying behind. Menus and popovers now close on the first press outside them, also when that press starts a drag (#36).
+
 ## [1.17.2] - 2026-11-10
 
 ### Added

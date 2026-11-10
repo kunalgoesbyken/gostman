@@ -96,10 +96,10 @@ export function ContextMenu({ position, title, items, onClose }) {
     const closeWhenOutside = (event) => {
       if (!menuRef.current.contains(event.target)) onClose()
     }
-    window.addEventListener("mousedown", closeWhenOutside)
+    window.addEventListener("pointerdown", closeWhenOutside)
     window.addEventListener("resize", onClose)
     return () => {
-      window.removeEventListener("mousedown", closeWhenOutside)
+      window.removeEventListener("pointerdown", closeWhenOutside)
       window.removeEventListener("resize", onClose)
     }
   }, [onClose])

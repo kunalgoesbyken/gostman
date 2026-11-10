@@ -88,7 +88,9 @@ function resized(rect, edge, delta, viewport, limits) {
   return fitted(next, viewport, limits)
 }
 
-const startsOnControl = (event) => Boolean(event.target.closest(CONTROLS))
+const startsOutsideHeader = (event) => !event.currentTarget.contains(event.target)
+
+const startsOnControl = (event) => startsOutsideHeader(event) || Boolean(event.target.closest(CONTROLS))
 
 const setCursor = (event, cursor) => {
   event.currentTarget.style.cursor = cursor
