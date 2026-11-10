@@ -55,6 +55,9 @@
     "pathMissing": "{{example}} needs a file path between the parentheses",
     "networkPath": "\"{{path}}\" is a network or device path. Files are read only from this computer's drives, so your Windows sign-in is never sent to another computer. Copy the file to this computer or map the share to a drive letter"
   },
+  "variables": {
+    "cannotFill": "{{name}} cannot be filled in: {{detail}}"
+  },
   "attachments": {
     "unavailable": "files attached from disk are sent only by the desktop app",
     "tooLarge": "the attached files are larger than {{size}} GB together",

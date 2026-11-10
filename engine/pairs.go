@@ -3,6 +3,7 @@ package engine
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io"
 	"regexp"
 	"slices"
@@ -91,7 +92,10 @@ const (
 	maxRequestExpansions = 100000
 )
 
-var errOverworked = locales.Errorf(locales.EngineRequestVariablesTooDeep, locales.Params{"example": "{{...}}"})
+var (
+	errOverworked      = locales.Errorf(locales.EngineRequestVariablesTooDeep, locales.Params{"example": "{{...}}"})
+	errEncoderArgument = errors.New("write the name of a variable between the parentheses, as in {{$base64(invoice)}}")
+)
 
 type substitution struct {
 	variables  map[string]string
@@ -196,15 +200,23 @@ func nameOf(match string) string {
 }
 
 func (s *substitution) lookup(match string, readsFiles bool, at slot) (string, bool) {
-	name := nameOf(match)
+	return s.value(nameOf(match), readsFiles, at)
+}
+
+func (s *substitution) value(name string, readsFiles bool, at slot) (string, bool) {
 	if value, ok := s.resolve(name); ok {
 		return value, true
 	}
-	if reference, ok := parseFileReference(name); ok {
-		if !readsFiles {
-			return "", false
+	if invocation, isCall := parseCall(name); isCall {
+		if encode, isEncoder := encoders[invocation.name]; isEncoder {
+			return s.encoded(encode, name, strings.TrimSpace(invocation.argument), readsFiles, at)
 		}
-		return s.file(name, reference)
+		if reference, isFile := fileReferenceOf(invocation); isFile {
+			if !readsFiles {
+				return "", false
+			}
+			return s.file(name, reference)
+		}
 	}
 	if !s.generates {
 		return "", false
@@ -212,24 +224,57 @@ func (s *substitution) lookup(match string, readsFiles bool, at slot) (string, b
 	return s.generate(name, at)
 }
 
+func (s *substitution) encoded(encode func(string) string, name, argument string, readsFiles bool, at slot) (string, bool) {
+	if argument == "" {
+		s.refuse(locales.Wrap(locales.EngineVariablesCannotFill, locales.Params{"name": placeholderOf(name)}, errEncoderArgument))
+		return "", false
+	}
+	value, ok := s.value(argument, readsFiles, at)
+	if !ok {
+		s.noteMissing(argument)
+		return "", false
+	}
+	return encode(value), true
+}
+
 func (s *substitution) generate(name string, at slot) (string, bool) {
 	if value, ok := s.generated[at]; ok {
 		return value, true
 	}
-	value, ok := dynamicValue(name)
-	if ok && at.owner != "" {
+	value, known, err := dynamicValue(name)
+	if err != nil {
+		s.refuse(locales.Wrap(locales.EngineVariablesCannotFill, locales.Params{"name": placeholderOf(name)}, err))
+		return "", false
+	}
+	if known && at.owner != "" {
 		s.generated[at] = value
 	}
-	return value, ok
+	return value, known
+}
+
+func (s *substitution) refuse(err error) {
+	if s.err == nil {
+		s.err = err
+	}
 }
 
 func (s *substitution) file(name string, reference fileReference) (string, bool) {
 	if s.files == nil {
 		return "", false
 	}
-	if value, ok := s.read[name]; ok {
-		return value, true
+	text, ok := s.read[name]
+	if !ok {
+		if text, ok = s.load(name, reference); !ok {
+			return "", false
+		}
 	}
+	if reference.mode != readTemplate {
+		return text, true
+	}
+	return s.nested(name, text)
+}
+
+func (s *substitution) load(name string, reference fileReference) (string, bool) {
 	if s.exceeded || s.err != nil {
 		return "", false
 	}
@@ -243,9 +288,9 @@ func (s *substitution) file(name string, reference fileReference) (string, bool)
 		s.exceeded = true
 		return "", false
 	}
-	value := reference.encode(data)
-	s.read[name] = value
-	return value, true
+	text := reference.encode(data)
+	s.read[name] = text
+	return text, true
 }
 
 func (s *substitution) fill(input string, readsFiles bool, limit int, owner string) (string, bool) {

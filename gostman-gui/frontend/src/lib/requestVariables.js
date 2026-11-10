@@ -1,9 +1,9 @@
 import { exactNumbersIn, isJsonNumber, parseExact } from './exactJson'
 import { formatList } from './i18n/format'
-import { fillPlaceholders, parseVariableMap, placeholderNames } from './placeholders'
+import { fillPlaceholders, parseVariableMap, placeholderNames, placeholderSources } from './placeholders'
 import { REQUEST_VARIABLES_TEXT as TEXT } from './requestVariablesText'
 import { isSentRow, parseRows, serializeRows } from './rows'
-import { isEngineName, isGeneratedName } from './variableNames'
+import { PROMPT_PREFIX, isEngineName, isGeneratedName, isPromptName } from './variableNames'
 
 export const TYPE_NONE = ''
 export const TYPE_STRING = 'string'
@@ -24,6 +24,8 @@ const PROBLEM_INTEGER_COMMA = 'integerComma'
 const PROBLEM_INEXACT = 'inexact'
 const PROBLEM_JSON_INEXACT = 'jsonInexact'
 const PROBLEM_SPACES = 'spaces'
+const PROBLEM_BOOLEAN_CASE = 'booleanCase'
+const PROBLEM_BOOLEAN_EMPTY = 'booleanEmpty'
 
 const CHOICE_SEPARATOR = ','
 const ROW_BASICS = ['key', 'value', 'enabled']
@@ -69,7 +71,11 @@ function readNumber(text, isWhole) {
 
 const isBooleanWord = (text) => text === BOOLEAN_TRUE || text === BOOLEAN_FALSE
 
-const readBoolean = (text) => (isBooleanWord(text) ? accepted(text === BOOLEAN_TRUE) : rejected(TYPE_BOOLEAN))
+function readBoolean(text) {
+  if (isBooleanWord(text)) return accepted(text === BOOLEAN_TRUE)
+  if (text === '') return rejected(PROBLEM_BOOLEAN_EMPTY)
+  return rejected(isBooleanWord(text.toLowerCase()) ? PROBLEM_BOOLEAN_CASE : TYPE_BOOLEAN)
+}
 
 const inexactJsonNumber = (text) => exactNumbersIn(parseExact(text)).find((written) => !isExact(written)) ?? ''
 
@@ -111,9 +117,13 @@ export const sentText = (row) => (typeOf(row) === TYPE_BOOLEAN && valueText(row)
 
 const winnerText = (row, values) => values?.get(row.key) ?? sentText(row)
 
+const answerKey = (name) => PROMPT_PREFIX + name.slice(PROMPT_PREFIX.length).trim()
+
+const valueOf = (values, name) => values.get(isPromptName(name) ? answerKey(name) : name)
+
 const usedText = (row, values) => {
   const winner = winnerText(row, values)
-  return values ? fillPlaceholders(winner, (name) => values.get(name)) : winner
+  return values ? fillPlaceholders(winner, (name) => valueOf(values, name)) : winner
 }
 
 const isUnresolved = (values, name) => values.has(name) && values.get(name) === undefined
@@ -124,7 +134,7 @@ const readUsed = (row, text, values) => (isPending(text, values) ? accepted(text
 
 function requiredText(winner, values) {
   if (!values) return winner
-  return fillPlaceholders(winner, (name) => values.get(name) ?? (isUnresolved(values, name) || isEngineName(name) ? undefined : ''))
+  return fillPlaceholders(winner, (name) => valueOf(values, name) ?? (isUnresolved(values, name) || isEngineName(name) ? undefined : ''))
 }
 
 const isMissing = (row, values) => row.required === true && typeOf(row) !== TYPE_BOOLEAN && isBlank(requiredText(winnerText(row, values), values))
@@ -176,7 +186,7 @@ export function blockedMessage(problems) {
 
 const generatedIn = (text) => placeholderNames(text).filter(isGeneratedName)
 
-const waitsFor = (candidate, keys) => placeholderNames(candidate.written).some((name) => name !== candidate.key && keys.has(name))
+const waitsFor = (candidate, keys) => placeholderSources(candidate.written).some((name) => name !== candidate.key && keys.has(name))
 
 export function generationsFor(rows, values) {
   const candidates = rows
@@ -194,7 +204,9 @@ export function generatedTexts(pending, expanded) {
   return Object.fromEntries(pending.map(({ key, text }) => [key, filled(text)]))
 }
 
-const valuesIn = (known) => parseVariableMap(known) ?? new Map()
+const answeredByName = (values) => new Map([...values, ...Array.from(values, ([name, value]) => [PROMPT_PREFIX + name, value])])
+
+const valuesIn = (known) => answeredByName(parseVariableMap(known) ?? new Map())
 
 export const pendingGenerations = (text, known) => generationsFor(parseRows(text), valuesIn(known))
 

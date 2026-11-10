@@ -23,7 +23,7 @@ import { reconcileTabs } from '../lib/tabReconcile'
 import { isNarrowViewport, rememberSidebarOpen, rememberedSidebarOpen } from '../lib/layout'
 import { reorderTabs, stepTab } from '../lib/tabOrder'
 import { SCOPE_COLLECTION, SCOPE_ENVIRONMENT, SCOPE_GLOBAL, SCOPE_SESSION } from '../lib/scripting/scopes'
-import { promptLayer, resolveLayers, scopeLayers, scriptLayers, variableText, withSecretMarks } from '../lib/variableScopes'
+import { resolveLayers, scopeLayers, scriptLayers, variableText, withSecretMarks } from '../lib/variableScopes'
 import { currentFormValues } from '../lib/variablesForm'
 import { choiceFor, chosenEnvironment, isSameScope, isScoped, variableHolderFor } from '../lib/environmentScope'
 import { isWelcomeDismissed, rememberWelcomeDismissed } from '../lib/welcome'
@@ -45,7 +45,7 @@ const CLOSED_ALERT = { isOpen: false, title: '', message: '', confirmText: '', v
 const CLOSED_CONFIRM = { isOpen: false, title: '', message: '', confirmText: '', variant: 'default', onConfirm: null, onCancel: null, alternative: null }
 const CLOSED_RUNNER = { isOpen: false, folderId: '', isRunning: false, results: [] }
 const CLOSED_DEPENDENCY_GRAPH = { isOpen: false, folderId: '' }
-const CLOSED_VARIABLE_PROMPT = { isOpen: false, names: [], defaults: {}, isForRun: false, resolve: null }
+const CLOSED_VARIABLE_PROMPT = { isOpen: false, names: [], defaults: {}, isForRun: false, problemsOf: () => [], resolve: null }
 const CLOSED_PROMPT = { isOpen: false, title: '', message: '', placeholder: '', defaultValue: '', confirmText: '', onConfirm: null }
 const CLOSED_DELETE_DATA = { isOpen: false, onDelete: null }
 
@@ -701,8 +701,8 @@ export const useAppStore = create(
         openEnvironmentDialog: () => set({ environmentDialogOpen: true, pendingVariable: '' }),
         defineVariable: (name) => set({ environmentDialogOpen: true, pendingVariable: name }),
         closeEnvironmentDialog: () => set({ environmentDialogOpen: false, pendingVariable: '' }),
-        askVariables: (names, defaults, isForRun = false) => new Promise((resolve) => set({
-          variablePrompt: { isOpen: true, names, defaults, isForRun, resolve },
+        askVariables: (names, defaults, isForRun, problemsOf) => new Promise((resolve) => set({
+          variablePrompt: { isOpen: true, names, defaults, isForRun, problemsOf, resolve },
         })),
         answerVariables: (answers) => {
           get().variablePrompt.resolve?.(answers)
@@ -915,9 +915,7 @@ export function selectResolvedVariables(state) {
   return lastResolved
 }
 
-export const variableTextFor = (state, request, answers = {}, referenced = {}) => (
-  variableText(resolveLayers([...scopeLayers(state, request, referenced), promptLayer(answers)]))
-)
+export const variableTextFor = (state, request, referenced = {}) => variableText(resolveLayers(scopeLayers(state, request, referenced)))
 
 export const scriptLayersFor = (state, request, referenced = {}) => scriptLayers(scopeLayers(state, request, referenced))
 

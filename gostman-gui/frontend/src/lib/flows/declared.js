@@ -1,5 +1,5 @@
 import { isPlainObject, parseJSON } from '../dataUtils'
-import { placeholderNames } from '../placeholders'
+import { placeholderSources } from '../placeholders'
 import { isJsonNumber, parseExact, stringifyExact } from '../exactJson'
 import { TYPE_BOOLEAN, TYPE_JSON, TYPE_NUMBER, TYPE_STRING } from '../requestVariables'
 
@@ -57,7 +57,7 @@ export const declaredTypes = (flow) => Object.fromEntries(namedDeclared(flow).ma
 
 export function declarationOrder(declared, isFixed) {
   const waiting = new Map(declared.map((entry) => [entry.name, entry]))
-  const waitsFor = (entry) => !isFixed(entry) && placeholderNames(entry.value).some((name) => name !== entry.name && waiting.has(name))
+  const waitsFor = (entry) => !isFixed(entry) && placeholderSources(entry.value).some((name) => name !== entry.name && waiting.has(name))
   const order = []
   while (waiting.size > 0) {
     const ready = [...waiting.values()].filter((entry) => !waitsFor(entry))

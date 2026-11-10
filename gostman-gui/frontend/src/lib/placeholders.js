@@ -1,3 +1,4 @@
+import { unencodedName } from './callNames'
 import { isPlainObject, parseJSON } from './dataUtils'
 
 const ONE_PLACEHOLDER = /\{\{([^}]+)\}\}/
@@ -45,3 +46,5 @@ export const fillPlaceholders = (text, valueOf) => fill(text, valueOf, [], { spe
 export const substitutePlaceholders = (text, variables) => fillPlaceholders(text, (name) => variables.get(name))
 
 export const placeholderNames = (text) => Array.from(text.matchAll(new RegExp(PLACEHOLDER)), ([, name]) => name.trim())
+
+export const placeholderSources = (text) => placeholderNames(text).map(unencodedName)

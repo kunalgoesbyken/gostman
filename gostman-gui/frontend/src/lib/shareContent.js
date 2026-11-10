@@ -6,7 +6,7 @@ import { activeKindsOf, countActiveRequests, exportToGostman, fileReadPathsOf, p
 import { ShareError } from './share'
 import { warningsIn } from './importRemarks'
 import { SCRIPT_FIELDS } from './activeContent'
-import { placeholderNames } from './placeholders'
+import { placeholderSources } from './placeholders'
 import { environmentChain, environmentEntries, usedVariableNames, withEntries } from './variableScopes'
 import { environmentsForShare, foldersForShare, isScoped, ownsCollectionVariables } from './environmentScope'
 
@@ -75,7 +75,7 @@ function referencedNames(selected, entries) {
   entries.filter(({ name }) => quotedIn(scripts, name)).forEach(({ name }) => names.add(name))
   for (let size = 0; size !== names.size;) {
     size = names.size
-    entries.filter(({ name }) => names.has(name)).flatMap(({ value }) => placeholderNames(String(value))).forEach((name) => names.add(name))
+    entries.filter(({ name }) => names.has(name)).flatMap(({ value }) => placeholderSources(String(value))).forEach((name) => names.add(name))
   }
   return names
 }

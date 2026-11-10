@@ -15,6 +15,8 @@
       "number": "{{name}} must be a number.",
       "integer": "{{name}} must be a whole number.",
       "boolean": "{{name}} must be true or false.",
+      "booleanCase": "{{name}} must be true or false in lowercase. TRUE and True are not accepted.",
+      "booleanEmpty": "{{name}} is empty. It must be true or false.",
       "json": "{{name}} must be valid JSON.",
       "enum": "{{name}} must be one of {{choices}}.",
       "numberComma": "{{name}} must be a number with a dot for decimals and no thousands separator, such as 1.5 or 1500.",

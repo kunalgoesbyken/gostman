@@ -64,6 +64,7 @@ export const FEATURES = [
   { id: 'scopes', group: 'variables', docs: 'variables#scopes-and-precedence', action: { type: 'tab', id: 'vars' }, icon: 'layers', empty: ['tab:vars'], landing: { group: 'variables', order: 1 } },
   { id: 'inherited-variables', group: 'variables', since: '1.12.0', docs: 'requests-and-responses#vars', action: { type: 'tab', id: 'vars' }, icon: 'layers' },
   { id: 'typed-variables', group: 'variables', since: '1.12.0', docs: 'variables#typed-request-variables', action: { type: 'tab', id: 'vars' }, icon: 'binary' },
+  { id: 'test-data-templates', group: 'variables', since: '1.17.0', docs: 'variables#templates-and-encoding', action: { type: 'tab', id: 'vars' }, icon: 'file-code' },
   { id: 'variables-view', group: 'requests', since: '1.12.0', docs: 'requests-and-responses#variables-view', action: { type: 'tab', id: 'vars' }, icon: 'sliders-horizontal' },
   { id: 'json-tree-depth', group: 'requests', since: '1.12.0', docs: 'requests-and-responses#expanding-the-json-tree', action: { type: 'sample', id: 'send' }, icon: 'braces' },
   { id: 'secrets', group: 'variables', docs: 'variables#secret-variables', action: { type: 'dialog', id: 'environments' }, icon: 'lock' },

@@ -14,7 +14,7 @@ import { Select } from "./ui/select"
 import { isBlankRow, isSentRow, rowName, serializeRows } from "../lib/rows"
 import { updatePreferences, usePreferences } from "../lib/preferences"
 import { BOOLEAN_FALSE, BOOLEAN_TRUE, PROBLEM_REQUIRED, TYPE_BOOLEAN, TYPE_ENUM, TYPE_NONE, VARIABLE_TYPES, keepRowSettings, problemOf, problemText, typeOf, typedValue, usesCheckbox } from "../lib/requestVariables"
-import { isFormField, isShownDespiteHidden, problemNames, sentProblems } from "../lib/variablesForm"
+import { hiddenNamesShown, isFormField, isShownDespiteHidden } from "../lib/variablesForm"
 import { KEY_VALUE_TEXT } from "../lib/keyValueText"
 import { REQUEST_TABS_TEXT } from "../lib/requestTabsText"
 import { REQUEST_VARIABLES_TEXT } from "../lib/requestVariablesText"
@@ -159,7 +159,7 @@ function Table({ rows, onChange }) {
   const [openAt, setOpenAt] = useState(NONE_OPEN)
   const sessionVariables = useAppStore((state) => state.sessionVariables)
   const resolved = useAppStore(selectResolvedVariables)
-  const shownNames = useMemo(() => problemNames(sentProblems({ vars: serializeRows(rows) }, resolved)), [rows, resolved])
+  const shownNames = useMemo(() => hiddenNamesShown({ vars: serializeRows(rows) }, resolved), [rows, resolved])
   const shown = [...rows, draftRow()]
   const commit = (next) => onChange(next.filter((row) => !isEmptyRow(row)))
   const replaceRow = (index, patch) => commit(shown.map((row, at) => (at === index ? { ...row, ...patch } : row)))

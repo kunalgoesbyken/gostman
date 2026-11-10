@@ -2,7 +2,7 @@ import { parseExtractors } from '../chaining'
 import { isPlainObject, parseJSON } from '../dataUtils'
 import { compareText } from '../i18n/format'
 import { environmentEntries } from '../variableScopes'
-import { placeholderNames } from '../placeholders'
+import { placeholderSources } from '../placeholders'
 import { PROCESS_PREFIX } from '../scripting/scopes'
 import { isDynamicName, isPromptName } from '../variableNames'
 import { CALL_READ, CALL_WRITE, scriptCalls } from './scriptCalls'
@@ -24,7 +24,7 @@ const namesOf = (calls, kind) => calls.filter((call) => call.kind === kind).map(
 
 const extractedNames = (request) => parseExtractors(request.extractors).filter((rule) => rule.enabled && rule.name !== '').map((rule) => rule.name)
 
-const placeholderReads = (request) => [...READ_FIELDS.map((field) => request[field] || ''), textOf(request.auth)].flatMap(placeholderNames)
+const placeholderReads = (request) => [...READ_FIELDS.map((field) => request[field] || ''), textOf(request.auth)].flatMap(placeholderSources)
 
 const ownNames = (request) => {
   const own = parseJSON(request.vars || '{}', {})

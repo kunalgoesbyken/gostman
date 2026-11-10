@@ -28,8 +28,10 @@ func buildGenerators() map[string]func() string {
 		"$uuid":                newGUID,
 		"$timestamp":           func() string { return strconv.FormatInt(time.Now().Unix(), 10) },
 		"$timestampMs":         func() string { return strconv.FormatInt(time.Now().UnixMilli(), 10) },
-		"$isoTimestamp":        func() string { return time.Now().UTC().Format(isoLayout) },
+		"$uuidV4":              newGUID,
+		"$uuidV7":              newUUIDv7,
 		"$randomInt":           func() string { return strconv.Itoa(rand.IntN(defaultRandomLimit + 1)) },
+		"$randomFloat":         func() string { return randomFloatBetween(0, defaultRandomLimit, defaultFloatDecimals) },
 		"$randomBoolean":       func() string { return strconv.FormatBool(rand.IntN(2) == 1) },
 		"$randomHex":           func() string { return randomFrom(hexDigits, 16) },
 		"$randomAlphaNumeric":  func() string { return randomFrom(alphaNumerics, 12) },
@@ -100,11 +102,6 @@ func buildGenerators() map[string]func() string {
 		"$randomDatabaseType":          func() string { return pick(databaseTypes) },
 		"$randomDatabaseCollation":     func() string { return pick(databaseCollations) },
 		"$randomDatabaseEngine":        func() string { return pick(databaseEngines) },
-		"$randomDateFuture":            func() string { return shiftedTime(year) },
-		"$randomDatePast":              func() string { return shiftedTime(-year) },
-		"$randomDateRecent":            func() string { return shiftedTime(-day) },
-		"$randomDateSoon":              func() string { return shiftedTime(day) },
-		"$randomBirthdate":             randomBirthdate,
 		"$randomWeekday":               func() string { return time.Weekday(rand.IntN(7)).String() },
 		"$randomMonth":                 func() string { return time.Month(1 + rand.IntN(12)).String() },
 		"$randomDomainName":            randomDomainName,
@@ -143,6 +140,9 @@ func buildGenerators() map[string]func() string {
 		"$randomLoremSlug":             func() string { return strings.Join(strings.Fields(wordsFrom(loremWords, 3)), "-") },
 		"$randomLoremLines":            func() string { return loremSentences(1 + rand.IntN(5)) },
 	}
+	for name, source := range moments {
+		generators[name] = source.plain
+	}
 	for _, category := range imageCategories {
 		generators["$random"+strings.ToUpper(category[:1])+category[1:]+"Image"] = func() string { return imageURL(category) }
 	}
@@ -168,27 +168,6 @@ func phoneDigits(length int) string {
 
 func coordinate(limit int) string {
 	return strconv.FormatFloat((rand.Float64()*2-1)*float64(limit), 'f', 4, 64)
-}
-
-func shiftedTime(span time.Duration) string {
-	offset := time.Duration(rand.Int64N(int64(absDuration(span)))) + time.Second
-	if span < 0 {
-		offset = -offset
-	}
-	return time.Now().UTC().Add(offset).Format(isoLayout)
-}
-
-func absDuration(span time.Duration) time.Duration {
-	if span < 0 {
-		return -span
-	}
-	return span
-}
-
-func randomBirthdate() string {
-	age := 18 + rand.IntN(63)
-	born := time.Now().UTC().AddDate(-age, 0, -rand.IntN(365))
-	return born.Format(dateLayout)
 }
 
 func randomIPv6() string {

@@ -14,6 +14,8 @@
   "request.urlInvalidMissing": "{{reason}} is a sentence saying which variables are not defined.",
   "request.headersInvalid": "{{detail}} is the technical reason, in English, from the JSON parser.",
   "files": "Errors about the file functions that read a file into a request. {{example}} is the literal text of the function, with double braces.",
+  "variables": "Errors about dynamic variables and functions that are written with arguments.",
+  "variables.cannotFill": "{{name}} is the literal text of the variable or function with double braces, for example {{$randomInt(5)}}. {{detail}} is the reason in English, which says how to write it.",
   "attachments": "Errors about files attached to a request body from disk.",
   "proxy": "Errors in the proxy address of the network settings.",
   "curl": "Errors shown when a curl command pasted into the request bar or imported cannot be read. Option names such as --url and curl itself stay as written.",

@@ -818,6 +818,8 @@ export function rememberedLanguage() {
 
 export const rememberLanguage = (id) => writeStored(LANGUAGE_KEY, id)
 
+export const BODY_SNIPPET_ID = 'body'
+
 export function generateAllSnippets(prepared) {
   const headers = prepared.headers || []
   const upload = uploadOf(prepared)
@@ -829,5 +831,6 @@ export function generateAllSnippets(prepared) {
     body: upload.file || upload.parts ? '' : prepared.body || '',
     ...upload,
   }
-  return Object.fromEntries(SNIPPET_LANGUAGES.map(({ id, generate }) => [id, isSafeRequest(request) ? generate(request) : UNSAFE_REQUEST_SNIPPET]))
+  const snippets = Object.fromEntries(SNIPPET_LANGUAGES.map(({ id, generate }) => [id, isSafeRequest(request) ? generate(request) : UNSAFE_REQUEST_SNIPPET]))
+  return { ...snippets, [BODY_SNIPPET_ID]: request.body }
 }

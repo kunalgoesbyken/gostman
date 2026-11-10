@@ -517,7 +517,7 @@ export function LoadedWorkspace({ backend, onBack }) {
 
       <Suspense fallback={<DialogPending />}>
         {codeDialogOpen && codeSnippets && (
-          <CodeSnippetDialog snippets={codeSnippets} onClose={closeCodeDialog} />
+          <CodeSnippetDialog snippets={codeSnippets} onSaveFile={actions.saveTextFile} onClose={closeCodeDialog} />
         )}
         {importDialogOpen && (
           <ImportExportDialog

@@ -13,6 +13,14 @@
       "description": "Random UUID v4"
     },
     {
+      "name": "$uuidV4",
+      "description": "Random UUID v4"
+    },
+    {
+      "name": "$uuidV7",
+      "description": "Random UUID v7, which begins with the time and sorts by creation"
+    },
+    {
       "name": "$timestamp",
       "description": "Unix time in seconds"
     },
@@ -25,12 +33,40 @@
       "description": "Current UTC time, ISO 8601"
     },
     {
+      "name": "$isoTimestamp(HH:mm:ss)",
+      "description": "Current UTC time in a pattern you write, such as HH:mm:ss"
+    },
+    {
+      "name": "$date",
+      "description": "Current UTC date, YYYY-MM-DD"
+    },
+    {
+      "name": "$date(dd/MM/yyyy)",
+      "description": "Current UTC date in a pattern you write, such as dd/MM/yyyy or EEEE d MMMM yyyy"
+    },
+    {
+      "name": "$date(+7d,dd/MM/yyyy)",
+      "description": "Date shifted by +7d or -1M (s, m, h, d, w, M, y) in a pattern you write"
+    },
+    {
       "name": "$randomInt",
       "description": "Integer from 0 to 1000"
     },
     {
       "name": "$randomInt(min,max)",
       "description": "Integer from min to max"
+    },
+    {
+      "name": "$randomFloat",
+      "description": "Number from 0 to 1000 with 2 decimals"
+    },
+    {
+      "name": "$randomFloat(min,max)",
+      "description": "Number from min to max with 2 decimals"
+    },
+    {
+      "name": "$randomFloat(min,max,decimals)",
+      "description": "Number from min to max with the decimals you give, 0 to 15"
     },
     {
       "name": "$randomBoolean",
@@ -345,20 +381,40 @@
       "description": "UTC time in the next year, ISO 8601"
     },
     {
+      "name": "$randomDateFuture(dd/MM/yyyy)",
+      "description": "UTC time in the next year in a pattern you write, such as dd/MM/yyyy"
+    },
+    {
       "name": "$randomDatePast",
       "description": "UTC time in the past year, ISO 8601"
+    },
+    {
+      "name": "$randomDatePast(dd/MM/yyyy)",
+      "description": "UTC time in the past year in a pattern you write, such as dd/MM/yyyy"
     },
     {
       "name": "$randomDateRecent",
       "description": "UTC time in the past day, ISO 8601"
     },
     {
+      "name": "$randomDateRecent(dd/MM/yyyy)",
+      "description": "UTC time in the past day in a pattern you write, such as dd/MM/yyyy"
+    },
+    {
       "name": "$randomDateSoon",
       "description": "UTC time in the next day, ISO 8601"
     },
     {
+      "name": "$randomDateSoon(dd/MM/yyyy)",
+      "description": "UTC time in the next day in a pattern you write, such as dd/MM/yyyy"
+    },
+    {
       "name": "$randomBirthdate",
       "description": "Date of birth for an adult, YYYY-MM-DD"
+    },
+    {
+      "name": "$randomBirthdate(dd/MM/yyyy)",
+      "description": "Date of birth for an adult in a pattern you write, such as dd/MM/yyyy"
     },
     {
       "name": "$randomWeekday",
@@ -523,6 +579,26 @@
     {
       "name": "$fileBase64(path)",
       "description": "A file as base64, read when the request is sent (desktop app and CLI)"
+    },
+    {
+      "name": "$template(path)",
+      "description": "A template file with its variables and generated values filled in, read when the request is sent (desktop app and CLI)"
+    },
+    {
+      "name": "$base64(variable)",
+      "description": "The value of a variable, with everything inside it filled in, as base64"
+    },
+    {
+      "name": "$base64Url(variable)",
+      "description": "The value of a variable, with everything inside it filled in, as base64url without padding"
+    },
+    {
+      "name": "$urlEncode(variable)",
+      "description": "The value of a variable, with everything inside it filled in, percent-encoded for a URL"
+    },
+    {
+      "name": "$base64($template(path))",
+      "description": "A template file filled in and encoded as base64, read when the request is sent (desktop app and CLI)"
     }
   ],
   "fakerAliases": {
@@ -530,6 +606,7 @@
     "$faker.string.alphanumeric": "$randomAlphaNumeric",
     "$faker.string.hexadecimal": "$randomHex",
     "$faker.number.int": "$randomInt",
+    "$faker.number.float": "$randomFloat",
     "$faker.datatype.boolean": "$randomBoolean",
     "$faker.color.human": "$randomColorName",
     "$faker.color.rgb": "$randomHexColor",
@@ -611,6 +688,7 @@
     "$faker.date.recent": "$randomDateRecent",
     "$faker.date.soon": "$randomDateSoon",
     "$faker.date.birthdate": "$randomBirthdate",
+    "$faker.date.now": "$date",
     "$faker.date.month": "$randomMonth",
     "$faker.date.weekday": "$randomWeekday",
     "$faker.commerce.price": "$randomPrice",

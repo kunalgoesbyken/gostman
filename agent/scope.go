@@ -113,7 +113,7 @@ func sentTexts(request workspace.Request, chain []workspace.Settings, auth engin
 func variablesIn(text string) []string {
 	var names []string
 	for _, span := range engine.PlaceholderSpans(text) {
-		name := strings.TrimSpace(text[span[0]+2 : span[1]-2])
+		name := engine.UnencodedName(strings.TrimSpace(text[span[0]+2 : span[1]-2]))
 		if asked, prompted := engine.PromptName(name); prompted {
 			name = asked
 		}

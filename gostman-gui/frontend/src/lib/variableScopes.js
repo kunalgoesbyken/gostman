@@ -1,10 +1,10 @@
 import { isPlainObject, parseJSON } from './dataUtils'
-import { placeholderNames } from './placeholders'
+import { placeholderSources } from './placeholders'
 import { declaredValues, isTyped, sentText } from './requestVariables'
 import { isSentRow, parseRows } from './rows'
 import { connectionDirectory } from './secretOrigins'
 import { chosenEnvironment, variableHolders } from './environmentScope'
-import { PROCESS_PREFIX, PROMPT_PREFIX } from './variableNames'
+import { PROCESS_PREFIX, PROMPT_PREFIX, isPromptName } from './variableNames'
 
 import { SCOPE_COLLECTION, SCOPE_ENVIRONMENT, SCOPE_GLOBAL, SCOPE_SESSION } from './scripting/scopes'
 
@@ -172,6 +172,7 @@ export function scopeLayers(state, request, referenced = {}) {
     sessionLayer(state.sessionVariables),
     ...(request?.flowGiven ? [sessionLayer(request.flowGiven)] : []),
     ...(Array.isArray(request?.formGiven) ? [givenLayer(rows, request.formGiven)] : []),
+    ...(request?.promptGiven ? [promptLayer(request.promptGiven)] : []),
   ])
 }
 
@@ -186,7 +187,7 @@ export function resolveLayers(layers) {
 }
 
 const scriptValues = (resolved) => (
-  Object.fromEntries(Array.from(resolved, ([name, { typed }]) => [name, typed]))
+  Object.fromEntries(Array.from(resolved).filter(([name]) => !isPromptName(name)).map(([name, { typed }]) => [name, typed]))
 )
 
 const SCRIPT_SCOPES = { global: SCOPE_GLOBAL, collection: SCOPE_COLLECTION, environment: SCOPE_ENVIRONMENT, session: SCOPE_SESSION }
@@ -230,14 +231,14 @@ export function promptNames(request) {
   return Array.from(names).filter((name) => name !== '')
 }
 
-export const promptLayer = (answers) => ({
+const promptLayer = (answers) => ({
   source: 'request',
   entries: Object.entries(answers).map(([name, value]) => ({ name: PROMPT_PREFIX + name, value })),
 })
 
 const withoutPromptPrefix = (name) => (name.startsWith(PROMPT_PREFIX) ? name.slice(PROMPT_PREFIX.length).trim() : name)
 
-export const usedVariableNames = (value) => new Set(collectStrings(value, []).flatMap(placeholderNames).map(withoutPromptPrefix))
+export const usedVariableNames = (value) => new Set(collectStrings(value, []).flatMap(placeholderSources).map(withoutPromptPrefix))
 
 export function referenceTargets(state, request, used) {
   const resolved = resolveLayers(scopeLayers(state, request))

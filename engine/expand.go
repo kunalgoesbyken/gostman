@@ -1,11 +1,8 @@
 package engine
 
 import (
-	cryptorand "crypto/rand"
-	"fmt"
 	"math/rand/v2"
 	"net/url"
-	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -21,8 +18,6 @@ const (
 	hexDigits          = "0123456789abcdef"
 	alphaNumerics      = "abcdefghijklmnopqrstuvwxyz0123456789"
 )
-
-var randomIntRangeRe = regexp.MustCompile(`^\$randomInt\(\s*(-?\d+)\s*,\s*(-?\d+)\s*\)$`)
 
 type Expansion struct {
 	substitution *substitution
@@ -122,44 +117,22 @@ func randomEmail() string {
 	return strings.ToLower(pick(firstNames)) + "." + strings.ToLower(pick(lastNames)) + strconv.Itoa(rand.IntN(1000)) + "@" + pick(mailHosts)
 }
 
-func newGUID() string {
-	var raw [16]byte
-	if _, err := cryptorand.Read(raw[:]); err != nil {
-		for i := range raw {
-			raw[i] = byte(rand.IntN(256))
-		}
-	}
-	raw[6] = raw[6]&0x0f | 0x40
-	raw[8] = raw[8]&0x3f | 0x80
-	return fmt.Sprintf("%x-%x-%x-%x-%x", raw[0:4], raw[4:6], raw[6:8], raw[8:10], raw[10:])
-}
-
-func randomIntBetween(low, high int64) (string, bool) {
-	if low > high {
-		low, high = high, low
-	}
-	span := high - low + 1
-	if span <= 0 || span > maxRandomIntSpan {
-		return "", false
-	}
-	return strconv.FormatInt(low+rand.Int64N(span), 10), true
-}
-
 func IsDynamicVariable(name string) bool {
-	_, ok := generatorOf(name)
-	return ok || randomIntRangeRe.MatchString(name)
+	_, known, err := dynamicValue(name)
+	return known && err == nil
 }
 
-func dynamicValue(name string) (string, bool) {
-	if generate, ok := generatorOf(name); ok {
-		return generate(), true
-	}
-	if found := randomIntRangeRe.FindStringSubmatch(name); found != nil {
-		low, lowErr := strconv.ParseInt(found[1], 10, 64)
-		high, highErr := strconv.ParseInt(found[2], 10, 64)
-		if lowErr == nil && highErr == nil {
-			return randomIntBetween(low, high)
+func dynamicValue(name string) (string, bool, error) {
+	if invocation, isCall := parseCall(name); isCall {
+		generate, known := calledGenerators[builtIns.canonical(invocation.name)]
+		if !known {
+			return "", false, nil
 		}
+		value, err := generate(invocation.argument)
+		return value, true, err
 	}
-	return "", false
+	if generate, known := generatorOf(name); known {
+		return generate(), true, nil
+	}
+	return "", false, nil
 }

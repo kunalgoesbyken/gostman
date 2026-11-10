@@ -4,6 +4,7 @@ import { Button, IconButton } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
 import { InfoTip } from "./ui/infoTip"
 import { Input } from "./ui/input"
+import { Textarea } from "./ui/textarea"
 import { Notice, SectionLabel } from "./ui/panel"
 import { BLANK_REFERENCE, ReferenceFields } from "./SecretReferenceFields"
 import { useSecretConnections } from "../hooks/useSecretConnections"
@@ -15,6 +16,8 @@ import { cn } from "../lib/utils"
 
 const COLUMNS = "grid grid-cols-[1.5rem_minmax(0,1fr)_minmax(0,1.5fr)_1.5rem_1.5rem_1.5rem] items-center gap-x-2 px-3"
 const REFERENCE_COLUMNS = "grid grid-cols-[1.5rem_minmax(0,1fr)_minmax(0,1.5fr)_1.5rem_1.5rem_1.5rem_1.5rem] items-center gap-x-2 px-3"
+const NEWLINE = "\n"
+const MULTILINE_ROWS = 6
 const BLANK_ROW = { name: "", value: "", secret: false, enabled: true }
 
 const matches = (row, needle) => (
@@ -60,20 +63,62 @@ function NameField({ row, isDraft, features, autoFocus, inputRef, onChange }) {
   )
 }
 
+const lineCount = (row) => asText(row.value).split(NEWLINE).length
+
+const showsLines = (row, isRevealed) => lineCount(row) > 1 && (!row.secret || isRevealed)
+
+function MultilineValue({ text, autoFocus, onBlur, onChange }) {
+  const field = useRef(null)
+  useEffect(() => {
+    if (!autoFocus) return
+    field.current.focus()
+    field.current.setSelectionRange(text.length, text.length)
+  }, [autoFocus])
+  return (
+    <Textarea
+      ref={field}
+      rows={Math.min(text.split(NEWLINE).length, MULTILINE_ROWS)}
+      value={text}
+      placeholder={TEXT.value}
+      aria-label={TEXT.value}
+      dir="ltr"
+      onChange={(event) => onChange({ value: event.target.value })}
+      onBlur={onBlur}
+    />
+  )
+}
+
 function ValueField({ row, isRevealed, readOnly, autoFocus, onBlur, onChange }) {
+  const addedLine = useRef(false)
+  const [isGrown, setIsGrown] = useState(false)
   const isHidden = row.secret && !isRevealed
-  if (readOnly) return <ReadOnlyText text={isHidden ? TEXT.hiddenValue : asText(row.value)} label={TEXT.value} />
+  const text = asText(row.value)
+  const hasLines = text.includes(NEWLINE)
+  useEffect(() => {
+    if (hasLines) setIsGrown(true)
+  }, [hasLines])
+  if (readOnly || (isHidden && hasLines)) return <ReadOnlyText text={isHidden ? TEXT.hiddenValue : text} label={TEXT.value} />
+  if (!isHidden && (hasLines || isGrown)) return <MultilineValue text={text} autoFocus={addedLine.current} onBlur={onBlur} onChange={onChange} />
+  const addLine = (event) => {
+    if (event.key !== "Enter" || !event.shiftKey || isHidden || row.name.trim() === "") return
+    event.preventDefault()
+    addedLine.current = true
+    setIsGrown(true)
+    onChange({ value: text + NEWLINE })
+  }
   return (
     <Input
       type={isHidden ? "password" : "text"}
-      value={asText(row.value)}
+      value={text}
       autoFocus={autoFocus}
       placeholder={TEXT.value}
+      title={TEXT.valueLines}
       aria-label={TEXT.value}
       dir="ltr"
       autoComplete="off"
       spellCheck={false}
       onChange={(event) => onChange({ value: event.target.value })}
+      onKeyDown={addLine}
       onBlur={onBlur}
       className="font-mono"
     />
@@ -94,12 +139,13 @@ function RowCells({ row, isDraft, isRevealed, focusField, features, references, 
   const canReveal = row.secret
   const toggleReference = () => onChange(row.ref ? { ref: undefined } : { ref: { ...BLANK_REFERENCE, provider: references.connections[0]?.alias ?? "" }, value: "", secret: false })
   const rowRef = useRef(null)
+  const isTall = !row.ref && showsLines(row, isRevealed)
   const nameRef = useRef(null)
   const askForName = (event) => {
     if (!isDraft && isUnnamed(row) && rowRef.current?.contains(event.relatedTarget)) nameRef.current?.focus()
   }
   return (
-    <div ref={rowRef} className={cn(references ? REFERENCE_COLUMNS : COLUMNS, "h-9")}>
+    <div ref={rowRef} className={cn(references ? REFERENCE_COLUMNS : COLUMNS, isTall ? "items-start py-1" : "h-9")}>
       {features.enabled ? (
         <Checkbox
           label={TEXT.enabled}

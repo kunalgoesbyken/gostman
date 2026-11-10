@@ -48,11 +48,20 @@ func JoinUnresolved(lists ...[]string) []string {
 	return joined
 }
 
-func NotDefined(names []string) string {
+func placeholderOf(name string) string {
+	return "{{" + name + "}}"
+}
+
+func placeholdersOf(names []string) []string {
 	placeholders := make([]string, len(names))
 	for i, name := range names {
-		placeholders[i] = "{{" + name + "}}"
+		placeholders[i] = placeholderOf(name)
 	}
+	return placeholders
+}
+
+func NotDefined(names []string) string {
+	placeholders := placeholdersOf(names)
 	switch last := len(placeholders) - 1; {
 	case last < 0:
 		return ""
@@ -64,9 +73,5 @@ func NotDefined(names []string) string {
 }
 
 func notDefinedMessage(names []string) locales.Message {
-	placeholders := make([]string, len(names))
-	for i, name := range names {
-		placeholders[i] = "{{" + name + "}}"
-	}
-	return locales.New(locales.EngineRequestNotDefined, locales.Params{"names": placeholders, "count": len(names)})
+	return locales.New(locales.EngineRequestNotDefined, locales.Params{"names": placeholdersOf(names), "count": len(names)})
 }

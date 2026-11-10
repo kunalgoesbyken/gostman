@@ -56,7 +56,7 @@ func isParameterName(name string) bool {
 func placeholderNames(text string) []string {
 	var names []string
 	for _, span := range engine.PlaceholderSpans(text) {
-		name := strings.TrimSpace(text[span[0]+2 : span[1]-2])
+		name := engine.UnencodedName(strings.TrimSpace(text[span[0]+2 : span[1]-2]))
 		if _, prompted := engine.PromptName(name); prompted || strings.HasPrefix(name, dynamicPrefix) {
 			continue
 		}

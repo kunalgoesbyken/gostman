@@ -28,6 +28,7 @@
     "search": "Filter variables",
     "variable": "Variable",
     "value": "Value",
+    "valueLines": "Press Shift+Enter to add a line, for a JSON or XML document",
     "add": "Add variable",
     "enabled": "Use this variable",
     "secret": "Mark as secret",

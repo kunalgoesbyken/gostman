@@ -34,19 +34,19 @@ Every variable is text unless you give it a type. In the **Vars** tab of a reque
 
 ![The Vars tab with a whole number, a true or false and a one of a list variable](../screenshots/variables-typed.png)
 
-`env.get("count")`, `pm.variables.get("count")` and `bru.getVar("count")` return the typed value, in the apps and in the CLI. The type never changes what is sent: `{{count}}` in a URL, header or body is filled in with the text exactly as you wrote it, so `1.50` and `2e3` are sent as written. Only an empty True or false is sent as `false`, the value its unticked box shows. Because the text is used as written, it is never trimmed or case-folded: spaces before or after a Number, Whole number, True or false or choice, and `TRUE` or `True` for True or false, are refused, so that a field shows exactly what is sent and the script and the request receive the same value. Spaces around a JSON value are part of its formatting and are kept.
+`env.get("count")`, `pm.variables.get("count")`, `insomnia.variables.get("count")` and `bru.getRequestVar("count")` return the typed value, in the apps and in the CLI. `bru.getVar` reads session values only, as it does in Bruno, where request variables are read with `getRequestVar`; a session value that replaces a typed variable is typed too. The type never changes what is sent: `{{count}}` in a URL, header or body is filled in with the text exactly as you wrote it, so `1.50` and `2e3` are sent as written. Only an empty True or false is sent as `false`, the value its unticked box shows. Because the text is used as written, it is never trimmed or case-folded: spaces before or after a Number, Whole number, True or false or choice, and `TRUE` or `True` for True or false, are refused, so that a field shows exactly what is sent and the script and the request receive the same value. Spaces around a JSON value are part of its formatting and are kept.
 
 Any and Text behave the same: the value reaches scripts as text. Any means that no type was chosen, Text says that the value is meant as text.
 
 Numbers are never guessed. A leading `+`, a leading zero such as `007`, `0x1F`, `.5`, spaces inside the number and a decimal comma are refused: `1,5` is `1.5` in some languages and `1,500` is fifteen hundred in others, so write `1.5` or `1500`. A number that a script cannot hold exactly is refused too rather than rounded: a whole number beyond 9007199254740991 (`2^53 - 1`), a number with more significant digits than a double keeps, or such a number inside a JSON value. Use Text for codes, long IDs and account numbers, or put them in quotes inside JSON.
 
-A typed value may refer to other variables, such as `{{base}}`, and to [dynamic variables](#dynamic-variables) such as `{{$randomInt}}`, `{{$timestamp}}` or `{{$randomBoolean}}`, also inside JSON. The field shows what you wrote, the references are filled in when the request is sent, and the type applies to the result: a script gets `1.5` for a Number whose value is `{{base}}` when `base` is `1.5`, and the send stops with a message naming the variable when the result does not match its type. A typed variable that holds a dynamic variable is generated once per send, and that one value goes to the script and into the request, so `env.get("ts")` and `{{ts}}` agree. A typed variable that refers to another typed variable gets that variable's value: with `n` set to `{{$randomInt}}` and `m` set to `{{n}}`, both are the same number. A variable of type Any or Text keeps the usual rule: the text is passed on as written, and each `{{$...}}` in it is generated where it is filled into the request. Dynamic variables are filled in for values written in the Vars tab or the Variables view; a session value that holds one is passed on as it is. A [prompt variable](#prompt-variables) such as `{{?page}}` or a `{{$file(...)}}` in a typed value is filled in when the request is sent, after the check, so the type is not enforced on it and scripts see it as written.
+A typed value may refer to other variables, such as `{{base}}`, and to [dynamic variables](#dynamic-variables) such as `{{$randomInt}}`, `{{$timestamp}}` or `{{$randomBoolean}}`, also inside JSON. The field shows what you wrote, the references are filled in when the request is sent, and the type applies to the result: a script gets `1.5` for a Number whose value is `{{base}}` when `base` is `1.5`, and the send stops with a message naming the variable when the result does not match its type. A typed variable that holds a dynamic variable is generated once per send, and that one value goes to the script and into the request, so `env.get("ts")` and `{{ts}}` agree. A typed variable that refers to another typed variable gets that variable's value: with `n` set to `{{$randomInt}}` and `m` set to `{{n}}`, both are the same number. A variable of type Any or Text keeps the usual rule: the text is passed on as written, and each `{{$...}}` in it is generated where it is filled into the request. Dynamic variables are filled in for values written in the Vars tab or the Variables view; a session value that holds one is passed on as it is. The answer to a [prompt variable](#prompt-variables) in a typed value, such as `{{?page}}`, is a value like any other: it is asked for before the pre-request script, the type applies to it, and the script gets it as the declared type. A `{{$file(...)}}` in a typed value is filled in when the request is sent, after the check, so the type is not enforced on it and scripts see it as written.
 
 The type applies to the value that is used, wherever it comes from. A session value (an Extract rule or a script that wrote the name), a `--var`, a data file row or a flow value that replaces a typed variable is read with the same type: `42` from a response reaches a Whole number as the number `42`, `{"a":1}` reaches a JSON variable as an object, and `abc` for a Whole number stops the send with a message that says the value replaces the one in the Vars tab. The runner and the CLI do the same as the apps.
 
-An empty optional Number, Whole number or JSON value reaches scripts as `null`, so `env.get("count") ?? 10` gives a default; Gostman 1.15.1 and earlier gave an empty string. An empty True or false row is `false`, and is sent as `false`. A True or false whose value comes from a reference, a session value or `--var` that turns out empty is refused instead, because nothing says which of the two was meant. Mark a row **Required** under **Field options** to ask for a value. Required works the same for every type and checks the value that would be sent: a value that is only spaces is empty, and so is a reference that gives no value, such as `{{token}}` when `token` is empty or not defined anywhere.
+An empty optional Number, Whole number or JSON value reaches scripts as `null`, so `env.get("count") ?? 10` gives a default; Gostman 1.15.1 and earlier gave an empty string. An empty True or false row is `false`, and is sent as `false`. A True or false whose value comes from a reference, a session value or `--var` that turns out empty is refused instead, because nothing says which of the two was meant; the message says that the value is empty, and for `TRUE` or `True` that only lowercase `true` and `false` are accepted. Mark a row **Required** under **Field options** to ask for a value. Required works the same for every type and checks the value that would be sent: a value that is only spaces is empty, and so is a reference that gives no value, such as `{{token}}` when `token` is empty or not defined anywhere.
 
-A value that does not match its type, or an empty required value, stops the send before any script runs. The request is not sent, the response says which variable is wrong, and the CLI counts it as a request without a response. When you change the type of a row that has a value, the field keeps showing that value next to the message, until you change it. Rows that are switched off are not checked. Only request variables have types; environment, collection and global values keep the JSON type they were saved with.
+A value that does not match its type, or an empty required value, stops the send before any script runs. A value that a pre-request script writes into a typed variable, with `env.session.set` for example, is checked again after the scripts, before the request is sent, with the same message. The request is not sent, the response says which variable is wrong, and the CLI counts it as a request without a response. When you change the type of a row that has a value, the field keeps showing that value next to the message, until you change it. Rows that are switched off are not checked. Only request variables have types; environment, collection and global values keep the JSON type they were saved with.
 
 See [Variables view](requests-and-responses.md#variables-view) to turn a request into a short form of its typed variables.
 
@@ -130,10 +130,13 @@ Dynamic variables are generated by the engine every time a request is sent, so e
 
 | Variable | Value |
 | --- | --- |
-| `{{$guid}}`, `{{$uuid}}`, `{{$randomUUID}}` | Random UUID v4 |
+| `{{$guid}}`, `{{$uuid}}`, `{{$randomUUID}}`, `{{$uuidV4}}` | Random UUID v4 |
+| `{{$uuidV7}}` | Random UUID v7: it begins with the time in milliseconds, so ids sort by creation |
 | `{{$timestamp}}`, `{{$timestampMs}}` | Unix time in seconds, in milliseconds |
 | `{{$isoTimestamp}}` | UTC time such as `2026-10-21T15:18:24.870Z` |
-| `{{$randomInt}}`, `{{$randomInt(min,max)}}` | Integer from 0 to 1000, or from `min` to `max` |
+| `{{$date}}` | UTC date such as `2026-10-21`; see [Dates](#dates) for other formats and offsets |
+| `{{$randomInt}}`, `{{$randomInt(min,max)}}` | Integer from 0 to 1000, or from `min` to `max` (both included, at most 2,147,483,648 values apart) |
+| `{{$randomFloat}}`, `{{$randomFloat(min,max)}}`, `{{$randomFloat(min,max,decimals)}}` | Number from 0 to 1000, or from `min` to `max`, with 2 decimals or the `decimals` you give (0 to 15) |
 | `{{$randomBoolean}}`, `{{$randomHex}}`, `{{$randomAlphaNumeric}}` | Random boolean, 16 hex characters, 12 letters and digits |
 | `{{$randomColor}}`, `{{$randomHexColor}}`, `{{$randomColorName}}` | A `#rrggbb` colour, or a colour name |
 
@@ -152,7 +155,7 @@ The `$random*` names follow Postman's, so collections imported from Postman keep
 | Words | `$randomWord`, `$randomWords`, `$randomNoun`, `$randomVerb`, `$randomIngverb`, `$randomAdjective`, `$randomAbbreviation`, `$randomPhrase` |
 | Lorem ipsum | `$randomLoremWord`, `$randomLoremWords`, `$randomLoremSentence`, `$randomLoremSentences`, `$randomLoremParagraph`, `$randomLoremParagraphs`, `$randomLoremText`, `$randomLoremSlug`, `$randomLoremLines` |
 
-- Dates are UTC in ISO 8601, such as `2027-03-17T13:11:50.000Z`. `$randomBirthdate` is a date such as `1990-04-12` for someone aged 18 to 80.
+- Dates are UTC in ISO 8601, such as `2027-03-17T13:11:50.000Z`, unless you give a pattern (see [Dates](#dates)). `$randomBirthdate` is a date such as `1990-04-12` for someone aged 18 to 80.
 - `$randomBankAccountIban` has valid check digits and `$randomCreditCardNumber` passes the Luhn check, so validators accept them. Neither belongs to a real account.
 - Every value is a single line, so it is safe inside a JSON string. Emails use `example.*` domains.
 - The sample data is in English.
@@ -163,6 +166,60 @@ A variable you define with the same name takes precedence. The code snippet view
 
 Every generator also has a name in the style of the faker library, such as `{{$faker.date.future}}`, `{{$faker.person.fullName}}`, `{{$faker.location.city}}` or `{{$faker.finance.iban}}`. Typing `faker.` in a body or field lists them, and the one you pick is inserted as `{{$faker...}}`. The groups are `string`, `number`, `datatype`, `color`, `person`, `phone`, `location`, `internet`, `system`, `image`, `finance`, `company`, `database`, `date`, `commerce`, `hacker`, `word` and `lorem`.
 
+A faker name takes the same arguments as the generator it stands for, and the list shows each form: `{{$faker.number.int(1,100)}}`, `{{$faker.number.float(0,1,4)}}`, `{{$faker.date.past(dd/MM/yyyy)}}`, `{{$faker.date.now(yyyy-MM-dd)}}`. Arguments are written in Gostman's order and notation, not as faker's options object, and the result is the same in the apps and in the CLI. There is no faker name for UUID v7, because faker has none: use `{{$uuidV7}}`.
+
+### Dates
+
+`{{$date(pattern)}}` is today's UTC date written the way you ask, and the generators that return a date or time take a pattern too: `$isoTimestamp`, `$randomDatePast`, `$randomDateFuture`, `$randomDateRecent`, `$randomDateSoon` and `$randomBirthdate`, with their faker names. Patterns use the Unicode letters that Java, .NET and date-fns share:
+
+| Letters | Meaning | Example |
+| --- | --- | --- |
+| `yyyy`, `yy` | Year | `2026`, `26` |
+| `MM`, `M`, `MMM`, `MMMM` | Month as a number, short name, full name | `03`, `3`, `Mar`, `March` |
+| `dd`, `d` | Day of the month | `07`, `7` |
+| `EEE`, `EEEE` | Weekday, short and full | `Tue`, `Tuesday` |
+| `HH`, `H` | Hour, 0 to 23 | `15` |
+| `hh`, `h`, `a` | Hour, 1 to 12, and AM or PM | `03`, `PM` |
+| `mm`, `ss` | Minutes, seconds | `09`, `45` |
+| `S`, `SS`, `SSS` | Fraction of a second, up to 9 digits | `870` |
+| `X` | The time zone, always `Z`, because dates are UTC | `Z` |
+
+Anything that is not a letter is copied as it is, and so is text in single quotes, with `''` for a quote itself: `{{$date(dd/MM/yyyy)}}` is `21/10/2026`, `{{$date(EEEE d MMMM yyyy)}}` is `Wednesday 21 October 2026`, and `{{$isoTimestamp(yyyy-MM-dd'T'HH:mm:ss.SSSX)}}` is the ISO form. A letter that is not in the table, or a quote that is never closed, stops the send with a message that names the placeholder. Month and weekday names are in English.
+
+`$date` also takes an offset before the pattern: `{{$date(+7d,dd/MM/yyyy)}}` is a week from now and `{{$date(-1M)}}` is a month ago, in the default format. An offset is a sign, a number and a unit: `s`, `m`, `h`, `d`, `w`, `M` (months) or `y`. Months and years move on the calendar.
+
+### Templates and encoding
+
+Test data often has to be a whole document, or a document inside a field. A variable can hold a multi-line JSON or XML document with placeholders in it, a placeholder inside a variable is filled in when the variable is used, and a dynamic value inside a variable is generated once per request, so the document is consistent wherever it appears. These functions complete it:
+
+| Function | Result |
+| --- | --- |
+| `{{$base64(name)}}` | The value of the variable `name`, with everything inside it filled in, as base64 |
+| `{{$base64Url(name)}}` | The same as base64url without padding, as used in JWTs |
+| `{{$urlEncode(name)}}` | The same percent-encoded, to put in a query value |
+| `{{$template(path)}}` | A file read like `{{$file(path)}}`, with the placeholders in it filled in (desktop app and CLI, see [Reading files](#reading-files)) |
+
+The argument of an encoder is anything a placeholder can hold, so `{{$base64($template(templates/order.xml))}}` and `{{$base64($uuidV7)}}` work, and one encoder can wrap another. It is a name, never text with `{{ }}` inside it: put that text in a variable first. A variable that is not defined is reported like any other. A template holds what any variable holds: other variables, faker values, dates, UUIDs and numbers, up to 8 levels deep.
+
+To send a JSON body with a base64 attribute whose content is an XML document filled with test values, in the web app, the desktop app and the CLI:
+
+1. Create a variable `order` with the document as its value, in **Environments**, in **Collection variables** to share it with every request of a collection, or in the **Vars** tab of a folder. Press Shift+Enter in the value field for a new line:
+
+   ```xml
+   <order id="{{$uuidV7}}" placed="{{$date(dd/MM/yyyy)}}">
+     <customer>{{$faker.person.fullName}}</customer>
+     <email>{{$faker.internet.email}}</email>
+     <total>{{$randomFloat(10,500,2)}}</total>
+   </order>
+   ```
+
+2. In the body, write `{ "type": "order", "payload": "{{$base64(order)}}" }`. Every send generates a new document and encodes it. `{{order}}` elsewhere in the same request is the same document, not encoded.
+3. To keep a generated document, open **Code** on a request whose body is `{{order}}` and pick **Request body**: **Save as file** writes what the engine produced. To send exactly that document again, or to compare a response with a fixed input, put the file in the workspace and use `{{$fileBase64(fixtures/order-1.xml)}}`.
+
+In the desktop app and the CLI the library can be files instead: keep documents in a `templates/` folder of the workspace, under Git next to the collection, and write `{{$base64($template(templates/order.xml))}}`. A template file is filled in like a variable and cannot read other files. `{{$template(...)}}` counts as active content like `{{$file(...)}}`: folders that are not trusted do not read it, and imports and agents are refused it.
+
+A tool such as [CUE](https://cuelang.org) can generate a file first, in a CI step (`cue export order.cue -o order.json`), and a request then sends it with `{{$file(...)}}` or `{{$fileBase64(...)}}`. Gostman does not run it for you. The code snippet view fills in fresh generated values of its own; the request that is sent generates its own too.
+
 ### Reading files
 
 `{{$file(path)}}` is replaced by the contents of a file as text, and `{{$fileBase64(path)}}` by its contents encoded as base64, for example to send a PDF inside a JSON body:
@@ -171,6 +228,7 @@ Every generator also has a name in the style of the faker library, such as `{{$f
 { "type": "application/pdf", "base64content": "{{$fileBase64(fixtures/invoice.pdf)}}" }
 ```
 
+- `{{$template(path)}}` reads a file the same way and then fills in the placeholders in it; see [Templates and encoding](#templates-and-encoding). The rules on this page about paths and limits apply to it.
 - Files are read when the request is sent: by the desktop app, and by `gostman run`, `send` and `load` when you pass `--allow-files`, so a collection you did not write cannot send your files. The web app and agent sessions (`gostman mcp`) do not read files, a request that uses them there is not sent, and an agent cannot save a request that reads a file.
 - A path starts at the workspace folder in the desktop app, and at the workspace folder or export file given to the CLI (the current folder for a request given as a method and a URL), and must stay inside that folder: `..`, absolute paths, `~/` and links that lead outside it are refused, so a collection cannot read other files on your computer. Without a workspace folder, the desktop app reads absolute paths, and `~/` is your home folder.
 - Network paths such as `\\server\share\file.txt` or `//server/share/file.txt`, and device paths such as `\\.\pipe\name`, `\\?\C:\...` or `COM1`, are refused with a message, so reading a file never makes Windows send your sign-in to another computer. Copy the file to this computer, or map the share to a drive letter.
@@ -181,9 +239,9 @@ Every generator also has a name in the style of the faker library, such as `{{$f
 
 ## Prompt variables
 
-`{{?name}}` asks for a value when the request is sent. A dialog lists every prompted name found in the request, pre-filled with a variable of the same name if one exists. Cancelling the dialog stops the send. The values are not saved.
+`{{?name}}` asks for a value when the request is sent. A dialog lists every prompted name found in the request, pre-filled with a variable of the same name if one exists (a value that is itself a prompt, such as `page` set to `{{?page}}`, is not offered). It opens before the pre-request script runs, so the script sees the answers; a prompt that a script adds to the request is asked for after it. When an answer is the value of a typed variable, as in `page` set to `{{?pageNo}}` with the type Whole number, it is checked in the dialog with the usual message, and nothing is sent until it fits. Cancelling the dialog stops the send. The values are not saved.
 
-In the CLI, `--var name=value` (or `--var-from-env`) supplies the value; without one the placeholder is left as written. The runner asks once per run: each name is asked the first time a request uses it, and later requests and iterations reuse the answer. The dialog says so, and its button reads **Continue run**. Cancelling marks that request as failed, and every later request that needs a prompted value fails without asking again; the run goes on unless **Stop on failure** is checked.
+In the CLI, `--var name=value` (or `--var-from-env`) supplies the value, and a typed variable checks it like any other value; without one the placeholder is left as written. The runner asks once per run: each name is asked the first time a request uses it, and later requests and iterations reuse the answer. The dialog says so, and its button reads **Continue run**. Cancelling marks that request as failed, and every later request that needs a prompted value fails without asking again; the run goes on unless **Stop on failure** is checked.
 
 ## .env files
 

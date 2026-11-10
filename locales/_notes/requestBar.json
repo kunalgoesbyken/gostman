@@ -15,6 +15,8 @@
   "requestBar.save": "Button that saves the request to the collection.",
   "requestBar.code": "Button that opens generated code for the request, as in code snippet.",
   "requestBar.codeHint": "Tooltip and title for the button that opens code generation.",
+  "requestBar.codeBody": "Entry of the language picker in the code snippet window that shows only the body of the request, with variables and generated values filled in.",
+  "requestBar.codeSave": "Button that saves the shown request body to a file on this computer.",
   "requestBar.codeLanguage": "Label of the programming language picker of the code snippet window. Not a human language.",
   "curlFiles.title": "Title of a confirmation after pasting a curl command that reads local files.",
   "curlFiles.withThem": "Button: paste the command including its file reads.",

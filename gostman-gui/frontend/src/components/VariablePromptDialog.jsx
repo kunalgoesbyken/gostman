@@ -5,11 +5,17 @@ import { Input } from "./ui/input"
 import { ENVIRONMENT_TEXT as TEXT } from "../lib/environmentText"
 import { useAppStore } from "../store/appStore"
 
-function OpenVariablePrompt({ names, defaults, isForRun, onAnswer }) {
+function OpenVariablePrompt({ names, defaults, isForRun, problemsOf, onAnswer }) {
   const [values, setValues] = useState(defaults)
+  const [isTried, setIsTried] = useState(false)
+  const problems = problemsOf(values)
 
   const submit = (event) => {
     event.preventDefault()
+    if (problems.length > 0) {
+      setIsTried(true)
+      return
+    }
     onAnswer(values)
   }
 
@@ -36,6 +42,7 @@ function OpenVariablePrompt({ names, defaults, isForRun, onAnswer }) {
               />
             </label>
           ))}
+          {isTried && problems.map(({ key, message }) => <p key={key} role="alert" className="text-2xs text-destructive">{message}</p>)}
         </DialogBody>
         <DialogFooter>
           <Button variant="outline" onClick={() => onAnswer(null)}>{TEXT.promptCancel}</Button>
@@ -49,5 +56,5 @@ function OpenVariablePrompt({ names, defaults, isForRun, onAnswer }) {
 export function VariablePromptDialog() {
   const prompt = useAppStore((s) => s.variablePrompt)
   const answerVariables = useAppStore((s) => s.answerVariables)
-  return prompt.isOpen ? <OpenVariablePrompt names={prompt.names} defaults={prompt.defaults} isForRun={prompt.isForRun} onAnswer={answerVariables} /> : null
+  return prompt.isOpen ? <OpenVariablePrompt names={prompt.names} defaults={prompt.defaults} isForRun={prompt.isForRun} problemsOf={prompt.problemsOf} onAnswer={answerVariables} /> : null
 }

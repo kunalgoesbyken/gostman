@@ -23,12 +23,14 @@ import { applyRequestEdits, extractInSandbox, requestSubject, responseSubject, r
 import { acceptedCookies, scriptCookies } from './scripting/scriptCookies'
 import { scriptedRequest } from './scripting/subjects'
 import { rememberResolved } from './resolvedSecrets'
+import { placeholderNames } from './placeholders'
 import { blockedMessage, generatedTexts, generationsFor, sentVariables } from './requestVariables'
 import { parseRows } from './rows'
 import { hasNamedRows, sentProblems, withoutGiven, writtenNames } from './variablesForm'
 import { SECRETS_TEXT } from './secretsText'
 import { ENTRY_KINDS, exchangeEntry, scriptEntry, secretsEntry, withActivity } from './timeline'
 import { checkValues, promptNames, referenceTargets, resolveLayers, scopeLayers, usedVariableNames } from './variableScopes'
+import { isPromptName } from './variableNames'
 import { shownUrl } from './shownUrl'
 import { sampleTransport } from './sampleResponses'
 import { isSampleRequest } from './samples'
@@ -40,11 +42,11 @@ const SCRIPT_ERROR = 'script'
 export const RESTRICTED_ERROR = 'restricted'
 
 const store = () => useAppStore.getState()
-const variablesText = (request, answers, referenced) => variableTextFor(store(), request, answers, referenced)
+const variablesText = (request, referenced) => variableTextFor(store(), request, referenced)
 const hasText = (text) => text.trim() !== ''
 
 function readVariables(request, referenced) {
-  const parsed = parseJSON(variablesText(request, undefined, referenced), {})
+  const parsed = parseJSON(variablesText(request, referenced), {})
   return isPlainObject(parsed) ? parsed : {}
 }
 
@@ -76,9 +78,15 @@ async function runStage(stage, job, request, { send, trace, referenced, timeoutM
   return { ...run, error: run.error ? `${stage}: ${run.error}` : '' }
 }
 
+const withAnswers = (request, answers) => ({ ...request, promptGiven: { ...request.promptGiven, ...answers } })
+
+const offeredAnswer = (text) => (placeholderNames(text).some(isPromptName) ? '' : text)
+
 const askNow = (request, referenced) => (names, isForRun) => {
   const known = readVariables(request, referenced)
-  return store().askVariables(names, Object.fromEntries(names.map((name) => [name, known[name] ?? ''])), isForRun)
+  const defaults = Object.fromEntries(names.map((name) => [name, offeredAnswer(known[name] ?? '')]))
+  const problemsOf = (answers) => requestVariableProblems(withAnswers(request, answers), referenced)
+  return store().askVariables(names, defaults, isForRun, problemsOf)
 }
 
 const askEveryTime = (names, ask) => ask(names, false)
@@ -109,10 +117,11 @@ export function rememberPrompts() {
   }
 }
 
-async function askForValues(request, referenced, prompts) {
-  const names = promptNames(request)
-  if (names.length === 0) return {}
-  return prompts(names, askNow(request, referenced))
+async function withAskedValues(request, referenced, prompts) {
+  const names = promptNames(request).filter((name) => !Object.hasOwn(request.promptGiven ?? {}, name))
+  if (names.length === 0) return request
+  const answers = await prompts(names, askNow(request, referenced))
+  return answers === null ? null : withAnswers(request, answers)
 }
 
 const NO_FLOW = { action: '', target: '' }
@@ -282,9 +291,16 @@ export function createExecutor(backend) {
     const plainProblems = requestVariableProblems(request)
     if (plainProblems.length > 0) return stop(request, blockedMessage(plainProblems))
     let referenced
-    let problems
     try {
       referenced = await resolveReferences(backend, request, lineage, trace)
+    } catch (error) {
+      return stop(request, error.message)
+    }
+    const early = await withAskedValues(request, referenced, prompts)
+    if (early === null) return stop(request, EXECUTION_TEXT.promptDeclined, CANCELLED_ERROR)
+    request = early
+    let problems
+    try {
       const checked = await checkedVariables(backend, request, referenced)
       request = checked.request
       problems = checked.problems
@@ -292,13 +308,13 @@ export function createExecutor(backend) {
       return stop(request, error.message)
     }
     if (problems.length > 0) return stop(request, blockedMessage(problems))
-    const variablesOf = (candidate, answers) => variablesText(candidate, answers, referenced)
     const context = { send: createScriptSender(backend, trace), trace, referenced, timeoutMs: lineage[0]?.settings.scriptTimeoutMs }
 
     const inherited = layersOf(lineage)
-    const modules = await loadModules(backend, [...preSteps(lineage, request), ...postSteps(lineage, request)])
+    const preRequestSteps = preSteps(lineage, request)
+    const modules = await loadModules(backend, [...preRequestSteps, ...postSteps(lineage, request)])
 
-    for (const step of preSteps(lineage, request)) {
+    for (const step of preRequestSteps) {
       const pre = await runStage(step.label, { script: step.script, request: requestSubject(request, inherited), modules }, request, context)
       runs.push(pre)
       request = withoutGiven(request, writtenNames(pre.writes))
@@ -308,12 +324,15 @@ export function createExecutor(backend) {
       if (addsFileReads(original, request)) return stop(request, EXECUTION_TEXT.scriptFileReads, SCRIPT_ERROR)
     }
 
-    const answers = await askForValues(request, referenced, prompts)
-    if (answers === null) return stop(request, EXECUTION_TEXT.promptDeclined, CANCELLED_ERROR)
+    const late = await withAskedValues(request, referenced, prompts)
+    if (late === null) return stop(request, EXECUTION_TEXT.promptDeclined, CANCELLED_ERROR)
+    request = late
+    const scriptedProblems = preRequestSteps.length > 0 ? requestVariableProblems(request, referenced) : []
+    if (scriptedProblems.length > 0) return stop(request, blockedMessage(scriptedProblems))
 
     let renewal
     try {
-      renewal = await renewAuth(backend, request, lineage, variablesOf(request, answers))
+      renewal = await renewAuth(backend, request, lineage, variablesText(request, referenced))
     } catch (error) {
       return stop(request, error.message)
     }
@@ -322,7 +341,7 @@ export function createExecutor(backend) {
 
     if (isLocalCommand(outgoing) && needsApproval(backend, outgoing, variablesText(outgoing))) return stop(request, LOCAL_COMMAND_TEXT.notApproved)
 
-    const transmit = () => transportFor(backend, outgoing)(sendId, withInheritance(store(), outgoing), variablesOf(request, answers), store().cookies)
+    const transmit = () => transportFor(backend, outgoing)(sendId, withInheritance(store(), outgoing), variablesText(request, referenced), store().cookies)
     const response = await trace.timed(exchangeEntry(ENTRY_KINDS.REQUEST, outgoing), transmit)
     let contractRun = null
     if (!outgoing.options?.discardCookies) store().storeCookies(response.cookies || [])

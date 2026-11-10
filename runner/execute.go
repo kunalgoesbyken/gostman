@@ -368,13 +368,28 @@ func (s *session) withSentRows(request Request, generated map[string]string) (Re
 	return request, err
 }
 
-func (s *session) withSentVariables(request Request, generated map[string]string) (Request, string, error) {
-	request, err := s.withSentRows(request, generated)
-	if err != nil || !request.hasVariables() {
-		return request, "", err
+func (s *session) variableMessage(request Request) (string, error) {
+	if !request.hasVariables() {
+		return "", nil
 	}
 	var message string
-	err = s.scripts.Call("variableMessage", &message, request.Vars, s.scoped(request).text())
+	err := s.scripts.Call("variableMessage", &message, request.Vars, s.scoped(request).text())
+	return message, err
+}
+
+func (s *session) scriptedVariableMessage(request Request) (string, error) {
+	if len(request.preSteps()) == 0 {
+		return "", nil
+	}
+	return s.variableMessage(request)
+}
+
+func (s *session) withSentVariables(request Request, generated map[string]string) (Request, string, error) {
+	request, err := s.withSentRows(request, generated)
+	if err != nil {
+		return request, "", err
+	}
+	message, err := s.variableMessage(request)
 	return request, message, err
 }
 
@@ -418,6 +433,14 @@ func (s *session) execute(ctx context.Context, request Request) (exchange, error
 	}
 	if outcome.flow.holdsBack() {
 		outcome.skipped = outcome.flow.reason()
+		return outcome, nil
+	}
+	message, err = s.scriptedVariableMessage(request)
+	if err != nil {
+		return outcome, err
+	}
+	if message != "" {
+		outcome.stop(message)
 		return outcome, nil
 	}
 

@@ -1,4 +1,5 @@
 import catalogue from '../../../../engine/variables.json'
+import { argumentOf, isEncodedName, isEncoderBase, splitCall } from './callNames'
 
 export { PROCESS_PREFIX } from './scripting/scopes'
 export const PROMPT_PREFIX = '?'
@@ -9,31 +10,48 @@ const DESCRIPTIONS = new Map(catalogue.variables.map(({ name, description }) => 
 const FAKER_TARGETS = new Map(Object.entries(catalogue.fakerAliases))
 
 export const DYNAMIC_VARIABLES = Array.from(DESCRIPTIONS.keys())
-export const FAKER_VARIABLES = Array.from(FAKER_TARGETS.keys())
 
-const DYNAMIC_RANGE = /^\$randomInt\(\s*-?\d+\s*,\s*-?\d+\s*\)$/u
-const FILE_REFERENCE = /^\$file(Base64)?\((.*)\)$/u
-const FILE_CALL = /\$file(?:Base64)?\(/u
-const RANGE_TEMPLATE = '$randomInt(min,max)'
-const FILE_TEMPLATE = '$file(path)'
-const FILE_BASE64_TEMPLATE = '$fileBase64(path)'
-
-function templateOf(name) {
-  const file = FILE_REFERENCE.exec(name)
-  if (file) return file[1] ? FILE_BASE64_TEMPLATE : FILE_TEMPLATE
-  if (DYNAMIC_RANGE.test(name)) return RANGE_TEMPLATE
-  return FAKER_TARGETS.get(name) || name
+const FILE_CALL = /\$(?:file|fileBase64|template)\(/u
+const FILE_FUNCTIONS = new Set(['$file', '$fileBase64', '$template'])
+function callForms() {
+  const forms = new Map()
+  for (const name of DESCRIPTIONS.keys()) {
+    const call = splitCall(name)
+    if (call) forms.set(call.base, [...(forms.get(call.base) ?? []), name])
+  }
+  return forms
 }
 
-export const isFileName = (name) => FILE_REFERENCE.test(name)
+const CALL_FORMS = callForms()
+
+const fakerCallForms = ([alias, target]) => (CALL_FORMS.get(target) ?? []).map((form) => alias + form.slice(target.length))
+
+export const FAKER_VARIABLES = [...FAKER_TARGETS.keys(), ...Array.from(FAKER_TARGETS, fakerCallForms).flat()]
+
+function templateOf(name) {
+  const call = splitCall(name)
+  if (!call) return FAKER_TARGETS.get(name) || name
+  const target = FAKER_TARGETS.get(call.base) || call.base
+  const exact = target + call.tail
+  return DESCRIPTIONS.has(exact) ? exact : CALL_FORMS.get(target)?.[0] ?? name
+}
+
+function readPathOf(name) {
+  const call = splitCall(name.trim())
+  if (!call) return null
+  if (FILE_FUNCTIONS.has(call.base)) return argumentOf(call)
+  return isEncoderBase(call.base) ? readPathOf(argumentOf(call)) : null
+}
+
+export const isFileName = (name) => readPathOf(name) !== null
 
 export const callsFile = (text) => FILE_CALL.test(text)
 
-export const filePathOf = (name) => FILE_REFERENCE.exec(name)?.[2].trim() || ''
+export const filePathOf = (name) => readPathOf(name) ?? ''
 
 export const isDynamicName = (name) => DESCRIPTIONS.has(templateOf(name))
 
-export const isGeneratedName = (name) => isDynamicName(name) && !isFileName(name)
+export const isGeneratedName = (name) => isDynamicName(name) && !isFileName(name) && !isEncodedName(name)
 
 export const describeDynamic = (name) => DESCRIPTIONS.get(templateOf(name)) || ''
 

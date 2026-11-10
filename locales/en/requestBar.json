@@ -56,6 +56,8 @@
     "code": "Code",
     "codeHint": "Generate code",
     "codeLanguage": "Language",
+    "codeBody": "Request body",
+    "codeSave": "Save as file",
     "urlPlaceholders": {
       "full": "Enter a URL or paste a curl command",
       "medium": "URL or curl command",

@@ -5,6 +5,7 @@ import { colorTriplet } from "./swatches.js"
 import { VARIABLE_TEXT } from "./variablesText.js"
 import { mapText, someText, textsIn } from "./textValues.js"
 import { DYNAMIC_PREFIX, DYNAMIC_VARIABLES, FAKER_VARIABLES, callsFile, describeDynamic, isDynamicName, isEngineName, isFakerQuery, isFileName, isPromptName } from "./variableNames.js"
+import { unencodedName } from "./callNames.js"
 
 const TOKEN = /\{\{\s*([^{}]*?)\s*\}\}/gu
 export const ENGINE_PLACEHOLDER = /\{\{([^}]+)\}\}/gu
@@ -56,7 +57,10 @@ export function withoutFileReferences(text) {
   return JSON.stringify(mapText(parsedJSON(stripped).value, withoutFileReferences))
 }
 
-export const isDefined = (name, variables) => variables.has(name) || isEngineName(name)
+export function isDefined(name, variables) {
+  const source = unencodedName(name)
+  return variables.has(name) || variables.has(source) || isEngineName(source)
+}
 
 const builtInText = (name, kind) => (kind === "dynamic" && describeDynamic(name)) || VARIABLE_TEXT[kind]
 

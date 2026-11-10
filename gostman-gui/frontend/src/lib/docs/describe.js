@@ -1,7 +1,7 @@
 import { BODY_BINARY, BODY_FORM, BODY_JSON, BODY_MULTIPART, BODY_NONE, BODY_TEXT, BODY_XML } from '../body'
 import { isPlainObject, lookup, parseJSON } from '../dataUtils'
 import { GRPC_METHOD } from '../grpc'
-import { placeholderNames } from '../placeholders'
+import { placeholderSources } from '../placeholders'
 import { readParamRows } from '../queryString'
 import { AUTH_OAUTH2, normalizeRequest } from '../request'
 import { isFileRow, isSentRow, parseRows } from '../rows'
@@ -170,6 +170,6 @@ function variableSources(request) {
 }
 
 export function variablesUsed(requests) {
-  const names = requests.flatMap(variableSources).flatMap(placeholderNames).filter(Boolean)
+  const names = requests.flatMap(variableSources).flatMap(placeholderSources).filter(Boolean)
   return Array.from(new Set(names)).sort()
 }

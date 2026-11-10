@@ -316,6 +316,11 @@
       "blurb": "Give request variables a type, so scripts receive numbers, booleans and JSON instead of text, and bad values are caught before sending.",
       "synonyms": "typed variables type number boolean integer json enum validation required"
     },
+    "testDataTemplates": {
+      "title": "Test data templates",
+      "blurb": "Write a JSON or XML document once with faker values, dates in your format, UUID v7 and random numbers, then send it as it is or as base64.",
+      "synonyms": "template templates test data faker uuid v7 date format pattern random number base64 encode generate fixture payload library"
+    },
     "variablesView": {
       "title": "Variables view",
       "blurb": "Show a request as a short form of its variables with Send and the response, for people who only fill in values.",

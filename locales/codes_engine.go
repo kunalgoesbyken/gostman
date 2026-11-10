@@ -56,4 +56,5 @@ const (
 	EngineRequestUrlScheme            Code = "engineMessages.request.urlScheme"
 	EngineRequestVariablesInvalid     Code = "engineMessages.request.variablesInvalid"
 	EngineRequestVariablesTooDeep     Code = "engineMessages.request.variablesTooDeep"
+	EngineVariablesCannotFill         Code = "engineMessages.variables.cannotFill"
 )

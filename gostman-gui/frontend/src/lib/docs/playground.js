@@ -1,5 +1,5 @@
 import { lookup } from '../dataUtils'
-import { placeholderNames } from '../placeholders'
+import { placeholderSources } from '../placeholders'
 import { CURL_FORM, CURL_RAW } from './curl'
 import { ACCESS_TOKEN, exchangeOf } from './describe'
 import { html } from './markup'
@@ -55,7 +55,7 @@ function headersOf(exchange, kind) {
 
 function variablesOf(url, headers, body) {
   const text = [url, ...headers.map(({ value }) => value), body].join('\n')
-  return Array.from(new Set(placeholderNames(text))).filter(Boolean).sort()
+  return Array.from(new Set(placeholderSources(text))).filter(Boolean).sort()
 }
 
 export function playgroundOf(request) {

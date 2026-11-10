@@ -7,19 +7,13 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"regexp"
 	"slices"
 	"strings"
 
 	"github.com/kunalgoesbyken/gostman/locales"
 )
 
-const (
-	fileEncodingBase64 = "Base64"
-	homePrefix         = "~"
-)
-
-var fileReferenceRe = regexp.MustCompile(`^\$file(Base64)?\((.*)\)$`)
+const homePrefix = "~"
 
 var (
 	errFilesUnavailable = locales.Errorf(locales.EngineFilesUnavailable, fileExample())
@@ -29,14 +23,28 @@ var (
 
 type FileReader func(path string) ([]byte, error)
 
+type fileMode int
+
+const (
+	readText fileMode = iota
+	readBase64
+	readTemplate
+)
+
+var fileModes = map[string]fileMode{
+	"$file":       readText,
+	"$fileBase64": readBase64,
+	"$template":   readTemplate,
+}
+
 type fileReference struct {
-	path   string
-	base64 bool
+	path string
+	mode fileMode
 }
 
 func ReadsFiles(text string) bool {
 	for _, match := range placeholderRe.FindAllStringSubmatch(text, -1) {
-		if _, ok := parseFileReference(strings.TrimSpace(match[1])); ok {
+		if readsFile(strings.TrimSpace(match[1])) {
 			return true
 		}
 	}
@@ -72,16 +80,25 @@ func anyText(value any, test func(string) bool) bool {
 	return false
 }
 
-func parseFileReference(name string) (fileReference, bool) {
-	found := fileReferenceRe.FindStringSubmatch(name)
-	if found == nil {
-		return fileReference{}, false
+func readsFile(name string) bool {
+	invocation, isCall := parseCall(name)
+	if !isCall {
+		return false
 	}
-	return fileReference{path: strings.TrimSpace(found[2]), base64: found[1] == fileEncodingBase64}, true
+	if _, isFile := fileModes[invocation.name]; isFile {
+		return true
+	}
+	_, isEncoder := encoders[invocation.name]
+	return isEncoder && readsFile(strings.TrimSpace(invocation.argument))
+}
+
+func fileReferenceOf(invocation call) (fileReference, bool) {
+	mode, isFile := fileModes[invocation.name]
+	return fileReference{path: strings.TrimSpace(invocation.argument), mode: mode}, isFile
 }
 
 func (r fileReference) encode(data []byte) string {
-	if r.base64 {
+	if r.mode == readBase64 {
 		return base64.StdEncoding.EncodeToString(data)
 	}
 	return string(data)
