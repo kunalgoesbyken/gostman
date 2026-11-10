@@ -1,4 +1,5 @@
 import { isSentRow, parseRows, serializeRows } from './rows'
+import { ENGINE_PLACEHOLDER } from './variables'
 
 export const SOAP_11 = '1.1'
 const SOAP_12 = '1.2'
@@ -24,6 +25,12 @@ const DECLARATION_END = '?>'
 const PARSER_ERROR = 'parsererror'
 const FAILURE_DETAIL = 'div'
 const XML_TYPE = 'application/xml'
+const LEADING_PLACEHOLDERS = /^(?:\s*\{\{[^}]+\}\})+/
+const TRAILING_PLACEHOLDERS = /(?:\{\{[^}]+\}\}\s*)+$/
+const PLACEHOLDER_TOKEN = 'gostmanph'
+const TOKEN_PATTERN = /gostmanph(\d+)x/g
+const QUOTED_TOKEN_PATTERN = /"gostmanphu(\d+)x"/g
+const UNQUOTED_VALUE = /=(\s*)(\{\{[^}]+\}\})/g
 
 const ELEMENT = 1
 const TEXT = 3
@@ -116,9 +123,51 @@ function render(document, text) {
   return [...declarationOf(text), ...body].join('\n')
 }
 
+function splitOuterPlaceholders(text) {
+  const head = LEADING_PLACEHOLDERS.exec(text)?.[0] ?? ''
+  const rest = text.slice(head.length)
+  const tail = TRAILING_PLACEHOLDERS.exec(rest)?.[0] ?? ''
+  return { head, core: rest.slice(0, rest.length - tail.length), tail }
+}
+
+function maskPlaceholders(text, quoteUnquoted) {
+  const originals = []
+  const slot = (placeholder) => {
+    const found = originals.indexOf(placeholder)
+    return found === -1 ? originals.push(placeholder) - 1 : found
+  }
+  const quoted = quoteUnquoted
+    ? text.replace(UNQUOTED_VALUE, (_, space, placeholder) => `=${space}"${PLACEHOLDER_TOKEN}u${slot(placeholder)}x"`)
+    : text
+  const masked = quoted.replace(ENGINE_PLACEHOLDER, (placeholder) => `${PLACEHOLDER_TOKEN}${slot(placeholder)}x`)
+  const original = (_, index) => originals[index]
+  return { masked, restore: (formatted) => formatted.replace(QUOTED_TOKEN_PATTERN, original).replace(TOKEN_PATTERN, original) }
+}
+
+const lineBreaksOf = (text) => text.replace(/[^\n]/g, '')
+
+function parseMasked(head, core, quoteUnquoted) {
+  const { masked, restore } = maskPlaceholders(lineBreaksOf(head) + core, quoteUnquoted)
+  return { masked, restore, ...parseXml(masked) }
+}
+
+function parseTemplate(text) {
+  const { head, core, tail } = splitOuterPlaceholders(text)
+  if (core.trim() === '' && text.trim() !== '') return { head, tail, isEmpty: true }
+  const plain = parseMasked(head, core, false)
+  if (!plain.error) return { head, tail, ...plain }
+  const quoted = parseMasked(head, core, true)
+  return { head, tail, ...(quoted.error ? plain : quoted) }
+}
+
+export const findXmlProblem = (text) => parseTemplate(text).error ?? null
+
 export function formatXml(text) {
-  const parsed = parseXml(text)
-  return parsed.error ? { error: parsed.error } : { text: render(parsed.document, text) }
+  const parsed = parseTemplate(text)
+  if (parsed.error) return { error: parsed.error }
+  if (parsed.isEmpty) return { text }
+  const body = parsed.restore(render(parsed.document, parsed.masked))
+  return { text: [parsed.head.trim(), body, parsed.tail.trim()].filter(Boolean).join('\n') }
 }
 
 const childElements = (node) => Array.from(node.children)

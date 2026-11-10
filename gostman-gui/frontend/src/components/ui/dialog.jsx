@@ -38,7 +38,14 @@ const keepFocusInDialog = (event) => event.preventDefault()
 
 const CODE_EDITOR = ".cm-editor"
 
-const isHandledElsewhere = (event) => event.defaultPrevented || Boolean(event.target.closest?.(CODE_EDITOR))
+const isInEditor = (event) => Boolean(event.target.closest?.(CODE_EDITOR))
+
+function useOpenDialog(ref) {
+  useEffect(() => {
+    openDialogs.push(ref)
+    return () => openDialogs.splice(openDialogs.indexOf(ref), 1)
+  }, [ref])
+}
 
 export function ResizeHandles({ frame }) {
   return (
@@ -50,23 +57,23 @@ export function ResizeHandles({ frame }) {
   )
 }
 
-export function Dialog({ label, size = "sm", floating, onClose, className, children }) {
+export function Dialog({ label, size = "sm", floating, closesFromEditor = false, onClose, className, children }) {
   const dialogRef = useRef(null)
   const frame = useFloatingWindow(floating)
   useFocusTrap(dialogRef)
 
-  useEffect(() => {
-    openDialogs.push(dialogRef)
-    return () => openDialogs.splice(openDialogs.indexOf(dialogRef), 1)
-  }, [])
+  useOpenDialog(dialogRef)
 
   useEffect(() => {
     const closeOnEscape = (event) => {
-      if (event.key === "Escape" && isTopmost(dialogRef) && !isHandledElsewhere(event)) onClose()
+      if (event.key !== "Escape" || event.defaultPrevented || !isTopmost(dialogRef)) return
+      if (isInEditor(event) && !closesFromEditor) return
+      event.preventDefault()
+      onClose()
     }
     window.addEventListener("keydown", closeOnEscape)
     return () => window.removeEventListener("keydown", closeOnEscape)
-  }, [onClose])
+  }, [onClose, closesFromEditor])
 
   return (
     <div className={frame ? FLOATING_LAYER : DIALOG_OVERLAY} onMouseDown={frame ? keepFocusInDialog : onClose}>
@@ -94,8 +101,10 @@ export function Dialog({ label, size = "sm", floating, onClose, className, child
 }
 
 export function DialogPending() {
+  const overlayRef = useRef(null)
+  useOpenDialog(overlayRef)
   return (
-    <div className={DIALOG_OVERLAY}>
+    <div ref={overlayRef} className={DIALOG_OVERLAY}>
       <div role="status" aria-label={APP_TEXT.loading} className={cn("flex w-full flex-col overflow-hidden rounded-lg border border-border bg-background shadow-lg", DIALOG_SIZES.lg)}>
         <div className="flex h-10 shrink-0 items-center border-b border-border px-4">
           <Skeleton className="h-3 w-32" />

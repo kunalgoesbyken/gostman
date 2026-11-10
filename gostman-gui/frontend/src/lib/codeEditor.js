@@ -11,7 +11,7 @@ import { javascript } from '@codemirror/lang-javascript'
 import { tags } from '@lezer/highlight'
 import { basicSetup } from 'codemirror'
 import { findJsonProblem, formatJson, lineAndColumn } from './jsonFormat'
-import { formatXml } from './soap'
+import { findXmlProblem, formatXml } from './soap'
 import { CLOSING_REFERENCE, SECRET_TINT, describeReference, findReferences, referenceAtCaret, referenceLook, suggestNames } from './variables'
 import { CODE_EDITOR_TEXT } from './codeEditorText'
 import { LARGE_BODY_CHARS } from './largeText'
@@ -188,10 +188,19 @@ function jsonErrors(view) {
   return [{ from: problem.offset, to, severity: 'error', message: problem.message }]
 }
 
+function xmlErrors(view) {
+  if (isTooLargeToLint(view)) return []
+  const text = view.state.doc.toString()
+  const message = text.trim() ? findXmlProblem(text) : null
+  if (!message) return []
+  const offset = xmlProblemOffset(text, message) ?? 0
+  return [{ from: offset, to: Math.min(offset + 1, text.length), severity: 'error', message }]
+}
+
 const LANGUAGES = {
   json: () => [json(), linter(jsonErrors)],
   yaml: () => yaml(),
-  xml: () => xml(),
+  xml: () => [xml(), linter(xmlErrors)],
   html: () => html(),
   javascript: () => [javascript(), linter(syntaxErrors)],
 }
@@ -200,7 +209,21 @@ export const languageExtension = (language) => LANGUAGES[language]?.() ?? []
 
 const XML_PROBLEM_NODES = new Set(['MismatchedCloseTag', 'MissingCloseTag'])
 
-function xmlProblemOffset(text) {
+const BROWSER_LINE = /line (\d+)/i
+
+function reportedLineOffset(text, message) {
+  const line = Number(BROWSER_LINE.exec(message)?.[1])
+  if (!line) return null
+  let offset = 0
+  for (let at = 1; at < line; at++) {
+    const next = text.indexOf('\n', offset)
+    if (next === -1) return null
+    offset = next + 1
+  }
+  return offset
+}
+
+function parsedProblemOffset(text) {
   let offset = null
   xmlLanguage.parser.parse(text).iterate({
     enter: (node) => {
@@ -212,10 +235,12 @@ function xmlProblemOffset(text) {
   return offset
 }
 
+const xmlProblemOffset = (text, message) => parsedProblemOffset(text) ?? reportedLineOffset(text, message)
+
 function xmlResult(text) {
   const result = formatXml(text)
   if (!result.error) return result
-  const offset = xmlProblemOffset(text)
+  const offset = xmlProblemOffset(text, result.error)
   return { error: offset === null ? { message: result.error } : { message: result.error, offset, line: lineAndColumn(text, offset).line } }
 }
 

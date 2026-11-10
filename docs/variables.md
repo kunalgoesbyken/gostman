@@ -201,6 +201,8 @@ Test data often has to be a whole document, or a document inside a field. A vari
 
 The argument of an encoder is anything a placeholder can hold, so `{{$base64($template(templates/order.xml))}}` and `{{$base64($uuidV7)}}` work, and one encoder can wrap another. It is a name, never text with `{{ }}` inside it: put that text in a variable first. A variable that is not defined is reported like any other. A template holds what any variable holds: other variables, faker values, dates, UUIDs and numbers, up to 8 levels deep.
 
+**Open in editor**, at the end of a variable's value field, shows a large document in the request body editor, in a movable, resizable window. It completes `{{` variables, `{{$` dynamic values and `$faker.` names, flags invalid JSON as you type, and **Format** indents JSON or XML and keeps the `{{placeholders}}` as written (an XML problem is reported by Format, as in the body editor). It picks Text, JSON or XML from the content, and you can change it. Edits are saved as you type, and a secret variable opens in it only while its value is shown.
+
 To send a JSON body with a base64 attribute whose content is an XML document filled with test values, in the web app, the desktop app and the CLI:
 
 1. Create a variable `order` with the document as its value, in **Environments**, in **Collection variables** to share it with every request of a collection, or in the **Vars** tab of a folder. Press Shift+Enter in the value field for a new line:

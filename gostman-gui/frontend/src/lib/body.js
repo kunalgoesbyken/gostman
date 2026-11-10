@@ -10,6 +10,10 @@ export const BODY_BINARY = 'binary'
 export const BODY_SOAP = 'soap'
 export const BODY_HEX = 'hex'
 
+export const FORMATTED_TYPE_NAMES = { [BODY_JSON]: 'JSON', [BODY_XML]: 'XML' }
+
+export const isFormattedType = (bodyType) => Object.hasOwn(FORMATTED_TYPE_NAMES, bodyType)
+
 export const RAW_SOCKET_METHODS = ['TCP', 'UDP', 'NATS']
 
 export const BODY_TYPES = [

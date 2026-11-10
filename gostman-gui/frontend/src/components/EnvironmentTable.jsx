@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from "react"
-import { Eye, EyeOff, KeyRound, Lock, LockOpen, X } from "lucide-react"
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react"
+import { Eye, EyeOff, KeyRound, Lock, LockOpen, Maximize2, X } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
 import { InfoTip } from "./ui/infoTip"
 import { Input } from "./ui/input"
 import { Textarea } from "./ui/textarea"
+import { DialogPending } from "./ui/dialog"
 import { Notice, SectionLabel } from "./ui/panel"
 import { BLANK_REFERENCE, ReferenceFields } from "./SecretReferenceFields"
 import { useSecretConnections } from "../hooks/useSecretConnections"
@@ -13,6 +14,8 @@ import { ENVIRONMENT_TEXT as TEXT } from "../lib/environmentText"
 import { REFERENCE_TEXT } from "../lib/secretsText"
 import { asText } from "../lib/variableScopes"
 import { cn } from "../lib/utils"
+
+const VariableValueDialog = lazy(() => import("./VariableValueDialog").then((module) => ({ default: module.VariableValueDialog })))
 
 const COLUMNS = "grid grid-cols-[1.5rem_minmax(0,1fr)_minmax(0,1.5fr)_1.5rem_1.5rem_1.5rem] items-center gap-x-2 px-3"
 const REFERENCE_COLUMNS = "grid grid-cols-[1.5rem_minmax(0,1fr)_minmax(0,1.5fr)_1.5rem_1.5rem_1.5rem_1.5rem] items-center gap-x-2 px-3"
@@ -88,7 +91,7 @@ function MultilineValue({ text, autoFocus, onBlur, onChange }) {
   )
 }
 
-function ValueField({ row, isRevealed, readOnly, autoFocus, onBlur, onChange }) {
+function ValueInput({ row, isRevealed, readOnly, autoFocus, onBlur, onChange }) {
   const addedLine = useRef(false)
   const [isGrown, setIsGrown] = useState(false)
   const isHidden = row.secret && !isRevealed
@@ -125,6 +128,19 @@ function ValueField({ row, isRevealed, readOnly, autoFocus, onBlur, onChange }) 
   )
 }
 
+function ValueField({ onOpenEditor, ...props }) {
+  const { row, isRevealed, readOnly } = props
+  const canOpenEditor = Boolean(onOpenEditor) && !readOnly && (!row.secret || isRevealed)
+  return (
+    <div className={cn("relative min-w-0", canOpenEditor && "[&_input]:pe-8 [&_textarea]:pe-8")}>
+      <ValueInput {...props} />
+      {canOpenEditor && (
+        <IconButton label={TEXT.openEditor} icon={Maximize2} size="icon-xs" onClick={onOpenEditor} className="absolute end-1 top-0.5" />
+      )}
+    </div>
+  )
+}
+
 function ReferenceSummary({ reference }) {
   const target = reference.path ? `${reference.provider}: ${reference.path}` : REFERENCE_TEXT.manager
   return (
@@ -135,7 +151,7 @@ function ReferenceSummary({ reference }) {
   )
 }
 
-function RowCells({ row, isDraft, isRevealed, focusField, features, references, onChange, onRemove, onToggleReveal }) {
+function RowCells({ row, isDraft, isRevealed, focusField, features, references, onChange, onRemove, onToggleReveal, onOpenEditor }) {
   const canReveal = row.secret
   const toggleReference = () => onChange(row.ref ? { ref: undefined } : { ref: { ...BLANK_REFERENCE, provider: references.connections[0]?.alias ?? "" }, value: "", secret: false })
   const rowRef = useRef(null)
@@ -155,7 +171,7 @@ function RowCells({ row, isDraft, isRevealed, focusField, features, references, 
         />
       ) : <span />}
       <NameField row={row} isDraft={isDraft} features={features} autoFocus={focusField === "name"} inputRef={nameRef} onChange={onChange} />
-      {row.ref ? <ReferenceSummary reference={row.ref} /> : <ValueField row={row} isRevealed={isRevealed} readOnly={features.readOnly} autoFocus={focusField === "value"} onBlur={askForName} onChange={onChange} />}
+      {row.ref ? <ReferenceSummary reference={row.ref} /> : <ValueField row={row} isRevealed={isRevealed} readOnly={features.readOnly} autoFocus={focusField === "value"} onBlur={askForName} onChange={onChange} onOpenEditor={onOpenEditor} />}
       {canReveal ? (
         <IconButton
           label={isRevealed ? TEXT.hide : TEXT.reveal}
@@ -219,6 +235,7 @@ export function EnvironmentTable({ rows, query, features, secrets, draftName = "
   const [revealed, setRevealed] = useState(() => new Set())
   const [draft, setDraft] = useState(() => draftFor(rows, draftName))
   const [focus, setFocus] = useState(() => focusFor(rows, draftName))
+  const [editing, setEditing] = useState(null)
   const needle = query.trim().toLowerCase()
   const visible = useMemo(
     () => rows.map((row, index) => ({ row, index })).filter(({ row }) => !needle || matches(row, needle)),
@@ -268,6 +285,7 @@ export function EnvironmentTable({ rows, query, features, secrets, draftName = "
           onChange={(patch) => edit(index, patch)}
           onRemove={() => onChange(rows.filter((_, at) => at !== index))}
           onToggleReveal={() => toggleReveal(index)}
+          onOpenEditor={() => setEditing(index)}
         />
       ))}
       {!features.readOnly && (
@@ -279,6 +297,16 @@ export function EnvironmentTable({ rows, query, features, secrets, draftName = "
           references={references}
           onChange={addRow}
         />
+      )}
+      {rows[editing] && (
+        <Suspense fallback={<DialogPending />}>
+          <VariableValueDialog
+            name={rows[editing].name}
+            value={asText(rows[editing].value)}
+            onChange={(value) => edit(editing, { value })}
+            onClose={() => setEditing(null)}
+          />
+        </Suspense>
       )}
     </div>
   )

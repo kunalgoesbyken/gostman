@@ -1,5 +1,5 @@
-import { Suspense, useMemo, useRef, useState } from "react"
-import { Braces, FileX } from "lucide-react"
+import { Suspense, useMemo } from "react"
+import { FileX } from "lucide-react"
 import { Button } from "./ui/button"
 import { EmptyState } from "./ui/emptyState"
 import { InfoTip } from "./ui/infoTip"
@@ -8,6 +8,7 @@ import { SegmentedControl } from "./ui/segmented"
 import { EditorSkeleton } from "./ui/skeleton"
 import { BinaryEncoder } from "./BinaryEncoder"
 import { FileField } from "./FileField"
+import { FormatButton, FormatProblem } from "./FormatControls"
 import { SoapBar } from "./SoapBar"
 import { KeyValueEditor } from "./KeyValueEditor"
 import {
@@ -21,40 +22,21 @@ import {
   bodyTypesFor,
   withBodyTypeFor,
   BODY_XML,
+  isFormattedType,
   switchBodyType,
 } from "../lib/body"
+import { useEditorFormatting } from "../hooks/useEditorFormatting"
 import { EMPTY_ATTACHMENT } from "../lib/attachments"
 import { BODY_TEXT } from "../lib/bodyText"
-import { chordLabel } from "../lib/chords"
 import { isPlainObject, lookup, parseJSON } from "../lib/dataUtils"
 import { addJsonRpcCall } from "../lib/jsonRpc"
-import { isApplePlatform } from "../lib/platform"
 import { parseRows, serializeRows } from "../lib/rows"
 import { SOAP_11, soapTemplate } from "../lib/soap"
 
 const PLAIN_TEXT_LANGUAGE = "plaintext"
 const EDITOR_LANGUAGES = { [BODY_JSON]: "json", [BODY_XML]: "xml", [BODY_SOAP]: "xml" }
-const FORMATTED_TYPE_NAMES = { [BODY_JSON]: "JSON", [BODY_XML]: "XML" }
-const FORMAT_CHORD = { shift: true, alt: true, key: "f" }
 
 const BODILESS_METHODS = ["GET", "HEAD"]
-
-const isFormattedType = (bodyType) => Object.hasOwn(FORMATTED_TYPE_NAMES, bodyType)
-
-const problemText = (type, error) => (error.column === undefined ? BODY_TEXT.cannotFormat(type, error) : BODY_TEXT.cannotFormatAt(type, error))
-
-function FormatProblem({ bodyType, error, onReveal }) {
-  return (
-    <Notice tone="destructive">
-      {problemText(FORMATTED_TYPE_NAMES[bodyType], error)}
-      {error.offset !== undefined && (
-        <button type="button" onClick={() => onReveal(error.offset)} className="ms-2 underline">
-          {BODY_TEXT.goToLine(error.line)}
-        </button>
-      )}
-    </Notice>
-  )
-}
 
 function RowsBody({ body, typed, onChange }) {
   const rows = useMemo(() => parseRows(body), [body])
@@ -128,21 +110,9 @@ function JsonRpcButton({ body, onChange }) {
   )
 }
 
-function useBodyFormatting(request) {
-  const editorRef = useRef(null)
-  const [problem, setProblem] = useState(null)
-  const isFormatted = isFormattedType(request.bodyType)
-  const shownProblem = problem && problem.body === request.body && problem.bodyType === request.bodyType ? problem.error : null
-
-  const onFormat = (result) => setProblem(result.error ? { error: result.error, body: request.body, bodyType: request.bodyType } : null)
-  const format = () => editorRef.current?.format()
-  const reveal = (offset) => editorRef.current?.reveal(offset)
-  return { editorRef, isFormatted, shownProblem, onFormat, format, reveal }
-}
-
 export function BodyPanel({ request: stored, drafts, editorPath, replacedByGraphQL, onUpdateRequest, onDraftsChange, EditorComponent }) {
   const request = withBodyTypeFor(stored)
-  const formatting = useBodyFormatting(request)
+  const formatting = useEditorFormatting(request.body, request.bodyType)
   const handleTypeChange = (bodyType) => {
     const next = switchBodyType(request, drafts, bodyType)
     const body = next.updates.body ?? request.body
@@ -156,18 +126,13 @@ export function BodyPanel({ request: stored, drafts, editorPath, replacedByGraph
         <SegmentedControl label={BODY_TEXT.typeLabel} options={bodyTypesFor(request.method)} value={request.bodyType} onChange={handleTypeChange} />
         {RAW_SOCKET_METHODS.includes(request.method) && <InfoTip text={request.method === 'NATS' ? BODY_TEXT.natsSocket : BODY_TEXT.rawSocket} />}
         {request.bodyType === BODY_JSON && <JsonRpcButton body={request.body} onChange={(body) => onUpdateRequest({ body })} />}
-        {formatting.isFormatted && (
-          <Button
-            variant="ghost"
-            size="sm"
-            title={BODY_TEXT.formatTitle(FORMATTED_TYPE_NAMES[request.bodyType], chordLabel(FORMAT_CHORD, isApplePlatform()))}
+        {isFormattedType(request.bodyType) && (
+          <FormatButton
+            language={request.bodyType}
             disabled={request.body.trim() === ""}
             onClick={formatting.format}
             className="ms-auto"
-          >
-            <Braces />
-            {BODY_TEXT.format}
-          </Button>
+          />
         )}
       </Toolbar>
       {request.bodyType === BODY_SOAP && <SoapBar request={request} onUpdateRequest={onUpdateRequest} />}
@@ -175,7 +140,7 @@ export function BodyPanel({ request: stored, drafts, editorPath, replacedByGraph
         <Notice>{BODY_TEXT.replacedByGraphQL}</Notice>
       )}
       {request.bodyType === BODY_MULTIPART && BODILESS_METHODS.includes(request.method) && <Notice>{BODY_TEXT.multipartOnGet}</Notice>}
-      {formatting.shownProblem && <FormatProblem bodyType={request.bodyType} error={formatting.shownProblem} onReveal={formatting.reveal} />}
+      {formatting.shownProblem && <FormatProblem language={request.bodyType} error={formatting.shownProblem} onReveal={formatting.reveal} />}
       <BodyEditor
         request={request}
         editorPath={editorPath}
