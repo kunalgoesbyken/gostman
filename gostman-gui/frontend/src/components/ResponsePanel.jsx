@@ -44,7 +44,7 @@ import { RESPONSE_CHECKS_TEXT } from "../lib/checksText"
 import { canSaveAsExample } from "../lib/examples"
 import { deepestLevel, trimmedTree } from "../lib/jsonTree"
 import { DEPTH_SETTINGS, appDefaultDepth, depthLabel, depthOfSetting, requestDepth, settingOfDepth } from "../lib/jsonDepth"
-import { adoptSetting, chooseDepth, collapseTarget, hasUnopenedNodes, isExpandedIn, noteToggle, opensBeyondLevel, setFilterPath, useTreeEpoch, useTreeView } from "../lib/jsonTreeView"
+import { adoptSetting, chooseDepth, collapseTarget, expandAll, hasUnopenedNodes, isExpandedIn, noteToggle, opensBeyondLevel, setFilterPath, useTreeEpoch, useTreeView } from "../lib/jsonTreeView"
 import { AUTO_DECODE_BYTES } from "../lib/binary/limits"
 import { LARGE_BODY_CHARS } from "../lib/largeText"
 import { PREVIEW_TEXT, RESPONSE_TEXT } from "../lib/responseText"
@@ -227,7 +227,7 @@ function PrettyBody({ json, formatted, filtered, highlight, epoch }) {
   return <JsonTree data={data} epoch={epoch} />
 }
 
-function TreeControls({ depth, isRemembered, isOpenedBeyond, canExpandMore, collapseTo, onChoose, onRemember }) {
+function TreeControls({ depth, isRemembered, isOpenedBeyond, canExpandMore, collapseTo, onChoose, onExpandAll, onRemember }) {
   const current = settingOfDepth(depth)
   return (
     <div className="ms-auto flex items-center gap-1">
@@ -235,7 +235,7 @@ function TreeControls({ depth, isRemembered, isOpenedBeyond, canExpandMore, coll
         label={isOpenedBeyond ? RESPONSE_TEXT.tree.collapseTo(collapseTo) : RESPONSE_TEXT.tree.expandAll}
         icon={isOpenedBeyond ? ChevronsDownUp : ChevronsUpDown}
         disabled={!isOpenedBeyond && !canExpandMore}
-        onClick={() => onChoose(isOpenedBeyond ? collapseTo : Infinity)}
+        onClick={isOpenedBeyond ? () => onChoose(collapseTo) : onExpandAll}
       />
       <Select aria-label={RESPONSE_TEXT.tree.depth} value={current} notifyReselect onChange={(event) => onChoose(depthOfSetting(event.target.value))} className="w-28">
         {DEPTH_SETTINGS.map((setting) => <option key={setting} value={setting}>{depthLabel(setting)}</option>)}
@@ -254,9 +254,9 @@ function TreeControls({ depth, isRemembered, isOpenedBeyond, canExpandMore, coll
 
 const JsonTree = memo(function JsonTree({ data, epoch }) {
   const { value, omitted, paths } = trimmedTree(data)
-  const shouldExpandNode = useCallback((level, node) => isExpandedIn(epoch, paths.get(node), level < epoch.depth), [epoch, paths])
+  const shouldExpandNode = useCallback((level, node) => isExpandedIn(epoch, paths.get(node), level), [epoch, paths])
   const beforeExpandChange = useCallback(({ level, value: node, newExpandValue }) => {
-    noteToggle(epoch, paths.get(node), level < epoch.depth, newExpandValue)
+    noteToggle(epoch, paths.get(node), level, newExpandValue)
     return true
   }, [epoch, paths])
   return (
@@ -503,7 +503,7 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
   const treeValue = view === 'pretty' && formatted.text === null && !highlight ? (filtered ? filtered.value : json) : null
   const hasTree = treeValue !== null && typeof treeValue === 'object'
   const nesting = useMemo(() => (hasTree ? deepestLevel(trimmedTree(treeValue).value) : 0), [hasTree, treeValue])
-  const epoch = useTreeEpoch(treeView, filtered ? debouncedPath : '', hasTree)
+  const epoch = useTreeEpoch(treeView, filtered ? debouncedPath : '', hasTree, nesting)
   const rememberDepth = onJsonDepthChange && !past && !docked ? () => {
     const setting = settingOfDepth(epoch.depth)
     adoptSetting(epoch, setting)
@@ -687,9 +687,10 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
                   depth={epoch.depth}
                   isRemembered={epoch.depth === baseDepth}
                   isOpenedBeyond={opensBeyondLevel(epoch)}
-                  canExpandMore={hasUnopenedNodes(epoch, nesting)}
+                  canExpandMore={hasUnopenedNodes(epoch)}
                   collapseTo={collapseTarget(epoch, appDefaultDepth(isMcp))}
                   onChoose={(next) => chooseDepth(epoch, next)}
+                  onExpandAll={() => expandAll(epoch)}
                   onRemember={rememberDepth}
                 />
               )}

@@ -66,13 +66,13 @@ export function useTreeView(owner, scope, setting, base) {
   return treeView
 }
 
-export function useTreeEpoch(treeView, source, isShown) {
+export function useTreeEpoch(treeView, source, isShown, nesting) {
   return useMemo(() => {
     if (!isShown || !treeView) return null
     const { view, state, base } = treeView
     const tree = treeOf(state, source)
-    return { id: `${view.id}:${state.era}:${tree.generation}:${source}`, depth: tree.choice ?? base, source, treeView }
-  }, [isShown, treeView, source])
+    return { id: `${view.id}:${state.era}:${tree.generation}:${source}`, depth: tree.choice ?? base, nesting, source, treeView }
+  }, [isShown, treeView, source, nesting])
 }
 
 export function chooseDepth({ depth: current, source, treeView: { view, state, base } }, depth) {
@@ -103,27 +103,32 @@ export function setFilterPath({ view }, path) {
 
 const openedIn = ({ source, treeView }) => treeView.state.trees.get(source)?.opened ?? NONE_OPENED
 
-export function noteToggle(epoch, path, byDefault, expanded) {
+export function noteToggle(epoch, path, level, expanded) {
   const { source, treeView: { state, view } } = epoch
   if (!state.trees.has(source)) state.trees.set(source, freshTree(state.lastLevel))
-  const paths = state.trees.get(source).opened
-  if (expanded === byDefault) paths.delete(path)
-  else paths.set(path, expanded)
+  state.trees.get(source).opened.set(path, { level, expanded })
   changed(view)
 }
 
-export function isExpandedIn(epoch, path, byDefault) {
-  const opened = openedIn(epoch)
-  return opened.has(path) ? opened.get(path) : byDefault
+export function isExpandedIn(epoch, path, level) {
+  return openedIn(epoch).get(path)?.expanded ?? level < epoch.depth
 }
 
-export function opensBeyondLevel(epoch) {
-  if (epoch.depth === Infinity) return true
-  for (const expanded of openedIn(epoch).values()) if (expanded) return true
-  return false
-}
+const handOpened = (depth, { level, expanded }) => expanded && level >= depth
 
-export const hasUnopenedNodes = (epoch, deepestLevel) => deepestLevel >= epoch.depth || openedIn(epoch).size > 0
+const handClosed = (depth, { level, expanded }) => !expanded && level < depth
+
+const someOpened = (epoch, test) => [...openedIn(epoch).values()].some((entry) => test(epoch.depth, entry))
+
+const hasDeeperLevels = (epoch) => epoch.nesting >= epoch.depth
+
+export const opensBeyondLevel = (epoch) => epoch.depth === Infinity || someOpened(epoch, handOpened)
+
+export const hasUnopenedNodes = (epoch) => hasDeeperLevels(epoch) || someOpened(epoch, handClosed)
+
+export function expandAll(epoch) {
+  chooseDepth(epoch, hasDeeperLevels(epoch) ? Infinity : epoch.depth)
+}
 
 export function collapseTarget(epoch, fallback) {
   return epoch.depth === Infinity ? treeOf(epoch.treeView.state, epoch.source).lastLevel ?? fallback : epoch.depth
