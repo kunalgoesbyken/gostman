@@ -243,7 +243,7 @@ func (a *App) updatePolicy() engine.Policy {
 
 func (a *App) policy() engine.Policy {
 	network, _ := networks.current()
-	return engine.Policy{Network: network, RevealSecrets: true}
+	return engine.Policy{Network: network, RevealSecrets: true, RecordBody: true}
 }
 
 func (a *App) sendPolicy() engine.Policy {

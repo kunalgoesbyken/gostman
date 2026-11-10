@@ -149,6 +149,7 @@ type Response struct {
 	Protocol     string        `json:"protocol,omitempty"`
 	StreamEnd    string        `json:"streamEnd,omitempty"`
 	Timeline     *Timeline     `json:"timeline,omitempty"`
+	Sent         *SentBody     `json:"sent,omitempty"`
 
 	Failed        bool           `json:"failed,omitempty"`
 	Notifications []Notification `json:"notifications,omitempty"`
@@ -156,6 +157,14 @@ type Response struct {
 	OutputSchema  string         `json:"outputSchema,omitempty"`
 
 	Localized *locales.Message `json:"localized,omitempty"`
+}
+
+type SentBody struct {
+	Body         string `json:"body"`
+	BodyEncoding string `json:"bodyEncoding"`
+	ContentType  string `json:"contentType"`
+	Size         int64  `json:"size"`
+	Truncated    bool   `json:"truncated"`
 }
 
 type Notification struct {

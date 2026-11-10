@@ -30,6 +30,7 @@ import { OverflowTabsList, TabCount, Tabs } from "./ui/tabs"
 import { SkeletonLines } from "./ui/skeleton"
 import { TestResults, countPassed, hasTestOutput } from "./TestResults"
 import { VisualizeTab } from "./VisualizeTab"
+import { RequestBodyTab } from "./RequestBodyTab"
 import { TimelineTab } from "./TimelineTab"
 import { UnresolvedNotice } from "./UnresolvedNotice"
 import { useClipboardCopy } from "../hooks/useClipboardCopy"
@@ -69,6 +70,7 @@ const TAB_TESTS = 'tests'
 const TAB_CONSOLE = 'console'
 const TAB_VISUALIZE = 'visualize'
 const TAB_TIMELINE = 'timeline'
+const TAB_REQUEST = 'request'
 const NO_VALUE = '—'
 const SEARCH_DEBOUNCE_MS = 200
 
@@ -343,11 +345,12 @@ const tabItem = (value, badge = null, marked = false) => ({
   content: <>{RESPONSE_TEXT.tabs[value]}{badge}</>,
 })
 
-function responseTabs({ hasResult, hasTimeline, showsTests, headers, cookies, tests }) {
+function responseTabs({ hasResult, hasTimeline, hasSent, showsTests, headers, cookies, tests }) {
   return [
     tabItem(TAB_BODY),
     hasResult && tabItem(TAB_HEADERS, <TabCount>{headers.length}</TabCount>, headers.length > 0),
     hasResult && tabItem(TAB_COOKIES, <TabCount>{cookies.length}</TabCount>, cookies.length > 0),
+    hasSent && tabItem(TAB_REQUEST),
     hasTimeline && tabItem(TAB_TIMELINE),
     showsTests && tabItem(TAB_TESTS, <TabCount tone={testTone(tests)}>{countPassed(tests.results)}/{tests.results.length}</TabCount>, true),
     tabItem(TAB_CONSOLE),
@@ -439,7 +442,7 @@ function PastResponseNotice({ past, canCompare, onCompare, onBack }) {
   )
 }
 
-export const ResponsePanel = memo(function ResponsePanel({ tabId, response, history = NO_HISTORY, tests, loading, docked = false, jsonDepth = '', onJsonDepthChange, onDownload, onExportHar, onSaveExample, onExplain, onTrust }) {
+export const ResponsePanel = memo(function ResponsePanel({ tabId, response, history = NO_HISTORY, tests, loading, docked = false, jsonDepth = '', onJsonDepthChange, onDownload, onSaveSent, onExportHar, onSaveExample, onExplain, onTrust }) {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [chosenTab, setActiveTab] = useState(TAB_BODY)
@@ -470,10 +473,11 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
   const hasBody = hasResult && kind !== BODY_KINDS.EMPTY
   const isOpen = isFullscreen || !isCollapsed
   const hasTimeline = Boolean(shown?.timeline)
-  const tabItems = responseTabs({ hasResult, hasTimeline, showsTests, headers, cookies, tests })
+  const hasSent = Boolean(shown?.sent)
+  const tabItems = responseTabs({ hasResult, hasTimeline, hasSent, showsTests, headers, cookies, tests })
   const activeTab = tabItems.some((item) => item.value === chosenTab) ? chosenTab : TAB_BODY
   const showsBody = isOpen && activeTab === TAB_BODY
-  const showsTabs = isOpen && (hasResult || hasTimeline)
+  const showsTabs = isOpen && (hasResult || hasTimeline || hasSent)
 
   const [searchOpen, setSearchOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -551,6 +555,7 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
   const renderContent = () => {
     if (loading) return <SkeletonLines label={RESPONSE_TEXT.sending} lines={6} />
     if (!shown) return <FeatureEmpty surface="response" icon={FileText} title={RESPONSE_TEXT.noResponseTitle} description={RESPONSE_TEXT.noResponseDescription} />
+    if (activeTab === TAB_REQUEST && hasSent) return <RequestBodyTab sent={shown.sent} onSave={past ? undefined : onSaveSent} />
     if (activeTab === TAB_TIMELINE && hasTimeline) return <TimelineTab timeline={shown.timeline} />
     if (shown.error) return <ErrorBody response={shown} onExplain={onExplain} onTrust={onTrust} />
     if (activeTab === TAB_TESTS && showsTests) return <TestResults tests={tests} />

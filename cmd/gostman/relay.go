@@ -129,7 +129,7 @@ func serveRelay(port int, origins []string, network *engine.Network, stdout, std
 	if err := loopback.CheckPort(port); err != nil {
 		return err
 	}
-	handler.Policy = engine.Policy{Network: network}
+	handler.Policy = engine.Policy{Network: network, RecordBody: true}
 	guard, err := newRelayGuard(origins, http.HandlerFunc(handler.Handler), stderr)
 	if err != nil {
 		return err

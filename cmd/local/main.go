@@ -18,7 +18,7 @@ func main() {
 		port = "8787"
 	}
 
-	handler.Policy = engine.Policy{}
+	handler.Policy = engine.Policy{RecordBody: true}
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/proxy", loopbackOnly(handler.Handler))

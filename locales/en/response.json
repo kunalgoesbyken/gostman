@@ -35,6 +35,10 @@
     "formatting": "Formatting…",
     "formatFailed": "The body could not be formatted: {{reason}}",
     "saveToFile": "Save to file",
+    "sent": {
+      "binary": "This request body is binary, so it is not shown as text. Save it to a file to inspect it.",
+      "truncated": "This request body is {{size}}. Only the first {{shown}} are shown and saved here."
+    },
     "findInBody": "Find in body",
     "noMatches": "No results",
     "matchPosition": "{{position}} of {{count}}",
@@ -54,6 +58,7 @@
       "body": "Body",
       "headers": "Headers",
       "cookies": "Cookies",
+      "request": "Request body",
       "timeline": "Timeline",
       "tests": "Checks",
       "console": "Console",

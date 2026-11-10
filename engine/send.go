@@ -21,6 +21,7 @@ const (
 	maxRedirects       = 10
 	maxRequestBody     = 10 << 20
 	maxEncodedBody     = maxRequestBody * 3 / 2
+	maxSentBody        = 1 << 20
 )
 
 var errBodyTooLarge = locales.Errorf(locales.EngineRequestBodyTooLarge, nil)
@@ -38,6 +39,7 @@ type Policy struct {
 	ReadFile          FileReader
 	OpenFile          FileOpener
 	RawSockets        bool
+	RecordBody        bool
 }
 
 func (p Policy) fileOpener() FileOpener {
@@ -88,6 +90,7 @@ func exchange(ctx context.Context, r Request, policy Policy, timeline *recorder)
 	}
 	response := setup.perform(ctx, policy.ResponseLimit())
 	response.Unresolved = setup.unresolved
+	response.Sent = setup.sent
 	return response
 }
 
@@ -130,6 +133,7 @@ type exchangeSetup struct {
 	client     *http.Client
 	cookies    *cookieLog
 	unresolved []string
+	sent       *SentBody
 }
 
 func newExchange(ctx context.Context, r Request, policy Policy, timeline *recorder) (*exchangeSetup, error) {
@@ -180,7 +184,24 @@ func newExchange(ctx context.Context, r Request, policy Policy, timeline *record
 			return nil
 		},
 	}
-	return &exchangeSetup{outgoing, client, cookies, prepared.Unresolved}, nil
+	setup := &exchangeSetup{request: outgoing, client: client, cookies: cookies, unresolved: prepared.Unresolved}
+	if policy.RecordBody {
+		setup.sent = sentBody(prepared.body, outgoing.Header.Get(headerContentType))
+	}
+	return setup, nil
+}
+
+func sentBody(body []byte, contentType string) *SentBody {
+	if len(body) == 0 {
+		return nil
+	}
+	size := int64(len(body))
+	truncated := len(body) > maxSentBody
+	if truncated {
+		body = body[:maxSentBody]
+	}
+	text, encoding := EncodeBody(body, truncated)
+	return &SentBody{Body: text, BodyEncoding: encoding, ContentType: MediaType(contentType, body), Size: size, Truncated: truncated}
 }
 
 func dropCredentials(header http.Header) {

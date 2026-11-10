@@ -216,7 +216,7 @@ To send a JSON body with a base64 attribute whose content is an XML document fil
    ```
 
 2. In the body, write `{ "type": "order", "payload": "{{$base64(order)}}" }`. Every send generates a new document and encodes it. `{{order}}` elsewhere in the same request is the same document, not encoded.
-3. To keep a generated document, open **Code** on a request whose body is `{{order}}` and pick **Request body**: **Save as file** writes what the engine produced. To send exactly that document again, or to compare a response with a fixed input, put the file in the workspace and use `{{$fileBase64(fixtures/order-1.xml)}}`.
+3. To keep a generated document, open the **Request body** tab next to Timeline in the response after sending: it shows the body exactly as it was sent, and **Save to file** writes it. (**Code**, then **Request body**, fills the body in again, so random values differ.) To send exactly that document again, or to compare a response with a fixed input, put the file in the workspace and use `{{$fileBase64(fixtures/order-1.xml)}}`.
 
 In the desktop app and the CLI the library can be files instead: keep documents in a `templates/` folder of the workspace, under Git next to the collection, and write `{{$base64($template(templates/order.xml))}}`. A template file is filled in like a variable and cannot read other files. `{{$template(...)}}` counts as active content like `{{$file(...)}}`: folders that are not trusted do not read it, and imports and agents are refused it.
 

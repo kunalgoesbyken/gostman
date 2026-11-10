@@ -502,6 +502,7 @@ export function LoadedWorkspace({ backend, onBack }) {
                     jsonDepth={activeRequest.jsonDepth}
                     onJsonDepthChange={setJsonDepth}
                     onDownload={actions.download}
+                    onSaveSent={actions.saveSentBody}
                     onExportHar={actions.exportHistoryHar}
                     onSaveExample={actions.examples.saveResponse}
                     onExplain={isAiOn ? () => actions.ai.start(TASK_EXPLAIN) : null}

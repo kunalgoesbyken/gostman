@@ -34,7 +34,7 @@ import { AUTH_OAUTH2, isUntouchedRequest, normalizeRequest } from './request'
 import { promptInstall } from './pwa'
 import { SAMPLE_REQUEST } from './welcome'
 import { isRequestDirty } from './requestChanges'
-import { bodyBase64, downloadName, httpStatusOf, mimeType } from './response'
+import { bodyBase64, downloadName, httpStatusOf, mimeType, sentFileName } from './response'
 import { clientUrl } from './sharedLink'
 import { createRunner } from './runner'
 import { environmentsUsed } from './runReport'
@@ -481,6 +481,8 @@ export function createWorkspaceActions(backend) {
     await backend.saveFile(downloadName(response), bodyBase64(response), mimeType(response))
   })
 
+  const saveSentBody = attempt(TEXT.saveFileFailed, (sent) => backend.saveFile(sentFileName(sent), bodyBase64(sent), mimeType(sent)))
+
   const saveBase64File = attempt(TEXT.saveFileFailed, (name, base64, mime) => backend.saveFile(name, base64, mime))
 
   const saveTextFile = attempt(TEXT.saveFileFailed, (name, text, mime) => (
@@ -832,6 +834,7 @@ export function createWorkspaceActions(backend) {
     shareRequest: (requestId) => store().openImportDialog(SHARE_TAB, requestId),
     shareLinkBase: clientUrl(backend.webAppUrl),
     download,
+    saveSentBody,
     saveTextFile,
     exportHistoryHar: (history) => saveTextFile(HAR_FILE_NAME, JSON.stringify(historyToHar(history, __APP_VERSION__), null, 2), HAR_MEDIA_TYPE),
     saveBase64File,

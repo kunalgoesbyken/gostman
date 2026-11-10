@@ -304,6 +304,7 @@ Each tab keeps its last 10 responses while the app is open. They are kept in mem
 | Body | Always | The response body. |
 | Headers | The request completed | Name and Value table, with a count. |
 | Cookies | The request completed | Name, Value, Domain, Path, Expires, Secure and HttpOnly. |
+| Request body | The request sent a body (not a file or an upload from disk) | The body exactly as it was sent, with variables and generated values filled in. Shows its type and size; **Copy** and **Save to file** are in its toolbar. Bodies over 1 MB are cut off and cannot be saved here; binary bodies are not shown as text. |
 | Timeline | The response has timing data, or scripts ran | See [Timeline](#timeline). |
 | Checks | There are check results or a script error | Each result with a pass or fail mark. The count shows passed over total. |
 | Console | The request completed | Output of `console.log()` in scripts. |
@@ -458,7 +459,7 @@ Code opens the Generate code dialog. Pick a language from the list at the top:
 | PowerShell | `Invoke-WebRequest`, for Windows PowerShell 5.1 and PowerShell 7 |
 | HTTPie | `http` |
 | wget | `wget` 1.19.2 or later |
-| Request body | Not code: only the body, with variables and generated values filled in. **Save as file** writes it to a file, see [Templates and encoding](variables.md#templates-and-encoding) |
+| Request body | Not code: only the body, with variables and generated values filled in. This is a fresh fill: random values differ from the last send, so for the body that was actually sent use the **Request body** tab of the response. **Save as file** writes it to a file, see [Templates and encoding](variables.md#templates-and-encoding) |
 
 Copy copies the snippet for the selected language, and the dialog opens on the language you picked last. Text is escaped for each language, so quotes, `$`, backslashes, line breaks and non-ASCII characters arrive as typed. The snippets are built from the request as the engine prepares it, so variables, inherited headers and auth appear as they are sent.
 

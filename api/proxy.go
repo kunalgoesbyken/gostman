@@ -39,6 +39,7 @@ const (
 
 var Policy = engine.Policy{
 	BlockPrivate:      true,
+	RecordBody:        true,
 	MaxResponseBytes:  3 << 20,
 	MaxTimeout:        30 * time.Second,
 	MaxStreamDuration: 60 * time.Second,

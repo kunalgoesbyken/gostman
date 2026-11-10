@@ -4,6 +4,12 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.17.2] - 2026-11-10
+
+### Added
+
+- Response: a **Request body** tab next to Timeline shows the body exactly as it was sent, with variables and generated values (random values, UUIDs, encoders) filled in, its type and size, **Copy** and **Save to file**. Bodies over 1 MB are cut off and cannot be saved, binary bodies are saved but not shown as text, and uploads streamed from disk have no tab. The tab is on in the app, the web app and the relay, and off for the CLI and agent sessions (#36).
+
 ## [1.17.1] - 2026-11-10
 
 ### Added

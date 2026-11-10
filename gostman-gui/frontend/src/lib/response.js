@@ -64,7 +64,7 @@ export function failureResponse(kind, message) {
   }
 }
 
-const isBase64 = (response) => response.bodyEncoding === ENCODING_BASE64
+export const isBase64 = (response) => response.bodyEncoding === ENCODING_BASE64
 
 export function textBody(response) {
   if (!response || response.error || isBase64(response)) return ''
@@ -106,6 +106,8 @@ export function bodyBytes(response) {
 export function bodyBase64(response) {
   return isBase64(response) ? response.body : textToBase64(response.body)
 }
+
+export const sentFileName = (sent) => `request-body.${FILE_EXTENSIONS[sent.contentType] || (isBase64(sent) ? 'bin' : 'txt')}`
 
 export function mimeType(response) {
   return response.contentType || FALLBACK_MIME
