@@ -1,7 +1,7 @@
 import { Heart } from "lucide-react"
 import { BrandIcon } from "../ui/brandIcon"
 import { WEB_APP_URL } from "../../lib/constants"
-import { ALTERNATIVETO_BADGE_URL, ALTERNATIVETO_URL, EASYLAUNCH_BADGE_DARK_URL, EASYLAUNCH_URL, SPONSOR_URL } from "../../lib/siteLinks"
+import { ALTERNATIVETO_BADGE_URL, ALTERNATIVETO_URL, EASYLAUNCH_BADGE_DARK_URL, EASYLAUNCH_URL, NICKLAUNCHES_BADGE_DARK_URL, NICKLAUNCHES_URL, SPONSOR_URL } from "../../lib/siteLinks"
 import { Brand } from "./Brand"
 import { FOOTER_COLUMNS } from "./footerLinks"
 
@@ -61,6 +61,14 @@ function EasyLaunchBadge() {
   )
 }
 
+function NickLaunchesBadge() {
+  return (
+    <a href={NICKLAUNCHES_URL} target="_blank" rel="noopener" className="inline-block">
+      <img src={NICKLAUNCHES_BADGE_DARK_URL} alt="Gostman on Nick Launches" width="244" height="56" loading="lazy" className="h-14 w-[244px] max-w-full" />
+    </a>
+  )
+}
+
 function FooterColumn({ column }) {
   return (
     <nav aria-label={column.title}>
@@ -86,6 +94,7 @@ export function SiteFooter() {
         </div>
         <div className="flex flex-wrap items-center gap-4">
           <EasyLaunchBadge />
+          <NickLaunchesBadge />
           <AlternativeToBadge />
         </div>
       </div>
