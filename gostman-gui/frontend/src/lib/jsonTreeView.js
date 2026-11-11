@@ -90,9 +90,13 @@ export function chooseDepth({ depth: current, source, treeView: { view, state, b
   changed(view)
 }
 
+const releasedFromOldBase = (tree) => (tree.choice === null ? { ...tree, opened: new Map() } : tree)
+
 export function adoptSetting({ source, treeView: { view, scope, era, state } }, setting) {
   eras.set(scope, { setting, count: era.count })
-  view.state = { ...state, base: depthOfSetting(setting), trees: withTree(state, source, { ...treeOf(state, source), choice: null }) }
+  const trees = new Map([...state.trees].map(([key, tree]) => [key, releasedFromOldBase(tree)]))
+  trees.set(source, { ...treeOf(state, source), choice: null })
+  view.state = { ...state, base: depthOfSetting(setting), trees }
   changed(view)
 }
 
@@ -122,7 +126,8 @@ const someOpened = (epoch, test) => [...openedIn(epoch).values()].some((entry) =
 
 const hasDeeperLevels = (epoch) => epoch.nesting >= epoch.depth
 
-export const opensBeyondLevel = (epoch) => epoch.depth === Infinity || someOpened(epoch, handOpened)
+export const opensBeyondLevel = (epoch, fallback) =>
+  epoch.depth === Infinity ? epoch.nesting >= collapseTarget(epoch, fallback) : someOpened(epoch, handOpened)
 
 export const hasUnopenedNodes = (epoch) => hasDeeperLevels(epoch) || someOpened(epoch, handClosed)
 

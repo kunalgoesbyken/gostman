@@ -691,7 +691,7 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
                 <TreeControls
                   depth={epoch.depth}
                   isRemembered={epoch.depth === baseDepth}
-                  isOpenedBeyond={opensBeyondLevel(epoch)}
+                  isOpenedBeyond={opensBeyondLevel(epoch, appDefaultDepth(isMcp))}
                   canExpandMore={hasUnopenedNodes(epoch)}
                   collapseTo={collapseTarget(epoch, appDefaultDepth(isMcp))}
                   onChoose={(next) => chooseDepth(epoch, next)}
