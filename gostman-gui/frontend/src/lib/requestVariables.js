@@ -145,8 +145,18 @@ export function typedValue(row, values) {
   return read.ok ? read.value : text
 }
 
+const holdsPrompt = (text) => placeholderNames(text).some(isPromptName)
+
+export const isDeclared = (row) => isTyped(row) || holdsPrompt(sentText(row))
+
+const answeredText = (row, values) => (
+  fillPlaceholders(winnerText(row, values), (name) => (isPromptName(name) ? valueOf(values, name) : undefined))
+)
+
+const declaredValue = (row, values) => (isTyped(row) ? typedValue(row, values) : answeredText(row, values))
+
 export const declaredValues = (rows, values) => Object.fromEntries(
-  rows.filter((row) => isSentRow(row) && isTyped(row)).map((row) => [row.key, typedValue(row, values)])
+  rows.filter((row) => isSentRow(row) && isDeclared(row)).map((row) => [row.key, declaredValue(row, values)])
 )
 
 export const variableName = (row) => (String(row.label ?? '').trim() || row.key.trim())
@@ -161,6 +171,7 @@ export function problemOf(row, values) {
 
 function filledProblemText(row, text, problem, name = variableName(row)) {
   if (problem === TYPE_ENUM) return TEXT.problems.enum({ name, choices: formatList(choicesOf(row), 'disjunction') })
+  if (problem === PROBLEM_BOOLEAN_CASE) return TEXT.problems.booleanCase({ name, written: text })
   if (problem === PROBLEM_JSON_INEXACT) return TEXT.problems.jsonInexact({ name, number: inexactJsonNumber(text) })
   return TEXT.problems[problem](name)
 }

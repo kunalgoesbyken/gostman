@@ -16,6 +16,7 @@ const (
 	argumentSeparator    = ","
 	defaultFloatDecimals = 2
 	maxFloatDecimals     = 15
+	maxExactDigits       = 15
 )
 
 type call struct {
@@ -162,5 +163,15 @@ func randomFloatBetween(low, high float64, decimals int) string {
 	if low > high {
 		low, high = high, low
 	}
-	return strconv.FormatFloat(low+rand.Float64()*(high-low), 'f', decimals, 64)
+	text := strconv.FormatFloat(low+rand.Float64()*(high-low), 'f', decimals, 64)
+	if significantDigits(text) <= maxExactDigits {
+		return text
+	}
+	rounded, _ := strconv.ParseFloat(text, 64)
+	return strconv.FormatFloat(rounded, 'f', -1, 64)
+}
+
+func significantDigits(number string) int {
+	digits := strings.ReplaceAll(strings.TrimPrefix(number, "-"), ".", "")
+	return len(strings.Trim(digits, "0"))
 }

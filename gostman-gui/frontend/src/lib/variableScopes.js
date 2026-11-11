@@ -1,6 +1,6 @@
 import { isPlainObject, parseJSON } from './dataUtils'
 import { placeholderSources } from './placeholders'
-import { declaredValues, isTyped, sentText } from './requestVariables'
+import { declaredValues, isDeclared, sentText } from './requestVariables'
 import { isSentRow, parseRows } from './rows'
 import { connectionDirectory } from './secretOrigins'
 import { chosenEnvironment, variableHolders } from './environmentScope'
@@ -118,7 +118,7 @@ const winningLayers = (layers) => {
 
 function withDeclaredTypes(layers) {
   const rows = layers.flatMap((layer) => layer.entries.flatMap((entry) => (entry.row ? [entry.row] : [])))
-  if (!rows.some(isTyped)) return layers
+  if (!rows.some(isDeclared)) return layers
   const declared = declaredValues(rows, checkValues(resolveLayers(layers)))
   const winners = winningLayers(layers)
   const typed = (entry, index) => (

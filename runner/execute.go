@@ -353,7 +353,7 @@ func (s *session) generatedValues(request Request) (map[string]string, error) {
 
 func (s *session) declaredValues(request Request) (variables, error) {
 	declared := variables{}
-	if !request.hasTypedVariables() {
+	if !request.hasVariables() {
 		return declared, nil
 	}
 	err := s.scripts.Call("declaredVariables", &declared, request.Vars, s.scoped(request).text())
