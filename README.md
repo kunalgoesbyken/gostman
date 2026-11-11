@@ -19,11 +19,7 @@
   <p>No account. Your requests stay on your device. The web app installs as an app and works offline.</p>
 </div>
 
-![Gostman sending a request and generating code](screenshots/demo.gif)
-
-| | |
-| --- | --- |
-| ![A POST request with a JSON body returning 201 Created, next to the collection tree](screenshots/readme-app.png) | ![gostman run in a terminal with every request passing, next to the same run in the app](screenshots/readme-cli.png) |
+![Gostman: a POST request with a JSON body returning 201 Created, with checks passing](screenshots/readme-card.png)
 
 Save a request once and use it three ways: send it from the app, check it on every pull request with `gostman run`, and let a coding agent call it through `gostman mcp` without seeing your secrets. Requests, collections and environments are plain files on your machine, and there is nothing to sign in to. New here? The [tutorial](docs/tutorial-first-collection.md) builds a tested collection step by step, and the [documentation](https://gostman.com/docs) covers every feature.
 
