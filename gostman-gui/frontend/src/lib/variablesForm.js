@@ -1,6 +1,6 @@
 import { isPlainObject } from './dataUtils'
 import { placeholderSources } from './placeholders'
-import { isShownInForm, sentText, variableProblems } from './requestVariables'
+import { PROBLEM_REQUIRED, isShownInForm, relayedProblemText, sentText, variableName, variableProblems } from './requestVariables'
 import { isSentRow, parseRows, rowName, serializeRows } from './rows'
 import { checkValues, resolveLayers, scopeLayers } from './variableScopes'
 
@@ -62,12 +62,23 @@ export function hiddenNamesShown(request, resolved) {
     .map((problem) => problem.key)
 }
 
-function fieldProblems(problems, resolved, fieldKeys) {
-  const own = problems.filter((problem) => fieldKeys.includes(problem.key))
-  const fed = problems
-    .filter((problem) => !fieldKeys.includes(problem.key))
-    .flatMap((problem) => feedersOfProblem(problem, resolved, fieldKeys).map((key) => ({ ...problem, key })))
-  return [...own, ...fed]
+function relayedProblems(problem, rows, resolved, fields) {
+  const feeders = feedersOfProblem(problem, resolved, fields.map(({ row }) => row.key))
+  if (feeders.length === 0) return []
+  const names = feeders.map((key) => variableName(fields.find(({ row }) => row.key === key).row))
+  const hidden = rows.find((row) => row.key === problem.key)
+  const message = relayedProblemText(hidden, problem.problem, names, checkValues(resolved))
+  return feeders.map((key) => ({ ...problem, key, message }))
+}
+
+function fieldProblems(request, resolved, fields) {
+  const rows = parseRows(request.vars)
+  const problems = sentProblems(request, resolved)
+  const isField = ({ key }) => fields.some(({ row }) => row.key === key)
+  return [
+    ...problems.filter(isField),
+    ...problems.filter((problem) => !isField(problem)).flatMap((problem) => relayedProblems(problem, rows, resolved, fields)),
+  ]
 }
 
 const givenRequest = (request, rows, fields) => ({
@@ -76,19 +87,31 @@ const givenRequest = (request, rows, fields) => ({
   formGiven: fields.map(({ row }) => row.key),
 })
 
+function checkedForm(state, request, rows, fields) {
+  const filled = givenRequest(request, rows, fields)
+  const resolved = resolvedFor(state, filled)
+  return { request: filled, problems: fieldProblems(filled, resolved, fields) }
+}
+
+const STAND_IN_VALUE = 'x'
+
+const onlyBlank = (fields, target) => fields.map((field) => ({ ...field, row: { ...field.row, value: field === target ? '' : STAND_IN_VALUE } }))
+
+const needsValue = (state, request, rows, fields, field) => (
+  field.row.required === true
+  || checkedForm(state, request, rows, onlyBlank(fields, field)).problems.some(({ key, problem }) => key === field.row.key && problem === PROBLEM_REQUIRED)
+)
+
 export function filledForm(state, request, values) {
   const rows = parseRows(request.vars)
   const savedResolved = resolvedFor(state, request)
   const visible = givenRequest(request, rows, formFields(rows, values, [], savedResolved))
   const shownNames = hiddenNamesShown(visible, resolvedFor(state, visible))
   const fields = formFields(rows, values, shownNames, savedResolved)
-  const filled = givenRequest(request, rows, fields)
-  const resolved = resolvedFor(state, filled)
   return {
-    fields,
+    ...checkedForm(state, request, rows, fields),
+    fields: fields.map((field) => ({ ...field, isRequired: needsValue(state, request, rows, fields, field) })),
     isChanged: fields.some(({ row, saved }) => valueText(row) !== valueText(saved)),
-    problems: fieldProblems(sentProblems(filled, resolved), resolved, fields.map(({ row }) => row.key)),
-    request: filled,
   }
 }
 

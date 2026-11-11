@@ -23,7 +23,7 @@ const submitsForm = (event) => (
   event.key === SUBMIT_KEY && !hasModifier(event) && !event.defaultPrevented && !event.nativeEvent.isComposing && event.target.tagName === INPUT_TAG
 )
 
-function FormField({ row, problem, isRevealed, onChange }) {
+function FormField({ row, problem, isRequired, isRevealed, onChange }) {
   const id = useId()
   const helpId = `${id}-help`
   const problemId = `${id}-problem`
@@ -38,7 +38,7 @@ function FormField({ row, problem, isRevealed, onChange }) {
       {!isBoolean && (
         <div className="flex items-baseline gap-2">
           <span className="text-xs font-medium text-foreground">{name}</span>
-          {row.required === true && <span className="text-2xs text-muted-foreground">{TEXT.required}</span>}
+          {isRequired && <span className="text-2xs text-muted-foreground">{TEXT.required}</span>}
         </div>
       )}
       <VariableValueField
@@ -104,8 +104,8 @@ export function VariablesView({ tab, onChange, onReset, onSend, onOpenEditor, on
   return (
     <PanelBody>
       <form ref={formRef} aria-label={TEXT.formLabel} onSubmit={send} onKeyDown={sendOnEnter} className="flex max-w-xl flex-col gap-4">
-        {fields.map(({ row, saved, index }) => (
-          <FormField key={index} row={row} problem={problems.find((problem) => problem.key === row.key)} isRevealed={attempt > 0} onChange={(patch) => onChange(saved, patch.value)} />
+        {fields.map(({ row, saved, index, isRequired }) => (
+          <FormField key={index} row={row} problem={problems.find((problem) => problem.key === row.key)} isRequired={isRequired} isRevealed={attempt > 0} onChange={(patch) => onChange(saved, patch.value)} />
         ))}
         {isChanged && (
           <div>

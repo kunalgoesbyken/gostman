@@ -159,8 +159,7 @@ export function problemOf(row, values) {
   return read.ok ? '' : read.problem
 }
 
-function filledProblemText(row, text, problem) {
-  const name = variableName(row)
+function filledProblemText(row, text, problem, name = variableName(row)) {
   if (problem === TYPE_ENUM) return TEXT.problems.enum({ name, choices: formatList(choicesOf(row), 'disjunction') })
   if (problem === PROBLEM_JSON_INEXACT) return TEXT.problems.jsonInexact({ name, number: inexactJsonNumber(text) })
   return TEXT.problems[problem](name)
@@ -172,6 +171,12 @@ export function problemText(row, problem, values) {
   if (winner !== sentText(row)) return TEXT.replaced(said)
   return values && holdsPlaceholder(winner) ? TEXT.fromReference({ problem: said, written: winner.trim() }) : said
 }
+
+const feederListType = (problem) => (problem === PROBLEM_REQUIRED ? 'disjunction' : 'conjunction')
+
+export const relayedProblemText = (row, problem, feederNames, values) => (
+  filledProblemText(row, usedText(row, values), problem, formatList(feederNames, feederListType(problem)))
+)
 
 export function variableProblems(rows, values) {
   return rows.filter(isSentRow).flatMap((row) => {
