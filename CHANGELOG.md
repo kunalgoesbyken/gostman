@@ -4,6 +4,16 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.17.6] - 2026-11-11
+
+### Fixed
+
+- A prompt answer (`{{?name}}`) reaches the pre-request script for Any and Text variables too, as the text that was entered, in the apps and in `gostman run` (#24).
+- `{{$randomFloat(min,max,decimals)}}` with many decimals always gives a value that a Number variable can hold, instead of being refused on some sends (#24).
+- The message for `FALSE` and `False` in a True or false variable names the value that was entered (#24).
+- Collapse to level N is off when nothing is open beyond that level, also at All levels, for a request saved at All levels and under a filter; pinning a lower level under a filter no longer leaves a Collapse button that does nothing (#21).
+- The Variables view explains a missing or invalid value in the words of the form, without names of hidden variables, and marks a field **Required** when a hidden required variable depends on it (#23).
+
 ## [1.17.5] - 2026-11-11
 
 ### Fixed
