@@ -22,8 +22,10 @@
     "noMatches": "No sent request matches.",
     "open": "Open",
     "delete": "Delete",
-    "deletedEntry": "Deleted 1 entry",
-    "deletedCall": "Deleted 1 call",
+    "deletedEntries_one": "Deleted {{count}} entry",
+    "deletedEntries_other": "Deleted {{count}} entries",
+    "deletedCalls_one": "Deleted {{count}} call",
+    "deletedCalls_other": "Deleted {{count}} calls",
     "clear": "Clear history",
     "noResponse": "No response",
     "sentAgo": {

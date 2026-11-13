@@ -309,6 +309,14 @@ function withCalls(entry, calls) {
   return { ...entry, calls: sorted.map(compactCall), timestamp: latest.at, statusCode: latest.statusCode, noResponse: latest.noResponse }
 }
 
+const timeOfEntry = (entry) => Date.parse(entry.timestamp)
+
+function placedByTime(history, entry) {
+  const time = timeOfEntry(entry)
+  const index = history.findIndex((other) => timeOfEntry(other) < time)
+  return index < 0 ? [...history, entry] : [...history.slice(0, index), entry, ...history.slice(index)]
+}
+
 let reportStorageFailure = () => {}
 
 const WRITE_DELAY_MS = 400
@@ -605,14 +613,15 @@ export const useAppStore = create(
         deleteHistoryCall: (id, position) => set((state) => {
           const entry = state.requestHistory.find((candidate) => candidate.id === id)
           if (!entry) return state
+          const others = state.requestHistory.filter((candidate) => candidate !== entry)
           const remaining = callsOf(entry).filter((_, index) => index !== position)
-          if (remaining.length === 0) return { requestHistory: state.requestHistory.filter((candidate) => candidate !== entry) }
-          return { requestHistory: state.requestHistory.map((candidate) => (candidate === entry ? withCalls(entry, remaining) : candidate)) }
+          return { requestHistory: remaining.length === 0 ? others : placedByTime(others, withCalls(entry, remaining)) }
         }),
-        restoreHistoryEntry: (entry, index) => set((state) => {
+        restoreHistoryEntry: (entry) => set((state) => {
           const existing = state.requestHistory.find((candidate) => isSameCall(candidate, entry))
-          if (!existing) return { requestHistory: [...state.requestHistory.slice(0, index), entry, ...state.requestHistory.slice(index)] }
-          return { requestHistory: state.requestHistory.map((candidate) => (candidate === existing ? withCalls(existing, [...callsOf(existing), ...callsOf(entry)]) : candidate)) }
+          const others = state.requestHistory.filter((candidate) => candidate !== existing)
+          const calls = existing ? [...callsOf(existing), ...callsOf(entry)] : callsOf(entry)
+          return { requestHistory: placedByTime(others, withCalls(existing || entry, calls)) }
         }),
         clearHistory: () => set({ requestHistory: [] }),
 

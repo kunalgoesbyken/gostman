@@ -65,6 +65,7 @@
         "clipboard": "In the collection tree, cut, copy or paste the request or folder",
         "duplicate": "In the collection tree, duplicate the request or folder",
         "undoTree": "In the collection tree, undo or redo the last move, paste or duplicate",
+        "undoHistory": "In the history list, undo the deletions the notice shows",
         "select": "In the collection tree, select several items: toggle one, extend the selection, or select all. Esc clears it",
         "rename": "Rename the request or folder",
         "remove": "Delete the request or folder (or all selected items), close the tab or remove the history entry",

@@ -429,7 +429,7 @@ By request lists each request once, with the method, the URL, the HTTP status of
 
 Every row, in both views, has one actions button (**…**), dimmed until you hover or focus the row. The same menu opens on right-click, and with Shift+F10 or the Menu key on a focused row. Its items are **Open**, **Show calls**, which opens the request with its Calls tab selected, **Copy as cURL**, for requests that have a curl form, and, set apart at the bottom, **Delete**.
 
-- Delete takes effect at once, and a notice offers **Undo** for a few seconds. In By request it deletes the entry with all its calls ("Deleted 1 entry"); in the Journal it deletes only that call ("Deleted 1 call"), and the request goes when its last call does. The Delete key on a focused row does the same.
+- Delete takes effect at once, and a notice offers **Undo** for a few seconds. In By request it deletes the entry with all its calls ("Deleted 1 entry"); in the Journal it deletes only that call ("Deleted 1 call"), and the request goes when its last call does. The Delete key on a focused row does the same, once per press (holding it does not repeat). Deleting again while the notice shows adds to it ("Deleted 3 calls"), and **Undo**, or Ctrl+Z (Cmd+Z on macOS) with the focus in the list, brings back everything it counts, each in its place by time.
 - **Clear history** asks first and says how many entries it deletes.
 - The app keeps 50 requests and 500 calls per request by default. Change both under **Requests** in [Preferences](preferences-and-shortcuts.md#preferences); the oldest request or call is dropped first.
 

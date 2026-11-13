@@ -680,26 +680,46 @@ export function createWorkspaceActions(backend) {
     store().showResponseTab(store().activeTabId, TAB_CALLS)
   }
 
-  const undoHistoryRemoval = (entry, index) => {
-    store().restoreHistoryEntry(entry, index)
+  let removal = { noticeId: '', items: [] }
+
+  const pendingRemovals = () => (store().notice?.id === removal.noticeId ? removal.items : [])
+
+  const removalMessage = (items) => {
+    if (items.every(({ isWhole }) => isWhole)) return HISTORY_TEXT.deletedEntries(items.length)
+    return HISTORY_TEXT.deletedCalls(items.reduce((total, { entry }) => total + callsOf(entry).length, 0))
+  }
+
+  const restoreRemovals = (items) => {
+    items.forEach(({ entry }) => store().restoreHistoryEntry(entry))
     store().dismissNotice()
   }
 
+  const announceRemoval = (item) => {
+    const items = [...pendingRemovals(), item]
+    store().showNotice(removalMessage(items), () => restoreRemovals(items))
+    removal = { noticeId: store().notice.id, items }
+  }
+
+  const undoHistoryRemoval = () => {
+    const items = pendingRemovals()
+    if (items.length === 0) return false
+    restoreRemovals(items)
+    return true
+  }
+
   function removeHistoryEntry(id) {
-    const index = store().requestHistory.findIndex((entry) => entry.id === id)
-    if (index < 0) return
-    const entry = store().requestHistory[index]
+    const entry = store().requestHistory.find((candidate) => candidate.id === id)
+    if (!entry) return
     store().deleteHistoryItem(id)
-    store().showNotice(HISTORY_TEXT.deletedEntry, () => undoHistoryRemoval(entry, index))
+    announceRemoval({ entry, isWhole: true })
   }
 
   function removeHistoryCall(id, position) {
-    const index = store().requestHistory.findIndex((entry) => entry.id === id)
-    const entry = store().requestHistory[index]
+    const entry = store().requestHistory.find((candidate) => candidate.id === id)
     const call = entry && callsOf(entry)[position]
     if (!call) return
     store().deleteHistoryCall(id, position)
-    store().showNotice(HISTORY_TEXT.deletedCall, () => undoHistoryRemoval({ ...entry, calls: [compactCall(call)] }, index))
+    announceRemoval({ entry: { ...entry, calls: [compactCall(call)] }, isWhole: false })
   }
 
   function saveLatestRequest() {
@@ -905,5 +925,6 @@ export function createWorkspaceActions(backend) {
     openHistoryCalls,
     removeHistoryEntry,
     removeHistoryCall,
+    undoHistoryRemoval,
   }
 }
