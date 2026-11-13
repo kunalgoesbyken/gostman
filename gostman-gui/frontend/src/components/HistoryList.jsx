@@ -10,10 +10,12 @@ import { RowMenuButton, menuOpener, rowMenuItems } from "./HistoryRowMenu"
 import { JournalList } from "./JournalList"
 import { MethodTag } from "./MethodTag"
 import { SearchField } from "./SearchField"
+import { useDebouncedValue } from "../hooks/useDebouncedValue"
 import { PANE_SIDEBAR, focusPane } from "../lib/panes"
 import { ORIENTATION, isFocusLost, moveFocus, tabStopOf } from "../lib/rovingFocus"
-import { STATUS_CLASSES } from "../lib/callHistory"
-import { ALL_FOLDERS, ALL_STATUSES, ALL_TAGS, RANGES, RANGE_ANY, filterHistory, groupByDate, groupByDay, journalOf, pageOfDays } from "../lib/historyFilter"
+import { currentTargetOf } from "../lib/historyIdentity"
+import { STATUS_CLASSES, totalCallsOf } from "../lib/callHistory"
+import { ALL_FOLDERS, ALL_STATUSES, ALL_TAGS, RANGES, RANGE_ANY, filterHistory, groupByDate, journalView } from "../lib/historyFilter"
 import { buildCollectionTree, listFolders } from "../lib/collectionTree"
 import { collectTags } from "../lib/tags"
 import { formatDate, formatDateTime, formatNumber } from "../lib/i18n/format"
@@ -29,6 +31,7 @@ const HOUR_MS = 60 * MINUTE_MS
 const DAY_MS = 24 * HOUR_MS
 const WEEK_MS = 7 * DAY_MS
 const JOURNAL_PAGE = 200
+const SEARCH_DEBOUNCE_MS = 150
 const ENTRY_KEYS = { selector: "[data-history-entry]", orientation: ORIENTATION.vertical }
 
 const entrySelector = (id) => `[data-history-entry="${CSS.escape(id)}"]`
@@ -164,45 +167,53 @@ export const HistoryList = memo(function HistoryList({ entries, folders, actions
   const [focusedId, setFocusedId] = useState(null)
   const [menu, setMenu] = useState(null)
   const [journalLimit, setJournalLimit] = useState(JOURNAL_PAGE)
+  const [pendingFocus, setPendingFocus] = useState(null)
   const listRef = useRef(null)
-  const pendingFocusId = useRef(null)
   const { historyView } = usePreferences()
   const isJournal = historyView === HISTORY_VIEW_JOURNAL
+  const searchedQuery = useDebouncedValue(query, SEARCH_DEBOUNCE_MS)
+  const searched = useMemo(() => ({ query: searchedQuery, ...filters }), [searchedQuery, filters])
 
-  const found = useMemo(
-    () => (isJournal ? journalOf : filterHistory)(entries, { query, ...filters }, folders, Date.now()),
-    [isJournal, entries, folders, query, filters],
-  )
-  const days = useMemo(() => (isJournal ? groupByDay(found, Date.now()) : []), [isJournal, found])
-  const shownDays = useMemo(() => pageOfDays(days, journalLimit), [days, journalLimit])
-  const shown = useMemo(() => (isJournal ? shownDays.flatMap((day) => day.rows) : found), [isJournal, shownDays, found])
+  const journal = useMemo(() => (isJournal ? journalView(entries, searched, folders, Date.now()) : null), [isJournal, entries, searched, folders])
+  const found = useMemo(() => (isJournal ? [] : filterHistory(entries, searched, folders, Date.now())), [isJournal, entries, searched, folders])
+  const shownDays = useMemo(() => (journal ? journal.days(journalLimit) : []), [journal, journalLimit])
+  const shown = useMemo(() => (journal ? shownDays.flatMap((day) => day.rows) : found), [journal, shownDays, found])
+  const foundCount = journal ? journal.count : found.length
   const groups = useMemo(() => {
     if (isJournal) return []
     return isGrouped ? groupByDate(found, Date.now()) : [{ key: "", entries: found }]
   }, [isJournal, found, isGrouped])
   const folderOptions = useMemo(() => listFolders(buildCollectionTree(folders, [])), [folders])
   const tags = useMemo(() => collectTags(entries), [entries])
-  const totalCalls = useMemo(() => entries.reduce((total, entry) => total + entry.calls.length, 0), [entries])
+  const totalCalls = useMemo(() => totalCallsOf(entries), [entries])
 
-  const isSearching = query.trim() !== "" || Object.entries(NO_FILTERS).some(([name, none]) => filters[name] !== none)
+  const isSearching = searchedQuery.trim() !== "" || Object.entries(NO_FILTERS).some(([name, none]) => filters[name] !== none)
   const tabStop = tabStopOf(shown.map((item) => item.id), focusedId)
 
-  const removeTarget = useCallback((target) => {
+  const menuTarget = useMemo(() => (menu ? currentTargetOf(entries, menu.target) : null), [menu, entries])
+
+  const removeTarget = useCallback((stale) => {
+    const target = currentTargetOf(entries, stale)
+    if (!target) return
     const index = shown.findIndex((item) => item.id === target.id)
-    const neighbour = shown[index + 1] || shown[index - 1]
-    pendingFocusId.current = neighbour?.id ?? ""
-    if (neighbour) setFocusedId(neighbour.id)
+    if (index >= 0) setPendingFocus(index)
     if (target.callIndex === null) actions.removeHistoryEntry(target.entry.id)
     else actions.removeHistoryCall(target.entry.id, target.callIndex)
-  }, [shown, actions])
+  }, [entries, shown, actions])
+
+  const showMore = () => {
+    setPendingFocus(shown.length)
+    setJournalLimit(journalLimit + JOURNAL_PAGE)
+  }
 
   useLayoutEffect(() => {
-    if (pendingFocusId.current === null) return
-    const neighbour = pendingFocusId.current && listRef.current?.querySelector(entrySelector(pendingFocusId.current))
-    pendingFocusId.current = null
-    if (neighbour) neighbour.focus()
+    if (pendingFocus === null) return
+    setPendingFocus(null)
+    const rows = [...(listRef.current?.querySelectorAll(ENTRY_KEYS.selector) ?? [])]
+    const row = rows[Math.min(pendingFocus, rows.length - 1)]
+    if (row) row.focus()
     else if (isFocusLost()) focusPane(PANE_SIDEBAR)
-  })
+  }, [pendingFocus])
 
   const enterResultsOnArrow = (event) => {
     if (event.key !== "ArrowDown" || !tabStop) return
@@ -236,12 +247,12 @@ export const HistoryList = memo(function HistoryList({ entries, folders, actions
       )}
       {isJournal && isSearching && entries.length > 0 && (
         <p role="status" className="px-3 pb-1 text-2xs text-muted-foreground tabular-nums">
-          {HISTORY_TEXT.journal.filtered({ shown: formatNumber(found.length), total: formatNumber(totalCalls) })}
+          {HISTORY_TEXT.journal.filtered({ shown: formatNumber(foundCount), total: formatNumber(totalCalls) })}
         </p>
       )}
 
       <div className="min-h-0 flex-1 overflow-y-auto">
-        {found.length === 0 ? (
+        {foundCount === 0 ? (
           <FeatureEmpty
             surface={isSearching ? undefined : "history"}
             icon={isSearching ? Search : Clock}
@@ -251,21 +262,21 @@ export const HistoryList = memo(function HistoryList({ entries, folders, actions
         ) : (
           <ul ref={listRef} aria-label={SIDEBAR_TEXT.history} onKeyDown={(event) => moveFocus(event, ENTRY_KEYS)} className="py-1">
             {isJournal ? (
-              <JournalList days={shownDays} tabStop={tabStop} menuId={menu?.target.id} {...rowProps} />
+              <JournalList days={shownDays} tabStop={tabStop} menuId={menuTarget?.id} {...rowProps} />
             ) : groups.map((group) => (
               <Fragment key={group.key}>
                 {group.key && <li className="px-3 pb-0.5 pt-2 text-2xs font-medium text-muted-foreground">{HISTORY_TEXT.groups[group.key]}</li>}
                 {group.entries.map((entry) => (
-                  <HistoryRow key={entry.id} entry={entry} isTabStop={entry.id === tabStop} isMenuOpen={menu?.target.id === entry.id} {...rowProps} />
+                  <HistoryRow key={entry.id} entry={entry} isTabStop={entry.id === tabStop} isMenuOpen={menuTarget?.id === entry.id} {...rowProps} />
                 ))}
               </Fragment>
             ))}
           </ul>
         )}
-        {isJournal && shown.length < found.length && (
+        {isJournal && shown.length < foundCount && (
           <div className="flex flex-col items-center gap-1 px-3 pb-2">
-            <p className="text-2xs text-muted-foreground">{HISTORY_TEXT.calls.shownRows({ shown: formatNumber(shown.length), total: formatNumber(found.length) })}</p>
-            <Button variant="ghost" size="sm" onClick={() => setJournalLimit(journalLimit + JOURNAL_PAGE)}>{HISTORY_TEXT.showMore}</Button>
+            <p className="text-2xs text-muted-foreground">{HISTORY_TEXT.calls.shownRows({ shown: formatNumber(shown.length), total: formatNumber(foundCount) })}</p>
+            <Button variant="ghost" size="sm" onClick={showMore}>{HISTORY_TEXT.showMore}</Button>
           </div>
         )}
       </div>
@@ -273,12 +284,12 @@ export const HistoryList = memo(function HistoryList({ entries, folders, actions
       {entries.length > 0 && (
         <div className="flex h-10 shrink-0 items-center gap-1 border-t border-border px-3">
           <Button variant="ghost" size="sm" onClick={actions.clearHistory}>{HISTORY_TEXT.clear}</Button>
-          {isJournal && found.length > 0 && (
-            <Button variant="ghost" size="sm" className="ms-auto" onClick={() => actions.exportCalls(found)}><Download />{HISTORY_TEXT.calls.exportCsv}</Button>
+          {isJournal && foundCount > 0 && (
+            <Button variant="ghost" size="sm" className="ms-auto" onClick={() => actions.exportCalls(journal.rows(Infinity))}><Download />{HISTORY_TEXT.calls.exportCsv}</Button>
           )}
         </div>
       )}
-      {menu && <ContextMenu position={menu.position} title="" items={rowMenuItems(menu.target, actions, removeTarget)} onClose={() => setMenu(null)} />}
+      {menuTarget && <ContextMenu position={menu.position} title="" items={rowMenuItems(menuTarget, actions, removeTarget)} onClose={() => setMenu(null)} />}
     </>
   )
 })

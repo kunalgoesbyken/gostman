@@ -35,8 +35,6 @@
     "subfolderCount_one": "{{count}} Unterordner",
     "subfolderCount_other": "{{count}} Unterordner",
     "clearHistory": "Verlauf löschen",
-    "clearHistoryMessage_one": "Den einzigen Verlaufseintrag löschen? Das lässt sich nicht rückgängig machen.",
-    "clearHistoryMessage_other": "Alle {{count}} Verlaufseinträge löschen? Das lässt sich nicht rückgängig machen.",
     "clear": "Löschen",
     "closeTab": "Tab schließen",
     "closeTabMessage": "„{{name}}“ hat ungespeicherte Änderungen. Vor dem Schließen speichern?",

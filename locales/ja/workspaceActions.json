@@ -33,7 +33,6 @@
     "requestCount_other": "{{count}}件のリクエスト",
     "subfolderCount_other": "{{count}}個のサブフォルダー",
     "clearHistory": "履歴をクリア",
-    "clearHistoryMessage_other": "{{count}}件の履歴をすべて削除しますか？この操作は元に戻せません。",
     "clear": "クリア",
     "closeTab": "タブを閉じる",
     "closeTabMessage": "「{{name}}」には未保存の変更があります。閉じる前に保存しますか？",

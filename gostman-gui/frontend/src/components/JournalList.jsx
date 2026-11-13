@@ -1,7 +1,7 @@
 import { CallStatus } from "./CallStatus"
 import { MethodTag } from "./MethodTag"
 import { RowMenuButton, menuOpener } from "./HistoryRowMenu"
-import { callLabel, durationText, requestNameOf, sizeText } from "../lib/callDisplay"
+import { callLabel, durationText, requestNameOf, sizeText, statusText } from "../lib/callDisplay"
 import { timeOf } from "../lib/callHistory"
 import { formatDate, formatTime } from "../lib/i18n/format"
 import { isRemoveKey } from "../lib/shortcuts"
@@ -42,7 +42,7 @@ function JournalRow({ row, isTabStop, isMenuOpen, onOpen, onDelete, onFocus, onO
           <span className="min-w-0 flex-1 truncate">{requestNameOf(entry)}</span>
         </span>
         <span className="flex min-w-0 items-center gap-1.5 whitespace-nowrap font-mono text-2xs tabular-nums">
-          <CallStatus call={call} />
+          <CallStatus call={call} title={statusText(call)} className="inline-block min-w-0 shrink truncate" />
           {call.durationMs !== null && <span className="shrink-0">{durationText(call.durationMs)}</span>}
           {call.size !== null && <span className="shrink-0">{sizeText(call.size)}</span>}
         </span>
