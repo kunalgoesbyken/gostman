@@ -79,8 +79,8 @@
     "showMore": "Show more",
     "sentOn": "Last sent {{date}}",
     "calls": {
-      "summaryLine_one": "{{count}} call · {{rate}} 2xx or 3xx · median {{median}} · p95 {{p95}}",
-      "summaryLine_other": "{{count}} calls · {{rate}} 2xx or 3xx · median {{median}} · p95 {{p95}}",
+      "summaryLine_one": "{{count}} call · {{rate}} 2xx or 3xx · median {{median}} · p95 {{p95}} · slowest {{slowest}} · avg {{size}}",
+      "summaryLine_other": "{{count}} calls · {{rate}} 2xx or 3xx · median {{median}} · p95 {{p95}} · slowest {{slowest}} · avg {{size}}",
       "showing": "Showing {{shown}} of {{total}} calls",
       "status": "Status",
       "classes": {

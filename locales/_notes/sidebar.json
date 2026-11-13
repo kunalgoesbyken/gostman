@@ -29,7 +29,7 @@
   "history.journal.filtered": "Shown above the journal while a search or a filter is on. {{shown}} and {{total}} are numbers of calls.",
   "history.showMore": "Button under the journal that lists more calls.",
   "history.sentOn": "Tooltip line on a history row. {{date}} is a full date and time.",
-  "history.calls.summaryLine": "One line above the Calls chart. {{rate}} is the share of calls answered with 2xx or 3xx; {{median}} and {{p95}} are durations such as 120 ms. The p95 is the 95th percentile.",
+  "history.calls.summaryLine": "One line above the Calls chart. {{rate}} is the share of calls answered with 2xx or 3xx; {{median}}, {{p95}} and {{slowest}} are durations such as 120 ms, {{size}} is the average size of a response such as 1.2 KB. The p95 is the 95th percentile; avg is short for average.",
   "history.calls.showing": "Read aloud by screen readers when a filter changes. {{shown}} and {{total}} are numbers of calls.",
   "history.calls.chartSummary": "Accessible name of the chart. {{from}} and {{to}} are dates and times, {{ok}} and {{failed}} are numbers of calls, {{median}} is a duration.",
   "history.calls.plotLabel": "Accessible name of the plot of the Calls chart, which takes the arrow keys.",

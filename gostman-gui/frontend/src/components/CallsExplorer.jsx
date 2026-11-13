@@ -68,7 +68,14 @@ function neighbourIndex(key, current, count) {
 
 function summaryLineOf(calls) {
   const summary = summarizeCalls(calls)
-  return TEXT.summaryLine({ count: summary.count, rate: formatPercent(summary.successRate), median: durationText(summary.p50Ms), p95: durationText(summary.p95Ms) })
+  return TEXT.summaryLine({
+    count: summary.count,
+    rate: formatPercent(summary.successRate),
+    median: durationText(summary.p50Ms),
+    p95: durationText(summary.p95Ms),
+    slowest: durationText(summary.maxMs),
+    size: sizeText(summary.averageSize),
+  })
 }
 
 function chartSummaryOf(calls) {

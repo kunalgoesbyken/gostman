@@ -88,6 +88,7 @@ const countIn = (calls, names) => calls.filter((call) => names.includes(statusCl
 
 export function summarizeCalls(calls) {
   const durations = calls.map((call) => call.durationMs).filter((value) => value !== null).sort((first, second) => first - second)
+  const sizes = calls.map((call) => call.size).filter((value) => value !== null)
   const okCount = countIn(calls, OK_CLASSES)
   return {
     count: calls.length,
@@ -96,6 +97,8 @@ export function summarizeCalls(calls) {
     successRate: calls.length === 0 ? null : okCount / calls.length,
     p50Ms: percentile(durations, 0.5),
     p95Ms: percentile(durations, 0.95),
+    maxMs: durations.at(-1) ?? null,
+    averageSize: sizes.length === 0 ? null : Math.round(sizes.reduce((sum, size) => sum + size, 0) / sizes.length),
   }
 }
 

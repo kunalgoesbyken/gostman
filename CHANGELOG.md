@@ -6,7 +6,7 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ### Added
 
-- The response panel has a **Calls** tab, the last one, with the calls of the request in the active tab: a one-line summary (count, share of 2xx or 3xx, median, p95), the chart with its filters, and a table. Its name carries the number of calls (99+ above 99), **No calls match** offers **Clear filters**, and a request opened from History shows its calls before it is sent again (#38).
+- The response panel has a **Calls** tab, the last one, with the calls of the request in the active tab: a one-line summary (count, share of 2xx or 3xx, median, p95, slowest, average size), the chart with its filters, and a table. Its name carries the number of calls (99+ above 99), **No calls match** offers **Clear filters**, and a request opened from History shows its calls before it is sent again (#38).
 - The chart of the calls works from the keyboard: one Tab stop, Left and Right arrows (and Home and End) between the calls with the same tooltip as hover, Enter to select the call in the table, Escape to clear. The chart has an accessible summary, and screen readers hear "Showing 12 of 24 calls" when a filter changes (#38).
 - A call that got no response keeps why: timed out, connection failed, DNS lookup failed, TLS error, cancelled, blocked by policy or another error. The reason shows in the Calls list, in the tooltip of the chart bar, in the Journal and in the Calls filters (#38).
 - **Export CSV** in the Calls tab and in the Journal saves the calls shown as a CSV file with the time, method, address, status, reason for no response, duration and size. The address is redacted like other shown addresses, and a text value that a spreadsheet would run as a formula starts with an apostrophe (#38).
@@ -16,7 +16,7 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 - The History tab opens on the **Journal**; **By request** keeps the list of 1.18.0. The switch sits under the search box and Gostman remembers the choice (#38).
 - A History row has one actions button (**…**), also on right-click, with **Open**, **Show calls**, **Copy as cURL** and, set apart at the bottom, **Delete**, so the delete button is no longer next to the chart button. Delete takes effect at once with an **Undo** notice (#38).
-- **Show calls** opens the request with its Calls tab selected instead of a chart window, and the summary of the calls is one line instead of six figures (#38).
+- **Show calls** opens the request with its Calls tab selected instead of a chart window, and the summary of the calls is one line that wraps instead of a grid of six figures (#38).
 
 ## [1.18.0] - 2026-11-13
 
