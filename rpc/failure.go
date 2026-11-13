@@ -29,6 +29,11 @@ func configError(format string, args ...any) error {
 	return &failure{kind: engine.ErrorConfig, message: fmt.Sprintf(format, args...)}
 }
 
+func localizedConfigError(code locales.Code, params locales.Params) error {
+	localized := locales.New(code, params)
+	return &failure{kind: engine.ErrorConfig, message: localized.String(), localized: &localized}
+}
+
 func classify(ctx context.Context, err error) *failure {
 	var known *failure
 	switch {

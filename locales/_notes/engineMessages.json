@@ -20,5 +20,7 @@
   "proxy": "Errors in the proxy address of the network settings.",
   "curl": "Errors shown when a curl command pasted into the request bar or imported cannot be read. Option names such as --url and curl itself stay as written.",
   "curl.needsValue": "{{option}} is a curl option as written in the command, for example -H or --data.",
-  "curl.noUrlAfterOption": "{{option}} is an option as written in the command, for example --unknown-option. {{value}} is the word that came after it."
+  "curl.noUrlAfterOption": "{{option}} is an option as written in the command, for example --unknown-option. {{value}} is the word that came after it.",
+  "grpc": "Errors about the .proto files added to a gRPC request. File names and import paths stay as written.",
+  "grpc.importConflict": "{{importer}} is the name of a .proto file, {{path}} is a path written in one of its import lines and {{file}} is the name of an added .proto file, for example validate.proto."
 }

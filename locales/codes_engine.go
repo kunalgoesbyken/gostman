@@ -31,6 +31,7 @@ const (
 	EngineFilesUnreadable             Code = "engineMessages.files.unreadable"
 	EngineGrpcAfterEnd                Code = "engineMessages.grpc.afterEnd"
 	EngineGrpcAfterTrailers           Code = "engineMessages.grpc.afterTrailers"
+	EngineGrpcImportConflict          Code = "engineMessages.grpc.importConflict"
 	EngineGrpcIncompleteFrame         Code = "engineMessages.grpc.incompleteFrame"
 	EngineGrpcMissingEnd              Code = "engineMessages.grpc.missingEnd"
 	EngineGrpcMissingTrailers         Code = "engineMessages.grpc.missingTrailers"

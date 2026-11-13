@@ -4,6 +4,12 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Fixed
+
+- gRPC: an added `.proto` file now resolves under every import path that ends with its file name, so two files that import the same dependency under different paths (for example `google/api/field_behavior.proto` and `field_behavior.proto`) no longer fail with "could not resolve path" (#37).
+- gRPC: an import that would make an added file import itself under another folder (two different files with the same name) is reported with the import and the file, instead of an unclear compile error (#37).
+- gRPC: adding a `.proto` file with the name of an earlier one, but other content, now shows a notice that it replaced the earlier file, and the notice stays with the request (#37).
+
 ## [1.18.0] - 2026-11-13
 
 ### Added

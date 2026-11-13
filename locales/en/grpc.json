@@ -11,6 +11,8 @@
     "schemaHint": "Load the services through server reflection, or add the service's .proto files. The address, headers and auth of this request are used.",
     "noServices": "No services were found.",
     "tooLarge": "{{name}} is {{size}}. Files are limited to {{limit}}.",
+    "replaced_one": "{{names}} replaced the file added earlier under the same name. Gostman keeps one file per name, so if they were two different files from different folders, only this one is used.",
+    "replaced_other": "{{names}} replaced the files added earlier under the same names. Gostman keeps one file per name, so if any of them were different files from different folders, only the new ones are used.",
     "method": "Method",
     "methodLabel": "gRPC method",
     "chooseMethod": "Choose a method",

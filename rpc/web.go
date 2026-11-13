@@ -316,8 +316,6 @@ func (w *webCall) readGRPCWeb(response *http.Response, raw []byte, result *excha
 	if !result.truncated && !seenTrailers && seenMessage {
 		result.status = status.New(codes.Unknown, locales.New(locales.EngineGrpcMissingTrailers, nil).English())
 	}
-	// A non-200 HTTP response cannot become a successful RPC through a
-	// misleading grpc-status header or trailers frame.
 	if response.StatusCode != http.StatusOK && result.status.Code() == codes.OK {
 		result.status = status.New(httpCode(response.StatusCode), http.StatusText(response.StatusCode))
 	}
@@ -387,8 +385,6 @@ func httpCode(httpStatus int) codes.Code {
 func (w *webCall) readConnect(response *http.Response, raw []byte, result *exchange) error {
 	if strings.HasPrefix(response.Header.Get("Content-Type"), contentConnectEnv) {
 		if response.StatusCode != http.StatusOK {
-			// Streaming errors use the same Connect JSON status as unary
-			// errors, not a sequence of framed responses.
 			result.status = connectStatus(raw, response.StatusCode)
 			return nil
 		}
