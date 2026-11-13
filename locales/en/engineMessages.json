@@ -75,5 +75,13 @@
     "needsValue": "{{option}} needs a value",
     "noUrl": "the curl command has no URL",
     "noUrlAfterOption": "the curl command has no URL. {{option}} is not a curl option Gostman knows, so {{value}} after it was not read as the URL; put the URL after --url"
+  },
+  "grpc": {
+    "incompleteFrame": "the response ends inside a message",
+    "missingEnd": "the stream ended without its end message",
+    "afterEnd": "the stream has data after its end message",
+    "repeatedTrailers": "the response has more than one trailers frame",
+    "afterTrailers": "the response has data after its trailers",
+    "missingTrailers": "the response has no trailers frame"
   }
 }

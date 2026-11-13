@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/locales"
 	"io"
 	"net/http"
 	"net/url"
@@ -278,11 +279,19 @@ func (w *webCall) readGRPCWeb(response *http.Response, raw []byte, result *excha
 		raw = decoded
 	}
 	result.status = webStatus(response.Header, response.StatusCode)
+	seenTrailers := false
+	seenMessage := false
 	for len(raw) >= frameHeaderSize {
 		flag := raw[0]
+		if seenTrailers {
+			if flag&flagTrailers != 0 {
+				return locales.Errorf(locales.EngineGrpcRepeatedTrailers, nil)
+			}
+			return locales.Errorf(locales.EngineGrpcAfterTrailers, nil)
+		}
 		size := int(binary.BigEndian.Uint32(raw[1:frameHeaderSize]))
 		if frameHeaderSize+size > len(raw) {
-			return fmt.Errorf("the response ends inside a message")
+			return locales.Errorf(locales.EngineGrpcIncompleteFrame, nil)
 		}
 		payload := raw[frameHeaderSize : frameHeaderSize+size]
 		raw = raw[frameHeaderSize+size:]
@@ -290,14 +299,27 @@ func (w *webCall) readGRPCWeb(response *http.Response, raw []byte, result *excha
 		case flag&flagCompressed != 0:
 			return fmt.Errorf("the response is compressed, which is not supported")
 		case flag&flagTrailers != 0:
+			seenTrailers = true
 			trailers := parseTrailers(payload)
 			result.trailer = trailers
 			result.status = webStatus(http.Header(trailerHeader(trailers)), http.StatusOK)
 		default:
+			seenMessage = true
 			if err := w.addMessage(result, payload); err != nil {
 				return err
 			}
 		}
+	}
+	if len(raw) > 0 && !result.truncated {
+		return locales.Errorf(locales.EngineGrpcIncompleteFrame, nil)
+	}
+	if !result.truncated && !seenTrailers && seenMessage {
+		result.status = status.New(codes.Unknown, locales.New(locales.EngineGrpcMissingTrailers, nil).English())
+	}
+	// A non-200 HTTP response cannot become a successful RPC through a
+	// misleading grpc-status header or trailers frame.
+	if response.StatusCode != http.StatusOK && result.status.Code() == codes.OK {
+		result.status = status.New(httpCode(response.StatusCode), http.StatusText(response.StatusCode))
 	}
 	return nil
 }
@@ -364,6 +386,12 @@ func httpCode(httpStatus int) codes.Code {
 
 func (w *webCall) readConnect(response *http.Response, raw []byte, result *exchange) error {
 	if strings.HasPrefix(response.Header.Get("Content-Type"), contentConnectEnv) {
+		if response.StatusCode != http.StatusOK {
+			// Streaming errors use the same Connect JSON status as unary
+			// errors, not a sequence of framed responses.
+			result.status = connectStatus(raw, response.StatusCode)
+			return nil
+		}
 		return readEnvelopes(raw, result)
 	}
 	if response.StatusCode == http.StatusOK {
@@ -380,11 +408,15 @@ func (w *webCall) readConnect(response *http.Response, raw []byte, result *excha
 }
 
 func readEnvelopes(raw []byte, result *exchange) error {
+	seenEnd := false
 	for len(raw) >= frameHeaderSize {
+		if seenEnd {
+			return locales.Errorf(locales.EngineGrpcAfterEnd, nil)
+		}
 		flag := raw[0]
 		size := int(binary.BigEndian.Uint32(raw[1:frameHeaderSize]))
 		if frameHeaderSize+size > len(raw) {
-			return fmt.Errorf("the response ends inside a message")
+			return locales.Errorf(locales.EngineGrpcIncompleteFrame, nil)
 		}
 		payload := raw[frameHeaderSize : frameHeaderSize+size]
 		raw = raw[frameHeaderSize+size:]
@@ -392,6 +424,7 @@ func readEnvelopes(raw []byte, result *exchange) error {
 		case flag&flagCompressed != 0:
 			return fmt.Errorf("the response is compressed, which is not supported")
 		case flag&flagEndStream != 0:
+			seenEnd = true
 			result.status = connectEndStatus(payload, result)
 		default:
 			var compact bytes.Buffer
@@ -402,6 +435,12 @@ func readEnvelopes(raw []byte, result *exchange) error {
 			result.size += int64(compact.Len())
 			result.serverStream = true
 		}
+	}
+	if len(raw) > 0 && !result.truncated {
+		return locales.Errorf(locales.EngineGrpcIncompleteFrame, nil)
+	}
+	if !seenEnd && !result.truncated {
+		return locales.Errorf(locales.EngineGrpcMissingEnd, nil)
 	}
 	return nil
 }
