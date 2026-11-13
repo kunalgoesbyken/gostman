@@ -69,7 +69,7 @@ import { countImported } from './importSummary'
 import { SCOPE_GLOBAL } from './variableScopes'
 import { createTrashActions, keepFolder, keepRequest } from './trashSession'
 import { csvHeaders } from './callDisplay'
-import { callFromResponse, callsOf, compactCall } from './callHistory'
+import { callFromResponse, callsOf, compactCall, totalCallsOf } from './callHistory'
 import { TAB_CALLS } from './responseTabs'
 import { HISTORY_TEXT } from './sidebarText'
 import { CALLS_FILE_NAME, CSV_MEDIA_TYPE, callsCsv } from './callsCsv'
@@ -606,7 +606,7 @@ export function createWorkspaceActions(backend) {
     if (entryCount === 0) return
     store().showConfirm(
       TEXT.clearHistory,
-      TEXT.clearHistoryMessage(entryCount),
+      TEXT.clearHistoryMessage(entryCount, totalCallsOf(store().requestHistory)),
       () => store().clearHistory(),
       null,
       DESTRUCTIVE,

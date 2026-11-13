@@ -17,7 +17,7 @@ const reasonOf = (raw) => {
   return REASONS.includes(raw.reason) ? raw.reason : REASON_UNKNOWN
 }
 
-function normalizeCall(raw) {
+export function normalizeCall(raw) {
   if (!raw || !isTime(raw.at)) return null
   return {
     at: raw.at,
@@ -38,6 +38,8 @@ export function callsOf(entry) {
 export function callFromResponse(response, statusCode, noResponse, at) {
   return normalizeCall({ at, statusCode, noResponse, reason: noResponse ? noResponseReason(response) : '', durationMs: response?.durationMs, size: noResponse ? null : response?.size })
 }
+
+export const totalCallsOf = (entries) => entries.reduce((total, entry) => total + entry.calls.length, 0)
 
 export const newestFirst = (calls) => [...calls].sort((first, second) => timeOf(second) - timeOf(first))
 
@@ -61,6 +63,8 @@ export function statusClassOf(call) {
 }
 
 export const timeOf = (call) => Date.parse(call.at)
+
+export const outcomeKeyOf = (raw) => (raw.noResponse === true ? -statusOf(raw.statusCode) - 1 : statusOf(raw.statusCode))
 
 export function filterCalls(calls, { classes, reasons = null, minMs = null, maxMs = null, from = null, to = null }) {
   return calls.filter((call) => {

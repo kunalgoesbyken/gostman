@@ -415,7 +415,7 @@ The journal lists every send on its own row, newest first. Each row has two line
 
 - Click a row to open its request as a tab.
 - Search, the date range, the status filter and the folder and tag filters apply to the calls, so `404` finds the calls that got one. While one of them is on, the journal says how many calls match, for example "12 of 24 calls".
-- The journal lists 200 calls, with **Show more** for 200 more. **Export CSV**, next to **Clear history**, saves every call that matches, not only the ones listed, in the format described under [Calls](#calls).
+- The journal lists 200 calls, with **Show more** for 200 more; focus moves to the first call it adds. Search applies a moment after you stop typing. **Export CSV**, next to **Clear history**, saves every call that matches, not only the ones listed, in the format described under [Calls](#calls).
 
 ### By request
 
@@ -429,8 +429,8 @@ By request lists each request once, with the method, the URL, the HTTP status of
 
 Every row, in both views, has one actions button (**…**), dimmed until you hover or focus the row. The same menu opens on right-click, and with Shift+F10 or the Menu key on a focused row. Its items are **Open**, **Show calls**, which opens the request with its Calls tab selected, **Copy as cURL**, for requests that have a curl form, and, set apart at the bottom, **Delete**.
 
-- Delete takes effect at once, and a notice offers **Undo** for a few seconds. In By request it deletes the entry with all its calls ("Deleted 1 entry"); in the Journal it deletes only that call ("Deleted 1 call"), and the request goes when its last call does. The Delete key on a focused row does the same, once per press (holding it does not repeat). Deleting again while the notice shows adds to it ("Deleted 3 calls"), and **Undo**, or Ctrl+Z (Cmd+Z on macOS) with the focus in the list, brings back everything it counts, each in its place by time.
-- **Clear history** asks first and says how many entries it deletes.
+- Delete takes effect at once, and a notice offers **Undo** for a few seconds. In By request it deletes the entry with all its calls ("Deleted 1 entry"); in the Journal it deletes only that call ("Deleted 1 call"), and the request goes when its last call does. The Delete key on a focused row does the same, once per press (holding it does not repeat), and focus moves to the row that takes its place (the one above when the last row went). Deleting again while the notice shows adds to it ("Deleted 3 calls"), and **Undo**, or Ctrl+Z (Cmd+Z on macOS) with the focus in the list, brings back everything it counts, each in its place by time.
+- **Clear history** asks first and says how many requests and calls it deletes.
 - The app keeps 50 requests and 500 calls per request by default. Change both under **Requests** in [Preferences](preferences-and-shortcuts.md#preferences); the oldest request or call is dropped first.
 
 ### Calls

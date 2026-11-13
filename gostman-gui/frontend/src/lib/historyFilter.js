@@ -1,4 +1,5 @@
-import { callsOf, statusClassOf, timeOf } from './callHistory'
+import { statusClassOf } from './callHistory'
+import { mergeCalls } from './journalMerge'
 import { foldCase, matchesTags } from './tags'
 import { folderChain } from './variableScopes'
 import { inheritedTags } from './collectionTree'
@@ -29,6 +30,11 @@ const startOfDay = (time) => {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
 }
 
+const startOfNextDay = (day) => {
+  const date = new Date(day)
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1).getTime()
+}
+
 const daysAgo = (timestamp, now) => Math.round((startOfDay(now) - startOfDay(timestamp)) / DAY_MS)
 
 export function bucketOf(timestamp, now) {
@@ -48,13 +54,16 @@ function matchersOf({ query, range, folderId, tag, statusClass = ALL_STATUSES },
   const needle = foldCase(query.trim())
   const tagsOf = inheritedTags(folders)
   const wanted = tag === ALL_TAGS ? [] : [tag]
+  const keepsTime = (timestamp) => inRange(timestamp, range, now)
+  const keepsOutcome = (entry, { statusCode, noResponse }) => (
+    (statusClass === ALL_STATUSES || statusClassOf({ statusCode, noResponse }) === statusClass)
+    && (needle === '' || foldCase(`${entry.method} ${entry.url} ${statusCode || ''}`).includes(needle))
+  )
   return {
     keepsEntry: (entry) => inFolder(entry, folderId, folders) && matchesTags(tagsOf(entry), { include: wanted }),
-    keepsSend: (entry, timestamp, { statusCode, noResponse }) => (
-      inRange(timestamp, range, now)
-      && (statusClass === ALL_STATUSES || statusClassOf({ statusCode, noResponse }) === statusClass)
-      && (needle === '' || foldCase(`${entry.method} ${entry.url} ${statusCode || ''}`).includes(needle))
-    ),
+    keepsTime,
+    keepsOutcome,
+    keepsSend: (entry, timestamp, outcome) => keepsTime(timestamp) && keepsOutcome(entry, outcome),
   }
 }
 
@@ -63,14 +72,21 @@ export function filterHistory(entries, filters, folders, now) {
   return entries.filter((entry) => keepsEntry(entry) && keepsSend(entry, entry.timestamp, entry))
 }
 
-export function journalOf(entries, filters, folders, now) {
-  const { keepsEntry, keepsSend } = matchersOf(filters, folders, now)
-  return entries
-    .filter(keepsEntry)
-    .flatMap((entry) => callsOf(entry).map((call, index) => ({ id: `${entry.id}:${index}`, index, timestamp: call.at, entry, call })))
-    .filter(({ entry, call }) => keepsSend(entry, call.at, call))
-    .sort((first, second) => timeOf(second.call) - timeOf(first.call))
+export function journalView(entries, filters, folders, now) {
+  const { keepsEntry, keepsTime, keepsOutcome } = matchersOf(filters, folders, now)
+  const merged = mergeCalls(entries.filter(keepsEntry), keepsTime, keepsOutcome)
+  return {
+    count: merged.count,
+    rows: merged.rows,
+    days: (limit) => {
+      const groups = groupByDay(merged.rows(limit), now)
+      const last = groups.at(-1)
+      return groups.map((group) => ({ ...group, count: group === last ? merged.countCalls(group.day, startOfNextDay(group.day)) : group.rows.length }))
+    },
+  }
 }
+
+export const journalOf = (entries, filters, folders, now) => journalView(entries, filters, folders, now).rows(Infinity)
 
 export function groupByDay(rows, now) {
   const groups = []
@@ -82,16 +98,6 @@ export function groupByDay(rows, now) {
     else groups.push({ day, relative: RELATIVE_DAYS[daysAgo(time, now)] ?? '', rows: [row] })
   }
   return groups
-}
-
-export function pageOfDays(groups, limit) {
-  let remaining = limit
-  return groups.flatMap((group) => {
-    if (remaining <= 0) return []
-    const rows = group.rows.slice(0, remaining)
-    remaining -= rows.length
-    return [{ ...group, count: group.rows.length, rows }]
-  })
 }
 
 export function groupByDate(entries, now) {

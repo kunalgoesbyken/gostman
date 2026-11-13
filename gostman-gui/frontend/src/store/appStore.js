@@ -13,6 +13,7 @@ import { DEFAULT_SETTINGS, normalizeSettings } from '../lib/network'
 import { ROOT_SETTINGS_ID, isBlankScope, normalizeFolder, normalizeScopeSettings, updatedScope } from '../lib/inheritance'
 import { normalizeRequest } from '../lib/request'
 import { callsOf, compactCall, newestFirst, recordCall } from '../lib/callHistory'
+import { HISTORY_IDENTITY_FIELDS } from '../lib/historyIdentity'
 import { TAB_BODY } from '../lib/responseTabs'
 import { VIEW_FULL, defaultViewOf, viewOf } from '../lib/requestView'
 import { normalizeFlow } from '../lib/flows/model'
@@ -32,7 +33,6 @@ import { isWelcomeDismissed, rememberWelcomeDismissed } from '../lib/welcome'
 import { rememberSteps, rememberedSteps } from '../lib/onboarding'
 import { NO_WORKSPACE, enterWorkspace, leaveWorkspace, persistableSessions, restoreSessions } from './workspaceSessions'
 
-const HISTORY_IDENTITY_FIELDS = ['method', 'url', 'body', 'bodyType', 'graphqlQuery', 'graphqlVariables', 'grpcMethod', 'grpcMessage', 'mcpMethod', 'mcpTool', 'mcpArguments']
 const IMPORT_TAB = 'import'
 export const DEFAULT_REQUEST_PANEL = 'params'
 const EMPTY_VARIABLES = '{}'
@@ -302,8 +302,6 @@ const historyStatus = (value) => (Number.isSafeInteger(value) && value > 0 ? val
 const historyEntry = (raw) => ({ ...normalizeRequest(raw), statusCode: historyStatus(raw?.statusCode), noResponse: raw?.noResponse === true, calls: callsOf(raw).map(compactCall) })
 
 const isSameCall = (first, second) => HISTORY_IDENTITY_FIELDS.every((field) => first[field] === second[field])
-
-export const historyIdentityOf = (entry) => JSON.stringify(HISTORY_IDENTITY_FIELDS.map((field) => entry[field]))
 
 function withCalls(entry, calls) {
   const sorted = newestFirst(calls)

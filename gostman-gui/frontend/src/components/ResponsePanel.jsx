@@ -58,7 +58,8 @@ import { describeResponse, formatTime } from "../lib/responseHistory"
 import { cn } from "../lib/utils"
 import { RESTRICTED_ERROR } from "../lib/execution"
 import { WORKSPACE_TEXT } from "../lib/workspaceText"
-import { historyIdentityOf, selectTabHistoryEntry, useAppStore } from "../store/appStore"
+import { historyIdentityOf } from "../lib/historyIdentity"
+import { selectTabHistoryEntry, useAppStore } from "../store/appStore"
 import {
   DEFAULT_RESPONSE_SHARE, MIN_REQUEST_HEIGHT_PX, MIN_RESPONSE_HEIGHT_PX, rememberResponseShare, rememberedResponseShare,
 } from "../lib/layout"
