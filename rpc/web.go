@@ -272,6 +272,10 @@ func toMD(header http.Header) metadata.MD {
 
 func (w *webCall) readGRPCWeb(response *http.Response, raw []byte, result *exchange) error {
 	if w.transport == engine.TransportGRPCWebText || strings.Contains(response.Header.Get("Content-Type"), "grpc-web-text") {
+		if result.truncated {
+			text := strings.Join(strings.Fields(string(raw)), "")
+			raw = []byte(text[:len(text)/4*4])
+		}
 		decoded, err := decodeBase64Chunks(string(raw))
 		if err != nil {
 			return fmt.Errorf("the response is not valid base64: %w", err)
@@ -291,6 +295,9 @@ func (w *webCall) readGRPCWeb(response *http.Response, raw []byte, result *excha
 		}
 		size := int(binary.BigEndian.Uint32(raw[1:frameHeaderSize]))
 		if frameHeaderSize+size > len(raw) {
+			if result.truncated {
+				break
+			}
 			return locales.Errorf(locales.EngineGrpcIncompleteFrame, nil)
 		}
 		payload := raw[frameHeaderSize : frameHeaderSize+size]
@@ -315,6 +322,9 @@ func (w *webCall) readGRPCWeb(response *http.Response, raw []byte, result *excha
 	}
 	if !result.truncated && !seenTrailers && seenMessage {
 		result.status = status.New(codes.Unknown, locales.New(locales.EngineGrpcMissingTrailers, nil).English())
+	}
+	if result.truncated && !seenTrailers && response.StatusCode == http.StatusOK && response.Header.Get(headerStatus) == "" {
+		result.status = status.New(codes.OK, "")
 	}
 	if response.StatusCode != http.StatusOK && result.status.Code() == codes.OK {
 		result.status = status.New(httpCode(response.StatusCode), http.StatusText(response.StatusCode))
