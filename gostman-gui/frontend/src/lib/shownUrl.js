@@ -1,3 +1,4 @@
+import { looksLikeCredential } from './credentialLook'
 import { redactText } from './redact'
 import { isSensitiveName } from './sensitiveNames'
 import { ENGINE_PLACEHOLDER } from './variables'
@@ -7,6 +8,7 @@ const REFRESH_LABEL = 'oauth.refreshToken'
 const QUERY_LABEL = 'query.'
 const FRAGMENT_LABEL = 'fragment.'
 const PASSWORD_LABEL = 'userinfo.password'
+const USER_LABEL = 'userinfo.user'
 const PLACEHOLDER_TOKEN = 'gostmanph'
 const MASKED_PLACEHOLDER = new RegExp(String.raw`${PLACEHOLDER_TOKEN}(\d+)x`, 'g')
 const FRAGMENT_MARK = '#'
@@ -15,6 +17,9 @@ const AUTHORITY_MARK = '//'
 const PATH_MARK = '/'
 const USERINFO_END = '@'
 const PASSWORD_MARK = ':'
+const PAIR_MARK = '&'
+const VALUE_MARK = '='
+const FORM_SPACE = '+'
 const SESSION_SOURCE = 'session'
 
 const isSecretVariable = (name, entry) => (entry.secret && entry.source !== SESSION_SOURCE) || isSensitiveName(name)
@@ -45,35 +50,45 @@ function decoded(text) {
   }
 }
 
-const sensitivePairs = (pairs, prefix, restore) => Array.from(pairs)
-  .filter(([name]) => isSensitiveName(name))
-  .map(([name, value]) => ({ label: prefix + restore(name), value }))
-
 function splitOn(text, mark) {
   const at = text.indexOf(mark)
   return at === -1 ? [text, ''] : [text.slice(0, at), text.slice(at + mark.length)]
 }
 
-function passwordOf(location) {
+const formDecoded = (text) => decoded(text.replaceAll(FORM_SPACE, ' '))
+
+const asTyped = (label, typed, decode) => [typed, decode(typed)].map((value) => ({ label, value }))
+
+const sensitivePairs = (text, prefix, restore) => text.split(PAIR_MARK)
+  .filter((pair) => pair !== '')
+  .map((pair) => splitOn(pair, VALUE_MARK))
+  .filter(([name]) => isSensitiveName(formDecoded(name)))
+  .flatMap(([name, value]) => asTyped(prefix + restore(formDecoded(name)), value, formDecoded))
+
+function userinfoOf(location) {
+  const none = { user: '', password: '' }
   const authorityStart = location.indexOf(AUTHORITY_MARK)
-  if (authorityStart === -1) return ''
+  if (authorityStart === -1) return none
   const scheme = location.slice(0, authorityStart)
-  if (scheme.includes(PATH_MARK) || !(scheme === '' || scheme.endsWith(PASSWORD_MARK))) return ''
+  if (scheme.includes(PATH_MARK) || !(scheme === '' || scheme.endsWith(PASSWORD_MARK))) return none
   const [authority] = splitOn(location.slice(authorityStart + AUTHORITY_MARK.length), PATH_MARK)
   const userinfoEnd = authority.lastIndexOf(USERINFO_END)
-  if (userinfoEnd === -1) return ''
-  const [, password] = splitOn(authority.slice(0, userinfoEnd), PASSWORD_MARK)
-  return decoded(password)
+  if (userinfoEnd === -1) return none
+  const [user, password] = splitOn(authority.slice(0, userinfoEnd), PASSWORD_MARK)
+  return { user, password }
 }
 
 function urlSecrets(address) {
   const { masked, restore } = maskPlaceholders(address)
   const [beforeFragment, fragment] = splitOn(masked, FRAGMENT_MARK)
   const [location, query] = splitOn(beforeFragment, QUERY_MARK)
+  const { user, password } = userinfoOf(location)
+  const userIsCredential = looksLikeCredential(USER_LABEL, restore(decoded(user)))
   return [
-    ...sensitivePairs(new URLSearchParams(query), QUERY_LABEL, restore),
-    ...sensitivePairs(new URLSearchParams(fragment), FRAGMENT_LABEL, restore),
-    { label: PASSWORD_LABEL, value: passwordOf(location) },
+    ...sensitivePairs(query, QUERY_LABEL, restore),
+    ...sensitivePairs(fragment, FRAGMENT_LABEL, restore),
+    ...asTyped(PASSWORD_LABEL, password, decoded),
+    ...(userIsCredential ? asTyped(USER_LABEL, user, decoded) : []),
   ]
     .map(({ label, value }) => ({ label, value: restore(value) }))
     .filter(({ value }) => !onlyPlaceholders(value))
