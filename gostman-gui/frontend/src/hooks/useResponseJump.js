@@ -1,13 +1,13 @@
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { useAppStore } from '../store/appStore'
 
 export function useResponseJump(tabId, reveal) {
   const jump = useAppStore((state) => state.responseJump)
-  const handled = useRef(jump.nonce)
+  const settle = useAppStore((state) => state.settleResponseJump)
 
   useEffect(() => {
-    if (jump.nonce === handled.current || jump.tabId !== tabId) return
-    handled.current = jump.nonce
+    if (!jump || jump.tabId !== tabId) return
     reveal(jump)
-  }, [jump, tabId, reveal])
+    settle(jump)
+  }, [jump, tabId, reveal, settle])
 }

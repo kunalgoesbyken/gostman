@@ -58,7 +58,7 @@ import { describeResponse, formatTime } from "../lib/responseHistory"
 import { cn } from "../lib/utils"
 import { RESTRICTED_ERROR } from "../lib/execution"
 import { WORKSPACE_TEXT } from "../lib/workspaceText"
-import { selectTabHistoryEntry, useAppStore } from "../store/appStore"
+import { historyIdentityOf, selectTabHistoryEntry, useAppStore } from "../store/appStore"
 import {
   DEFAULT_RESPONSE_SHARE, MIN_REQUEST_HEIGHT_PX, MIN_RESPONSE_HEIGHT_PX, rememberResponseShare, rememberedResponseShare,
 } from "../lib/layout"
@@ -356,7 +356,7 @@ function CallsTab({ calls, entry, loading, onExport }) {
   if (calls.length === 0) return <EmptyState icon={BarChart3} title={RESPONSE_TEXT.noCallsTitle} description={RESPONSE_TEXT.noCallsDescription} />
   return (
     <Suspense fallback={null}>
-      <CallsExplorer calls={calls} entry={entry} onExport={onExport} />
+      <CallsExplorer key={historyIdentityOf(entry)} calls={calls} entry={entry} onExport={onExport} />
     </Suspense>
   )
 }
