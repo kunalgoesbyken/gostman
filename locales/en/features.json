@@ -232,6 +232,11 @@
       "blurb": "Every request you send is kept, with its response status, so you can open it again.",
       "synonyms": "history recent sent previous"
     },
+    "callHistory": {
+      "title": "Call history chart",
+      "blurb": "Keep every send of a request with its time, status, duration and size, and chart them to follow an unstable or slow API over time.",
+      "synonyms": "history calls chart graph bar timeline duration latency status uptime outage monitor zoom filter"
+    },
     "collections": {
       "title": "Collections and folders",
       "blurb": "Group requests in nested folders, drag them into place, search, tag and colour them.",

@@ -4,6 +4,8 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.18.0] - 2026-11-13
+
 ### Added
 
 - The history keeps every send of a request: its date and time, status, duration and size. A history row shows how many times the request was sent, and **Show calls** opens a bar chart of the calls over time with filters by status class and duration, a From and To interval, drag-to-zoom on the chart, a summary (success rate, median, p95, slowest, average size) and the list of calls (#38).
