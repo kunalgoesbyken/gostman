@@ -30,7 +30,7 @@ func compile(ctx context.Context, protos []ProtoFile) (*protoregistry.Files, err
 	if err != nil {
 		return nil, err
 	}
-	aliases, err := importAliases(sources)
+	aliases, err := importAliases(ctx, sources)
 	if err != nil {
 		return nil, err
 	}
@@ -98,34 +98,54 @@ type parsedFile struct {
 	pkg     string
 }
 
-func parseFiles(sources map[string]string) map[string]parsedFile {
+func parseFiles(ctx context.Context, sources map[string]string) (map[string]parsedFile, error) {
 	parsed := make(map[string]parsedFile, len(sources))
 	for name, content := range sources {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
 		tree, err := parser.Parse(name, strings.NewReader(content), reporter.NewHandler(nil))
 		if err != nil {
 			continue
 		}
 		var file parsedFile
+		seen := map[string]bool{}
 		for _, declaration := range tree.Decls {
 			switch statement := declaration.(type) {
 			case *ast.ImportNode:
-				file.imports = append(file.imports, statement.Name.AsString())
+				if imported := statement.Name.AsString(); !seen[imported] {
+					seen[imported] = true
+					file.imports = append(file.imports, imported)
+				}
 			case *ast.PackageNode:
 				file.pkg = string(statement.Name.AsIdentifier())
 			}
 		}
 		parsed[name] = file
 	}
-	return parsed
+	return parsed, nil
 }
 
-func importAliases(sources map[string]string) (map[string]string, error) {
-	parsed := parseFiles(sources)
+func importAliases(ctx context.Context, sources map[string]string) (map[string]string, error) {
+	parsed, err := parseFiles(ctx, sources)
+	if err != nil {
+		return nil, err
+	}
 	names := sortedNames(sources)
+	byBase := map[string][]string{}
+	for _, name := range names {
+		byBase[path.Base(name)] = append(byBase[path.Base(name)], name)
+	}
 	aliases := map[string]string{}
 	for _, importer := range names {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
 		for _, imported := range parsed[importer].imports {
-			if file, found := sameNamedFile(sources, parsed, imported); found {
+			if _, exact := sources[imported]; exact {
+				continue
+			}
+			if file, found := sameNamedFile(byBase, parsed, imported); found {
 				aliases[imported] = file
 			}
 		}
@@ -138,10 +158,20 @@ func importAliases(sources map[string]string) (map[string]string, error) {
 			}
 		}
 	}
+	reached := map[string]map[string]bool{}
 	for _, importer := range names {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
 		for _, imported := range parsed[importer].imports {
 			file, aliased := aliases[imported]
-			if aliased && leadsTo(graph, file, importer, map[string]bool{}) {
+			if !aliased {
+				continue
+			}
+			if reached[file] == nil {
+				reached[file] = reachableFrom(graph, file)
+			}
+			if reached[file][importer] {
 				return nil, localizedConfigError(locales.EngineGrpcImportConflict, locales.Params{
 					"importer": importer,
 					"path":     imported,
@@ -177,16 +207,8 @@ func suppliedFile(sources, aliases map[string]string, imported string) (string, 
 	return file, aliased
 }
 
-func sameNamedFile(sources map[string]string, parsed map[string]parsedFile, imported string) (string, bool) {
-	if _, exact := sources[imported]; exact {
-		return "", false
-	}
-	var candidates []string
-	for name := range sources {
-		if path.Base(name) == path.Base(imported) {
-			candidates = append(candidates, name)
-		}
-	}
+func sameNamedFile(byBase map[string][]string, parsed map[string]parsedFile, imported string) (string, bool) {
+	candidates := byBase[path.Base(imported)]
 	if len(candidates) != 1 {
 		return "", false
 	}
@@ -196,20 +218,20 @@ func sameNamedFile(sources map[string]string, parsed map[string]parsedFile, impo
 	return candidates[0], true
 }
 
-func leadsTo(graph map[string][]string, from, to string, visited map[string]bool) bool {
-	if from == to {
-		return true
-	}
-	if visited[from] {
-		return false
-	}
-	visited[from] = true
-	for _, next := range graph[from] {
-		if leadsTo(graph, next, to, visited) {
-			return true
+func reachableFrom(graph map[string][]string, start string) map[string]bool {
+	reached := map[string]bool{start: true}
+	pending := []string{start}
+	for len(pending) > 0 {
+		current := pending[len(pending)-1]
+		pending = pending[:len(pending)-1]
+		for _, next := range graph[current] {
+			if !reached[next] {
+				reached[next] = true
+				pending = append(pending, next)
+			}
 		}
 	}
-	return false
+	return reached
 }
 
 func forwardingResolver(aliases map[string]string) protocompile.Resolver {

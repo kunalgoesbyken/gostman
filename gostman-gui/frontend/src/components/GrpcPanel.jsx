@@ -15,7 +15,7 @@ import { GRPC_TEXT as TEXT } from "../lib/grpcText"
 
 const tooLargeMessage = (file) => TEXT.tooLarge(file.name, formatBytes(file.size), formatBytes(maxAttachmentBytes()))
 
-function ProtoFilePicker({ files, onChange, onError, onReplaced }) {
+function ProtoFilePicker({ files, onChange, onError }) {
   const inputRef = useRef(null)
 
   const handlePick = async (event) => {
@@ -28,9 +28,7 @@ function ProtoFilePicker({ files, onChange, onError, onReplaced }) {
       return
     }
     onError("")
-    const added = await Promise.all(picked.map(readProtoFile))
-    onReplaced(replacedProtoNames(files, added))
-    onChange(mergeProtoFiles(files, added))
+    onChange(mergeProtoFiles(files, await Promise.all(picked.map(readProtoFile))))
   }
 
   return (
@@ -92,9 +90,9 @@ function SchemaNotice({ schema, fileError }) {
 export function GrpcPanel({ request, schema, editorPath, onUpdateRequest, onProtosChange, onLoadSchema, EditorComponent }) {
   const { method, grpcMethod, grpcMessage, grpcProtos } = request
   const [fileError, setFileError] = useState("")
-  const [replaced, setReplaced] = useState([])
 
   const files = useMemo(() => parseProtoFiles(grpcProtos), [grpcProtos])
+  const replaced = useMemo(() => replacedProtoNames(files), [files])
   const services = schema?.services
   const selected = useMemo(() => (services ? findMethod(services, grpcMethod) : undefined), [services, grpcMethod])
   const source = files.length > 0 ? files.map((file) => file.name).join(", ") : TEXT.reflection
@@ -108,7 +106,6 @@ export function GrpcPanel({ request, schema, editorPath, onUpdateRequest, onProt
 
   const removeFiles = () => {
     setFileError("")
-    setReplaced([])
     onProtosChange([])
   }
 
@@ -119,7 +116,7 @@ export function GrpcPanel({ request, schema, editorPath, onUpdateRequest, onProt
         {!isGrpc && (
           <Button variant="outline" size="sm" onClick={() => onUpdateRequest({ method: GRPC_METHOD })}>{TEXT.sendAsGrpc}</Button>
         )}
-        <ProtoFilePicker files={files} onChange={onProtosChange} onError={setFileError} onReplaced={setReplaced} />
+        <ProtoFilePicker files={files} onChange={onProtosChange} onError={setFileError} />
         {files.length > 0 && <Button variant="outline" size="sm" onClick={removeFiles}>{TEXT.removeFiles}</Button>}
         <Button variant="outline" size="sm" disabled={Boolean(schema?.loading)} onClick={onLoadSchema}>
           {services ? TEXT.reload : TEXT.load}

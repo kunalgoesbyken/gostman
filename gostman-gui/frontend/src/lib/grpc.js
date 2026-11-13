@@ -22,14 +22,13 @@ export async function readProtoFile(file) {
 }
 
 export function mergeProtoFiles(existing, added) {
-  const replaced = new Set(added.map((file) => file.name))
-  return [...existing.filter((file) => !replaced.has(file.name)), ...added]
+  const earlier = new Map(existing.map((file) => [file.name, file.content]))
+  const readded = new Set(added.map((file) => file.name))
+  const changed = (file) => earlier.has(file.name) && earlier.get(file.name) !== file.content
+  return [...existing.filter((file) => !readded.has(file.name)), ...added.map((file) => (changed(file) ? { ...file, replaced: true } : file))]
 }
 
-export function replacedProtoNames(existing, added) {
-  const contents = new Map(existing.map((file) => [file.name, file.content]))
-  return added.filter((file) => contents.has(file.name) && contents.get(file.name) !== file.content).map((file) => file.name)
-}
+export const replacedProtoNames = (files) => files.filter((file) => file.replaced).map((file) => file.name)
 
 export function toGrpcTarget(request, variables) {
   const { url, headers, auth, options, grpcProtos, inherited = [] } = request
