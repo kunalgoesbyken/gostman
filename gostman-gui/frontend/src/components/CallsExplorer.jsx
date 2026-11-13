@@ -137,8 +137,7 @@ function svgX(svg, clientX) {
   return Math.min(WIDTH - PAD_RIGHT, Math.max(PAD_LEFT, ((clientX - box.left) / box.width) * WIDTH))
 }
 
-function CallsChart({ calls, view, label, onZoom, onOpen }) {
-  const svgRef = useRef(null)
+function CallsChart({ calls, view, label, plotRef, onZoom, onOpen }) {
   const [drag, setDrag] = useState(null)
   const [hovered, setHovered] = useState(null)
   const [activeIndex, setActiveIndex] = useState(null)
@@ -155,11 +154,11 @@ function CallsChart({ calls, view, label, onZoom, onOpen }) {
   const start = (event) => {
     if (event.button !== 0) return
     event.currentTarget.setPointerCapture?.(event.pointerId)
-    const x = svgX(svgRef.current, event.clientX)
+    const x = svgX(plotRef.current, event.clientX)
     setDrag({ from: x, to: x })
   }
   const move = (event) => {
-    if (drag) setDrag({ ...drag, to: svgX(svgRef.current, event.clientX) })
+    if (drag) setDrag({ ...drag, to: svgX(plotRef.current, event.clientX) })
   }
   const end = () => {
     if (!drag) return
@@ -189,7 +188,7 @@ function CallsChart({ calls, view, label, onZoom, onOpen }) {
   return (
     <figure aria-label={label} className="relative m-0">
       <svg
-        ref={svgRef}
+        ref={plotRef}
         role="application"
         aria-label={TEXT.plotLabel}
         tabIndex={0}
@@ -245,7 +244,7 @@ function CallsChart({ calls, view, label, onZoom, onOpen }) {
   )
 }
 
-function CallsTable({ calls, limit, selected, rowRefs, onShowMore }) {
+function CallsTable({ calls, limit, selected, rowRefs, onLeaveRow, onShowMore }) {
   const shown = calls.slice(0, limit)
   const keepRow = (call) => (node) => {
     if (node) rowRefs.current.set(call, node)
@@ -270,6 +269,7 @@ function CallsTable({ calls, limit, selected, rowRefs, onShowMore }) {
               key={`${call.at}-${index}`}
               ref={keepRow(call)}
               tabIndex={-1}
+              onKeyDown={call === selected ? onLeaveRow : undefined}
               aria-current={call === selected || undefined}
               className={cn("border-t border-border", call === selected && "bg-accent")}
             >
@@ -300,6 +300,7 @@ export function CallsExplorer({ calls, entry, onExport }) {
   const [rowLimit, setRowLimit] = useState(ROWS_PAGE)
   const [focusRequest, setFocusRequest] = useState(null)
   const rowRefs = useRef(new Map())
+  const plotRef = useRef(null)
   const view = zoom ?? fullView
   const counts = useMemo(() => countByClass(calls), [calls])
   const reasonCounts = useMemo(() => countByReason(calls), [calls])
@@ -325,6 +326,12 @@ export function CallsExplorer({ calls, entry, onExport }) {
     setRowLimit((limit) => Math.max(limit, shown.indexOf(call) + 1))
     setFocusRequest({ call })
   }
+  const leaveRow = (event) => {
+    if (event.key !== "Escape" || hasModifier(event)) return
+    event.preventDefault()
+    setSelected(null)
+    plotRef.current?.focus()
+  }
   const showMore = () => {
     setRowLimit(rowLimit + ROWS_PAGE)
     setFocusRequest({ call: shown[rowLimit] })
@@ -344,12 +351,12 @@ export function CallsExplorer({ calls, entry, onExport }) {
       <CheckFilter legend={TEXT.status} names={STATUS_CLASSES} selected={classes} counts={counts} labelOf={(name) => TEXT.classes[name]} fillOf={(name) => CLASS_FILL[name]} onChange={setClasses} />
       {counts.none > 0 && <CheckFilter legend={TEXT.reasonLegend} names={REASON_NAMES} selected={reasons} counts={reasonCounts} labelOf={(name) => TEXT.reasons[name]} onChange={setReasons} />}
       <RangeFilters duration={duration} onDuration={setDuration} view={view} onView={setEdge} isZoomed={zoom !== null} onReset={() => setZoom(null)} />
-      <CallsChart calls={shown} view={view} label={chartSummaryOf(shown)} onZoom={setZoom} onOpen={openCall} />
+      <CallsChart calls={shown} view={view} label={chartSummaryOf(shown)} plotRef={plotRef} onZoom={setZoom} onOpen={openCall} />
       {hasLegacy && <p className="text-2xs text-muted-foreground">{TEXT.legacy}</p>}
       {shown.length === 0 ? (
         <EmptyState icon={BarChart3} title={TEXT.noMatchesTitle} action={<Button size="sm" variant="outline" onClick={clearFilters}>{TEXT.clearFilters}</Button>} />
       ) : (
-        <CallsTable calls={shown} limit={rowLimit} selected={selected} rowRefs={rowRefs} onShowMore={showMore} />
+        <CallsTable calls={shown} limit={rowLimit} selected={selected} rowRefs={rowRefs} onLeaveRow={leaveRow} onShowMore={showMore} />
       )}
     </div>
   )
