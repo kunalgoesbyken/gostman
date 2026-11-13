@@ -4,6 +4,8 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.19.0] - 2026-11-14
+
 ### Added
 
 - The response panel has a **Calls** tab, the last one, with the calls of the request in the active tab: a one-line summary (count, share of 2xx or 3xx, median, p95, slowest, average size), the chart with its filters, and a table of the latest 200 calls with **Show more**. Its name carries the number of calls (99+ above 99), **No calls match** offers **Clear filters**, and a request opened from History shows its calls before it is sent again (#38).

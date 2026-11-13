@@ -232,6 +232,11 @@
       "blurb": "Every request you send is kept, with its response status, so you can open it again.",
       "synonyms": "history recent sent previous"
     },
+    "historyJournal": {
+      "title": "History journal and Calls tab",
+      "blurb": "See every send in one timeline by day, follow a request's calls in the Calls tab with why a call got no response, and export them as CSV.",
+      "synonyms": "journal timeline log history calls tab csv export spreadsheet no response reason timeout dns undo"
+    },
     "callHistory": {
       "title": "Call history chart",
       "blurb": "Keep every send of a request with its time, status, duration and size. Chart them in the response's Calls tab, or read them all as a journal in History, to follow an unstable or slow API over time.",

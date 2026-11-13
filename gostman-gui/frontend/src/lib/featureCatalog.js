@@ -48,6 +48,7 @@ export const FEATURES = [
   { id: 'dependency-graph', group: 'variables', since: '1.9.0', docs: 'requests-and-responses#variable-dependencies', action: { type: 'command', id: 'dependencyGraph' }, icon: 'workflow', palette: true, tool: { group: 'build', order: 8 } },
   { id: 'open-tabs', group: 'data', since: '1.8.3', docs: 'collections-and-git#tabs', action: { type: 'tab', id: 'openTabs' }, icon: 'panel-left' },
   { id: 'history', group: 'data', docs: 'requests-and-responses#history', action: { type: 'tab', id: 'history' }, icon: 'history', empty: ['history'], sample: 'send' },
+  { id: 'history-journal', group: 'data', since: '1.19.0', docs: 'requests-and-responses#journal', action: { type: 'tab', id: 'history' }, icon: 'history' },
   { id: 'call-history', group: 'data', since: '1.18.0', docs: 'requests-and-responses#calls', action: { type: 'tab', id: 'history' }, icon: 'activity' },
   { id: 'collections', group: 'data', docs: 'collections-and-git#collection-tree', action: { type: 'command', id: 'newFolder' }, icon: 'folder-plus' },
   { id: 'folder-workspace', command: 'gostman init', group: 'data', platforms: ['desktop'], docs: 'collections-and-git#storage-menu', action: { type: 'command', id: 'workspaceSwitcher' }, icon: 'folder-open', landing: { group: 'data', order: 2 }, tool: { group: 'shareGit', order: 4 } },
