@@ -9,6 +9,8 @@ const QUOTE = '"'
 const MINUTE_MS = 60 * 1000
 const MINUTES_PER_HOUR = 60
 const SPECIAL_CHARACTERS = [SEPARATOR, QUOTE, '\r', '\n']
+const FORMULA_STARTS = ['=', '+', '-', '@', '\t', '\r']
+const FORMULA_GUARD = "'"
 
 const pad = (number) => String(number).padStart(2, '0')
 
@@ -19,8 +21,10 @@ export function isoWithOffset(time) {
   return `${local}${offset < 0 ? '-' : '+'}${pad(Math.floor(distance / MINUTES_PER_HOUR))}:${pad(distance % MINUTES_PER_HOUR)}`
 }
 
+const guarded = (value) => (typeof value === 'string' && FORMULA_STARTS.some((start) => value.startsWith(start)) ? FORMULA_GUARD + value : value)
+
 function field(value) {
-  const text = String(value ?? '')
+  const text = String(guarded(value) ?? '')
   return SPECIAL_CHARACTERS.some((character) => text.includes(character)) ? `${QUOTE}${text.replaceAll(QUOTE, QUOTE + QUOTE)}${QUOTE}` : text
 }
 
