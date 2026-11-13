@@ -303,6 +303,8 @@ const historyEntry = (raw) => ({ ...normalizeRequest(raw), statusCode: historySt
 
 const isSameCall = (first, second) => HISTORY_IDENTITY_FIELDS.every((field) => first[field] === second[field])
 
+export const historyIdentityOf = (entry) => JSON.stringify(HISTORY_IDENTITY_FIELDS.map((field) => entry[field]))
+
 function withCalls(entry, calls) {
   const sorted = newestFirst(calls)
   const [latest] = sorted
@@ -410,7 +412,7 @@ export const useAppStore = create(
         commandPaletteOpen: false,
         commandPaletteMode: 'commands',
         globalSearch: { nonce: 0, query: '' },
-        responseJump: { nonce: 0, tabId: '', query: '', tab: TAB_BODY },
+        responseJump: null,
         shortcutsDialogOpen: false,
         preferencesDialogOpen: false,
         isSidebarOpen: rememberedSidebarOpen(),
@@ -812,8 +814,9 @@ export const useAppStore = create(
         closePreferencesDialog: () => set({ preferencesDialogOpen: false }),
         toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
         openGlobalSearch: (query = '') => set((state) => ({ isSidebarOpen: true, globalSearch: { nonce: state.globalSearch.nonce + 1, query } })),
-        jumpToResponse: (tabId, query) => set((state) => ({ activeTabId: tabId, responseJump: { nonce: state.responseJump.nonce + 1, tabId, query, tab: TAB_BODY } })),
-        showResponseTab: (tabId, tab) => set((state) => ({ activeTabId: tabId, responseJump: { nonce: state.responseJump.nonce + 1, tabId, query: '', tab } })),
+        jumpToResponse: (tabId, query) => set({ activeTabId: tabId, responseJump: { tabId, query, tab: TAB_BODY } }),
+        showResponseTab: (tabId, tab) => set({ activeTabId: tabId, responseJump: { tabId, query: '', tab } }),
+        settleResponseJump: (jump) => set((state) => (state.responseJump === jump ? { responseJump: null } : state)),
         closeSidebar: () => set({ isSidebarOpen: false }),
         closeCommandPalette: () => set({ commandPaletteOpen: false }),
         openCookiesDialog: () => set({ cookiesDialogOpen: true }),
@@ -925,6 +928,7 @@ export function restoreTabDrafts(source) {
 
 useAppStore.subscribe((state, previous) => {
   if (state.isSidebarOpen !== previous.isSidebarOpen) rememberSidebarOpen(state.isSidebarOpen)
+  if (state.responseJump && state.activeTabId !== previous.activeTabId && state.responseJump.tabId !== state.activeTabId) useAppStore.setState({ responseJump: null })
 })
 
 export const selectActiveTab = (state) => state.tabs.find((tab) => tab.id === state.activeTabId) || state.tabs[0]
