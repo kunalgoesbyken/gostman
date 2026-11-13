@@ -2712,6 +2712,26 @@ export namespace main {
 		    return a;
 		}
 	}
+	export class HistoryCall {
+	    at: string;
+	    statusCode?: number;
+	    noResponse?: boolean;
+	    durationMs?: number;
+	    size?: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new HistoryCall(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.at = source["at"];
+	        this.statusCode = source["statusCode"];
+	        this.noResponse = source["noResponse"];
+	        this.durationMs = source["durationMs"];
+	        this.size = source["size"];
+	    }
+	}
 	export class HistoryEntry {
 	    id: string;
 	    name: string;
@@ -2749,6 +2769,7 @@ export namespace main {
 	    sortOrder: number;
 	    statusCode?: number;
 	    noResponse?: boolean;
+	    calls?: HistoryCall[];
 	
 	    static createFrom(source: any = {}) {
 	        return new HistoryEntry(source);
@@ -2792,6 +2813,7 @@ export namespace main {
 	        this.sortOrder = source["sortOrder"];
 	        this.statusCode = source["statusCode"];
 	        this.noResponse = source["noResponse"];
+	        this.calls = this.convertValues(source["calls"], HistoryCall);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

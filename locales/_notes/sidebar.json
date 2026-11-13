@@ -12,5 +12,17 @@
   "history.sentAgoSpoken": "Spoken version of the short age label for screen readers.",
   "history.sentAgoSpoken.date": "{{date}} is a formatted date.",
   "sidebar.viewsMenu": "Title of the menu opened by right-clicking the sidebar tabs (Collections, Flows, History).",
-  "sidebar.resetViews": "Menu item that shows every sidebar tab again in the original order."
+  "sidebar.resetViews": "Menu item that shows every sidebar tab again in the original order.",
+  "history.callCount": "Number of times a request in the history was sent. A call is one send.",
+  "history.showCalls": "Button on a history row that opens the chart and list of every send of that request.",
+  "history.sentOn": "Tooltip line on a history row. {{date}} is a full date and time.",
+  "history.calls.title": "Title of the dialog listing every send of one request.",
+  "history.calls.p50": "Median duration of the calls.",
+  "history.calls.p95": "95th percentile of the call durations; keep it short.",
+  "history.calls.classes.other": "Calls that got a response without an HTTP status, such as gRPC or MCP.",
+  "history.calls.minPlaceholder": "Placeholder of a short number field; ms is milliseconds.",
+  "history.calls.maxPlaceholder": "Placeholder of a short number field; ms is milliseconds.",
+  "history.calls.resetZoom": "Button that zooms the chart back out to every call.",
+  "history.calls.barLabel": "Tooltip of a bar in the chart. Keep the order of the placeholders if your language allows.",
+  "history.calls.shownRows": "{{shown}} and {{total}} are numbers of calls."
 }

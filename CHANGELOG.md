@@ -4,6 +4,11 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Added
+
+- The history keeps every send of a request: its date and time, status, duration and size. A history row shows how many times the request was sent, and **Show calls** opens a bar chart of the calls over time with filters by status class and duration, a From and To interval, drag-to-zoom on the chart, a summary (success rate, median, p95, slowest, average size) and the list of calls (#38).
+- Preferences → Requests sets how many requests the history keeps (50 by default, up to 1000) and how many calls it keeps per request (500 by default, up to 10000) (#38).
+
 ## [1.17.6] - 2026-11-11
 
 ### Fixed

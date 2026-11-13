@@ -35,6 +35,8 @@ export const TAB_PLACEMENTS = ['bar', 'sidebar']
 export const EDITOR_FONT_SIZES = { min: 10, max: 24 }
 export const REQUEST_TIMEOUT_SECONDS = { min: 0, max: 3600 }
 export const BUILT_IN_TIMEOUT_SECONDS = 30
+export const HISTORY_ENTRIES = { min: 10, max: 1000 }
+export const HISTORY_CALLS = { min: 1, max: 10000 }
 
 export const DEFAULT_PREFERENCES = {
   theme: 'system',
@@ -54,6 +56,8 @@ export const DEFAULT_PREFERENCES = {
   editorFontSize: 12,
   wrapLines: true,
   requestTimeoutSeconds: 0,
+  historyEntries: 50,
+  historyCalls: 500,
   confirmCloseTab: true,
   showInheritedVariables: false,
   language: SYSTEM_LANGUAGE,
@@ -85,6 +89,8 @@ const VALIDATORS = {
   editorFontSize: integerWithin(EDITOR_FONT_SIZES),
   wrapLines: isFlag,
   requestTimeoutSeconds: integerWithin(REQUEST_TIMEOUT_SECONDS),
+  historyEntries: integerWithin(HISTORY_ENTRIES),
+  historyCalls: integerWithin(HISTORY_CALLS),
   confirmCloseTab: isFlag,
   showInheritedVariables: isFlag,
   language: oneOf(LANGUAGE_VALUES),

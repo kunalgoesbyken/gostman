@@ -30,7 +30,9 @@
       "confirmCloseTab": "Ask before discarding unsaved changes when closing a tab",
       "language": "Language",
       "authorName": "Your name on notes",
-      "sidebarViews": "Sidebar tabs"
+      "sidebarViews": "Sidebar tabs",
+      "historyEntries": "Requests kept in history",
+      "historyCalls": "Calls kept per request"
     },
     "themes": {
       "system": "System",
@@ -175,6 +177,10 @@
     "moveViewUp": "Move {{name}} up",
     "moveViewDown": "Move {{name}} down",
     "textScaleHint": "Scales the interface and its input fields. The window zoom is applied on top of this size: a base of {{size}} px shows as {{zoomed}} px at 125% zoom.",
-    "editorFontSizeHint": "Code editors, in pixels. It does not follow Text size, and the window zoom is applied on top of it."
+    "editorFontSizeHint": "Code editors, in pixels. It does not follow Text size, and the window zoom is applied on top of it.",
+    "historyEntriesHint": "The oldest request leaves the history when another one is sent.",
+    "historyCallsHint": "Each send of the same request is added to its timeline, with the time, status, duration and size.",
+    "requests": "requests",
+    "calls": "calls"
   }
 }

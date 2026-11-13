@@ -57,6 +57,47 @@
       "week": "Earlier this week",
       "month": "Earlier this month",
       "older": "Older"
+    },
+    "callCount_one": "{{count}} call",
+    "callCount_other": "{{count}} calls",
+    "showCalls": "Show calls",
+    "sentOn": "Last sent {{date}}",
+    "calls": {
+      "title": "Calls",
+      "summary": "Summary",
+      "count": "Calls",
+      "successRate": "Success",
+      "p50": "Median",
+      "p95": "p95",
+      "slowest": "Slowest",
+      "averageSize": "Average size",
+      "status": "Status",
+      "classes": {
+        "success": "2xx",
+        "redirect": "3xx",
+        "clientError": "4xx",
+        "serverError": "5xx",
+        "other": "Other",
+        "none": "No response"
+      },
+      "duration": "Duration",
+      "minDuration": "Shortest duration in milliseconds",
+      "maxDuration": "Longest duration in milliseconds",
+      "minPlaceholder": "min ms",
+      "maxPlaceholder": "max ms",
+      "from": "From",
+      "to": "To",
+      "resetZoom": "Show all",
+      "zoomHint": "Drag across the chart to zoom in on a period.",
+      "chartLabel_one": "Durations of {{count}} call over time, coloured by status",
+      "chartLabel_other": "Durations of {{count}} calls over time, coloured by status",
+      "barLabel": "{{time}} · {{status}} · {{duration}} · {{size}}",
+      "unknown": "not measured",
+      "noMatches": "No call matches the filters.",
+      "time": "Time",
+      "size": "Size",
+      "shownRows": "Showing the latest {{shown}} of {{total}} calls.",
+      "legacy": "Calls sent before this version have no duration or size."
     }
   }
 }

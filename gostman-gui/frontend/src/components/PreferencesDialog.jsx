@@ -28,7 +28,7 @@ import { openExternal } from "../lib/about"
 import { ORIENTATION, moveFocus } from "../lib/rovingFocus"
 import { scrollIntoStrip } from "../lib/scrollIntoStrip"
 import {
-  BUILT_IN_TIMEOUT_SECONDS, DENSITIES, EDITOR_FONT_SIZES, FONT_NAME_LENGTH, REQUEST_TIMEOUT_SECONDS,
+  BUILT_IN_TIMEOUT_SECONDS, DENSITIES, EDITOR_FONT_SIZES, FONT_NAME_LENGTH, HISTORY_CALLS, HISTORY_ENTRIES, REQUEST_TIMEOUT_SECONDS,
   RESPONSE_LAYOUTS, TAB_PLACEMENTS, TEXT_SCALES, resetPreferences, updatePreferences, usePreferences,
 } from "../lib/preferences"
 import { SECTION_AI, SECTION_UPDATES, selectPreferencesSection, usePreferencesSection } from "../lib/preferencesSection"
@@ -227,6 +227,22 @@ function RequestsSection({ preferences }) {
         range={REQUEST_TIMEOUT_SECONDS}
         value={preferences.requestTimeoutSeconds}
         onCommit={(requestTimeoutSeconds) => updatePreferences({ requestTimeoutSeconds })}
+      />
+      <NumberRow
+        label={fields.historyEntries}
+        hint={PREFERENCES_TEXT.historyEntriesHint}
+        suffix={PREFERENCES_TEXT.requests}
+        range={HISTORY_ENTRIES}
+        value={preferences.historyEntries}
+        onCommit={(historyEntries) => updatePreferences({ historyEntries })}
+      />
+      <NumberRow
+        label={fields.historyCalls}
+        hint={PREFERENCES_TEXT.historyCallsHint}
+        suffix={PREFERENCES_TEXT.calls}
+        range={HISTORY_CALLS}
+        value={preferences.historyCalls}
+        onCommit={(historyCalls) => updatePreferences({ historyCalls })}
       />
       <FlagRow label={fields.confirmCloseTab} name="confirmCloseTab" preferences={preferences} />
     </>

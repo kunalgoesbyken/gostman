@@ -12,6 +12,7 @@ import { ENVIRONMENT_TEXT } from '../lib/environmentText'
 import { DEFAULT_SETTINGS, normalizeSettings } from '../lib/network'
 import { ROOT_SETTINGS_ID, isBlankScope, normalizeFolder, normalizeScopeSettings, updatedScope } from '../lib/inheritance'
 import { normalizeRequest } from '../lib/request'
+import { callsOf, compactCall, recordCall } from '../lib/callHistory'
 import { VIEW_FULL, defaultViewOf, viewOf } from '../lib/requestView'
 import { normalizeFlow } from '../lib/flows/model'
 import { isFlowDirty } from '../lib/flows/edit'
@@ -31,6 +32,7 @@ import { rememberSteps, rememberedSteps } from '../lib/onboarding'
 import { NO_WORKSPACE, enterWorkspace, leaveWorkspace, persistableSessions, restoreSessions } from './workspaceSessions'
 
 const HISTORY_LIMIT = 50
+const HISTORY_CALLS_LIMIT = 500
 const HISTORY_IDENTITY_FIELDS = ['method', 'url', 'body', 'bodyType', 'graphqlQuery', 'graphqlVariables', 'grpcMethod', 'grpcMessage', 'mcpMethod', 'mcpTool', 'mcpArguments']
 const IMPORT_TAB = 'import'
 export const DEFAULT_REQUEST_PANEL = 'params'
@@ -298,7 +300,7 @@ const withoutTabs = (state, closing) => {
 
 const historyStatus = (value) => (Number.isSafeInteger(value) && value > 0 ? value : 0)
 
-const historyEntry = (raw) => ({ ...normalizeRequest(raw), statusCode: historyStatus(raw?.statusCode), noResponse: raw?.noResponse === true })
+const historyEntry = (raw) => ({ ...normalizeRequest(raw), statusCode: historyStatus(raw?.statusCode), noResponse: raw?.noResponse === true, calls: callsOf(raw).map(compactCall) })
 
 const isSameCall = (first, second) => HISTORY_IDENTITY_FIELDS.every((field) => first[field] === second[field])
 
@@ -351,6 +353,7 @@ export const useAppStore = create(
         flows: [],
         specs: [],
         requestHistory: [],
+        callHistoryId: '',
         cookies: [],
         settings: DEFAULT_SETTINGS,
         environments: [],
@@ -583,17 +586,25 @@ export const useAppStore = create(
           ? { folders: state.folders.map((folder) => (folder.isOpen ? { ...folder, isOpen: false } : folder)) }
           : state)),
 
-        addToHistory: (request, statusCode = 0, noResponse = false) => set((state) => {
-          const entry = { ...historyEntry({ ...request, statusCode, noResponse }), examples: '', id: createId('hist'), timestamp: new Date().toISOString() }
+        addToHistory: (request, call, { entries = HISTORY_LIMIT, calls = HISTORY_CALLS_LIMIT } = {}) => set((state) => {
+          const { statusCode, noResponse, at: timestamp } = call
+          const entry = { ...historyEntry({ ...request, statusCode, noResponse, calls: [] }), examples: '', id: createId('hist'), timestamp }
           const others = state.requestHistory.filter((existing) => !isSameCall(existing, entry))
-          const replaced = new Set(state.requestHistory.filter((existing) => isSameCall(existing, entry)).map((existing) => existing.id))
+          const sameCalls = state.requestHistory.filter((existing) => isSameCall(existing, entry))
+          const replaced = new Set(sameCalls.map((existing) => existing.id))
+          const earlier = sameCalls.flatMap((existing) => callsOf(existing))
+          entry.calls = recordCall(earlier, call, calls).map(compactCall)
           const tabs = replaced.size === 0 ? state.tabs : state.tabs.map((tab) => (replaced.has(tab.historyId) ? { ...tab, historyId: entry.id } : tab))
-          return { requestHistory: [entry, ...others].slice(0, HISTORY_LIMIT), tabs }
+          const callHistoryId = replaced.has(state.callHistoryId) ? entry.id : state.callHistoryId
+          return { requestHistory: [entry, ...others].slice(0, entries), tabs, callHistoryId }
         }),
+        openCallHistory: (callHistoryId) => set({ callHistoryId, commandPaletteOpen: false }),
+        closeCallHistory: () => set({ callHistoryId: '' }),
         deleteHistoryItem: (id) => set((state) => ({
           requestHistory: state.requestHistory.filter((entry) => entry.id !== id),
+          callHistoryId: state.callHistoryId === id ? '' : state.callHistoryId,
         })),
-        clearHistory: () => set({ requestHistory: [] }),
+        clearHistory: () => set({ requestHistory: [], callHistoryId: '' }),
 
         storeCookies: (received) => set((state) => (
           received.length > 0 ? { cookies: mergeCookies(state.cookies, received) } : state
@@ -945,6 +956,7 @@ export const selectIsDialogOpen = (state) => (
   || state.specDialog !== null
   || state.runner.isOpen
   || state.dependencyGraph.isOpen
+  || state.callHistoryId !== ''
   || state.alertDialog.isOpen
   || state.confirmDialog.isOpen
   || state.promptDialog.isOpen

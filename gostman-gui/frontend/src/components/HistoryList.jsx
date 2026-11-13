@@ -1,5 +1,5 @@
 import { Fragment, memo, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react"
-import { CalendarDays, Clock, Search, X } from "lucide-react"
+import { BarChart3, CalendarDays, Clock, Search, X } from "lucide-react"
 import { Badge } from "./ui/badge"
 import { Button, IconButton } from "./ui/button"
 import { Select } from "./ui/select"
@@ -12,7 +12,8 @@ import { ORIENTATION, isFocusLost, moveFocus, tabStopOf } from "../lib/rovingFoc
 import { ALL_FOLDERS, ALL_TAGS, RANGES, RANGE_ANY, filterHistory, groupByDate } from "../lib/historyFilter"
 import { buildCollectionTree, listFolders } from "../lib/collectionTree"
 import { collectTags } from "../lib/tags"
-import { formatDate } from "../lib/i18n/format"
+import { formatDate, formatDateTime } from "../lib/i18n/format"
+import { callsOf } from "../lib/callHistory"
 import { statusVariant } from "../lib/response"
 import { isRemoveKey } from "../lib/shortcuts"
 import { HISTORY_TEXT, SIDEBAR_TEXT } from "../lib/sidebarText"
@@ -61,7 +62,18 @@ function StatusMark({ entry }) {
   return null
 }
 
-function HistoryRow({ entry, isTabStop, onOpen, onDelete, onFocus }) {
+function CallCount({ count }) {
+  if (count < 2) return null
+  return (
+    <span className="shrink-0 font-mono text-2xs tabular-nums group-focus-within:hidden group-hover:hidden">
+      <span aria-hidden="true">×{count}</span>
+      <span className="sr-only">{HISTORY_TEXT.callCount(count)}</span>
+    </span>
+  )
+}
+
+function HistoryRow({ entry, isTabStop, onOpen, onDelete, onFocus, onShowCalls }) {
+  const callCount = callsOf(entry).length
   const removeOnKey = (event) => {
     if (!isRemoveKey(event)) return
     event.preventDefault()
@@ -78,14 +90,23 @@ function HistoryRow({ entry, isTabStop, onOpen, onDelete, onFocus }) {
         onClick={() => onOpen(entry)}
         onFocus={() => onFocus(entry.id)}
         onKeyDown={removeOnKey}
-        title={entry.url}
+        title={`${entry.url}\n${HISTORY_TEXT.sentOn(formatDateTime(new Date(entry.timestamp)))} · ${HISTORY_TEXT.callCount(callCount)}`}
         className="flex h-full min-w-0 flex-1 items-center gap-1.5 ps-3 text-start"
       >
         <MethodTag compact method={entry.method} className="w-10" />
         <span className="min-w-0 flex-1 truncate">{entry.url}</span>
         <StatusMark entry={entry} />
+        <CallCount count={callCount} />
         <SentAt timestamp={entry.timestamp} />
       </button>
+      <IconButton
+        label={HISTORY_TEXT.showCalls}
+        icon={BarChart3}
+        size="icon-xs"
+        tabIndex={-1}
+        onClick={() => onShowCalls(entry.id)}
+        className="hidden group-focus-within:inline-flex group-hover:inline-flex"
+      />
       <IconButton
         label={HISTORY_TEXT.remove}
         icon={X}
@@ -138,6 +159,7 @@ export const HistoryList = memo(function HistoryList({ entries, folders, actions
   const listRef = useRef(null)
   const pendingFocusId = useRef(null)
   const deleteHistoryItem = useAppStore((s) => s.deleteHistoryItem)
+  const openCallHistory = useAppStore((s) => s.openCallHistory)
 
   const shown = useMemo(() => filterHistory(entries, { query, ...filters }, folders, Date.now()), [entries, folders, query, filters])
   const groups = useMemo(() => (isGrouped ? groupByDate(shown, Date.now()) : [{ key: "", entries: shown }]), [shown, isGrouped])
@@ -197,6 +219,7 @@ export const HistoryList = memo(function HistoryList({ entries, folders, actions
                     onOpen={actions.openHistoryEntry}
                     onDelete={removeEntry}
                     onFocus={setFocusedId}
+                    onShowCalls={openCallHistory}
                   />
                 ))}
               </Fragment>

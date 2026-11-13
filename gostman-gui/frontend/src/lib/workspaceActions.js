@@ -68,6 +68,7 @@ import { CURL_FILES_TEXT } from './requestBarText'
 import { countImported } from './importSummary'
 import { SCOPE_GLOBAL } from './variableScopes'
 import { createTrashActions, keepFolder, keepRequest } from './trashSession'
+import { callFromResponse } from './callHistory'
 import { environmentForFolder, findActiveEnvironment, isFlowTab, isSpecTab, selectActiveTab, selectActiveVariables, useAppStore } from '../store/appStore'
 import { ownedVariableCount, scopedFolderNames, scopedImport } from './environmentScope'
 
@@ -297,7 +298,11 @@ export function createWorkspaceActions(backend) {
     const { auth, response, tests, extraction } = await execute(request, pendingId)
     store().finishTabRequest(tab.id, pendingId, response, { tests, extraction })
     if (auth.oauth2 !== tab.request.auth.oauth2) setToken(tab.id, auth.oauth2)
-    if (!UNRECORDED_ERRORS.includes(response.error)) store().addToHistory(withoutFormGiven(request), httpStatusOf(response), Boolean(response.error) && !response.statusCode)
+    if (!UNRECORDED_ERRORS.includes(response.error)) {
+      const call = callFromResponse(response, httpStatusOf(response), Boolean(response.error) && !response.statusCode, new Date().toISOString())
+      const { historyEntries, historyCalls } = getPreferences()
+      store().addToHistory(withoutFormGiven(request), call, { entries: historyEntries, calls: historyCalls })
+    }
   }
 
   const saveSettings = async (settings) => {
@@ -658,7 +663,7 @@ export function createWorkspaceActions(backend) {
     return send()
   }
 
-  const openHistoryEntry = ({ statusCode, ...entry }) => store().openRequestTab({ ...entry, id: '', timestamp: '' }, { historyId: entry.id })
+  const openHistoryEntry = ({ statusCode, noResponse, calls, ...entry }) => store().openRequestTab({ ...entry, id: '', timestamp: '' }, { historyId: entry.id })
 
   function saveLatestRequest() {
     const [latest] = store().requestHistory

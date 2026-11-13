@@ -44,5 +44,9 @@
   "preferences.languageTranslateLink": "Name of the translation platform. Keep Weblate as written.",
   "preferences.fields.sidebarViews": "Heading of the Appearance setting that lists the sidebar tabs with a checkbox and move buttons each.",
   "preferences.moveViewUp": "Accessible label of a button. {{name}} is a sidebar tab name such as History.",
-  "preferences.moveViewDown": "Accessible label of a button. {{name}} is a sidebar tab name such as History."
+  "preferences.moveViewDown": "Accessible label of a button. {{name}} is a sidebar tab name such as History.",
+  "preferences.historyEntriesHint": "Hint under the setting for how many different requests the history keeps.",
+  "preferences.historyCallsHint": "Hint under the setting for how many sends of one request the history keeps for its chart.",
+  "preferences.requests": "Unit after the number of requests kept in history.",
+  "preferences.calls": "Unit after the number of calls kept per request. A call is one send of a request."
 }

@@ -138,8 +138,19 @@ type Request struct {
 
 type HistoryEntry struct {
 	Request
-	StatusCode int  `json:"statusCode,omitempty"`
-	NoResponse bool `json:"noResponse,omitempty"`
+	StatusCode int           `json:"statusCode,omitempty"`
+	NoResponse bool          `json:"noResponse,omitempty"`
+	Calls      []HistoryCall `json:"calls,omitempty"`
+}
+
+// HistoryCall is one send of a history entry: when it went out and what came back.
+// DurationMs and Size are absent when they were not measured.
+type HistoryCall struct {
+	At         string `json:"at"`
+	StatusCode int    `json:"statusCode,omitempty"`
+	NoResponse bool   `json:"noResponse,omitempty"`
+	DurationMs *int64 `json:"durationMs,omitempty"`
+	Size       *int64 `json:"size,omitempty"`
 }
 
 var (
