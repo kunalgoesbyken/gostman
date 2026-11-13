@@ -29,6 +29,7 @@ const (
 	EngineFilesTooLarge               Code = "engineMessages.files.tooLarge"
 	EngineFilesUnavailable            Code = "engineMessages.files.unavailable"
 	EngineFilesUnreadable             Code = "engineMessages.files.unreadable"
+	EngineGrpcImportConflict          Code = "engineMessages.grpc.importConflict"
 	EngineNetworkCertificateExpired   Code = "engineMessages.network.certificateExpired"
 	EngineNetworkDial                 Code = "engineMessages.network.dial"
 	EngineNetworkDialServer           Code = "engineMessages.network.dialServer"

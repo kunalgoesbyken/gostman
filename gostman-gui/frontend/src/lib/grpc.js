@@ -26,6 +26,11 @@ export function mergeProtoFiles(existing, added) {
   return [...existing.filter((file) => !replaced.has(file.name)), ...added]
 }
 
+export function replacedProtoNames(existing, added) {
+  const contents = new Map(existing.map((file) => [file.name, file.content]))
+  return added.filter((file) => contents.has(file.name) && contents.get(file.name) !== file.content).map((file) => file.name)
+}
+
 export function toGrpcTarget(request, variables) {
   const { url, headers, auth, options, grpcProtos, inherited = [] } = request
   return { address: url, headers, auth, options, variables, protos: parseProtoFiles(grpcProtos), inherited }

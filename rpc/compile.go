@@ -10,8 +10,10 @@ import (
 	"github.com/bufbuild/protocompile/ast"
 	"github.com/bufbuild/protocompile/parser"
 	"github.com/bufbuild/protocompile/reporter"
+	"github.com/kunalgoesbyken/gostman/locales"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"
+	"google.golang.org/protobuf/types/descriptorpb"
 )
 
 const (
@@ -24,9 +26,14 @@ func compile(ctx context.Context, protos []ProtoFile) (*protoregistry.Files, err
 	if err != nil {
 		return nil, err
 	}
+	aliases, err := importAliases(sources)
+	if err != nil {
+		return nil, err
+	}
 	compiler := protocompile.Compiler{
-		Resolver: protocompile.WithStandardImports(&protocompile.SourceResolver{
-			Accessor: protocompile.SourceAccessorFromMap(sources),
+		Resolver: protocompile.WithStandardImports(protocompile.CompositeResolver{
+			&protocompile.SourceResolver{Accessor: protocompile.SourceAccessorFromMap(sources)},
+			forwardingResolver(aliases),
 		}),
 	}
 	compiled, err := compiler.Compile(ctx, sortedNames(sources)...)
@@ -65,9 +72,6 @@ func namedSources(protos []ProtoFile) (map[string]string, error) {
 		}
 		sources[name] = proto.Content
 	}
-	for _, imported := range importedPaths(sources) {
-		adoptImportPath(sources, imported)
-	}
 	return sources, nil
 }
 
@@ -84,25 +88,67 @@ func sortedNames(sources map[string]string) []string {
 	return names
 }
 
-func importedPaths(sources map[string]string) []string {
-	var imported []string
-	for _, name := range sortedNames(sources) {
-		tree, err := parser.Parse(name, strings.NewReader(sources[name]), reporter.NewHandler(nil))
+func importsByFile(sources map[string]string) map[string][]string {
+	imports := make(map[string][]string, len(sources))
+	for name, content := range sources {
+		tree, err := parser.Parse(name, strings.NewReader(content), reporter.NewHandler(nil))
 		if err != nil {
 			continue
 		}
 		for _, declaration := range tree.Decls {
 			if statement, ok := declaration.(*ast.ImportNode); ok {
-				imported = append(imported, statement.Name.AsString())
+				imports[name] = append(imports[name], statement.Name.AsString())
 			}
 		}
 	}
-	return imported
+	return imports
 }
 
-func adoptImportPath(sources map[string]string, imported string) {
-	if _, exists := sources[imported]; exists {
-		return
+func importAliases(sources map[string]string) (map[string]string, error) {
+	imports := importsByFile(sources)
+	names := sortedNames(sources)
+	aliases := map[string]string{}
+	for _, importer := range names {
+		for _, imported := range imports[importer] {
+			if file, found := sameNamedFile(sources, imported); found {
+				aliases[imported] = file
+			}
+		}
+	}
+	graph := make(map[string][]string, len(sources))
+	for importer, paths := range imports {
+		for _, imported := range paths {
+			if file, found := suppliedFile(sources, aliases, imported); found {
+				graph[importer] = append(graph[importer], file)
+			}
+		}
+	}
+	for _, importer := range names {
+		for _, imported := range imports[importer] {
+			file, aliased := aliases[imported]
+			if aliased && leadsTo(graph, file, importer, map[string]bool{}) {
+				return nil, localizedConfigError(locales.EngineGrpcImportConflict, locales.Params{
+					"importer": importer,
+					"path":     imported,
+					"file":     file,
+				})
+			}
+		}
+	}
+	return aliases, nil
+}
+
+func suppliedFile(sources, aliases map[string]string, imported string) (string, bool) {
+	if _, exact := sources[imported]; exact {
+		return imported, true
+	}
+	file, aliased := aliases[imported]
+	return file, aliased
+}
+
+func sameNamedFile(sources map[string]string, imported string) (string, bool) {
+	if _, exact := sources[imported]; exact {
+		return "", false
 	}
 	var candidates []string
 	for name := range sources {
@@ -111,10 +157,39 @@ func adoptImportPath(sources map[string]string, imported string) {
 		}
 	}
 	if len(candidates) != 1 {
-		return
+		return "", false
 	}
-	sources[imported] = sources[candidates[0]]
-	delete(sources, candidates[0])
+	return candidates[0], true
+}
+
+func leadsTo(graph map[string][]string, from, to string, visited map[string]bool) bool {
+	if from == to {
+		return true
+	}
+	if visited[from] {
+		return false
+	}
+	visited[from] = true
+	for _, next := range graph[from] {
+		if leadsTo(graph, next, to, visited) {
+			return true
+		}
+	}
+	return false
+}
+
+func forwardingResolver(aliases map[string]string) protocompile.Resolver {
+	return protocompile.ResolverFunc(func(name string) (protocompile.SearchResult, error) {
+		file, aliased := aliases[name]
+		if !aliased {
+			return protocompile.SearchResult{}, protoregistry.NotFound
+		}
+		return protocompile.SearchResult{Proto: &descriptorpb.FileDescriptorProto{
+			Name:             &name,
+			Dependency:       []string{file},
+			PublicDependency: []int32{0},
+		}}, nil
+	})
 }
 
 func register(files *protoregistry.Files, file protoreflect.FileDescriptor) error {

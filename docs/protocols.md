@@ -75,7 +75,9 @@ The Services line shows where the service list comes from.
 
 - With no files added it shows Server reflection. Select Load, and Gostman asks the server for its services through reflection. The button changes to Reload afterwards.
 - Select Add .proto files to pick one or more `.proto` files. When files are present, Gostman compiles them and uses them instead of reflection. The file names appear in the Services line.
-- Adding a file with the same name replaces the earlier one. Remove files clears them.
+- Gostman does not see the folders of the files you add, so it matches each `import` line to an added file by the file name at the end of the path. `google/api/field_behavior.proto` and `api/field_behavior.proto` both use an added `field_behavior.proto`, in every file that imports it, and the file is compiled once.
+- Adding a file with the same name replaces the earlier one, and a notice names the files whose content changed. Remove files clears them.
+- Two different files with the same name cannot be used together. When an import would make a file import itself, for example the only added `validate.proto` importing `buf/validate.proto`, Gostman names the import and the file. Rename one of the two files and change its import to match.
 - The address, headers and auth of the request are used for the connection.
 - A file over the attachment size limit is rejected with a message that names the file.
 

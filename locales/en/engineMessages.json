@@ -75,5 +75,8 @@
     "needsValue": "{{option}} needs a value",
     "noUrl": "the curl command has no URL",
     "noUrlAfterOption": "the curl command has no URL. {{option}} is not a curl option Gostman knows, so {{value}} after it was not read as the URL; put the URL after --url"
+  },
+  "grpc": {
+    "importConflict": "{{importer}} imports {{path}}, which Gostman can only match to {{file}} by its file name. {{file}} leads back to {{importer}}, so {{path}} and {{file}} would be the same file importing itself. If they are two different files with the same name, rename one of them and change its import to match."
   }
 }

@@ -1,10 +1,12 @@
 import english from '../../../../locales/en/grpc.json'
 import { messages } from './i18n/core'
+import { formatList } from './i18n/format'
 
 const text = messages('grpc', english, (t) => ({
   grpc: {
     methodPlaceholder: 'package.Service/Method',
     tooLarge: (name, size, limit) => t('grpc.tooLarge', { name, size, limit }),
+    replaced: (names) => t('grpc.replaced', { count: names.length, names: formatList(names) }),
   },
 }))
 

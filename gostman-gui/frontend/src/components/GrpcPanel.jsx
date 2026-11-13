@@ -9,13 +9,13 @@ import { EditorSkeleton } from "./ui/skeleton"
 import { maxAttachmentBytes } from "../lib/attachments"
 import { formatBytes } from "../lib/byteSize"
 import {
-  GRPC_METHOD, findMethod, isBlankMessage, mergeProtoFiles, methodKind, parseProtoFiles, readProtoFile,
+  GRPC_METHOD, findMethod, isBlankMessage, mergeProtoFiles, methodKind, parseProtoFiles, readProtoFile, replacedProtoNames,
 } from "../lib/grpc"
 import { GRPC_TEXT as TEXT } from "../lib/grpcText"
 
 const tooLargeMessage = (file) => TEXT.tooLarge(file.name, formatBytes(file.size), formatBytes(maxAttachmentBytes()))
 
-function ProtoFilePicker({ files, onChange, onError }) {
+function ProtoFilePicker({ files, onChange, onError, onReplaced }) {
   const inputRef = useRef(null)
 
   const handlePick = async (event) => {
@@ -28,7 +28,9 @@ function ProtoFilePicker({ files, onChange, onError }) {
       return
     }
     onError("")
-    onChange(mergeProtoFiles(files, await Promise.all(picked.map(readProtoFile))))
+    const added = await Promise.all(picked.map(readProtoFile))
+    onReplaced(replacedProtoNames(files, added))
+    onChange(mergeProtoFiles(files, added))
   }
 
   return (
@@ -90,6 +92,7 @@ function SchemaNotice({ schema, fileError }) {
 export function GrpcPanel({ request, schema, editorPath, onUpdateRequest, onProtosChange, onLoadSchema, EditorComponent }) {
   const { method, grpcMethod, grpcMessage, grpcProtos } = request
   const [fileError, setFileError] = useState("")
+  const [replaced, setReplaced] = useState([])
 
   const files = useMemo(() => parseProtoFiles(grpcProtos), [grpcProtos])
   const services = schema?.services
@@ -105,6 +108,7 @@ export function GrpcPanel({ request, schema, editorPath, onUpdateRequest, onProt
 
   const removeFiles = () => {
     setFileError("")
+    setReplaced([])
     onProtosChange([])
   }
 
@@ -115,12 +119,13 @@ export function GrpcPanel({ request, schema, editorPath, onUpdateRequest, onProt
         {!isGrpc && (
           <Button variant="outline" size="sm" onClick={() => onUpdateRequest({ method: GRPC_METHOD })}>{TEXT.sendAsGrpc}</Button>
         )}
-        <ProtoFilePicker files={files} onChange={onProtosChange} onError={setFileError} />
+        <ProtoFilePicker files={files} onChange={onProtosChange} onError={setFileError} onReplaced={setReplaced} />
         {files.length > 0 && <Button variant="outline" size="sm" onClick={removeFiles}>{TEXT.removeFiles}</Button>}
         <Button variant="outline" size="sm" disabled={Boolean(schema?.loading)} onClick={onLoadSchema}>
           {services ? TEXT.reload : TEXT.load}
         </Button>
       </Toolbar>
+      {replaced.length > 0 && <Notice tone="warning">{TEXT.replaced(replaced)}</Notice>}
       <SchemaNotice schema={schema} fileError={fileError} />
       <Toolbar>
         <SectionLabel>{TEXT.method}</SectionLabel>

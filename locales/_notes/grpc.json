@@ -9,5 +9,6 @@
   "grpc.kinds.bidirectional": "gRPC call kind: both sides send a stream.",
   "grpc.kinds.client": "gRPC call kind: the client sends a stream.",
   "grpc.kinds.server": "gRPC call kind: the server sends a stream.",
-  "grpc.tooLarge": "{{size}} and {{limit}} are file sizes."
+  "grpc.tooLarge": "{{size}} and {{limit}} are file sizes.",
+  "grpc.replaced": "{{names}} is a list of .proto file names. Gostman matches each import line to an added file by its name, so it can hold only one file per name."
 }
