@@ -4,11 +4,11 @@ import { formatDateTime } from './i18n/format'
 import { REASON_UNKNOWN } from './noResponse'
 import { RESPONSE_TEXT } from './responseText'
 import { HISTORY_TEXT } from './sidebarText'
+import { TAB_BAR_TEXT } from './tabBarText'
 
 const TEXT = HISTORY_TEXT.calls
 const CSV = TEXT.csv
 const SECOND_OPTIONS = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }
-const SHORT_OPTIONS = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }
 
 const BADGE_VARIANT = {
   [CLASS_SUCCESS]: 'success',
@@ -33,7 +33,7 @@ export const statusVariantOf = (call) => BADGE_VARIANT[statusClassOf(call)]
 
 export const momentText = (time) => formatDateTime(new Date(time), SECOND_OPTIONS)
 
-export const shortMomentText = (time) => formatDateTime(new Date(time), SHORT_OPTIONS)
+export const requestNameOf = (entry) => (entry.name && entry.name !== TAB_BAR_TEXT.newRequest ? entry.name : entry.url)
 
 export const callLabel = (call) => TEXT.barLabel({ time: momentText(timeOf(call)), status: statusText(call), duration: durationText(call.durationMs), size: sizeText(call.size) })
 

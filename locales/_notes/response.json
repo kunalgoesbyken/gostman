@@ -25,6 +25,7 @@
   "response.tabs.timeline": "Tab that shows where the time of a request went.",
   "response.tabs.calls": "Tab that charts and lists every send of the request: its time, status, duration and size. A call is one send.",
   "response.noCallsTitle": "Title of the empty Calls tab, shown when the request in the tab has not been sent yet.",
+  "response.cappedCount": "Count on a tab that is too large to show, for example 99+. {{count}} is the largest number shown.",
   "response.tabs.visualize": "Tab that shows output drawn by a script.",
   "response.views.pretty": "View of the body formatted for reading.",
   "response.views.raw": "View of the body exactly as received.",

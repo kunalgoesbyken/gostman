@@ -69,7 +69,9 @@ import { countImported } from './importSummary'
 import { SCOPE_GLOBAL } from './variableScopes'
 import { createTrashActions, keepFolder, keepRequest } from './trashSession'
 import { csvHeaders } from './callDisplay'
-import { callFromResponse } from './callHistory'
+import { callFromResponse, callsOf, compactCall } from './callHistory'
+import { TAB_CALLS } from './responseTabs'
+import { HISTORY_TEXT } from './sidebarText'
 import { CALLS_FILE_NAME, CSV_MEDIA_TYPE, callsCsv } from './callsCsv'
 import { shownUrl } from './shownUrl'
 import { environmentForFolder, findActiveEnvironment, isFlowTab, isSpecTab, selectActiveTab, selectActiveVariables, selectResolvedVariables, useAppStore } from '../store/appStore'
@@ -673,6 +675,33 @@ export function createWorkspaceActions(backend) {
 
   const openHistoryEntry = ({ statusCode, noResponse, calls, ...entry }) => store().openRequestTab({ ...entry, id: '', timestamp: '' }, { historyId: entry.id })
 
+  const openHistoryCalls = (entry) => {
+    openHistoryEntry(entry)
+    store().showResponseTab(store().activeTabId, TAB_CALLS)
+  }
+
+  const undoHistoryRemoval = (entry, index) => {
+    store().restoreHistoryEntry(entry, index)
+    store().dismissNotice()
+  }
+
+  function removeHistoryEntry(id) {
+    const index = store().requestHistory.findIndex((entry) => entry.id === id)
+    if (index < 0) return
+    const entry = store().requestHistory[index]
+    store().deleteHistoryItem(id)
+    store().showNotice(HISTORY_TEXT.deletedEntry, () => undoHistoryRemoval(entry, index))
+  }
+
+  function removeHistoryCall(id, position) {
+    const index = store().requestHistory.findIndex((entry) => entry.id === id)
+    const entry = store().requestHistory[index]
+    const call = entry && callsOf(entry)[position]
+    if (!call) return
+    store().deleteHistoryCall(id, position)
+    store().showNotice(HISTORY_TEXT.deletedCall, () => undoHistoryRemoval({ ...entry, calls: [compactCall(call)] }, index))
+  }
+
   function saveLatestRequest() {
     const [latest] = store().requestHistory
     if (!activeTab().request.url && latest) openHistoryEntry(latest)
@@ -873,5 +902,8 @@ export function createWorkspaceActions(backend) {
     openRequest: (request) => store().openRequestTab(request),
     previewRequest: (request) => store().openRequestTab(request, { preview: true }),
     openHistoryEntry,
+    openHistoryCalls,
+    removeHistoryEntry,
+    removeHistoryCall,
   }
 }

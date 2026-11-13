@@ -307,9 +307,9 @@ Each tab keeps its last 10 responses while the app is open. They are kept in mem
 | Request body | The request sent a body (not a file or an upload from disk) | The body exactly as it was sent, with variables and generated values filled in. Shows its type and size; **Copy** and **Save to file** are in its toolbar. Bodies over 1 MB are cut off and cannot be saved here; binary bodies are not shown as text. |
 | Timeline | The response has timing data, or scripts ran | See [Timeline](#timeline). |
 | Checks | There are check results or a script error | Each result with a pass or fail mark. The count shows passed over total. |
-| Calls | A response is shown, or the request has calls | The chart, filters and list of every send of the request, with a count. See [Calls](#calls). **No calls recorded** appears when the request in the tab has none. |
 | Console | The request completed | Output of `console.log()` in scripts. |
 | Visualize | A script called `visualize()` | See [Visualize](#visualize). |
+| Calls | A response is shown, or the request has calls | The summary, chart, filters and list of every send of the request, with a count. Always the last tab. See [Calls](#calls). |
 
 ### Body views
 
@@ -407,25 +407,44 @@ The Search tab in the sidebar, or the **Search everywhere** command in the comma
 
 ## History
 
-The History tab at the top of the sidebar lists sent requests, with the method, the URL, the HTTP status of the response, in the colours of the response panel, and the time since sending (for example "5m" or "2d"). Sends that got no response are marked **No response**. Screen readers read the time in full, for example "sent 5 minutes ago". The tab shows a count.
+The History tab at the top of the sidebar keeps what you sent. The switch under the search box chooses how it is listed: **Journal**, the default, or **By request**. Gostman remembers the choice. The tab shows a count of the requests.
+
+### Journal
+
+The journal lists every send on its own row, newest first. Each row has two lines: the time of the send, to the second, the method and the name of the request (its address when it has no name of its own), then the status, with the reason when the send got no response, the duration and the size. A heading above each day stays in view while you scroll and gives the date, with Today or Yesterday where it applies, and the number of calls of that day, for example "Today · Fri 14 Nov".
+
+- Click a row to open its request as a tab.
+- Search, the date range, the status filter and the folder and tag filters apply to the calls, so `404` finds the calls that got one. While one of them is on, the journal says how many calls match, for example "12 of 24 calls".
+- The journal lists 200 calls, with **Show more** for 200 more. **Export CSV**, next to **Clear history**, saves every call that matches, not only the ones listed, in the format described under [Calls](#calls).
+
+### By request
+
+By request lists each request once, with the method, the URL, the HTTP status of its last send, in the colours of the response panel, and the time since sending (for example "5m" or "2d"). Sends that got no response are marked **No response**. Screen readers read the time in full, for example "sent 5 minutes ago".
 
 - Click an entry to open it as a request tab.
-- Search history filters by method, URL and status, so `404` finds the requests that got one.
-- The actions button (**…**), shown when you hover an entry, opens a menu with **Show calls** and, set apart at the bottom, **Remove from history**. Right-click an entry, or press Shift+F10 or the Menu key on it, to open the same menu; Delete removes the focused entry at once. Clear history deletes all entries.
+- Search history filters by method, URL and status, so `404` finds the requests that got one. The status filter looks at the last send of each request, and **Group by date** groups the entries by the day of their last send.
 - Sending the same request again moves its entry to the top and adds the send to its calls; an entry sent more than once shows the count, for example "×12". Hovering an entry shows the full date and time of the last send.
-- **By request** and **Journal**, at the top of the tab, switch how it is listed. **By request** is the list described above. **Journal** lists every send on its own row, newest first, with the method, the address, the date and time, the status and the duration. Click a row to open its request, as you do in **By request**. Search, the date range, the folder and tag filters and **Group by date** apply to the calls, and the journal shows the latest 200 with **Show more** for 200 more. A journal row has no remove button, because removing a request removes all its calls: use **By request** for that. In the journal, **Export CSV** next to **Clear history** saves every call that matches the search and the filters, not only the ones listed, in the format of [Calls](#calls). Gostman remembers which one you chose.
+
+### Row actions
+
+Every row, in both views, has one actions button (**…**), dimmed until you hover or focus the row. The same menu opens on right-click, and with Shift+F10 or the Menu key on a focused row. Its items are **Open**, **Show calls**, which opens the request with its Calls tab selected, **Copy as cURL**, for requests that have a curl form, and, set apart at the bottom, **Delete**.
+
+- Delete takes effect at once, and a notice offers **Undo** for a few seconds. In By request it deletes the entry with all its calls ("Deleted 1 entry"); in the Journal it deletes only that call ("Deleted 1 call"), and the request goes when its last call does. The Delete key on a focused row does the same.
+- **Clear history** asks first and says how many entries it deletes.
 - The app keeps 50 requests and 500 calls per request by default. Change both under **Requests** in [Preferences](preferences-and-shortcuts.md#preferences); the oldest request or call is dropped first.
 
 ### Calls
 
-The **Calls** tab of the [response panel](#tabs), next to Body, Headers and the other tabs, shows every send of the request in the active tab, to follow how an unstable or slow API behaves over time. **Show calls**, in the menu of a History entry, opens the same chart in a window. The Calls tab also appears for a request opened from History, before you send it again.
+The **Calls** tab of the [response panel](#tabs) shows every send of the request in the active tab, to follow how an unstable or slow API behaves over time. It is the last tab and never the one you land on, and its name carries the number of calls (99+ above 99). **Show calls** in the History menu opens a request with this tab selected, and the tab also appears for a request opened from History before you send it again.
 
-- A request keeps its calls under its method, address and body (and its GraphQL, gRPC and MCP fields). Change one of them and the tab shows the calls of the request that matches, or **No calls recorded** until you send it.
+- A request keeps its calls under its method, address and body (and its GraphQL, gRPC and MCP fields). Change one of them and the tab shows the calls of the request that matches, or **No calls recorded for this request yet** until you send it. The empty text is not shown while the first send runs.
 - Each call keeps the date and time, the status, the duration and the size of the response. Calls with no response keep the time until the send failed and a short reason: **Timed out**, **Connection failed** (the server or the proxy could not be reached), **DNS lookup failed**, **TLS error** (the handshake or the certificate), **Cancelled**, **Blocked by policy** (a private address on the web app, or a host that may not be called) or **Other error**. The reason shows in the status of the call, in the list and in the tooltip of its bar. Calls saved before this version show plain **No response**.
-- The chart puts each call at the time it was sent, as a bar as tall as its duration, coloured by status: 2xx, 3xx, 4xx, 5xx, **Other** (a response without an HTTP status, such as gRPC or MCP) and **No response**, drawn at full height so outages stand out. Hover a bar for its details.
-- The status checkboxes, with the number of calls of each kind, the checkboxes for the reason a call got no response (shown when some did) and the duration fields (in milliseconds) filter the chart, the summary and the list.
+- A line at the top sums up the calls shown: how many, the share answered with 2xx or 3xx, and the median and 95th percentile of the duration, for example "24 calls · 92% 2xx or 3xx · median 120 ms · p95 840 ms".
+- The chart puts each call at the time it was sent, as a bar as tall as its duration, coloured by status: 2xx, 3xx, 4xx, 5xx, **Other** (a response without an HTTP status, such as gRPC or MCP) and **No response**, drawn at full height so outages stand out. The status is never shown by colour alone: the tooltip, the checkboxes and the list say it in words.
+- The status checkboxes, with the number of calls of each kind, the checkboxes for the reason a call got no response (shown when some did) and the duration fields (in milliseconds) filter the chart and the list. When they leave no call, **No calls match** offers **Clear filters**. Screen readers hear "Showing 12 of 24 calls" when a filter changes.
 - Drag across the chart to zoom in on a period, or set **From** and **To**. **Show all** zooms back out.
-- The summary gives the number of calls, the share answered with 2xx or 3xx, the median, 95th percentile and slowest duration and the average size of the calls shown. The list below shows the latest 200 of them.
+- The plot is one stop for the Tab key. The Left and Right arrow keys, Home and End move between the calls in time order and show the tooltip that hovering shows, Enter selects the call in the list and moves focus to its row, and Escape clears. The chart has an accessible summary: the number of calls, the period, how many were answered with 2xx or 3xx and how many with 4xx, 5xx or no response, and the median.
+- The list below the chart is a table of the calls shown, newest first, with the time, the status, the duration and the size. It follows the same filters and zoom, and shows the latest 200 of them.
 - **Export CSV** saves the calls shown, after the filters and the zoom, as `gostman-calls.csv`. The desktop app asks where to save it; the web app downloads it. The columns are the time (ISO 8601 with the offset of your time zone), the method, the address, the status (the HTTP status, `none` for no response or `other` for a response without one), the reason for no response (`timeout`, `connection`, `dns`, `tls`, `cancelled`, `blocked`, `other`, or `unknown` for calls saved before the reason was kept), the duration in milliseconds and the size in bytes, with the header in your language. Values that contain a comma, a quote or a line break are quoted as RFC 4180 describes. Secret values and the values of sensitive query parameters in the address show as `***`. A text value that starts with `=`, `+`, `-`, `@`, a tab or a carriage return, such as an address in an imported collection, gets a leading apostrophe, so a spreadsheet does not run it as a formula.
 - Entries saved before calls were recorded keep their one send, without duration or size.
 

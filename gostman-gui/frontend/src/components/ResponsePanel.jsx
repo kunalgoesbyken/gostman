@@ -43,6 +43,7 @@ import { shortcutLabel } from "../lib/platform"
 import { AI_TEXT } from "../lib/aiText"
 import { RESPONSE_CHECKS_TEXT } from "../lib/checksText"
 import { callsOf } from "../lib/callHistory"
+import { TAB_BODY, TAB_CALLS } from "../lib/responseTabs"
 import { canSaveAsExample } from "../lib/examples"
 import { deepestLevel, trimmedTree } from "../lib/jsonTree"
 import { DEPTH_SETTINGS, appDefaultDepth, depthLabel, depthOfSetting, requestDepth, settingOfDepth } from "../lib/jsonDepth"
@@ -65,7 +66,6 @@ import {
   BODY_KINDS, ERROR_TITLES, bodyBytes, bodyKind, dataUrl, isScriptableImage, looksLikeJson, mimeType, parseJsonBody, statusVariant, textBody,
 } from "../lib/response"
 
-const TAB_BODY = 'body'
 const TAB_HEADERS = 'headers'
 const TAB_COOKIES = 'cookies'
 const TAB_TESTS = 'tests'
@@ -73,8 +73,8 @@ const TAB_CONSOLE = 'console'
 const TAB_VISUALIZE = 'visualize'
 const TAB_TIMELINE = 'timeline'
 const TAB_REQUEST = 'request'
-const TAB_CALLS = 'calls'
 const NO_VALUE = '—'
+const CALLS_BADGE_MAX = 99
 const SEARCH_DEBOUNCE_MS = 200
 
 const NO_HISTORY = []
@@ -349,7 +349,10 @@ const tabItem = (value, badge = null, marked = false) => ({
   content: <>{RESPONSE_TEXT.tabs[value]}{badge}</>,
 })
 
-function CallsTab({ calls, entry, onExport }) {
+const callsBadge = (count) => (count === 0 ? null : <>{' '}<TabCount>{count > CALLS_BADGE_MAX ? RESPONSE_TEXT.cappedCount(CALLS_BADGE_MAX) : count}</TabCount></>)
+
+function CallsTab({ calls, entry, loading, onExport }) {
+  if (calls.length === 0 && loading) return <SkeletonLines label={RESPONSE_TEXT.sending} lines={6} />
   if (calls.length === 0) return <EmptyState icon={BarChart3} title={RESPONSE_TEXT.noCallsTitle} description={RESPONSE_TEXT.noCallsDescription} />
   return (
     <Suspense fallback={null}>
@@ -365,10 +368,10 @@ function responseTabs({ hasResult, hasTimeline, hasSent, showsTests, headers, co
     hasResult && tabItem(TAB_COOKIES, <TabCount>{cookies.length}</TabCount>, cookies.length > 0),
     hasSent && tabItem(TAB_REQUEST),
     hasTimeline && tabItem(TAB_TIMELINE),
-    tabItem(TAB_CALLS, calls.length > 0 ? <TabCount>{calls.length}</TabCount> : null, calls.length > 0),
     showsTests && tabItem(TAB_TESTS, <TabCount tone={testTone(tests)}>{countPassed(tests.results)}/{tests.results.length}</TabCount>, true),
     tabItem(TAB_CONSOLE),
     tests?.visualization && tabItem(TAB_VISUALIZE),
+    tabItem(TAB_CALLS, callsBadge(calls.length), calls.length > 0),
   ].filter(Boolean)
 }
 
@@ -539,12 +542,13 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
     setPastAt(null)
   }, [response])
 
-  const revealSearch = useCallback((text) => {
-    setActiveTab(TAB_BODY)
+  const revealJump = useCallback(({ tab, query: text }) => {
+    setActiveTab(tab)
+    if (tab !== TAB_BODY) return
     setSearchOpen(true)
     setQuery(text)
   }, [])
-  useResponseJump(tabId, revealSearch)
+  useResponseJump(tabId, revealJump)
 
   useEffect(() => setMatchIndex(0), [debouncedQuery, view, filtered])
 
@@ -569,7 +573,7 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
   const toggleCollapse = useCallback(() => setIsCollapsed((current) => !current), [])
 
   const renderContent = () => {
-    if (activeTab === TAB_CALLS) return <CallsTab calls={calls} entry={historyEntry} onExport={onExportCalls} />
+    if (activeTab === TAB_CALLS) return <CallsTab calls={calls} entry={historyEntry} loading={loading} onExport={onExportCalls} />
     if (loading) return <SkeletonLines label={RESPONSE_TEXT.sending} lines={6} />
     if (!shown) return <FeatureEmpty surface="response" icon={FileText} title={RESPONSE_TEXT.noResponseTitle} description={RESPONSE_TEXT.noResponseDescription} />
     if (activeTab === TAB_REQUEST && hasSent) return <RequestBodyTab sent={shown.sent} onSave={past ? undefined : onSaveSent} />

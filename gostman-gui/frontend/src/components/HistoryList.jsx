@@ -1,20 +1,19 @@
 import { Fragment, memo, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react"
-import { BarChart3, CalendarDays, Clock, Download, MoreHorizontal, Search, Trash2 } from "lucide-react"
+import { CalendarDays, Clock, Download, Search } from "lucide-react"
 import { Badge } from "./ui/badge"
 import { Button, IconButton } from "./ui/button"
 import { ContextMenu } from "./ui/ContextMenu"
 import { SegmentedControl } from "./ui/segmented"
 import { Select } from "./ui/select"
-import { CallStatus } from "./CallStatus"
 import { FeatureEmpty } from "./FeatureEmpty"
+import { RowMenuButton, menuOpener, rowMenuItems } from "./HistoryRowMenu"
+import { JournalList } from "./JournalList"
 import { MethodTag } from "./MethodTag"
 import { SearchField } from "./SearchField"
-import { useAppStore } from "../store/appStore"
 import { PANE_SIDEBAR, focusPane } from "../lib/panes"
 import { ORIENTATION, isFocusLost, moveFocus, tabStopOf } from "../lib/rovingFocus"
-import { timeOf } from "../lib/callHistory"
-import { callLabel, durationText, shortMomentText } from "../lib/callDisplay"
-import { ALL_FOLDERS, ALL_TAGS, RANGES, RANGE_ANY, filterHistory, groupByDate, journalOf } from "../lib/historyFilter"
+import { STATUS_CLASSES } from "../lib/callHistory"
+import { ALL_FOLDERS, ALL_STATUSES, ALL_TAGS, RANGES, RANGE_ANY, filterHistory, groupByDate, groupByDay, journalOf, pageOfDays } from "../lib/historyFilter"
 import { buildCollectionTree, listFolders } from "../lib/collectionTree"
 import { collectTags } from "../lib/tags"
 import { formatDate, formatDateTime, formatNumber } from "../lib/i18n/format"
@@ -56,7 +55,7 @@ function relativeTime(isoString) {
 function SentAt({ timestamp }) {
   const { short, spoken } = relativeTime(timestamp)
   return (
-    <span className="shrink-0 pe-1 text-2xs group-focus-within:hidden group-hover:hidden group-data-[menu-open]:hidden">
+    <span className="shrink-0 pe-1 text-2xs">
       <span aria-hidden="true">{short}</span>
       <span className="sr-only">{spoken}</span>
     </span>
@@ -72,7 +71,7 @@ function StatusMark({ entry }) {
 function CallCount({ count }) {
   if (count < 2) return null
   return (
-    <span className="shrink-0 font-mono text-2xs tabular-nums group-focus-within:hidden group-hover:hidden group-data-[menu-open]:hidden">
+    <span className="shrink-0 font-mono text-2xs tabular-nums">
       <span aria-hidden="true">×{count}</span>
       <span className="sr-only">{HISTORY_TEXT.callCount(count)}</span>
     </span>
@@ -81,20 +80,16 @@ function CallCount({ count }) {
 
 function HistoryRow({ entry, isTabStop, isMenuOpen, onOpen, onDelete, onFocus, onOpenMenu, onCloseMenu }) {
   const callCount = entry.calls.length
+  const target = { id: entry.id, entry, callIndex: null }
+  const openMenu = menuOpener(target, onOpenMenu)
   const removeOnKey = (event) => {
     if (!isRemoveKey(event)) return
     event.preventDefault()
-    onDelete(entry.id)
-  }
-  const openMenu = (event) => {
-    event.preventDefault()
-    const rect = event.currentTarget.getBoundingClientRect()
-    onOpenMenu(entry.id, { x: event.clientX || rect.left, y: event.clientY || rect.bottom })
+    onDelete(target)
   }
 
   return (
     <li
-      data-menu-open={isMenuOpen || undefined}
       onContextMenu={openMenu}
       className={cn("group flex h-7 items-center pe-1.5 text-xs hover:bg-accent hover:text-foreground", isMenuOpen ? "bg-accent text-foreground" : "text-muted-foreground")}
     >
@@ -115,56 +110,14 @@ function HistoryRow({ entry, isTabStop, isMenuOpen, onOpen, onDelete, onFocus, o
         <CallCount count={callCount} />
         <SentAt timestamp={entry.timestamp} />
       </button>
-      <IconButton
-        label={HISTORY_TEXT.actions(entry.url)}
-        icon={MoreHorizontal}
-        size="icon-xs"
-        tabIndex={-1}
-        aria-haspopup="menu"
-        aria-expanded={isMenuOpen}
-        onClick={isMenuOpen ? onCloseMenu : openMenu}
-        className="hidden group-focus-within:inline-flex group-hover:inline-flex group-data-[menu-open]:inline-flex"
-      />
+      <RowMenuButton name={entry.url} isOpen={isMenuOpen} onOpen={openMenu} onClose={onCloseMenu} />
     </li>
   )
 }
 
-function JournalRow({ row, isTabStop, onOpen, onFocus }) {
-  const { entry, call } = row
-  return (
-    <li className="flex h-10 items-center text-xs text-muted-foreground hover:bg-accent hover:text-foreground">
-      <button
-        type="button"
-        data-history-entry={row.id}
-        data-pane-entry
-        tabIndex={isTabStop ? 0 : -1}
-        onClick={() => onOpen(entry)}
-        onFocus={() => onFocus(row.id)}
-        title={`${entry.url}\n${callLabel(call)}`}
-        className="flex h-full min-w-0 flex-1 items-center gap-1.5 px-3 text-start"
-      >
-        <MethodTag compact method={entry.method} className="w-10" />
-        <span className="flex min-w-0 flex-1 flex-col">
-          <span className="truncate">{entry.url}</span>
-          <span className="flex min-w-0 items-center gap-1.5 whitespace-nowrap font-mono text-2xs tabular-nums">
-            <span className="min-w-0 truncate">{shortMomentText(timeOf(call))}</span>
-            <CallStatus call={call} />
-            {call.durationMs !== null && <span className="shrink-0">{durationText(call.durationMs)}</span>}
-          </span>
-        </span>
-      </button>
-    </li>
-  )
-}
+const NO_FILTERS = { range: RANGE_ANY, folderId: ALL_FOLDERS, tag: ALL_TAGS, statusClass: ALL_STATUSES }
 
-const rowMenuItems = (entryId, showCalls, remove) => [
-  { id: "calls", label: HISTORY_TEXT.showCalls, icon: BarChart3, onSelect: () => showCalls(entryId) },
-  { id: "remove", label: HISTORY_TEXT.remove, icon: Trash2, destructive: true, separated: true, onSelect: () => remove(entryId) },
-]
-
-const NO_FILTERS = { range: RANGE_ANY, folderId: ALL_FOLDERS, tag: ALL_TAGS }
-
-function HistoryFilters({ filters, onChange, folderOptions, tags, isGrouped, onGroupedChange, view, onViewChange }) {
+function HistoryFilters({ filters, onChange, folderOptions, tags, canGroup, isGrouped, onGroupedChange, view, onViewChange }) {
   const choose = (name) => (event) => onChange({ ...filters, [name]: event.target.value })
   return (
     <div className="flex flex-col gap-1 px-2 pb-1">
@@ -180,9 +133,13 @@ function HistoryFilters({ filters, onChange, folderOptions, tags, isGrouped, onG
             {RANGES.map((range) => <option key={range} value={range}>{HISTORY_TEXT.ranges[range]}</option>)}
           </Select>
         </div>
-        <IconButton label={HISTORY_TEXT.groupByDate} icon={CalendarDays} variant="outline" aria-pressed={isGrouped} onClick={() => onGroupedChange(!isGrouped)} className="h-7 w-7 shrink-0" />
+        {canGroup && <IconButton label={HISTORY_TEXT.groupByDate} icon={CalendarDays} variant="outline" aria-pressed={isGrouped} onClick={() => onGroupedChange(!isGrouped)} className="h-7 w-7 shrink-0" />}
       </div>
-      <div className="grid grid-cols-2 gap-1 empty:hidden">
+      <div className="grid grid-cols-2 gap-1">
+        <Select value={filters.statusClass} onChange={choose("statusClass")} aria-label={HISTORY_TEXT.status}>
+          <option value={ALL_STATUSES}>{HISTORY_TEXT.allStatuses}</option>
+          {STATUS_CLASSES.map((name) => <option key={name} value={name}>{HISTORY_TEXT.calls.classes[name]}</option>)}
+        </Select>
         {folderOptions.length > 0 && (
           <Select value={filters.folderId} onChange={choose("folderId")} aria-label={HISTORY_TEXT.folder}>
             <option value={ALL_FOLDERS}>{HISTORY_TEXT.allFolders}</option>
@@ -209,8 +166,6 @@ export const HistoryList = memo(function HistoryList({ entries, folders, actions
   const [journalLimit, setJournalLimit] = useState(JOURNAL_PAGE)
   const listRef = useRef(null)
   const pendingFocusId = useRef(null)
-  const deleteHistoryItem = useAppStore((s) => s.deleteHistoryItem)
-  const openCallHistory = useAppStore((s) => s.openCallHistory)
   const { historyView } = usePreferences()
   const isJournal = historyView === HISTORY_VIEW_JOURNAL
 
@@ -218,21 +173,28 @@ export const HistoryList = memo(function HistoryList({ entries, folders, actions
     () => (isJournal ? journalOf : filterHistory)(entries, { query, ...filters }, folders, Date.now()),
     [isJournal, entries, folders, query, filters],
   )
-  const shown = useMemo(() => (isJournal ? found.slice(0, journalLimit) : found), [isJournal, found, journalLimit])
-  const groups = useMemo(() => (isGrouped ? groupByDate(shown, Date.now()) : [{ key: "", entries: shown }]), [shown, isGrouped])
+  const days = useMemo(() => (isJournal ? groupByDay(found, Date.now()) : []), [isJournal, found])
+  const shownDays = useMemo(() => pageOfDays(days, journalLimit), [days, journalLimit])
+  const shown = useMemo(() => (isJournal ? shownDays.flatMap((day) => day.rows) : found), [isJournal, shownDays, found])
+  const groups = useMemo(() => {
+    if (isJournal) return []
+    return isGrouped ? groupByDate(found, Date.now()) : [{ key: "", entries: found }]
+  }, [isJournal, found, isGrouped])
   const folderOptions = useMemo(() => listFolders(buildCollectionTree(folders, [])), [folders])
   const tags = useMemo(() => collectTags(entries), [entries])
+  const totalCalls = useMemo(() => entries.reduce((total, entry) => total + entry.calls.length, 0), [entries])
 
   const isSearching = query.trim() !== "" || Object.entries(NO_FILTERS).some(([name, none]) => filters[name] !== none)
-  const tabStop = tabStopOf(shown.map((entry) => entry.id), focusedId)
+  const tabStop = tabStopOf(shown.map((item) => item.id), focusedId)
 
-  const removeEntry = useCallback((id) => {
-    const index = shown.findIndex((entry) => entry.id === id)
+  const removeTarget = useCallback((target) => {
+    const index = shown.findIndex((item) => item.id === target.id)
     const neighbour = shown[index + 1] || shown[index - 1]
     pendingFocusId.current = neighbour?.id ?? ""
     if (neighbour) setFocusedId(neighbour.id)
-    deleteHistoryItem(id)
-  }, [shown, deleteHistoryItem])
+    if (target.callIndex === null) actions.removeHistoryEntry(target.entry.id)
+    else actions.removeHistoryCall(target.entry.id, target.callIndex)
+  }, [shown, actions])
 
   useLayoutEffect(() => {
     if (pendingFocusId.current === null) return
@@ -248,11 +210,34 @@ export const HistoryList = memo(function HistoryList({ entries, folders, actions
     listRef.current?.querySelector(entrySelector(tabStop))?.focus()
   }
 
+  const rowProps = {
+    onOpen: actions.openHistoryEntry,
+    onDelete: removeTarget,
+    onFocus: setFocusedId,
+    onOpenMenu: (target, position) => setMenu({ target, position }),
+    onCloseMenu: () => setMenu(null),
+  }
+
   return (
     <>
       <SearchField value={query} onChange={setQuery} onKeyDown={enterResultsOnArrow} placeholder={HISTORY_TEXT.search} />
       {entries.length > 0 && (
-        <HistoryFilters filters={filters} onChange={setFilters} folderOptions={folderOptions} tags={tags} isGrouped={isGrouped} onGroupedChange={setIsGrouped} view={historyView} onViewChange={(view) => updatePreferences({ historyView: view })} />
+        <HistoryFilters
+          filters={filters}
+          onChange={setFilters}
+          folderOptions={folderOptions}
+          tags={tags}
+          canGroup={!isJournal}
+          isGrouped={isGrouped}
+          onGroupedChange={setIsGrouped}
+          view={historyView}
+          onViewChange={(view) => updatePreferences({ historyView: view })}
+        />
+      )}
+      {isJournal && isSearching && entries.length > 0 && (
+        <p role="status" className="px-3 pb-1 text-2xs text-muted-foreground tabular-nums">
+          {HISTORY_TEXT.journal.filtered({ shown: formatNumber(found.length), total: formatNumber(totalCalls) })}
+        </p>
       )}
 
       <div className="min-h-0 flex-1 overflow-y-auto">
@@ -265,29 +250,19 @@ export const HistoryList = memo(function HistoryList({ entries, folders, actions
           />
         ) : (
           <ul ref={listRef} aria-label={SIDEBAR_TEXT.history} onKeyDown={(event) => moveFocus(event, ENTRY_KEYS)} className="py-1">
-            {groups.map((group) => (
+            {isJournal ? (
+              <JournalList days={shownDays} tabStop={tabStop} menuId={menu?.target.id} {...rowProps} />
+            ) : groups.map((group) => (
               <Fragment key={group.key}>
                 {group.key && <li className="px-3 pb-0.5 pt-2 text-2xs font-medium text-muted-foreground">{HISTORY_TEXT.groups[group.key]}</li>}
-                {group.entries.map((item) => (isJournal ? (
-                  <JournalRow key={item.id} row={item} isTabStop={item.id === tabStop} onOpen={actions.openHistoryEntry} onFocus={setFocusedId} />
-                ) : (
-                  <HistoryRow
-                    key={item.id}
-                    entry={item}
-                    isTabStop={item.id === tabStop}
-                    isMenuOpen={menu?.entryId === item.id}
-                    onOpen={actions.openHistoryEntry}
-                    onDelete={removeEntry}
-                    onFocus={setFocusedId}
-                    onOpenMenu={(entryId, position) => setMenu({ entryId, position })}
-                    onCloseMenu={() => setMenu(null)}
-                  />
-                )))}
+                {group.entries.map((entry) => (
+                  <HistoryRow key={entry.id} entry={entry} isTabStop={entry.id === tabStop} isMenuOpen={menu?.target.id === entry.id} {...rowProps} />
+                ))}
               </Fragment>
             ))}
           </ul>
         )}
-        {shown.length < found.length && (
+        {isJournal && shown.length < found.length && (
           <div className="flex flex-col items-center gap-1 px-3 pb-2">
             <p className="text-2xs text-muted-foreground">{HISTORY_TEXT.calls.shownRows({ shown: formatNumber(shown.length), total: formatNumber(found.length) })}</p>
             <Button variant="ghost" size="sm" onClick={() => setJournalLimit(journalLimit + JOURNAL_PAGE)}>{HISTORY_TEXT.showMore}</Button>
@@ -303,7 +278,7 @@ export const HistoryList = memo(function HistoryList({ entries, folders, actions
           )}
         </div>
       )}
-      {menu && <ContextMenu position={menu.position} title="" items={rowMenuItems(menu.entryId, openCallHistory, removeEntry)} onClose={() => setMenu(null)} />}
+      {menu && <ContextMenu position={menu.position} title="" items={rowMenuItems(menu.target, actions, removeTarget)} onClose={() => setMenu(null)} />}
     </>
   )
 })

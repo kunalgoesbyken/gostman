@@ -8,6 +8,6 @@ export function useResponseJump(tabId, reveal) {
   useEffect(() => {
     if (jump.nonce === handled.current || jump.tabId !== tabId) return
     handled.current = jump.nonce
-    reveal(jump.query)
+    reveal(jump)
   }, [jump, tabId, reveal])
 }

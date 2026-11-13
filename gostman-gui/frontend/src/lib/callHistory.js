@@ -39,6 +39,8 @@ export function callFromResponse(response, statusCode, noResponse, at) {
   return normalizeCall({ at, statusCode, noResponse, reason: noResponse ? noResponseReason(response) : '', durationMs: response?.durationMs, size: noResponse ? null : response?.size })
 }
 
+export const newestFirst = (calls) => [...calls].sort((first, second) => timeOf(second) - timeOf(first))
+
 export const recordCall = (calls, call, limit) => [call, ...calls].slice(0, Math.max(1, limit))
 
 export function compactCall({ at, statusCode, noResponse, reason, durationMs, size }) {
@@ -79,17 +81,21 @@ function percentile(sorted, fraction) {
   return sorted[index]
 }
 
+const OK_CLASSES = [CLASS_SUCCESS, CLASS_REDIRECT]
+const FAILED_CLASSES = [CLASS_CLIENT_ERROR, CLASS_SERVER_ERROR, CLASS_NONE]
+
+const countIn = (calls, names) => calls.filter((call) => names.includes(statusClassOf(call))).length
+
 export function summarizeCalls(calls) {
   const durations = calls.map((call) => call.durationMs).filter((value) => value !== null).sort((first, second) => first - second)
-  const sizes = calls.map((call) => call.size).filter((value) => value !== null)
-  const answered = calls.filter((call) => [CLASS_SUCCESS, CLASS_REDIRECT].includes(statusClassOf(call))).length
+  const okCount = countIn(calls, OK_CLASSES)
   return {
     count: calls.length,
-    successRate: calls.length === 0 ? null : answered / calls.length,
+    okCount,
+    failedCount: countIn(calls, FAILED_CLASSES),
+    successRate: calls.length === 0 ? null : okCount / calls.length,
     p50Ms: percentile(durations, 0.5),
     p95Ms: percentile(durations, 0.95),
-    maxMs: durations.at(-1) ?? null,
-    averageSize: sizes.length === 0 ? null : Math.round(sizes.reduce((sum, size) => sum + size, 0) / sizes.length),
   }
 }
 
