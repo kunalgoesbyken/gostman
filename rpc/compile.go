@@ -19,6 +19,10 @@ import (
 const (
 	maxProtoFiles = 200
 	maxProtoBytes = 4 << 20
+
+	wellKnownFolder     = "google/protobuf/"
+	wellKnownPackage    = "google.protobuf"
+	descriptorProtoPath = wellKnownFolder + "descriptor.proto"
 )
 
 func compile(ctx context.Context, protos []ProtoFile) (*protoregistry.Files, error) {
@@ -30,6 +34,7 @@ func compile(ctx context.Context, protos []ProtoFile) (*protoregistry.Files, err
 	if err != nil {
 		return nil, err
 	}
+	placeDescriptorProto(sources, aliases)
 	compiler := protocompile.Compiler{
 		Resolver: protocompile.WithStandardImports(protocompile.CompositeResolver{
 			&protocompile.SourceResolver{Accessor: protocompile.SourceAccessorFromMap(sources)},
@@ -88,43 +93,53 @@ func sortedNames(sources map[string]string) []string {
 	return names
 }
 
-func importsByFile(sources map[string]string) map[string][]string {
-	imports := make(map[string][]string, len(sources))
+type parsedFile struct {
+	imports []string
+	pkg     string
+}
+
+func parseFiles(sources map[string]string) map[string]parsedFile {
+	parsed := make(map[string]parsedFile, len(sources))
 	for name, content := range sources {
 		tree, err := parser.Parse(name, strings.NewReader(content), reporter.NewHandler(nil))
 		if err != nil {
 			continue
 		}
+		var file parsedFile
 		for _, declaration := range tree.Decls {
-			if statement, ok := declaration.(*ast.ImportNode); ok {
-				imports[name] = append(imports[name], statement.Name.AsString())
+			switch statement := declaration.(type) {
+			case *ast.ImportNode:
+				file.imports = append(file.imports, statement.Name.AsString())
+			case *ast.PackageNode:
+				file.pkg = string(statement.Name.AsIdentifier())
 			}
 		}
+		parsed[name] = file
 	}
-	return imports
+	return parsed
 }
 
 func importAliases(sources map[string]string) (map[string]string, error) {
-	imports := importsByFile(sources)
+	parsed := parseFiles(sources)
 	names := sortedNames(sources)
 	aliases := map[string]string{}
 	for _, importer := range names {
-		for _, imported := range imports[importer] {
-			if file, found := sameNamedFile(sources, imported); found {
+		for _, imported := range parsed[importer].imports {
+			if file, found := sameNamedFile(sources, parsed, imported); found {
 				aliases[imported] = file
 			}
 		}
 	}
 	graph := make(map[string][]string, len(sources))
-	for importer, paths := range imports {
-		for _, imported := range paths {
-			if file, found := suppliedFile(sources, aliases, imported); found {
-				graph[importer] = append(graph[importer], file)
+	for importer, file := range parsed {
+		for _, imported := range file.imports {
+			if target, found := suppliedFile(sources, aliases, imported); found {
+				graph[importer] = append(graph[importer], target)
 			}
 		}
 	}
 	for _, importer := range names {
-		for _, imported := range imports[importer] {
+		for _, imported := range parsed[importer].imports {
 			file, aliased := aliases[imported]
 			if aliased && leadsTo(graph, file, importer, map[string]bool{}) {
 				return nil, localizedConfigError(locales.EngineGrpcImportConflict, locales.Params{
@@ -138,6 +153,22 @@ func importAliases(sources map[string]string) (map[string]string, error) {
 	return aliases, nil
 }
 
+func placeDescriptorProto(sources, aliases map[string]string) {
+	file, aliased := aliases[descriptorProtoPath]
+	if !aliased {
+		return
+	}
+	sources[descriptorProtoPath] = sources[file]
+	delete(sources, file)
+	delete(aliases, descriptorProtoPath)
+	for path, target := range aliases {
+		if target == file {
+			aliases[path] = descriptorProtoPath
+		}
+	}
+	aliases[file] = descriptorProtoPath
+}
+
 func suppliedFile(sources, aliases map[string]string, imported string) (string, bool) {
 	if _, exact := sources[imported]; exact {
 		return imported, true
@@ -146,7 +177,7 @@ func suppliedFile(sources, aliases map[string]string, imported string) (string, 
 	return file, aliased
 }
 
-func sameNamedFile(sources map[string]string, imported string) (string, bool) {
+func sameNamedFile(sources map[string]string, parsed map[string]parsedFile, imported string) (string, bool) {
 	if _, exact := sources[imported]; exact {
 		return "", false
 	}
@@ -157,6 +188,9 @@ func sameNamedFile(sources map[string]string, imported string) (string, bool) {
 		}
 	}
 	if len(candidates) != 1 {
+		return "", false
+	}
+	if strings.HasPrefix(imported, wellKnownFolder) && parsed[candidates[0]].pkg != wellKnownPackage {
 		return "", false
 	}
 	return candidates[0], true
