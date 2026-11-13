@@ -506,12 +506,13 @@ export function LoadedWorkspace({ backend, onBack }) {
                     onDownload={actions.download}
                     onSaveSent={actions.saveSentBody}
                     onExportHar={actions.exportHistoryHar}
+                    onExportCalls={actions.exportCalls}
                     onSaveExample={actions.examples.saveResponse}
                     onExplain={isAiOn ? () => actions.ai.start(TASK_EXPLAIN) : null}
                     onTrust={actions.storage?.confirmTrust}
                   />}
                 </div>
-                {besideTab && <BesideResponse tab={besideTab} onClose={() => setBesideTab('')} />}
+                {besideTab && <BesideResponse tab={besideTab} onClose={() => setBesideTab('')} onExportCalls={actions.exportCalls} />}
               </div>}
             </>
           )}
@@ -569,7 +570,7 @@ export function LoadedWorkspace({ backend, onBack }) {
         {aiDialog && <AiDialog actions={actions.ai} />}
         {isRunnerOpen && <RunnerDialog folders={folders} requests={requests} actions={actions} />}
         {isDependencyGraphOpen && <DependencyGraphDialog folders={folders} requests={requests} actions={actions} />}
-        {isCallHistoryOpen && <CallHistoryDialog />}
+        {isCallHistoryOpen && <CallHistoryDialog onExport={actions.exportCalls} />}
       </Suspense>
 
       {isFrameless && <WindowEdges />}

@@ -7,7 +7,7 @@ import { shownMethod } from "../lib/methodLabel"
 import { SPLIT_TEXT } from "../lib/splitText"
 import { tabTitle } from "../lib/tabDisplay"
 
-export function BesideResponse({ tab, onClose }) {
+export function BesideResponse({ tab, onClose, onExportCalls }) {
   return (
     <section aria-label={SPLIT_TEXT.pane} className="flex min-h-0 min-w-0 flex-1 flex-col border-s border-border max-md:hidden">
       <Toolbar className="gap-2 ps-3 pe-1.5">
@@ -15,7 +15,7 @@ export function BesideResponse({ tab, onClose }) {
         <span dir="auto" className="min-w-0 flex-1 truncate text-xs text-foreground">{tabTitle(tab)}</span>
         <IconButton label={SPLIT_TEXT.close} icon={X} onClick={onClose} />
       </Toolbar>
-      <ResponsePanel docked tabId={tab.id} jsonDepth={tab.request.jsonDepth} response={tab.response} history={tab.responses} tests={tab.tests} loading={tab.pendingId !== null} />
+      <ResponsePanel docked tabId={tab.id} jsonDepth={tab.request.jsonDepth} response={tab.response} history={tab.responses} tests={tab.tests} loading={tab.pendingId !== null} onExportCalls={onExportCalls} />
     </section>
   )
 }

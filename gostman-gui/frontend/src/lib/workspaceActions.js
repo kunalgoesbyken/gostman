@@ -68,8 +68,11 @@ import { CURL_FILES_TEXT } from './requestBarText'
 import { countImported } from './importSummary'
 import { SCOPE_GLOBAL } from './variableScopes'
 import { createTrashActions, keepFolder, keepRequest } from './trashSession'
+import { csvHeaders } from './callDisplay'
 import { callFromResponse } from './callHistory'
-import { environmentForFolder, findActiveEnvironment, isFlowTab, isSpecTab, selectActiveTab, selectActiveVariables, useAppStore } from '../store/appStore'
+import { CALLS_FILE_NAME, CSV_MEDIA_TYPE, callsCsv } from './callsCsv'
+import { shownUrl } from './shownUrl'
+import { environmentForFolder, findActiveEnvironment, isFlowTab, isSpecTab, selectActiveTab, selectActiveVariables, selectResolvedVariables, useAppStore } from '../store/appStore'
 import { ownedVariableCount, scopedFolderNames, scopedImport } from './environmentScope'
 
 const UNRECORDED_ERRORS = ['config', 'script', 'cancelled', RESTRICTED_ERROR]
@@ -494,6 +497,11 @@ export function createWorkspaceActions(backend) {
     backend.saveFile(name, textToBase64(text), mime)
   ))
 
+  const exportCalls = (rows) => {
+    const resolved = selectResolvedVariables(store())
+    return saveTextFile(CALLS_FILE_NAME, callsCsv(rows, csvHeaders(), (entry) => shownUrl(entry.url, resolved, entry.auth)), CSV_MEDIA_TYPE)
+  }
+
   const runCoverage = (results) => coverageOfRun(backend, results)
 
   const downloadRunReport = async (format = 'html') => {
@@ -841,6 +849,7 @@ export function createWorkspaceActions(backend) {
     download,
     saveSentBody,
     saveTextFile,
+    exportCalls,
     exportHistoryHar: (history) => saveTextFile(HAR_FILE_NAME, JSON.stringify(historyToHar(history, __APP_VERSION__), null, 2), HAR_MEDIA_TYPE),
     saveBase64File,
     createFolder,

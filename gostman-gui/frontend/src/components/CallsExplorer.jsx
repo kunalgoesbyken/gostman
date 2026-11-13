@@ -1,12 +1,14 @@
 import { useMemo, useRef, useState } from "react"
+import { Download } from "lucide-react"
 import { Button } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
 import { Input } from "./ui/input"
 import { CallStatus } from "./CallStatus"
 import {
   CLASS_CLIENT_ERROR, CLASS_NONE, CLASS_OTHER, CLASS_REDIRECT, CLASS_SERVER_ERROR, CLASS_SUCCESS, STATUS_CLASSES,
-  countByClass, filterCalls, paddedSpan, statusClassOf, summarizeCalls, timeOf, timeSpan,
+  countByClass, countByReason, filterCalls, paddedSpan, statusClassOf, summarizeCalls, timeOf, timeSpan,
 } from "../lib/callHistory"
+import { ALL_REASONS, REASON_NAMES } from "../lib/noResponse"
 import { callLabel, durationText, momentText, sizeText } from "../lib/callDisplay"
 import { formatNumber, formatPercent } from "../lib/i18n/format"
 import { RESPONSE_TEXT } from "../lib/responseText"
@@ -69,21 +71,21 @@ function Summary({ calls }) {
   )
 }
 
-function ClassFilters({ classes, counts, onChange }) {
+function CheckFilter({ legend, names, selected, counts, labelOf, fillOf, onChange }) {
   const toggle = (name) => (event) => {
-    const next = new Set(classes)
+    const next = new Set(selected)
     if (event.target.checked) next.add(name)
     else next.delete(name)
     onChange(next)
   }
   return (
     <fieldset className="flex flex-wrap items-center gap-x-3 gap-y-1">
-      <legend className="sr-only">{TEXT.status}</legend>
-      {STATUS_CLASSES.filter((name) => counts[name] > 0).map((name) => (
-        <Checkbox key={name} checked={classes.has(name)} onChange={toggle(name)} className="h-7">
+      <legend className="sr-only">{legend}</legend>
+      {names.filter((name) => counts[name] > 0).map((name) => (
+        <Checkbox key={name} checked={selected.has(name)} onChange={toggle(name)} className="h-7">
           <span className="flex items-center gap-1.5">
-            <svg aria-hidden="true" viewBox="0 0 8 8" className="h-2 w-2"><rect width="8" height="8" rx="1" className={CLASS_FILL[name]} /></svg>
-            {TEXT.classes[name]}
+            {fillOf && <svg aria-hidden="true" viewBox="0 0 8 8" className="h-2 w-2"><rect width="8" height="8" rx="1" className={fillOf(name)} /></svg>}
+            {labelOf(name)}
             <span className="text-muted-foreground tabular-nums">{formatNumber(counts[name])}</span>
           </span>
         </Checkbox>
@@ -92,7 +94,7 @@ function ClassFilters({ classes, counts, onChange }) {
   )
 }
 
-function RangeFilters({ duration, onDuration, view, onView, isZoomed, onReset }) {
+function RangeFilters({ duration, onDuration, view, onView, isZoomed, onReset, onExport }) {
   return (
     <div className="flex flex-wrap items-center gap-2 text-xs">
       <span className="text-muted-foreground">{TEXT.duration}</span>
@@ -104,6 +106,7 @@ function RangeFilters({ duration, onDuration, view, onView, isZoomed, onReset })
       <span className="text-muted-foreground">{TEXT.to}</span>
       <Input type="datetime-local" step="1" aria-label={TEXT.to} value={toLocalInput(view.to)} onChange={(event) => onView("to", fromLocalInput(event.target.value))} className="h-7 w-auto" />
       <Button variant="outline" size="sm" disabled={!isZoomed} onClick={onReset}>{TEXT.resetZoom}</Button>
+      {onExport && <Button variant="outline" size="sm" className="ms-auto" onClick={onExport}><Download />{TEXT.exportCsv}</Button>}
     </div>
   )
 }
@@ -219,16 +222,18 @@ function CallsTable({ calls }) {
   )
 }
 
-export function CallsExplorer({ calls }) {
+export function CallsExplorer({ calls, entry, onExport }) {
   const fullView = useMemo(() => paddedSpan(timeSpan(calls) ?? { from: Date.now(), to: Date.now() }), [calls])
   const [classes, setClasses] = useState(ALL_CLASSES)
+  const [reasons, setReasons] = useState(ALL_REASONS)
   const [duration, setDuration] = useState({ min: "", max: "" })
   const [zoom, setZoom] = useState(null)
   const view = zoom ?? fullView
   const counts = useMemo(() => countByClass(calls), [calls])
+  const reasonCounts = useMemo(() => countByReason(calls), [calls])
   const shown = useMemo(
-    () => filterCalls(calls, { classes, minMs: millisecondsOf(duration.min), maxMs: millisecondsOf(duration.max), from: view.from, to: view.to }),
-    [calls, classes, duration, view],
+    () => filterCalls(calls, { classes, reasons, minMs: millisecondsOf(duration.min), maxMs: millisecondsOf(duration.max), from: view.from, to: view.to }),
+    [calls, classes, reasons, duration, view],
   )
   const hasLegacy = calls.some((call) => call.durationMs === null && !call.noResponse)
   const setEdge = (edge, time) => {
@@ -240,8 +245,9 @@ export function CallsExplorer({ calls }) {
   return (
     <div className="flex flex-col gap-3 px-4 py-3">
       <Summary calls={shown} />
-      <ClassFilters classes={classes} counts={counts} onChange={setClasses} />
-      <RangeFilters duration={duration} onDuration={setDuration} view={view} onView={setEdge} isZoomed={zoom !== null} onReset={() => setZoom(null)} />
+      <CheckFilter legend={TEXT.status} names={STATUS_CLASSES} selected={classes} counts={counts} labelOf={(name) => TEXT.classes[name]} fillOf={(name) => CLASS_FILL[name]} onChange={setClasses} />
+      {counts.none > 0 && <CheckFilter legend={TEXT.reasonLegend} names={REASON_NAMES} selected={reasons} counts={reasonCounts} labelOf={(name) => TEXT.reasons[name]} onChange={setReasons} />}
+      <RangeFilters duration={duration} onDuration={setDuration} view={view} onView={setEdge} isZoomed={zoom !== null} onReset={() => setZoom(null)} onExport={onExport && (() => onExport(shown.map((call) => ({ entry, call }))))} />
       <CallsChart calls={shown} view={view} onZoom={setZoom} />
       {hasLegacy && <p className="text-2xs text-muted-foreground">{TEXT.legacy}</p>}
       {shown.length === 0 ? <p className="text-xs text-muted-foreground">{TEXT.noMatches}</p> : <CallsTable calls={shown} />}

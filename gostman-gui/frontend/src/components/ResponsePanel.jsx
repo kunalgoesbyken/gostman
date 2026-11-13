@@ -349,11 +349,11 @@ const tabItem = (value, badge = null, marked = false) => ({
   content: <>{RESPONSE_TEXT.tabs[value]}{badge}</>,
 })
 
-function CallsTab({ calls }) {
+function CallsTab({ calls, entry, onExport }) {
   if (calls.length === 0) return <EmptyState icon={BarChart3} title={RESPONSE_TEXT.noCallsTitle} description={RESPONSE_TEXT.noCallsDescription} />
   return (
     <Suspense fallback={null}>
-      <CallsExplorer calls={calls} />
+      <CallsExplorer calls={calls} entry={entry} onExport={onExport} />
     </Suspense>
   )
 }
@@ -456,7 +456,7 @@ function PastResponseNotice({ past, canCompare, onCompare, onBack }) {
   )
 }
 
-export const ResponsePanel = memo(function ResponsePanel({ tabId, response, history = NO_HISTORY, tests, loading, docked = false, jsonDepth = '', onJsonDepthChange, onDownload, onSaveSent, onExportHar, onSaveExample, onExplain, onTrust }) {
+export const ResponsePanel = memo(function ResponsePanel({ tabId, response, history = NO_HISTORY, tests, loading, docked = false, jsonDepth = '', onJsonDepthChange, onDownload, onSaveSent, onExportHar, onExportCalls, onSaveExample, onExplain, onTrust }) {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [chosenTab, setActiveTab] = useState(TAB_BODY)
@@ -569,7 +569,7 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
   const toggleCollapse = useCallback(() => setIsCollapsed((current) => !current), [])
 
   const renderContent = () => {
-    if (activeTab === TAB_CALLS) return <CallsTab calls={calls} />
+    if (activeTab === TAB_CALLS) return <CallsTab calls={calls} entry={historyEntry} onExport={onExportCalls} />
     if (loading) return <SkeletonLines label={RESPONSE_TEXT.sending} lines={6} />
     if (!shown) return <FeatureEmpty surface="response" icon={FileText} title={RESPONSE_TEXT.noResponseTitle} description={RESPONSE_TEXT.noResponseDescription} />
     if (activeTab === TAB_REQUEST && hasSent) return <RequestBodyTab sent={shown.sent} onSave={past ? undefined : onSaveSent} />

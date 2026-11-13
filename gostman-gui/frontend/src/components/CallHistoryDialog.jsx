@@ -16,7 +16,7 @@ function useEntry() {
   return useAppStore((s) => s.requestHistory.find((entry) => entry.id === id))
 }
 
-function CallHistoryView({ entry, onClose }) {
+function CallHistoryView({ entry, onClose, onExport }) {
   const calls = useMemo(() => callsOf(entry), [entry])
 
   return (
@@ -30,15 +30,15 @@ function CallHistoryView({ entry, onClose }) {
         </span>
       </DialogHeader>
       <div className="min-h-0 flex-1 overflow-y-auto">
-        <CallsExplorer calls={calls} />
+        <CallsExplorer calls={calls} entry={entry} onExport={onExport} />
       </div>
     </Dialog>
   )
 }
 
-export function CallHistoryDialog() {
+export function CallHistoryDialog({ onExport }) {
   const entry = useEntry()
   const close = useAppStore((s) => s.closeCallHistory)
   if (!entry) return null
-  return <CallHistoryView entry={entry} onClose={close} />
+  return <CallHistoryView entry={entry} onClose={close} onExport={onExport} />
 }

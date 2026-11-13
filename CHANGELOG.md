@@ -7,6 +7,8 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 ### Added
 
 - The response panel has a **Calls** tab, next to Body, Headers and the others, with the chart, filters and list of every send of the request in the active tab; a request opened from History shows its calls before it is sent again (#38).
+- A call that got no response keeps why: timed out, connection failed, DNS lookup failed, TLS error, cancelled, blocked by policy or another error. The reason shows in the Calls list, in the tooltip of the chart bar and in the Calls filters (#38).
+- **Export CSV** in the Calls tab and chart window, and in the Journal, saves the calls shown as a CSV file with the time, method, address, status, reason for no response, duration and size; the address is redacted like other shown addresses (#38).
 - The History tab switches between **By request** and **Journal**, a list of every send, newest first, with its method, address, date and time, status and duration. A row opens its request, and Gostman remembers the choice (#38).
 
 ### Changed

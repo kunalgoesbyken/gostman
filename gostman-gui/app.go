@@ -147,6 +147,7 @@ type HistoryCall struct {
 	At         string `json:"at"`
 	StatusCode int    `json:"statusCode,omitempty"`
 	NoResponse bool   `json:"noResponse,omitempty"`
+	Reason     string `json:"reason,omitempty"`
 	DurationMs *int64 `json:"durationMs,omitempty"`
 	Size       *int64 `json:"size,omitempty"`
 }

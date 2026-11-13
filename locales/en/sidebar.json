@@ -87,6 +87,28 @@
         "other": "Other",
         "none": "No response"
       },
+      "reasonLegend": "Reason for no response",
+      "reasons": {
+        "timeout": "Timed out",
+        "connection": "Connection failed",
+        "dns": "DNS lookup failed",
+        "tls": "TLS error",
+        "cancelled": "Cancelled",
+        "blocked": "Blocked by policy",
+        "other": "Other error",
+        "unknown": "No reason recorded"
+      },
+      "noResponseBecause": "No response ({{reason}})",
+      "exportCsv": "Export CSV",
+      "csv": {
+        "time": "Time",
+        "method": "Method",
+        "url": "URL",
+        "status": "Status",
+        "reason": "No-response reason",
+        "durationMs": "Duration (ms)",
+        "sizeBytes": "Size (bytes)"
+      },
       "duration": "Duration",
       "minDuration": "Shortest duration in milliseconds",
       "maxDuration": "Longest duration in milliseconds",

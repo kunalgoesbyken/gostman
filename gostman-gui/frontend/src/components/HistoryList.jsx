@@ -1,5 +1,5 @@
 import { Fragment, memo, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react"
-import { BarChart3, CalendarDays, Clock, MoreHorizontal, Search, Trash2 } from "lucide-react"
+import { BarChart3, CalendarDays, Clock, Download, MoreHorizontal, Search, Trash2 } from "lucide-react"
 import { Badge } from "./ui/badge"
 import { Button, IconButton } from "./ui/button"
 import { ContextMenu } from "./ui/ContextMenu"
@@ -296,8 +296,11 @@ export const HistoryList = memo(function HistoryList({ entries, folders, actions
       </div>
 
       {entries.length > 0 && (
-        <div className="flex h-10 shrink-0 items-center border-t border-border px-3">
+        <div className="flex h-10 shrink-0 items-center gap-1 border-t border-border px-3">
           <Button variant="ghost" size="sm" onClick={actions.clearHistory}>{HISTORY_TEXT.clear}</Button>
+          {isJournal && found.length > 0 && (
+            <Button variant="ghost" size="sm" className="ms-auto" onClick={() => actions.exportCalls(found)}><Download />{HISTORY_TEXT.calls.exportCsv}</Button>
+          )}
         </div>
       )}
       {menu && <ContextMenu position={menu.position} title="" items={rowMenuItems(menu.entryId, openCallHistory, removeEntry)} onClose={() => setMenu(null)} />}
