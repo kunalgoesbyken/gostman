@@ -60,6 +60,7 @@
       "cookies": "Cookies",
       "request": "Request body",
       "timeline": "Timeline",
+      "calls": "Calls",
       "tests": "Checks",
       "console": "Console",
       "visualize": "Visualize"
@@ -128,6 +129,8 @@
     "noHeadersDescription": "The server sent no headers.",
     "noCookiesTitle": "No cookies",
     "noCookiesDescription": "The server sent no cookies.",
+    "noCallsTitle": "No calls recorded",
+    "noCallsDescription": "Each time this request is sent, the call is kept here with its time, status, duration and size.",
     "emptyTitle": "Empty response body",
     "emptyDescription": "The server answered {{status}} without a body.",
     "binaryTitle": "Binary response, {{size}}",

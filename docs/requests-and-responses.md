@@ -307,6 +307,7 @@ Each tab keeps its last 10 responses while the app is open. They are kept in mem
 | Request body | The request sent a body (not a file or an upload from disk) | The body exactly as it was sent, with variables and generated values filled in. Shows its type and size; **Copy** and **Save to file** are in its toolbar. Bodies over 1 MB are cut off and cannot be saved here; binary bodies are not shown as text. |
 | Timeline | The response has timing data, or scripts ran | See [Timeline](#timeline). |
 | Checks | There are check results or a script error | Each result with a pass or fail mark. The count shows passed over total. |
+| Calls | A response is shown, or the request has calls | The chart, filters and list of every send of the request, with a count. See [Calls](#calls). **No calls recorded** appears when the request in the tab has none. |
 | Console | The request completed | Output of `console.log()` in scripts. |
 | Visualize | A script called `visualize()` | See [Visualize](#visualize). |
 
@@ -410,14 +411,16 @@ The History tab at the top of the sidebar lists sent requests, with the method, 
 
 - Click an entry to open it as a request tab.
 - Search history filters by method, URL and status, so `404` finds the requests that got one.
-- The remove button, shown when you hover an entry, deletes it. Clear history deletes all entries.
+- The actions button (**…**), shown when you hover an entry, opens a menu with **Show calls** and, set apart at the bottom, **Remove from history**. Right-click an entry, or press Shift+F10 or the Menu key on it, to open the same menu; Delete removes the focused entry at once. Clear history deletes all entries.
 - Sending the same request again moves its entry to the top and adds the send to its calls; an entry sent more than once shows the count, for example "×12". Hovering an entry shows the full date and time of the last send.
+- **By request** and **Journal**, at the top of the tab, switch how it is listed. **By request** is the list described above. **Journal** lists every send on its own row, newest first, with the method, the address, the date and time, the status and the duration. Click a row to open its request, as you do in **By request**. Search, the date range, the folder and tag filters and **Group by date** apply to the calls, and the journal shows the latest 200 with **Show more** for 200 more. A journal row has no remove button, because removing a request removes all its calls: use **By request** for that. Gostman remembers which one you chose.
 - The app keeps 50 requests and 500 calls per request by default. Change both under **Requests** in [Preferences](preferences-and-shortcuts.md#preferences); the oldest request or call is dropped first.
 
 ### Calls
 
-**Show calls**, the chart button shown when you hover an entry, opens every send of that request, to follow how an unstable or slow API behaves over time.
+The **Calls** tab of the [response panel](#tabs), next to Body, Headers and the other tabs, shows every send of the request in the active tab, to follow how an unstable or slow API behaves over time. **Show calls**, in the menu of a History entry, opens the same chart in a window. The Calls tab also appears for a request opened from History, before you send it again.
 
+- A request keeps its calls under its method, address and body (and its GraphQL, gRPC and MCP fields). Change one of them and the tab shows the calls of the request that matches, or **No calls recorded** until you send it.
 - Each call keeps the date and time, the status, the duration and the size of the response. Calls with no response keep the time until the send failed.
 - The chart puts each call at the time it was sent, as a bar as tall as its duration, coloured by status: 2xx, 3xx, 4xx, 5xx, **Other** (a response without an HTTP status, such as gRPC or MCP) and **No response**, drawn at full height so outages stand out. Hover a bar for its details.
 - The status checkboxes, with the number of calls of each kind, and the duration fields (in milliseconds) filter the chart, the summary and the list.

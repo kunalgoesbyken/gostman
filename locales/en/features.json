@@ -234,8 +234,8 @@
     },
     "callHistory": {
       "title": "Call history chart",
-      "blurb": "Keep every send of a request with its time, status, duration and size, and chart them to follow an unstable or slow API over time.",
-      "synonyms": "history calls chart graph bar timeline duration latency status uptime outage monitor zoom filter"
+      "blurb": "Keep every send of a request with its time, status, duration and size. Chart them in the response's Calls tab, or read them all as a journal in History, to follow an unstable or slow API over time.",
+      "synonyms": "history calls chart graph bar timeline duration latency status uptime outage monitor zoom filter journal log tab"
     },
     "collections": {
       "title": "Collections and folders",

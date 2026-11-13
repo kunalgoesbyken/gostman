@@ -23,6 +23,8 @@
   "response.truncated": "{{size}} is a size such as 5 MB. The response was cut because the app keeps at most that much of one response.",
   "response.tabs.tests": "Tab with the results of checks (assertions). Matches the term used for checks elsewhere.",
   "response.tabs.timeline": "Tab that shows where the time of a request went.",
+  "response.tabs.calls": "Tab that charts and lists every send of the request: its time, status, duration and size. A call is one send.",
+  "response.noCallsTitle": "Title of the empty Calls tab, shown when the request in the tab has not been sent yet.",
   "response.tabs.visualize": "Tab that shows output drawn by a script.",
   "response.views.pretty": "View of the body formatted for reading.",
   "response.views.raw": "View of the body exactly as received.",

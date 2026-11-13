@@ -1,3 +1,4 @@
+import { callsOf, timeOf } from './callHistory'
 import { foldCase, matchesTags } from './tags'
 import { folderChain } from './variableScopes'
 import { inheritedTags } from './collectionTree'
@@ -37,20 +38,34 @@ export function bucketOf(timestamp, now) {
   return BUCKET_OLDER
 }
 
-const inRange = (entry, range, now) => range === RANGE_ANY || daysAgo(new Date(entry.timestamp).getTime(), now) < RANGE_DAYS[range]
+const inRange = (timestamp, range, now) => range === RANGE_ANY || daysAgo(new Date(timestamp).getTime(), now) < RANGE_DAYS[range]
 
 const inFolder = (entry, folderId, folders) => folderId === ALL_FOLDERS || folderChain(folders, entry.folderId).some((folder) => folder.id === folderId)
 
-export function filterHistory(entries, { query, range, folderId, tag }, folders, now) {
+function matchersOf({ query, range, folderId, tag }, folders, now) {
   const needle = foldCase(query.trim())
   const tagsOf = inheritedTags(folders)
   const wanted = tag === ALL_TAGS ? [] : [tag]
-  return entries.filter((entry) => (
-    inRange(entry, range, now)
-    && inFolder(entry, folderId, folders)
-    && matchesTags(tagsOf(entry), { include: wanted })
-    && (needle === '' || foldCase(`${entry.method} ${entry.url} ${entry.statusCode || ''}`).includes(needle))
-  ))
+  return {
+    keepsEntry: (entry) => inFolder(entry, folderId, folders) && matchesTags(tagsOf(entry), { include: wanted }),
+    keepsSend: (entry, timestamp, statusCode) => (
+      inRange(timestamp, range, now) && (needle === '' || foldCase(`${entry.method} ${entry.url} ${statusCode || ''}`).includes(needle))
+    ),
+  }
+}
+
+export function filterHistory(entries, filters, folders, now) {
+  const { keepsEntry, keepsSend } = matchersOf(filters, folders, now)
+  return entries.filter((entry) => keepsEntry(entry) && keepsSend(entry, entry.timestamp, entry.statusCode))
+}
+
+export function journalOf(entries, filters, folders, now) {
+  const { keepsEntry, keepsSend } = matchersOf(filters, folders, now)
+  return entries
+    .filter(keepsEntry)
+    .flatMap((entry) => callsOf(entry).map((call, index) => ({ id: `${entry.id}:${index}`, timestamp: call.at, entry, call })))
+    .filter(({ entry, call }) => keepsSend(entry, call.at, call.statusCode))
+    .sort((first, second) => timeOf(second.call) - timeOf(first.call))
 }
 
 export function groupByDate(entries, now) {

@@ -61,6 +61,13 @@
     "callCount_one": "{{count}} call",
     "callCount_other": "{{count}} calls",
     "showCalls": "Show calls",
+    "actions": "Actions for {{name}}",
+    "view": "History view",
+    "views": {
+      "requests": "By request",
+      "journal": "Journal"
+    },
+    "showMore": "Show more",
     "sentOn": "Last sent {{date}}",
     "calls": {
       "title": "Calls",

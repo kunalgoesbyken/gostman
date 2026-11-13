@@ -4,6 +4,15 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Added
+
+- The response panel has a **Calls** tab, next to Body, Headers and the others, with the chart, filters and list of every send of the request in the active tab; a request opened from History shows its calls before it is sent again (#38).
+- The History tab switches between **By request** and **Journal**, a list of every send, newest first, with its method, address, date and time, status and duration. A row opens its request, and Gostman remembers the choice (#38).
+
+### Changed
+
+- A History row has one actions button (**…**) with **Show calls** and **Remove from history** set apart at the bottom, so the remove button is no longer next to the chart button (#38).
+
 ## [1.18.0] - 2026-11-13
 
 ### Added

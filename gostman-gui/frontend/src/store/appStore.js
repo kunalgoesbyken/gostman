@@ -907,6 +907,13 @@ useAppStore.subscribe((state, previous) => {
 
 export const selectActiveTab = (state) => state.tabs.find((tab) => tab.id === state.activeTabId) || state.tabs[0]
 
+export function selectTabHistoryEntry(state, tabId) {
+  const tab = state.tabs.find((candidate) => candidate.id === tabId)
+  if (!tab) return undefined
+  const request = normalizeRequest(tab.request)
+  return state.requestHistory.find((entry) => isSameCall(entry, request))
+}
+
 const sameInputs = (first, second) => first !== null && first.every((input, index) => Object.is(input, second[index]))
 
 let lastInputs = null
