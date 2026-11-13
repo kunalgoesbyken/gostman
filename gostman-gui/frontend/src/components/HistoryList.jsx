@@ -19,7 +19,7 @@ import { collectTags } from "../lib/tags"
 import { formatDate, formatDateTime, formatNumber } from "../lib/i18n/format"
 import { HISTORY_VIEWS, HISTORY_VIEW_JOURNAL, updatePreferences, usePreferences } from "../lib/preferences"
 import { statusVariant } from "../lib/response"
-import { isRemoveKey } from "../lib/shortcuts"
+import { isRemoveKey, isUndoKey } from "../lib/shortcuts"
 import { HISTORY_TEXT, SIDEBAR_TEXT } from "../lib/sidebarText"
 import { TREE_TEXT } from "../lib/treeText"
 import { cn } from "../lib/utils"
@@ -83,7 +83,7 @@ function HistoryRow({ entry, isTabStop, isMenuOpen, onOpen, onDelete, onFocus, o
   const target = { id: entry.id, entry, callIndex: null }
   const openMenu = menuOpener(target, onOpenMenu)
   const removeOnKey = (event) => {
-    if (!isRemoveKey(event)) return
+    if (!isRemoveKey(event) || event.repeat) return
     event.preventDefault()
     onDelete(target)
   }
@@ -210,6 +210,10 @@ export const HistoryList = memo(function HistoryList({ entries, folders, actions
     listRef.current?.querySelector(entrySelector(tabStop))?.focus()
   }
 
+  const undoOnKey = (event) => {
+    if (isUndoKey(event) && actions.undoHistoryRemoval()) event.preventDefault()
+  }
+
   const rowProps = {
     onOpen: actions.openHistoryEntry,
     onDelete: removeTarget,
@@ -249,7 +253,7 @@ export const HistoryList = memo(function HistoryList({ entries, folders, actions
             description={isSearching ? HISTORY_TEXT.noMatches : HISTORY_TEXT.emptyDescription}
           />
         ) : (
-          <ul ref={listRef} aria-label={SIDEBAR_TEXT.history} onKeyDown={(event) => moveFocus(event, ENTRY_KEYS)} className="py-1">
+          <ul ref={listRef} aria-label={SIDEBAR_TEXT.history} onKeyDown={(event) => { undoOnKey(event); moveFocus(event, ENTRY_KEYS) }} className="py-1">
             {isJournal ? (
               <JournalList days={shownDays} tabStop={tabStop} menuId={menu?.target.id} {...rowProps} />
             ) : groups.map((group) => (

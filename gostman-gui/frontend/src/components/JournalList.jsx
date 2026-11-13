@@ -15,7 +15,7 @@ function JournalRow({ row, isTabStop, isMenuOpen, onOpen, onDelete, onFocus, onO
   const target = { id: row.id, entry, callIndex: row.index }
   const openMenu = menuOpener(target, onOpenMenu)
   const removeOnKey = (event) => {
-    if (!isRemoveKey(event)) return
+    if (!isRemoveKey(event) || event.repeat) return
     event.preventDefault()
     onDelete(target)
   }
