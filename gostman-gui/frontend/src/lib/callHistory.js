@@ -43,7 +43,7 @@ export const totalCallsOf = (entries) => entries.reduce((total, entry) => total 
 
 export const newestFirst = (calls) => [...calls].sort((first, second) => timeOf(second) - timeOf(first))
 
-export const recordCall = (calls, call, limit) => [call, ...calls].slice(0, Math.max(1, limit))
+export const recordCall = (calls, call, limit) => newestFirst([call, ...calls]).slice(0, Math.max(1, limit))
 
 export function compactCall({ at, statusCode, noResponse, reason, durationMs, size }) {
   return {

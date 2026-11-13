@@ -311,6 +311,8 @@ function withCalls(entry, calls) {
 
 const timeOfEntry = (entry) => Date.parse(entry.timestamp)
 
+const byTime = (history) => [...history].sort((first, second) => (timeOfEntry(second) || 0) - (timeOfEntry(first) || 0))
+
 function placedByTime(history, entry) {
   const time = timeOfEntry(entry)
   const index = history.findIndex((other) => timeOfEntry(other) < time)
@@ -452,7 +454,7 @@ export const useAppStore = create(
             flows,
             specs,
             tabs: refreshSpecTabs(refreshFlowTabs(tabs, state.flows, flows), state.specs, specs),
-            requestHistory: asArray(data.history).map(historyEntry),
+            requestHistory: byTime(asArray(data.history).map(historyEntry)),
             cookies: mergeCookies(asArray(data.cookies), []),
             settings: normalizeSettings(data.settings),
             environments,
@@ -605,9 +607,9 @@ export const useAppStore = create(
           const sameCalls = state.requestHistory.filter((existing) => isSameCall(existing, entry))
           const replaced = new Set(sameCalls.map((existing) => existing.id))
           const earlier = sameCalls.flatMap((existing) => callsOf(existing))
-          entry.calls = recordCall(earlier, call, limits.calls).map(compactCall)
+          const placed = withCalls(entry, recordCall(earlier, call, limits.calls))
           const tabs = replaced.size === 0 ? state.tabs : state.tabs.map((tab) => (replaced.has(tab.historyId) ? { ...tab, historyId: entry.id } : tab))
-          return { requestHistory: [entry, ...others].slice(0, limits.entries), tabs }
+          return { requestHistory: placedByTime(others, placed).slice(0, limits.entries), tabs }
         }),
         deleteHistoryItem: (id) => set((state) => ({ requestHistory: state.requestHistory.filter((entry) => entry.id !== id) })),
         deleteHistoryCall: (id, position) => set((state) => {
