@@ -12,7 +12,9 @@ import { ENVIRONMENT_TEXT } from '../lib/environmentText'
 import { DEFAULT_SETTINGS, normalizeSettings } from '../lib/network'
 import { ROOT_SETTINGS_ID, isBlankScope, normalizeFolder, normalizeScopeSettings, updatedScope } from '../lib/inheritance'
 import { normalizeRequest } from '../lib/request'
-import { callsOf, compactCall, recordCall } from '../lib/callHistory'
+import { callsOf, compactCall, newestFirst, recordCall } from '../lib/callHistory'
+import { HISTORY_IDENTITY_FIELDS } from '../lib/historyIdentity'
+import { TAB_BODY } from '../lib/responseTabs'
 import { VIEW_FULL, defaultViewOf, viewOf } from '../lib/requestView'
 import { normalizeFlow } from '../lib/flows/model'
 import { isFlowDirty } from '../lib/flows/edit'
@@ -31,7 +33,6 @@ import { isWelcomeDismissed, rememberWelcomeDismissed } from '../lib/welcome'
 import { rememberSteps, rememberedSteps } from '../lib/onboarding'
 import { NO_WORKSPACE, enterWorkspace, leaveWorkspace, persistableSessions, restoreSessions } from './workspaceSessions'
 
-const HISTORY_IDENTITY_FIELDS = ['method', 'url', 'body', 'bodyType', 'graphqlQuery', 'graphqlVariables', 'grpcMethod', 'grpcMessage', 'mcpMethod', 'mcpTool', 'mcpArguments']
 const IMPORT_TAB = 'import'
 export const DEFAULT_REQUEST_PANEL = 'params'
 const EMPTY_VARIABLES = '{}'
@@ -302,6 +303,22 @@ const historyEntry = (raw) => ({ ...normalizeRequest(raw), statusCode: historySt
 
 const isSameCall = (first, second) => HISTORY_IDENTITY_FIELDS.every((field) => first[field] === second[field])
 
+function withCalls(entry, calls) {
+  const sorted = newestFirst(calls)
+  const [latest] = sorted
+  return { ...entry, calls: sorted.map(compactCall), timestamp: latest.at, statusCode: latest.statusCode, noResponse: latest.noResponse }
+}
+
+const timeOfEntry = (entry) => Date.parse(entry.timestamp)
+
+const byTime = (history) => [...history].sort((first, second) => (timeOfEntry(second) || 0) - (timeOfEntry(first) || 0))
+
+function placedByTime(history, entry) {
+  const time = timeOfEntry(entry)
+  const index = history.findIndex((other) => timeOfEntry(other) < time)
+  return index < 0 ? [...history, entry] : [...history.slice(0, index), entry, ...history.slice(index)]
+}
+
 let reportStorageFailure = () => {}
 
 const WRITE_DELAY_MS = 400
@@ -351,7 +368,6 @@ export const useAppStore = create(
         flows: [],
         specs: [],
         requestHistory: [],
-        callHistoryId: '',
         cookies: [],
         settings: DEFAULT_SETTINGS,
         environments: [],
@@ -396,7 +412,7 @@ export const useAppStore = create(
         commandPaletteOpen: false,
         commandPaletteMode: 'commands',
         globalSearch: { nonce: 0, query: '' },
-        responseJump: { nonce: 0, tabId: '', query: '' },
+        responseJump: null,
         shortcutsDialogOpen: false,
         preferencesDialogOpen: false,
         isSidebarOpen: rememberedSidebarOpen(),
@@ -438,7 +454,7 @@ export const useAppStore = create(
             flows,
             specs,
             tabs: refreshSpecTabs(refreshFlowTabs(tabs, state.flows, flows), state.specs, specs),
-            requestHistory: asArray(data.history).map(historyEntry),
+            requestHistory: byTime(asArray(data.history).map(historyEntry)),
             cookies: mergeCookies(asArray(data.cookies), []),
             settings: normalizeSettings(data.settings),
             environments,
@@ -591,18 +607,25 @@ export const useAppStore = create(
           const sameCalls = state.requestHistory.filter((existing) => isSameCall(existing, entry))
           const replaced = new Set(sameCalls.map((existing) => existing.id))
           const earlier = sameCalls.flatMap((existing) => callsOf(existing))
-          entry.calls = recordCall(earlier, call, limits.calls).map(compactCall)
+          const placed = withCalls(entry, recordCall(earlier, call, limits.calls))
           const tabs = replaced.size === 0 ? state.tabs : state.tabs.map((tab) => (replaced.has(tab.historyId) ? { ...tab, historyId: entry.id } : tab))
-          const callHistoryId = replaced.has(state.callHistoryId) ? entry.id : state.callHistoryId
-          return { requestHistory: [entry, ...others].slice(0, limits.entries), tabs, callHistoryId }
+          return { requestHistory: placedByTime(others, placed).slice(0, limits.entries), tabs }
         }),
-        openCallHistory: (callHistoryId) => set({ callHistoryId, commandPaletteOpen: false }),
-        closeCallHistory: () => set({ callHistoryId: '' }),
-        deleteHistoryItem: (id) => set((state) => ({
-          requestHistory: state.requestHistory.filter((entry) => entry.id !== id),
-          callHistoryId: state.callHistoryId === id ? '' : state.callHistoryId,
-        })),
-        clearHistory: () => set({ requestHistory: [], callHistoryId: '' }),
+        deleteHistoryItem: (id) => set((state) => ({ requestHistory: state.requestHistory.filter((entry) => entry.id !== id) })),
+        deleteHistoryCall: (id, position) => set((state) => {
+          const entry = state.requestHistory.find((candidate) => candidate.id === id)
+          if (!entry) return state
+          const others = state.requestHistory.filter((candidate) => candidate !== entry)
+          const remaining = callsOf(entry).filter((_, index) => index !== position)
+          return { requestHistory: remaining.length === 0 ? others : placedByTime(others, withCalls(entry, remaining)) }
+        }),
+        restoreHistoryEntry: (entry) => set((state) => {
+          const existing = state.requestHistory.find((candidate) => isSameCall(candidate, entry))
+          const others = state.requestHistory.filter((candidate) => candidate !== existing)
+          const calls = existing ? [...callsOf(existing), ...callsOf(entry)] : callsOf(entry)
+          return { requestHistory: placedByTime(others, withCalls(existing || entry, calls)) }
+        }),
+        clearHistory: () => set({ requestHistory: [] }),
 
         storeCookies: (received) => set((state) => (
           received.length > 0 ? { cookies: mergeCookies(state.cookies, received) } : state
@@ -791,7 +814,9 @@ export const useAppStore = create(
         closePreferencesDialog: () => set({ preferencesDialogOpen: false }),
         toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
         openGlobalSearch: (query = '') => set((state) => ({ isSidebarOpen: true, globalSearch: { nonce: state.globalSearch.nonce + 1, query } })),
-        jumpToResponse: (tabId, query) => set((state) => ({ activeTabId: tabId, responseJump: { nonce: state.responseJump.nonce + 1, tabId, query } })),
+        jumpToResponse: (tabId, query) => set({ activeTabId: tabId, responseJump: { tabId, query, tab: TAB_BODY } }),
+        showResponseTab: (tabId, tab) => set({ activeTabId: tabId, responseJump: { tabId, query: '', tab } }),
+        settleResponseJump: (jump) => set((state) => (state.responseJump === jump ? { responseJump: null } : state)),
         closeSidebar: () => set({ isSidebarOpen: false }),
         closeCommandPalette: () => set({ commandPaletteOpen: false }),
         openCookiesDialog: () => set({ cookiesDialogOpen: true }),
@@ -903,9 +928,17 @@ export function restoreTabDrafts(source) {
 
 useAppStore.subscribe((state, previous) => {
   if (state.isSidebarOpen !== previous.isSidebarOpen) rememberSidebarOpen(state.isSidebarOpen)
+  if (state.responseJump && state.activeTabId !== previous.activeTabId && state.responseJump.tabId !== state.activeTabId) useAppStore.setState({ responseJump: null })
 })
 
 export const selectActiveTab = (state) => state.tabs.find((tab) => tab.id === state.activeTabId) || state.tabs[0]
+
+export function selectTabHistoryEntry(state, tabId) {
+  const tab = state.tabs.find((candidate) => candidate.id === tabId)
+  if (!tab) return undefined
+  const request = normalizeRequest(tab.request)
+  return state.requestHistory.find((entry) => isSameCall(entry, request))
+}
 
 const sameInputs = (first, second) => first !== null && first.every((input, index) => Object.is(input, second[index]))
 
@@ -954,7 +987,6 @@ export const selectIsDialogOpen = (state) => (
   || state.specDialog !== null
   || state.runner.isOpen
   || state.dependencyGraph.isOpen
-  || state.callHistoryId !== ''
   || state.alertDialog.isOpen
   || state.confirmDialog.isOpen
   || state.promptDialog.isOpen

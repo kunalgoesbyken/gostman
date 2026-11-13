@@ -68,8 +68,13 @@ import { CURL_FILES_TEXT } from './requestBarText'
 import { countImported } from './importSummary'
 import { SCOPE_GLOBAL } from './variableScopes'
 import { createTrashActions, keepFolder, keepRequest } from './trashSession'
-import { callFromResponse } from './callHistory'
-import { environmentForFolder, findActiveEnvironment, isFlowTab, isSpecTab, selectActiveTab, selectActiveVariables, useAppStore } from '../store/appStore'
+import { csvHeaders } from './callDisplay'
+import { callFromResponse, callsOf, compactCall, totalCallsOf } from './callHistory'
+import { TAB_CALLS } from './responseTabs'
+import { HISTORY_TEXT } from './sidebarText'
+import { CALLS_FILE_NAME, CSV_MEDIA_TYPE, callsCsv } from './callsCsv'
+import { shownUrl } from './shownUrl'
+import { environmentForFolder, findActiveEnvironment, isFlowTab, isSpecTab, selectActiveTab, selectActiveVariables, selectResolvedVariables, useAppStore } from '../store/appStore'
 import { ownedVariableCount, scopedFolderNames, scopedImport } from './environmentScope'
 
 const UNRECORDED_ERRORS = ['config', 'script', 'cancelled', RESTRICTED_ERROR]
@@ -494,6 +499,11 @@ export function createWorkspaceActions(backend) {
     backend.saveFile(name, textToBase64(text), mime)
   ))
 
+  const exportCalls = (rows) => {
+    const resolved = selectResolvedVariables(store())
+    return saveTextFile(CALLS_FILE_NAME, callsCsv(rows, csvHeaders(), (entry) => shownUrl(entry.url, resolved, entry.auth)), CSV_MEDIA_TYPE)
+  }
+
   const runCoverage = (results) => coverageOfRun(backend, results)
 
   const downloadRunReport = async (format = 'html') => {
@@ -596,7 +606,7 @@ export function createWorkspaceActions(backend) {
     if (entryCount === 0) return
     store().showConfirm(
       TEXT.clearHistory,
-      TEXT.clearHistoryMessage(entryCount),
+      TEXT.clearHistoryMessage(entryCount, totalCallsOf(store().requestHistory)),
       () => store().clearHistory(),
       null,
       DESTRUCTIVE,
@@ -664,6 +674,53 @@ export function createWorkspaceActions(backend) {
   }
 
   const openHistoryEntry = ({ statusCode, noResponse, calls, ...entry }) => store().openRequestTab({ ...entry, id: '', timestamp: '' }, { historyId: entry.id })
+
+  const openHistoryCalls = (entry) => {
+    openHistoryEntry(entry)
+    store().showResponseTab(store().activeTabId, TAB_CALLS)
+  }
+
+  let removal = { noticeId: '', items: [] }
+
+  const pendingRemovals = () => (store().notice?.id === removal.noticeId ? removal.items : [])
+
+  const removalMessage = (items) => {
+    if (items.every(({ isWhole }) => isWhole)) return HISTORY_TEXT.deletedEntries(items.length)
+    return HISTORY_TEXT.deletedCalls(items.reduce((total, { entry }) => total + callsOf(entry).length, 0))
+  }
+
+  const restoreRemovals = (items) => {
+    items.forEach(({ entry }) => store().restoreHistoryEntry(entry))
+    store().dismissNotice()
+  }
+
+  const announceRemoval = (item) => {
+    const items = [...pendingRemovals(), item]
+    store().showNotice(removalMessage(items), () => restoreRemovals(items))
+    removal = { noticeId: store().notice.id, items }
+  }
+
+  const undoHistoryRemoval = () => {
+    const items = pendingRemovals()
+    if (items.length === 0) return false
+    restoreRemovals(items)
+    return true
+  }
+
+  function removeHistoryEntry(id) {
+    const entry = store().requestHistory.find((candidate) => candidate.id === id)
+    if (!entry) return
+    store().deleteHistoryItem(id)
+    announceRemoval({ entry, isWhole: true })
+  }
+
+  function removeHistoryCall(id, position) {
+    const entry = store().requestHistory.find((candidate) => candidate.id === id)
+    const call = entry && callsOf(entry)[position]
+    if (!call) return
+    store().deleteHistoryCall(id, position)
+    announceRemoval({ entry: { ...entry, calls: [compactCall(call)] }, isWhole: false })
+  }
 
   function saveLatestRequest() {
     const [latest] = store().requestHistory
@@ -841,6 +898,7 @@ export function createWorkspaceActions(backend) {
     download,
     saveSentBody,
     saveTextFile,
+    exportCalls,
     exportHistoryHar: (history) => saveTextFile(HAR_FILE_NAME, JSON.stringify(historyToHar(history, __APP_VERSION__), null, 2), HAR_MEDIA_TYPE),
     saveBase64File,
     createFolder,
@@ -864,5 +922,9 @@ export function createWorkspaceActions(backend) {
     openRequest: (request) => store().openRequestTab(request),
     previewRequest: (request) => store().openRequestTab(request, { preview: true }),
     openHistoryEntry,
+    openHistoryCalls,
+    removeHistoryEntry,
+    removeHistoryCall,
+    undoHistoryRemoval,
   }
 }

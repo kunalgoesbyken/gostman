@@ -39,6 +39,7 @@ export const MOVING_KEYS = [
   { id: 'clipboard', chords: [TREE_CHORDS.cut, TREE_CHORDS.copy, TREE_CHORDS.paste] },
   { id: 'duplicate', chords: [TREE_CHORDS.duplicate] },
   { id: 'undoTree', chords: [TREE_CHORDS.undo, TREE_CHORDS.redo] },
+  { id: 'undoHistory', chords: [TREE_CHORDS.undo] },
   { id: 'select', chords: [TREE_CHORDS.toggleSelect, TREE_CHORDS.extendUp, TREE_CHORDS.extendDown, TREE_CHORDS.selectAll] },
   { id: 'rename', chords: [{ key: 'f2' }] },
   { id: 'remove', chords: REMOVE_CHORDS },
@@ -122,6 +123,8 @@ export const activeShortcuts = (isDesktop = isDesktopApp(), overrides = getPrefe
 export const matchesBinding = (binding, event, isApple = isApplePlatform()) => matchesChord(binding, event, isApple)
 
 export const isRemoveKey = (event) => REMOVE_CHORDS.some((chord) => matchesBinding(chord, event))
+
+export const isUndoKey = (event) => matchesBinding(TREE_CHORDS.undo, event)
 
 export const bindingLabel = (binding, isApple = isApplePlatform()) => chordLabel(binding, isApple)
 

@@ -20,7 +20,6 @@
     "emptyTitle": "履歴はまだありません",
     "emptyDescription": "送信したリクエストがここに表示されます。",
     "noMatches": "一致する送信済みリクエストはありません。",
-    "remove": "履歴から削除",
     "clear": "履歴をクリア",
     "noResponse": "レスポンスなし",
     "sentAgo": {

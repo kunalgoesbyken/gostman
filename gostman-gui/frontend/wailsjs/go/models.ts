@@ -2716,6 +2716,7 @@ export namespace main {
 	    at: string;
 	    statusCode?: number;
 	    noResponse?: boolean;
+	    reason?: string;
 	    durationMs?: number;
 	    size?: number;
 	
@@ -2728,6 +2729,7 @@ export namespace main {
 	        this.at = source["at"];
 	        this.statusCode = source["statusCode"];
 	        this.noResponse = source["noResponse"];
+	        this.reason = source["reason"];
 	        this.durationMs = source["durationMs"];
 	        this.size = source["size"];
 	    }

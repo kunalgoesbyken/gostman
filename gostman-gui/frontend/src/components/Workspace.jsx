@@ -72,7 +72,6 @@ const SpecDiffDialog = lazy(() => import("./SpecDiffDialog").then((module) => ({
 const SpecSyncDialog = lazy(() => import("./SpecSyncDialog").then((module) => ({ default: module.SpecSyncDialog })))
 const FolderSettings = lazy(() => import("./FolderSettings").then((module) => ({ default: module.FolderSettings })))
 const DependencyGraphDialog = lazy(() => import("./DependencyGraphDialog").then((module) => ({ default: module.DependencyGraphDialog })))
-const CallHistoryDialog = lazy(() => import("./CallHistoryDialog").then((module) => ({ default: module.CallHistoryDialog })))
 const RunnerDialog = lazy(() => import("./RunnerDialog").then((module) => ({ default: module.RunnerDialog })))
 const AiDialog = lazy(() => import("./AiDialog").then((module) => ({ default: module.AiDialog })))
 const FlowView = lazy(() => import("./flows/FlowView").then((module) => ({ default: module.FlowView })))
@@ -285,7 +284,6 @@ export function LoadedWorkspace({ backend, onBack }) {
   const settings = useAppStore((s) => s.settings)
   const isRunnerOpen = useAppStore((s) => s.runner.isOpen)
   const isDependencyGraphOpen = useAppStore((s) => s.dependencyGraph.isOpen)
-  const isCallHistoryOpen = useAppStore((s) => s.callHistoryId !== '')
   const folderSettings = useAppStore((s) => s.folderSettings)
   const collectionSettings = useAppStore((s) => s.collectionSettings)
   const sharedOrder = useAppStore((s) => s.sharedOrder)
@@ -506,12 +504,13 @@ export function LoadedWorkspace({ backend, onBack }) {
                     onDownload={actions.download}
                     onSaveSent={actions.saveSentBody}
                     onExportHar={actions.exportHistoryHar}
+                    onExportCalls={actions.exportCalls}
                     onSaveExample={actions.examples.saveResponse}
                     onExplain={isAiOn ? () => actions.ai.start(TASK_EXPLAIN) : null}
                     onTrust={actions.storage?.confirmTrust}
                   />}
                 </div>
-                {besideTab && <BesideResponse tab={besideTab} onClose={() => setBesideTab('')} />}
+                {besideTab && <BesideResponse tab={besideTab} onClose={() => setBesideTab('')} onExportCalls={actions.exportCalls} />}
               </div>}
             </>
           )}
@@ -569,7 +568,6 @@ export function LoadedWorkspace({ backend, onBack }) {
         {aiDialog && <AiDialog actions={actions.ai} />}
         {isRunnerOpen && <RunnerDialog folders={folders} requests={requests} actions={actions} />}
         {isDependencyGraphOpen && <DependencyGraphDialog folders={folders} requests={requests} actions={actions} />}
-        {isCallHistoryOpen && <CallHistoryDialog />}
       </Suspense>
 
       {isFrameless && <WindowEdges />}

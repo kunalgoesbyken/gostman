@@ -52,7 +52,8 @@ function MenuItem({ item, onClose }) {
         style={{ paddingLeft: BASE_PADDING_PX + Math.min(item.indent || 0, MAX_INDENT_LEVELS) * INDENT_STEP_PX }}
         className={cn(
           "flex h-7 w-full items-center gap-2 pe-3 text-start text-xs hover:bg-accent disabled:pointer-events-none disabled:opacity-40",
-          item.destructive && "text-destructive"
+          item.destructive && "text-destructive",
+          item.separated && "mt-1 border-t border-border"
         )}
       >
         {Icon && <Icon className="h-3.5 w-3.5 shrink-0" />}

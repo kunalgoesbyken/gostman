@@ -3,6 +3,11 @@ import { messages } from './i18n/core'
 
 const text = messages('workspaceActions', english, (t) => ({
   workspaceActions: {
+    clearHistoryMessage: (requests, calls) => t('workspaceActions.clearHistoryMessage', {
+      count: requests,
+      requests: t('workspaceActions.requestCount', { count: requests }),
+      calls: t('workspaceActions.callCount', { count: calls }),
+    }),
     deleteFolderMessage: (name, requests, subfolders, parent) => {
       const counts = { name, requests: t('workspaceActions.requestCount', { count: requests }), subfolders: t('workspaceActions.subfolderCount', { count: subfolders }) }
       if (requests + subfolders === 0) return t('workspaceActions.deleteFolderEmpty', { name })

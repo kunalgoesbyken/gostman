@@ -48,16 +48,24 @@ export function createTabActions(backend, attempt, cancelTab, flows, specs) {
     if (targets.length > 0) closeMany(targets)
   }
 
-  const copyCurl = attempt(TAB_TEXT.curlFailed, async (tabId) => {
-    const tab = store().tabs.find((candidate) => candidate.id === tabId)
-    if (isFlowTab(tab)) throw new Error(FLOW_TEXT.noCurl)
-    if (isSpecTab(tab)) throw new Error(TAB_TEXT.noCurl)
-    if (!tab || isGrpcRequest(tab.request) || isMcpRequest(tab.request)) throw new Error(TAB_TEXT.noCurl)
+  const canCopyCurl = (request) => !isGrpcRequest(request) && !isMcpRequest(request)
+
+  async function copyCurlOf(request) {
+    if (!canCopyCurl(request)) throw new Error(TAB_TEXT.noCurl)
     if (!navigator.clipboard) throw new Error(TAB_TEXT.noClipboard)
-    const prepared = await backend.prepare(withInheritance(store(), tab.request), variableTextFor(store(), tab.request))
+    const prepared = await backend.prepare(withInheritance(store(), request), variableTextFor(store(), request))
     const { generateAllSnippets } = await import('./codeGenerator')
     await navigator.clipboard.writeText(generateAllSnippets(prepared).curl)
     store().showNotice(TAB_TEXT.curlCopied)
+  }
+
+  const copyRequestCurl = attempt(TAB_TEXT.curlFailed, copyCurlOf)
+
+  const copyCurl = attempt(TAB_TEXT.curlFailed, async (tabId) => {
+    const tab = store().tabs.find((candidate) => candidate.id === tabId)
+    if (isFlowTab(tab)) throw new Error(FLOW_TEXT.noCurl)
+    if (isSpecTab(tab) || !tab) throw new Error(TAB_TEXT.noCurl)
+    await copyCurlOf(tab.request)
   })
 
   const reveal = (tabId) => {
@@ -76,6 +84,8 @@ export function createTabActions(backend, attempt, cancelTab, flows, specs) {
     reorder: (tabId, targetId, place) => store().moveTab(tabId, targetId, place),
     reveal,
     copyCurl,
+    copyRequestCurl,
+    canCopyCurl,
     canReveal: (tab) => !isDocumentTab(tab) && Boolean(savedFor(tab)),
   }
 }

@@ -1,3 +1,5 @@
+import { statusClassOf } from './callHistory'
+import { mergeCalls } from './journalMerge'
 import { foldCase, matchesTags } from './tags'
 import { folderChain } from './variableScopes'
 import { inheritedTags } from './collectionTree'
@@ -12,6 +14,7 @@ export const RANGES = [RANGE_ANY, RANGE_TODAY, RANGE_WEEK, RANGE_MONTH]
 
 export const ALL_FOLDERS = ''
 export const ALL_TAGS = ''
+export const ALL_STATUSES = ''
 
 export const BUCKET_TODAY = 'today'
 export const BUCKET_YESTERDAY = 'yesterday'
@@ -20,10 +23,16 @@ export const BUCKET_MONTH = 'month'
 export const BUCKET_OLDER = 'older'
 
 const RANGE_DAYS = { [RANGE_TODAY]: 1, [RANGE_WEEK]: 7, [RANGE_MONTH]: 30 }
+const RELATIVE_DAYS = { 0: BUCKET_TODAY, 1: BUCKET_YESTERDAY }
 
 const startOfDay = (time) => {
   const date = new Date(time)
   return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
+}
+
+const startOfNextDay = (day) => {
+  const date = new Date(day)
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1).getTime()
 }
 
 const daysAgo = (timestamp, now) => Math.round((startOfDay(now) - startOfDay(timestamp)) / DAY_MS)
@@ -37,20 +46,58 @@ export function bucketOf(timestamp, now) {
   return BUCKET_OLDER
 }
 
-const inRange = (entry, range, now) => range === RANGE_ANY || daysAgo(new Date(entry.timestamp).getTime(), now) < RANGE_DAYS[range]
+const inRange = (timestamp, range, now) => range === RANGE_ANY || daysAgo(new Date(timestamp).getTime(), now) < RANGE_DAYS[range]
 
 const inFolder = (entry, folderId, folders) => folderId === ALL_FOLDERS || folderChain(folders, entry.folderId).some((folder) => folder.id === folderId)
 
-export function filterHistory(entries, { query, range, folderId, tag }, folders, now) {
+function matchersOf({ query, range, folderId, tag, statusClass = ALL_STATUSES }, folders, now) {
   const needle = foldCase(query.trim())
   const tagsOf = inheritedTags(folders)
   const wanted = tag === ALL_TAGS ? [] : [tag]
-  return entries.filter((entry) => (
-    inRange(entry, range, now)
-    && inFolder(entry, folderId, folders)
-    && matchesTags(tagsOf(entry), { include: wanted })
-    && (needle === '' || foldCase(`${entry.method} ${entry.url} ${entry.statusCode || ''}`).includes(needle))
-  ))
+  const keepsTime = (timestamp) => inRange(timestamp, range, now)
+  const keepsOutcome = (entry, { statusCode, noResponse }) => (
+    (statusClass === ALL_STATUSES || statusClassOf({ statusCode, noResponse }) === statusClass)
+    && (needle === '' || foldCase(`${entry.method} ${entry.url} ${statusCode || ''}`).includes(needle))
+  )
+  return {
+    keepsEntry: (entry) => inFolder(entry, folderId, folders) && matchesTags(tagsOf(entry), { include: wanted }),
+    keepsTime,
+    keepsOutcome,
+    keepsSend: (entry, timestamp, outcome) => keepsTime(timestamp) && keepsOutcome(entry, outcome),
+  }
+}
+
+export function filterHistory(entries, filters, folders, now) {
+  const { keepsEntry, keepsSend } = matchersOf(filters, folders, now)
+  return entries.filter((entry) => keepsEntry(entry) && keepsSend(entry, entry.timestamp, entry))
+}
+
+export function journalView(entries, filters, folders, now) {
+  const { keepsEntry, keepsTime, keepsOutcome } = matchersOf(filters, folders, now)
+  const merged = mergeCalls(entries.filter(keepsEntry), keepsTime, keepsOutcome)
+  return {
+    count: merged.count,
+    rows: merged.rows,
+    days: (limit) => {
+      const groups = groupByDay(merged.rows(limit), now)
+      const last = groups.at(-1)
+      return groups.map((group) => ({ ...group, count: group === last ? merged.countCalls(group.day, startOfNextDay(group.day)) : group.rows.length }))
+    },
+  }
+}
+
+export const journalOf = (entries, filters, folders, now) => journalView(entries, filters, folders, now).rows(Infinity)
+
+export function groupByDay(rows, now) {
+  const groups = []
+  for (const row of rows) {
+    const time = new Date(row.timestamp).getTime()
+    const day = startOfDay(time)
+    const last = groups.at(-1)
+    if (last?.day === day) last.rows.push(row)
+    else groups.push({ day, relative: RELATIVE_DAYS[daysAgo(time, now)] ?? '', rows: [row] })
+  }
+  return groups
 }
 
 export function groupByDate(entries, now) {

@@ -2,7 +2,7 @@ import { Suspense, lazy, memo, useState, useMemo, useEffect, useRef, useCallback
 import { JsonView, darkStyles } from 'react-json-view-lite'
 import 'react-json-view-lite/dist/index.css'
 import {
-  AlertTriangle, BookmarkPlus, Check, ChevronDown, ChevronUp, ChevronsDownUp, ChevronsUpDown, Cookie, Copy, Download, FileDigit, FileText, FileX, History, List, ListPlus,
+  AlertTriangle, BarChart3, BookmarkPlus, Check, ChevronDown, ChevronUp, ChevronsDownUp, ChevronsUpDown, Cookie, Copy, Download, FileDigit, FileText, FileX, History, List, ListPlus,
   Maximize2, MessageCircleQuestion, Minimize2, Pin, Scissors, Search, ShieldCheck,
 } from "lucide-react"
 import { ConsolePanel } from "./ConsolePanel"
@@ -42,6 +42,8 @@ import { MCP_PROTOCOL } from "../lib/mcp"
 import { shortcutLabel } from "../lib/platform"
 import { AI_TEXT } from "../lib/aiText"
 import { RESPONSE_CHECKS_TEXT } from "../lib/checksText"
+import { callsOf } from "../lib/callHistory"
+import { TAB_BODY, TAB_CALLS } from "../lib/responseTabs"
 import { canSaveAsExample } from "../lib/examples"
 import { deepestLevel, trimmedTree } from "../lib/jsonTree"
 import { DEPTH_SETTINGS, appDefaultDepth, depthLabel, depthOfSetting, requestDepth, settingOfDepth } from "../lib/jsonDepth"
@@ -56,6 +58,8 @@ import { describeResponse, formatTime } from "../lib/responseHistory"
 import { cn } from "../lib/utils"
 import { RESTRICTED_ERROR } from "../lib/execution"
 import { WORKSPACE_TEXT } from "../lib/workspaceText"
+import { historyIdentityOf } from "../lib/historyIdentity"
+import { selectTabHistoryEntry, useAppStore } from "../store/appStore"
 import {
   DEFAULT_RESPONSE_SHARE, MIN_REQUEST_HEIGHT_PX, MIN_RESPONSE_HEIGHT_PX, rememberResponseShare, rememberedResponseShare,
 } from "../lib/layout"
@@ -63,7 +67,6 @@ import {
   BODY_KINDS, ERROR_TITLES, bodyBytes, bodyKind, dataUrl, isScriptableImage, looksLikeJson, mimeType, parseJsonBody, statusVariant, textBody,
 } from "../lib/response"
 
-const TAB_BODY = 'body'
 const TAB_HEADERS = 'headers'
 const TAB_COOKIES = 'cookies'
 const TAB_TESTS = 'tests'
@@ -72,6 +75,7 @@ const TAB_VISUALIZE = 'visualize'
 const TAB_TIMELINE = 'timeline'
 const TAB_REQUEST = 'request'
 const NO_VALUE = '—'
+const CALLS_BADGE_MAX = 99
 const SEARCH_DEBOUNCE_MS = 200
 
 const NO_HISTORY = []
@@ -81,6 +85,7 @@ const TOOLBAR_ROW = 'h-[calc(2.5rem-1px)]'
 
 const ResponseCompareDialog = lazy(() => import("./ResponseCompareDialog").then((module) => ({ default: module.ResponseCompareDialog })))
 const AddChecksDialog = lazy(() => import("./AddChecksDialog").then((module) => ({ default: module.AddChecksDialog })))
+const CallsExplorer = lazy(() => import("./CallsExplorer").then((module) => ({ default: module.CallsExplorer })))
 
 const HISTORY_TEXT = RESPONSE_TEXT.history
 
@@ -345,7 +350,19 @@ const tabItem = (value, badge = null, marked = false) => ({
   content: <>{RESPONSE_TEXT.tabs[value]}{badge}</>,
 })
 
-function responseTabs({ hasResult, hasTimeline, hasSent, showsTests, headers, cookies, tests }) {
+const callsBadge = (count) => (count === 0 ? null : <>{' '}<TabCount>{count > CALLS_BADGE_MAX ? RESPONSE_TEXT.cappedCount(CALLS_BADGE_MAX) : count}</TabCount></>)
+
+function CallsTab({ calls, entry, loading, onExport }) {
+  if (calls.length === 0 && loading) return <SkeletonLines label={RESPONSE_TEXT.sending} lines={6} />
+  if (calls.length === 0) return <EmptyState icon={BarChart3} title={RESPONSE_TEXT.noCallsTitle} description={RESPONSE_TEXT.noCallsDescription} />
+  return (
+    <Suspense fallback={null}>
+      <CallsExplorer key={historyIdentityOf(entry)} calls={calls} entry={entry} onExport={onExport} />
+    </Suspense>
+  )
+}
+
+function responseTabs({ hasResult, hasTimeline, hasSent, showsTests, headers, cookies, calls, tests }) {
   return [
     tabItem(TAB_BODY),
     hasResult && tabItem(TAB_HEADERS, <TabCount>{headers.length}</TabCount>, headers.length > 0),
@@ -355,6 +372,7 @@ function responseTabs({ hasResult, hasTimeline, hasSent, showsTests, headers, co
     showsTests && tabItem(TAB_TESTS, <TabCount tone={testTone(tests)}>{countPassed(tests.results)}/{tests.results.length}</TabCount>, true),
     tabItem(TAB_CONSOLE),
     tests?.visualization && tabItem(TAB_VISUALIZE),
+    tabItem(TAB_CALLS, callsBadge(calls.length), calls.length > 0),
   ].filter(Boolean)
 }
 
@@ -442,7 +460,7 @@ function PastResponseNotice({ past, canCompare, onCompare, onBack }) {
   )
 }
 
-export const ResponsePanel = memo(function ResponsePanel({ tabId, response, history = NO_HISTORY, tests, loading, docked = false, jsonDepth = '', onJsonDepthChange, onDownload, onSaveSent, onExportHar, onSaveExample, onExplain, onTrust }) {
+export const ResponsePanel = memo(function ResponsePanel({ tabId, response, history = NO_HISTORY, tests, loading, docked = false, jsonDepth = '', onJsonDepthChange, onDownload, onSaveSent, onExportHar, onExportCalls, onSaveExample, onExplain, onTrust }) {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [chosenTab, setActiveTab] = useState(TAB_BODY)
@@ -451,6 +469,8 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
   const [historyMenu, setHistoryMenu] = useState(null)
   const [isComparing, setIsComparing] = useState(false)
   const [isAddingChecks, setIsAddingChecks] = useState(false)
+  const historyEntry = useAppStore((state) => selectTabHistoryEntry(state, tabId))
+  const calls = useMemo(() => callsOf(historyEntry), [historyEntry])
   const { containerRef, panelShare, isDragging, startDrag, resetHeight, nudgeHeight } = usePanelResize()
 
   const earlier = useMemo(() => history.filter((entry) => entry.response !== response), [history, response])
@@ -474,10 +494,10 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
   const isOpen = isFullscreen || !isCollapsed
   const hasTimeline = Boolean(shown?.timeline)
   const hasSent = Boolean(shown?.sent)
-  const tabItems = responseTabs({ hasResult, hasTimeline, hasSent, showsTests, headers, cookies, tests })
+  const tabItems = responseTabs({ hasResult, hasTimeline, hasSent, showsTests, headers, cookies, calls, tests })
   const activeTab = tabItems.some((item) => item.value === chosenTab) ? chosenTab : TAB_BODY
   const showsBody = isOpen && activeTab === TAB_BODY
-  const showsTabs = isOpen && (hasResult || hasTimeline || hasSent)
+  const showsTabs = isOpen && (hasResult || hasTimeline || hasSent || calls.length > 0)
 
   const [searchOpen, setSearchOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -523,12 +543,13 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
     setPastAt(null)
   }, [response])
 
-  const revealSearch = useCallback((text) => {
-    setActiveTab(TAB_BODY)
+  const revealJump = useCallback(({ tab, query: text }) => {
+    setActiveTab(tab)
+    if (tab !== TAB_BODY) return
     setSearchOpen(true)
     setQuery(text)
   }, [])
-  useResponseJump(tabId, revealSearch)
+  useResponseJump(tabId, revealJump)
 
   useEffect(() => setMatchIndex(0), [debouncedQuery, view, filtered])
 
@@ -553,6 +574,7 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
   const toggleCollapse = useCallback(() => setIsCollapsed((current) => !current), [])
 
   const renderContent = () => {
+    if (activeTab === TAB_CALLS) return <CallsTab calls={calls} entry={historyEntry} loading={loading} onExport={onExportCalls} />
     if (loading) return <SkeletonLines label={RESPONSE_TEXT.sending} lines={6} />
     if (!shown) return <FeatureEmpty surface="response" icon={FileText} title={RESPONSE_TEXT.noResponseTitle} description={RESPONSE_TEXT.noResponseDescription} />
     if (activeTab === TAB_REQUEST && hasSent) return <RequestBodyTab sent={shown.sent} onSave={past ? undefined : onSaveSent} />

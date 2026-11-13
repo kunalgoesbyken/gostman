@@ -33,7 +33,6 @@
     "requestCount_other": "{{count}} 个请求",
     "subfolderCount_other": "{{count}} 个子文件夹",
     "clearHistory": "清除历史记录",
-    "clearHistoryMessage_other": "要删除全部 {{count}} 条历史记录吗？此操作无法撤销。",
     "clear": "清除",
     "closeTab": "关闭标签页",
     "closeTabMessage": "“{{name}}”有未保存的更改。关闭前要保存吗？",

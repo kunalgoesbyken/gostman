@@ -361,8 +361,10 @@ Each list, row of tabs and set of options is one stop for the Tab key, so Tab mo
 | Ctrl+A | Collection tree | Select every visible row |
 | Esc | Collection tree | Clear the selection |
 | Delete or Ctrl+Backspace | Open tabs | Close the tab |
-| Delete or Ctrl+Backspace | History | Remove the entry |
+| Delete or Ctrl+Backspace | History | Delete the entry, or the call in the Journal, with an Undo notice |
+| Ctrl+Z | History | Undo the deletions the notice shows |
 | Shift+F10 or the Menu key | Collection tree | Show the actions for the request or folder |
+| Shift+F10 or the Menu key | History | Show the actions for the entry or the call |
 | Down Arrow | Sidebar search fields | Move into the results |
 | Ctrl+Space | Address bar, tables and code editors | Suggest variables without typing `{{` first; the word before the caret filters the list |
 | Shift+Alt+F | JSON and XML body editor | Format the body, the same as the **Format** button |

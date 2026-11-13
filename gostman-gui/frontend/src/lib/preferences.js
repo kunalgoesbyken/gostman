@@ -32,6 +32,9 @@ export const FONT_NAME_LENGTH = 100
 export const DENSITIES = ['comfortable', 'compact']
 export const RESPONSE_LAYOUTS = ['below', 'right']
 export const TAB_PLACEMENTS = ['bar', 'sidebar']
+export const HISTORY_VIEW_JOURNAL = 'journal'
+export const HISTORY_VIEW_REQUESTS = 'requests'
+export const HISTORY_VIEWS = [HISTORY_VIEW_JOURNAL, HISTORY_VIEW_REQUESTS]
 export const EDITOR_FONT_SIZES = { min: 10, max: 24 }
 export const REQUEST_TIMEOUT_SECONDS = { min: 0, max: 3600 }
 export const BUILT_IN_TIMEOUT_SECONDS = 30
@@ -58,6 +61,7 @@ export const DEFAULT_PREFERENCES = {
   requestTimeoutSeconds: 0,
   historyEntries: 50,
   historyCalls: 500,
+  historyView: HISTORY_VIEW_JOURNAL,
   confirmCloseTab: true,
   showInheritedVariables: false,
   language: SYSTEM_LANGUAGE,
@@ -91,6 +95,7 @@ const VALIDATORS = {
   requestTimeoutSeconds: integerWithin(REQUEST_TIMEOUT_SECONDS),
   historyEntries: integerWithin(HISTORY_ENTRIES),
   historyCalls: integerWithin(HISTORY_CALLS),
+  historyView: oneOf(HISTORY_VIEWS),
   confirmCloseTab: isFlag,
   showInheritedVariables: isFlag,
   language: oneOf(LANGUAGE_VALUES),
