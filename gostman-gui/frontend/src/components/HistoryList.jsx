@@ -13,7 +13,6 @@ import { ALL_FOLDERS, ALL_TAGS, RANGES, RANGE_ANY, filterHistory, groupByDate } 
 import { buildCollectionTree, listFolders } from "../lib/collectionTree"
 import { collectTags } from "../lib/tags"
 import { formatDate, formatDateTime } from "../lib/i18n/format"
-import { callsOf } from "../lib/callHistory"
 import { statusVariant } from "../lib/response"
 import { isRemoveKey } from "../lib/shortcuts"
 import { HISTORY_TEXT, SIDEBAR_TEXT } from "../lib/sidebarText"
@@ -73,7 +72,7 @@ function CallCount({ count }) {
 }
 
 function HistoryRow({ entry, isTabStop, onOpen, onDelete, onFocus, onShowCalls }) {
-  const callCount = callsOf(entry).length
+  const callCount = entry.calls.length
   const removeOnKey = (event) => {
     if (!isRemoveKey(event)) return
     event.preventDefault()

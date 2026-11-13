@@ -66,7 +66,7 @@ const fromLocalInput = (value) => {
   const time = value ? new Date(value).getTime() : NaN
   return Number.isNaN(time) ? null : time
 }
-const millisecondsOf = (value) => (value.trim() === "" || !/^\d+$/.test(value.trim()) ? null : Number(value.trim()))
+const millisecondsOf = (value) => (/^\d+$/.test(value.trim()) ? Number(value.trim()) : null)
 
 function useEntry() {
   const id = useAppStore((s) => s.callHistoryId)
@@ -247,11 +247,11 @@ function CallsTable({ calls }) {
 
 function CallHistoryView({ entry, onClose }) {
   const calls = useMemo(() => callsOf(entry), [entry])
-  const fullWindow = useMemo(() => paddedSpan(timeSpan(calls) ?? { from: Date.now(), to: Date.now() }), [calls])
+  const fullView = useMemo(() => paddedSpan(timeSpan(calls) ?? { from: Date.now(), to: Date.now() }), [calls])
   const [classes, setClasses] = useState(ALL_CLASSES)
   const [duration, setDuration] = useState({ min: "", max: "" })
   const [zoom, setZoom] = useState(null)
-  const view = zoom ?? fullWindow
+  const view = zoom ?? fullView
   const counts = useMemo(() => countByClass(calls), [calls])
   const shown = useMemo(
     () => filterCalls(calls, { classes, minMs: millisecondsOf(duration.min), maxMs: millisecondsOf(duration.max), from: view.from, to: view.to }),

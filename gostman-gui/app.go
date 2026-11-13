@@ -143,8 +143,6 @@ type HistoryEntry struct {
 	Calls      []HistoryCall `json:"calls,omitempty"`
 }
 
-// HistoryCall is one send of a history entry: when it went out and what came back.
-// DurationMs and Size are absent when they were not measured.
 type HistoryCall struct {
 	At         string `json:"at"`
 	StatusCode int    `json:"statusCode,omitempty"`

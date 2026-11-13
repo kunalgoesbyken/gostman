@@ -31,8 +31,6 @@ import { isWelcomeDismissed, rememberWelcomeDismissed } from '../lib/welcome'
 import { rememberSteps, rememberedSteps } from '../lib/onboarding'
 import { NO_WORKSPACE, enterWorkspace, leaveWorkspace, persistableSessions, restoreSessions } from './workspaceSessions'
 
-const HISTORY_LIMIT = 50
-const HISTORY_CALLS_LIMIT = 500
 const HISTORY_IDENTITY_FIELDS = ['method', 'url', 'body', 'bodyType', 'graphqlQuery', 'graphqlVariables', 'grpcMethod', 'grpcMessage', 'mcpMethod', 'mcpTool', 'mcpArguments']
 const IMPORT_TAB = 'import'
 export const DEFAULT_REQUEST_PANEL = 'params'
@@ -586,17 +584,17 @@ export const useAppStore = create(
           ? { folders: state.folders.map((folder) => (folder.isOpen ? { ...folder, isOpen: false } : folder)) }
           : state)),
 
-        addToHistory: (request, call, { entries = HISTORY_LIMIT, calls = HISTORY_CALLS_LIMIT } = {}) => set((state) => {
+        addToHistory: (request, call, limits) => set((state) => {
           const { statusCode, noResponse, at: timestamp } = call
           const entry = { ...historyEntry({ ...request, statusCode, noResponse, calls: [] }), examples: '', id: createId('hist'), timestamp }
           const others = state.requestHistory.filter((existing) => !isSameCall(existing, entry))
           const sameCalls = state.requestHistory.filter((existing) => isSameCall(existing, entry))
           const replaced = new Set(sameCalls.map((existing) => existing.id))
           const earlier = sameCalls.flatMap((existing) => callsOf(existing))
-          entry.calls = recordCall(earlier, call, calls).map(compactCall)
+          entry.calls = recordCall(earlier, call, limits.calls).map(compactCall)
           const tabs = replaced.size === 0 ? state.tabs : state.tabs.map((tab) => (replaced.has(tab.historyId) ? { ...tab, historyId: entry.id } : tab))
           const callHistoryId = replaced.has(state.callHistoryId) ? entry.id : state.callHistoryId
-          return { requestHistory: [entry, ...others].slice(0, entries), tabs, callHistoryId }
+          return { requestHistory: [entry, ...others].slice(0, limits.entries), tabs, callHistoryId }
         }),
         openCallHistory: (callHistoryId) => set({ callHistoryId, commandPaletteOpen: false }),
         closeCallHistory: () => set({ callHistoryId: '' }),

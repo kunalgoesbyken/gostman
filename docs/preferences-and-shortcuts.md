@@ -107,11 +107,14 @@ Preferences is a window you can move and resize inside the app. Its sections, in
 | Editor | **Editor font size** | A whole number of pixels from 10 to 24 | 12 |
 | Editor | **Wrap long lines** | On or off | On |
 | Requests | **Default timeout** | A whole number of seconds from 0 to 3600 | 0 |
+| Requests | **Requests kept in history** | A whole number from 10 to 1000 | 50 |
+| Requests | **Calls kept per request** | A whole number from 1 to 10000 | 500 |
 | Requests | **Ask before discarding unsaved changes when closing a tab** | On or off | On |
 | Language | **Language** | **Same as the system**, **English** and every language that is listed | **Same as the system** |
 | AI | **AI** | Consent, on or off, provider, base URL, API key and model; see [AI features](ai.md) | Off |
 
 - **Default timeout** applies to requests that set no timeout of their own. 0 uses the built-in limit of 30 seconds. See [Settings](requests-and-responses.md#settings) for request settings.
+- **Requests kept in history** and **Calls kept per request** limit the [History](requests-and-responses.md#history) tab and the [calls](requests-and-responses.md#calls) of each entry. A lower value applies at the next send.
 - A number field only takes effect while the value is a whole number inside the range. Otherwise the field is marked invalid, and it goes back to the saved value when you leave it.
 - **Language** starts with **Same as the system**, which follows the browser or operating system language and uses English when that language is not listed. After it come English and the other languages, each by its own name. A language is listed once at least half of the interface is translated; the rest of its text appears in English. Choosing a different language shows **Switch language**, and clicking it reloads Gostman in that language. Open tabs and unsaved drafts are kept, and responses shown in tabs are cleared. Some translations are drafts that native speakers still review. To ask for a language or report a wrong translation, use the link under the list, which opens [issue #15](https://github.com/kunalgoesbyken/gostman/issues/15). Translations are edited on [Weblate](https://hosted.weblate.org/engage/gostman/). See [Translating Gostman](translating.md). The command line, the documentation and exported files stay in English.
 - **Use the system title bar** appears in the desktop app on Windows and Linux, under Appearance. It replaces Gostman's own title bar and window buttons with your desktop's, and takes effect the next time Gostman starts. It is saved with the app's data rather than these preferences, so **Reset to defaults** leaves it unchanged. On macOS the system title bar is always used.

@@ -11,7 +11,7 @@ const measureOf = (value) => (isMeasure(value) ? Math.round(value) : null)
 const statusOf = (value) => (Number.isSafeInteger(value) && value > 0 ? value : 0)
 const isTime = (value) => typeof value === 'string' && !Number.isNaN(Date.parse(value))
 
-export function normalizeCall(raw) {
+function normalizeCall(raw) {
   if (!raw || !isTime(raw.at)) return null
   return {
     at: raw.at,
@@ -22,7 +22,6 @@ export function normalizeCall(raw) {
   }
 }
 
-// Entries saved before calls were recorded keep their one send, with no timing.
 export function callsOf(entry) {
   const calls = Array.isArray(entry?.calls) ? entry.calls.map(normalizeCall).filter(Boolean) : []
   if (calls.length > 0 || !isTime(entry?.timestamp)) return calls
@@ -65,7 +64,7 @@ export function filterCalls(calls, { classes, minMs = null, maxMs = null, from =
   })
 }
 
-export function percentile(sorted, fraction) {
+function percentile(sorted, fraction) {
   if (sorted.length === 0) return null
   const index = Math.min(sorted.length - 1, Math.max(0, Math.ceil(fraction * sorted.length) - 1))
   return sorted[index]
@@ -97,7 +96,6 @@ export function timeSpan(calls) {
   return { from: Math.min(...times), to: Math.max(...times) }
 }
 
-// Pads a span so a single call or calls at the same instant still get a visible width.
 export function paddedSpan(span, minimumMs = 60 * 1000) {
   const width = span.to - span.from
   if (width >= minimumMs) return { from: span.from - width * 0.02, to: span.to + width * 0.02 }

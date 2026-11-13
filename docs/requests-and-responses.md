@@ -411,7 +411,19 @@ The History tab at the top of the sidebar lists sent requests, with the method, 
 - Click an entry to open it as a request tab.
 - Search history filters by method, URL and status, so `404` finds the requests that got one.
 - The remove button, shown when you hover an entry, deletes it. Clear history deletes all entries.
-- The app keeps up to 50 entries.
+- Sending the same request again moves its entry to the top and adds the send to its calls; an entry sent more than once shows the count, for example "×12". Hovering an entry shows the full date and time of the last send.
+- The app keeps 50 requests and 500 calls per request by default. Change both under **Requests** in [Preferences](preferences-and-shortcuts.md#preferences); the oldest request or call is dropped first.
+
+### Calls
+
+**Show calls**, the chart button shown when you hover an entry, opens every send of that request, to follow how an unstable or slow API behaves over time.
+
+- Each call keeps the date and time, the status, the duration and the size of the response. Calls with no response keep the time until the send failed.
+- The chart puts each call at the time it was sent, as a bar as tall as its duration, coloured by status: 2xx, 3xx, 4xx, 5xx, **Other** (a response without an HTTP status, such as gRPC or MCP) and **No response**, drawn at full height so outages stand out. Hover a bar for its details.
+- The status checkboxes, with the number of calls of each kind, and the duration fields (in milliseconds) filter the chart, the summary and the list.
+- Drag across the chart to zoom in on a period, or set **From** and **To**. **Show all** zooms back out.
+- The summary gives the number of calls, the share answered with 2xx or 3xx, the median, 95th percentile and slowest duration and the average size of the calls shown. The list below shows the latest 200 of them.
+- Entries saved before calls were recorded keep their one send, without duration or size.
 
 ## Cookie jar
 
