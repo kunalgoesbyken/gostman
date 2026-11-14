@@ -74,6 +74,7 @@ const DEFAULT_REQUEST = {
   grpcMethod: '',
   grpcMessage: '',
   grpcProtos: '',
+  grpcImportRoots: '',
   mcpMethod: '',
   mcpTool: '',
   mcpArguments: '',

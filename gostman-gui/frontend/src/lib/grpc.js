@@ -30,9 +30,12 @@ export function mergeProtoFiles(existing, added) {
 
 export const replacedProtoNames = (files) => files.filter((file) => file.replaced).map((file) => file.name)
 
+export const importRootsOf = (value) => String(value?.grpcImportRoots || '').split(/[,\n]/).map((root) => root.trim()).filter(Boolean)
+
 export function toGrpcTarget(request, variables) {
   const { url, headers, auth, options, grpcProtos, inherited = [] } = request
-  return { address: url, headers, auth, options, variables, protos: parseProtoFiles(grpcProtos), inherited }
+  const importRoots = [...importRootsOf(request), ...[...inherited].reverse().flatMap(importRootsOf)]
+  return { address: url, headers, auth, options, variables, protos: parseProtoFiles(grpcProtos), importRoots, inherited }
 }
 
 export function toGrpcCall(request, variables) {

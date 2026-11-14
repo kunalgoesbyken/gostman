@@ -83,6 +83,8 @@
     "afterEnd": "the stream has data after its end message",
     "repeatedTrailers": "the response has more than one trailers frame",
     "afterTrailers": "the response has data after its trailers",
-    "missingTrailers": "the response has no trailers frame"
+    "missingTrailers": "the response has no trailers frame",
+    "importRootsLimit": "The import roots exceed the permitted .proto file count or total size.",
+    "importRootsUnavailable": "Import roots were not read because reading local files is off here. In the CLI, add --allow-files; in the desktop app, trust the folder; on the web, add the .proto files or use server reflection."
   }
 }

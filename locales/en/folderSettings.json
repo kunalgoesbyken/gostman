@@ -15,7 +15,8 @@
       "script": "Script",
       "tests": "Checks",
       "docs": "Docs",
-      "notes": "Notes"
+      "notes": "Notes",
+      "protobuf": "Protobuf"
     },
     "more": "More",
     "moreHint": "More settings",
@@ -53,6 +54,8 @@
     },
     "menuSettings": "Settings",
     "collectionMenu": "Collection settings",
-    "restrictedNote": "This folder is not trusted, so its scripts, OAuth 2.0 settings, local MCP commands and file reads are switched off."
+    "restrictedNote": "This folder is not trusted, so its scripts, OAuth 2.0 settings, local MCP commands and file reads are switched off.",
+    "protobufNote": "Shared import roots for gRPC .proto files. Enter workspace-relative directories, separated by commas. Requests inherit roots from their nearest folder, then the collection.",
+    "protobufPlaceholder": "proto, vendor/googleapis"
   }
 }

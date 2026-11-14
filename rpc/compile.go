@@ -2,14 +2,19 @@ package rpc
 
 import (
 	"context"
+	"errors"
+	"os"
 	"path"
+	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 
 	"github.com/bufbuild/protocompile"
 	"github.com/bufbuild/protocompile/ast"
 	"github.com/bufbuild/protocompile/parser"
 	"github.com/bufbuild/protocompile/reporter"
+	"github.com/kunalgoesbyken/gostman/engine"
 	"github.com/kunalgoesbyken/gostman/locales"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"
@@ -25,25 +30,37 @@ const (
 )
 
 func compile(ctx context.Context, protos []ProtoFile) (*protoregistry.Files, error) {
+	return compileTarget(ctx, protos, nil, engine.Policy{})
+}
+
+func compileTarget(ctx context.Context, protos []ProtoFile, roots []string, policy engine.Policy) (*protoregistry.Files, error) {
 	sources, err := namedSources(protos)
 	if err != nil {
 		return nil, err
 	}
-	aliases, err := importAliases(ctx, sources)
+	readsRoots := len(roots) > 0 && policy.ReadFile != nil
+	var rootResolver protocompile.Resolver
+	if readsRoots {
+		rootResolver = importRootResolver(roots, policy.ReadFile, len(sources), sourceBytes(sources))
+	}
+	aliases, err := importAliases(ctx, sources, rootResolver)
 	if err != nil {
 		return nil, err
 	}
 	placeDescriptorProto(sources, aliases)
-	compiler := protocompile.Compiler{
-		Resolver: protocompile.WithStandardImports(protocompile.CompositeResolver{
-			&protocompile.SourceResolver{Accessor: protocompile.SourceAccessorFromMap(sources)},
-			forwardingResolver(aliases),
-		}),
+	resolvers := protocompile.CompositeResolver{&protocompile.SourceResolver{Accessor: protocompile.SourceAccessorFromMap(sources)}}
+	if rootResolver != nil {
+		resolvers = append(resolvers, rootResolver)
 	}
+	resolvers = append(resolvers, forwardingResolver(aliases))
+	compiler := protocompile.Compiler{Resolver: protocompile.WithStandardImports(resolvers)}
 	compiled, err := compiler.Compile(ctx, sortedNames(sources)...)
 	if err != nil {
 		if ctx.Err() != nil {
 			return nil, ctx.Err()
+		}
+		if len(roots) > 0 && !readsRoots && errors.Is(err, os.ErrNotExist) {
+			return nil, configError("the .proto files do not compile: %v. %s", err, locales.New(locales.EngineGrpcImportRootsUnavailable, nil).String())
 		}
 		return nil, configError("the .proto files do not compile: %v", err)
 	}
@@ -125,7 +142,7 @@ func parseFiles(ctx context.Context, sources map[string]string) (map[string]pars
 	return parsed, nil
 }
 
-func importAliases(ctx context.Context, sources map[string]string) (map[string]string, error) {
+func importAliases(ctx context.Context, sources map[string]string, roots protocompile.Resolver) (map[string]string, error) {
 	parsed, err := parseFiles(ctx, sources)
 	if err != nil {
 		return nil, err
@@ -143,6 +160,13 @@ func importAliases(ctx context.Context, sources map[string]string) (map[string]s
 		for _, imported := range parsed[importer].imports {
 			if _, exact := sources[imported]; exact {
 				continue
+			}
+			if roots != nil {
+				if _, err := roots.FindFileByPath(imported); err == nil {
+					continue
+				} else if !errors.Is(err, os.ErrNotExist) {
+					return nil, err
+				}
 			}
 			if file, found := sameNamedFile(byBase, parsed, imported); found {
 				aliases[imported] = file
@@ -262,4 +286,54 @@ func register(files *protoregistry.Files, file protoreflect.FileDescriptor) erro
 		}
 	}
 	return files.RegisterFile(file)
+}
+
+func sourceBytes(sources map[string]string) int {
+	total := 0
+	for _, content := range sources {
+		total += len(content)
+	}
+	return total
+}
+
+func importRootResolver(roots []string, read engine.FileReader, count, size int) protocompile.Resolver {
+	normalized := make([]string, len(roots))
+	for index, root := range roots {
+		normalized[index] = filepath.FromSlash(strings.ReplaceAll(root, "\\", "/"))
+	}
+	var mu sync.Mutex
+	cache := map[string][]byte{}
+	return protocompile.ResolverFunc(func(name string) (protocompile.SearchResult, error) {
+		if !safeImportPath(name) {
+			return protocompile.SearchResult{}, os.ErrNotExist
+		}
+		mu.Lock()
+		defer mu.Unlock()
+		for _, root := range normalized {
+			file := filepath.Join(root, filepath.FromSlash(name))
+			if data, found := cache[file]; found {
+				return protocompile.SearchResult{Source: strings.NewReader(string(data))}, nil
+			}
+			data, err := read(file)
+			if errors.Is(err, os.ErrNotExist) {
+				continue
+			}
+			if err != nil {
+				return protocompile.SearchResult{}, err
+			}
+			if count+1 > maxProtoFiles || size+len(data) > maxProtoBytes {
+				return protocompile.SearchResult{}, localizedConfigError(locales.EngineGrpcImportRootsLimit, nil)
+			}
+			count++
+			size += len(data)
+			cache[file] = data
+			return protocompile.SearchResult{Source: strings.NewReader(string(data))}, nil
+		}
+		return protocompile.SearchResult{}, os.ErrNotExist
+	})
+}
+
+func safeImportPath(value string) bool {
+	return value != "" && !strings.ContainsAny(value, "\\:") && filepath.IsLocal(value) &&
+		!strings.HasPrefix(value, "~") && !strings.Contains(value, "//")
 }

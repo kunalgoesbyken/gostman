@@ -24,6 +24,8 @@
       "client": "Client streaming",
       "server": "Server streaming",
       "unary": "Unary"
-    }
+    },
+    "importRoots": "Import roots",
+    "importRootsHint": "Workspace-relative folders; absolute or ~/ paths in desktop app storage"
   }
 }

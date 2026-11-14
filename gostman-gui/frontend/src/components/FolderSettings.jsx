@@ -31,13 +31,14 @@ import { environmentForFolder, useAppStore, variableTextFor } from "../store/app
 const TAB_HEADERS = "headers"
 const TAB_AUTH = "auth"
 const TAB_VARS = "vars"
+const TAB_PROTOBUF = "protobuf"
 const TAB_SCRIPT = "script"
 const TAB_TESTS = "tests"
 const TAB_DOCS = "docs"
 const TAB_NOTES = "notes"
 const VIEW_PRE = "preScript"
 const VIEW_POST = "postScript"
-const tabItems = () => Object.entries(TEXT.tabs).map(([value, label]) => ({ value, label, content: label }))
+const tabItems = () => Object.entries(TEXT.tabs).filter(([value]) => value !== TAB_PROTOBUF || isDesktopShell()).map(([value, label]) => ({ value, label, content: label }))
 const VARIABLE_FEATURES = { enabled: false, secret: false, readOnly: false }
 const SCRIPT_VIEWS = [
   { value: VIEW_PRE, get label() { return TEXT.preScript } },
@@ -287,6 +288,14 @@ export function FolderSettings({ backend, scope, EditorComponent, onClose }) {
               onChange={patch}
             />
           </TabsContent>
+          {isDesktopShell() && <TabsContent value={TAB_PROTOBUF} className="h-full min-h-0">
+            <Panel>
+              <div className="p-4">
+                <p className="mb-3 text-sm text-muted-foreground">{TEXT.protobufNote}</p>
+                <Input dir="ltr" value={settings.grpcImportRoots} onChange={(event) => patch({ grpcImportRoots: event.target.value })} placeholder={TEXT.protobufPlaceholder} aria-label={TEXT.tabs.protobuf} spellCheck={false} />
+              </div>
+            </Panel>
+          </TabsContent>}
           <TabsContent value={TAB_VARS} className="h-full min-h-0">
             <VarsTab folder={folder} isCollection={ownsCollectionList} rootNote={rootNote} onChange={patch} />
           </TabsContent>

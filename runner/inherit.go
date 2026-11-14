@@ -54,7 +54,7 @@ func (r Request) allTags() []string {
 func (r Request) layers() []engine.Layer {
 	layers := make([]engine.Layer, len(r.Lineage))
 	for i, folder := range r.Lineage {
-		layers[i] = engine.Layer{Headers: folder.Headers, Auth: folder.Auth}
+		layers[i] = engine.Layer{Headers: folder.Headers, Auth: folder.Auth, GrpcImportRoots: folder.GrpcImportRoots}
 	}
 	return layers
 }

@@ -30,6 +30,7 @@ type Request struct {
 	GrpcMethod       string         `json:"grpcMethod"`
 	GrpcMessage      string         `json:"grpcMessage"`
 	GrpcProtos       string         `json:"grpcProtos"`
+	GrpcImportRoots  string         `json:"grpcImportRoots,omitempty"`
 	McpMethod        string         `json:"mcpMethod"`
 	McpTool          string         `json:"mcpTool"`
 	McpArguments     string         `json:"mcpArguments"`
@@ -45,6 +46,7 @@ type Request struct {
 
 type Settings struct {
 	Description     string      `json:"description"`
+	GrpcImportRoots string      `json:"grpcImportRoots,omitempty"`
 	Headers         string      `json:"headers"`
 	Auth            engine.Auth `json:"auth"`
 	PreScript       string      `json:"preScript"`

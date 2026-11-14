@@ -174,10 +174,13 @@ func (s *session) transmit(ctx context.Context, request Request) (engine.Respons
 	if request.Method == grpcMethod {
 		var call rpc.Call
 		scope, _ := s.sendable(request)
-		if err := s.scripts.Call("toGrpcCall", &call, request, scope.text()); err != nil {
+		inheriting := struct {
+			Request
+			Inherited []engine.Layer `json:"inherited"`
+		}{request, request.layers()}
+		if err := s.scripts.Call("toGrpcCall", &call, inheriting, scope.text()); err != nil {
 			return engine.Response{}, err
 		}
-		call.Target.Inherited = request.layers()
 		return rpc.Invoke(ctx, call, s.policy), nil
 	}
 	if request.Method == mcpMethod {

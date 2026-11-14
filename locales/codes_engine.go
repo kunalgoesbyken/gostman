@@ -32,6 +32,8 @@ const (
 	EngineGrpcAfterEnd                Code = "engineMessages.grpc.afterEnd"
 	EngineGrpcAfterTrailers           Code = "engineMessages.grpc.afterTrailers"
 	EngineGrpcImportConflict          Code = "engineMessages.grpc.importConflict"
+	EngineGrpcImportRootsLimit        Code = "engineMessages.grpc.importRootsLimit"
+	EngineGrpcImportRootsUnavailable  Code = "engineMessages.grpc.importRootsUnavailable"
 	EngineGrpcIncompleteFrame         Code = "engineMessages.grpc.incompleteFrame"
 	EngineGrpcMissingEnd              Code = "engineMessages.grpc.missingEnd"
 	EngineGrpcMissingTrailers         Code = "engineMessages.grpc.missingTrailers"

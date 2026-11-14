@@ -175,7 +175,7 @@ func readFile(path string, file *os.File) ([]byte, error) {
 
 func unreadable(path, resolved string, err error) error {
 	if errors.Is(err, fs.ErrNotExist) {
-		return locales.Errorf(locales.EngineFilesNotFound, locales.Params{"path": path, "resolved": resolved})
+		return locales.Caused(locales.EngineFilesNotFound, locales.Params{"path": path, "resolved": resolved}, err)
 	}
 	return locales.Wrap(locales.EngineFilesUnreadable, locales.Params{"path": path}, err)
 }

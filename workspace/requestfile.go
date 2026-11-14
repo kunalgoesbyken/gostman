@@ -14,7 +14,7 @@ const (
 var (
 	requestKeys = []string{
 		"id", "name", "description", "tags", "order", "method", "url", "queryParams", "headers", "auth", "bodyType", "body",
-		"graphqlQuery", "graphqlVariables", "grpcMethod", "grpcMessage", "grpcProtos", "mcpMethod", "mcpTool", "mcpArguments", "socketProtocol", "socketMessages", "vars", "options",
+		"graphqlQuery", "graphqlVariables", "grpcMethod", "grpcMessage", "grpcProtos", "grpcImportRoots", "mcpMethod", "mcpTool", "mcpArguments", "socketProtocol", "socketMessages", "vars", "options",
 		"extractors", "assertions", "preScript", "postScript", "examples", "notes", "jsonDepth", "defaultView", "timestamp",
 	}
 	requestMarkers = []string{"method", "url"}
@@ -171,6 +171,7 @@ func (b nodeBuilder) request(document requestDocument) *yaml.Node {
 	setField(root, "grpcMethod", b.text(request.GrpcMethod))
 	setField(root, "grpcMessage", b.text(request.GrpcMessage))
 	setField(root, "grpcProtos", b.jsonText(request.GrpcProtos))
+	setField(root, "grpcImportRoots", b.text(request.GrpcImportRoots))
 	setField(root, "mcpMethod", b.text(request.McpMethod))
 	setField(root, "mcpTool", b.text(request.McpTool))
 	setField(root, "mcpArguments", b.text(request.McpArguments))
@@ -316,6 +317,7 @@ func readRequest(root *yaml.Node) (requestDocument, error) {
 		GrpcMethod:       fields.text("grpcMethod"),
 		GrpcMessage:      fields.text("grpcMessage"),
 		GrpcProtos:       fields.jsonText("grpcProtos", false, unchanged),
+		GrpcImportRoots:  fields.text("grpcImportRoots"),
 		McpMethod:        fields.text("mcpMethod"),
 		McpTool:          fields.text("mcpTool"),
 		McpArguments:     fields.text("mcpArguments"),
