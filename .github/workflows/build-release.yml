@@ -10,8 +10,8 @@ on:
   workflow_dispatch:
 
 env:
-  WAILS_VERSION: 'v2.11.0'
-  GO_VERSION: '1.24.5'
+  WAILS_VERSION: 'v2.17.1'
+  GO_VERSION: '1.26.11'
   NODE_VERSION: '20'
 
 permissions:

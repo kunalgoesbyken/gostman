@@ -296,7 +296,7 @@ export function siteMeta() {
   return {
     name: 'site-meta',
     enforce: 'post',
-    transformIndexHtml: { enforce: 'pre', transform: (html) => html.replaceAll(SITE_URL_TOKEN, siteUrl).replaceAll(APP_VERSION_TOKEN, appVersion) },
+    transformIndexHtml: { order: 'pre', handler: (html) => html.replaceAll(SITE_URL_TOKEN, siteUrl).replaceAll(APP_VERSION_TOKEN, appVersion) },
     async generateBundle(_options, bundle) {
       const missingDocs = missingGuideDocs()
       if (missingDocs.length) this.error(`Guide pages link to docs that do not exist: ${missingDocs.join(', ')}`)

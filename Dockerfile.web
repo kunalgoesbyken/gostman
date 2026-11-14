@@ -16,7 +16,7 @@ COPY gostman-gui/wails.json /src/gostman-gui/wails.json
 COPY gostman-gui/frontend/ ./
 RUN npm run build:web
 
-FROM --platform=$BUILDPLATFORM golang:1.24.5-alpine AS cli
+FROM --platform=$BUILDPLATFORM golang:1.26.11-alpine AS cli
 ARG VERSION=dev
 ARG TARGETOS
 ARG TARGETARCH

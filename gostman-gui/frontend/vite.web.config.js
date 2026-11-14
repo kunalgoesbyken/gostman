@@ -121,10 +121,10 @@ function preloadedOnLanding(module) {
 }
 
 const SANDBOX_WORKER_PREFIX = 'assets/sandbox.worker.'
-const SHARED_RUNTIME_MODULE = '/node_modules/react-dom/'
+const SHARED_RUNTIME_MODULE = '/node_modules/react-dom/cjs/'
 
 const chunkFileName = (chunk) =>
-  Object.keys(chunk.modules).some((id) => id.includes(SHARED_RUNTIME_MODULE)) ? 'assets/react.[hash].js' : 'assets/[name].[hash].js'
+  chunk.moduleIds.some((id) => id.includes(SHARED_RUNTIME_MODULE)) ? 'assets/react.[hash].js' : 'assets/[name].[hash].js'
 
 const linkedChunks = (bundle, fileName, seen = new Set()) => {
   if (seen.has(fileName) || !bundle[fileName]) return seen

@@ -1339,6 +1339,8 @@ export namespace engine {
 	export class Layer {
 	    headers: string;
 	    auth: Auth;
+	    grpcImportRoots?: string;
+	    grpcUploadedProtos?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Layer(source);
@@ -1348,6 +1350,8 @@ export namespace engine {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.headers = source["headers"];
 	        this.auth = this.convertValues(source["auth"], Auth);
+	        this.grpcImportRoots = source["grpcImportRoots"];
+	        this.grpcUploadedProtos = source["grpcUploadedProtos"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -1505,6 +1509,26 @@ export namespace engine {
 		    return a;
 		}
 	}
+	export class SentBody {
+	    body: string;
+	    bodyEncoding: string;
+	    contentType: string;
+	    size: number;
+	    truncated: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new SentBody(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.body = source["body"];
+	        this.bodyEncoding = source["bodyEncoding"];
+	        this.contentType = source["contentType"];
+	        this.size = source["size"];
+	        this.truncated = source["truncated"];
+	    }
+	}
 	export class Timeline {
 	    hops: Hop[];
 	    omitted?: number;
@@ -1557,6 +1581,7 @@ export namespace engine {
 	    protocol?: string;
 	    streamEnd?: string;
 	    timeline?: Timeline;
+	    sent?: SentBody;
 	    failed?: boolean;
 	    notifications?: Notification[];
 	    unresolved?: string[];
@@ -1584,6 +1609,7 @@ export namespace engine {
 	        this.protocol = source["protocol"];
 	        this.streamEnd = source["streamEnd"];
 	        this.timeline = this.convertValues(source["timeline"], Timeline);
+	        this.sent = this.convertValues(source["sent"], SentBody);
 	        this.failed = source["failed"];
 	        this.notifications = this.convertValues(source["notifications"], Notification);
 	        this.unresolved = source["unresolved"];
@@ -1609,6 +1635,7 @@ export namespace engine {
 		    return a;
 		}
 	}
+	
 	
 	
 	
@@ -2594,6 +2621,9 @@ export namespace main {
 	    color?: string;
 	    tags?: string[];
 	    description: string;
+	    grpcImportRoots?: string;
+	    grpcUploadedProtos?: string;
+	    grpcUploadedAt?: string;
 	    headers: string;
 	    auth: engine.Auth;
 	    preScript: string;
@@ -2619,6 +2649,9 @@ export namespace main {
 	        this.color = source["color"];
 	        this.tags = source["tags"];
 	        this.description = source["description"];
+	        this.grpcImportRoots = source["grpcImportRoots"];
+	        this.grpcUploadedProtos = source["grpcUploadedProtos"];
+	        this.grpcUploadedAt = source["grpcUploadedAt"];
 	        this.headers = source["headers"];
 	        this.auth = this.convertValues(source["auth"], engine.Auth);
 	        this.preScript = source["preScript"];
@@ -2758,6 +2791,7 @@ export namespace main {
 	    grpcMethod: string;
 	    grpcMessage: string;
 	    grpcProtos: string;
+	    grpcImportRoots?: string;
 	    mcpMethod: string;
 	    mcpTool: string;
 	    mcpArguments: string;
@@ -2802,6 +2836,7 @@ export namespace main {
 	        this.grpcMethod = source["grpcMethod"];
 	        this.grpcMessage = source["grpcMessage"];
 	        this.grpcProtos = source["grpcProtos"];
+	        this.grpcImportRoots = source["grpcImportRoots"];
 	        this.mcpMethod = source["mcpMethod"];
 	        this.mcpTool = source["mcpTool"];
 	        this.mcpArguments = source["mcpArguments"];
@@ -2932,6 +2967,7 @@ export namespace main {
 	    grpcMethod: string;
 	    grpcMessage: string;
 	    grpcProtos: string;
+	    grpcImportRoots?: string;
 	    mcpMethod: string;
 	    mcpTool: string;
 	    mcpArguments: string;
@@ -2973,6 +3009,7 @@ export namespace main {
 	        this.grpcMethod = source["grpcMethod"];
 	        this.grpcMessage = source["grpcMessage"];
 	        this.grpcProtos = source["grpcProtos"];
+	        this.grpcImportRoots = source["grpcImportRoots"];
 	        this.mcpMethod = source["mcpMethod"];
 	        this.mcpTool = source["mcpTool"];
 	        this.mcpArguments = source["mcpArguments"];
@@ -4997,6 +5034,8 @@ export namespace rpc {
 	    variables: string;
 	    options: engine.Options;
 	    protos: ProtoFile[];
+	    importRoots?: string[];
+	    importSources?: ProtoFile[];
 	
 	    static createFrom(source: any = {}) {
 	        return new Target(source);
@@ -5011,6 +5050,8 @@ export namespace rpc {
 	        this.variables = source["variables"];
 	        this.options = this.convertValues(source["options"], engine.Options);
 	        this.protos = this.convertValues(source["protos"], ProtoFile);
+	        this.importRoots = source["importRoots"];
+	        this.importSources = this.convertValues(source["importSources"], ProtoFile);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -5757,6 +5798,9 @@ export namespace workspace {
 	}
 	export class Settings {
 	    description: string;
+	    grpcImportRoots?: string;
+	    grpcUploadedProtos?: string;
+	    grpcUploadedAt?: string;
 	    headers: string;
 	    auth: engine.Auth;
 	    preScript: string;
@@ -5772,6 +5816,9 @@ export namespace workspace {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.description = source["description"];
+	        this.grpcImportRoots = source["grpcImportRoots"];
+	        this.grpcUploadedProtos = source["grpcUploadedProtos"];
+	        this.grpcUploadedAt = source["grpcUploadedAt"];
 	        this.headers = source["headers"];
 	        this.auth = this.convertValues(source["auth"], engine.Auth);
 	        this.preScript = source["preScript"];
@@ -5832,6 +5879,9 @@ export namespace workspace {
 	    color?: string;
 	    tags?: string[];
 	    description: string;
+	    grpcImportRoots?: string;
+	    grpcUploadedProtos?: string;
+	    grpcUploadedAt?: string;
 	    headers: string;
 	    auth: engine.Auth;
 	    preScript: string;
@@ -5856,6 +5906,9 @@ export namespace workspace {
 	        this.color = source["color"];
 	        this.tags = source["tags"];
 	        this.description = source["description"];
+	        this.grpcImportRoots = source["grpcImportRoots"];
+	        this.grpcUploadedProtos = source["grpcUploadedProtos"];
+	        this.grpcUploadedAt = source["grpcUploadedAt"];
 	        this.headers = source["headers"];
 	        this.auth = this.convertValues(source["auth"], engine.Auth);
 	        this.preScript = source["preScript"];
@@ -5909,6 +5962,7 @@ export namespace workspace {
 	    grpcMethod: string;
 	    grpcMessage: string;
 	    grpcProtos: string;
+	    grpcImportRoots?: string;
 	    mcpMethod: string;
 	    mcpTool: string;
 	    mcpArguments: string;
@@ -5950,6 +6004,7 @@ export namespace workspace {
 	        this.grpcMethod = source["grpcMethod"];
 	        this.grpcMessage = source["grpcMessage"];
 	        this.grpcProtos = source["grpcProtos"];
+	        this.grpcImportRoots = source["grpcImportRoots"];
 	        this.mcpMethod = source["mcpMethod"];
 	        this.mcpTool = source["mcpTool"];
 	        this.mcpArguments = source["mcpArguments"];
