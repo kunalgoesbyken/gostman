@@ -1,6 +1,8 @@
 {
   "grpc.services": "Label of the list of gRPC services loaded from the server or from .proto files.",
   "grpc.reflection": "Shown when the services come from server reflection. Server reflection is a gRPC feature.",
+  "grpc.addFolder": "Button next to the one that adds .proto files. It picks a whole folder and adds every .proto file in it. Short.",
+  "grpc.addFolderTitle": "Tooltip of the Add folder button. The path of each file inside the picked folder is kept, so an import such as xds/annotations/v3/status.proto finds exactly that file.",
   "grpc.load": "Button that loads the services. Short.",
   "grpc.reload": "Button that loads the services again. Short.",
   "grpc.method": "Label of the picker for a gRPC method.",

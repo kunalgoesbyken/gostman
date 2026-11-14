@@ -75,11 +75,20 @@ The Services line shows where the service list comes from.
 
 - With no files added it shows Server reflection. Select Load, and Gostman asks the server for its services through reflection. The button changes to Reload afterwards.
 - Select Add .proto files to pick one or more `.proto` files. When files are present, Gostman compiles them and uses them instead of reflection. The file names appear in the Services line.
-- Gostman does not see the folders of the files you add, so it matches each `import` line to an added file by the file name at the end of the path. `google/api/field_behavior.proto` and `api/field_behavior.proto` both use an added `field_behavior.proto`, in every file that imports it, and the file is compiled once.
-- Adding a file with the same name replaces the earlier one. When its content is different, a notice names the file and stays with the request until you add that file again unchanged. Remove files clears the files and their notices.
-- The file picker keeps one file per base name. For two distinct files with the same base name, set **Import roots** to read their original directory paths instead; without roots, conflicting picked names still behave as before. An import cycle is reported with its file paths.
+- Select **Add folder** to add every `.proto` file in a folder at once, in the desktop app and in the web app. Each file keeps its path inside the folder (the folder's own name is left off), so a folder with `udpa/annotations/status.proto` and `xds/annotations/v3/status.proto` adds two files, and each `import` line finds the file at exactly that path. Files that are not `.proto` files are ignored. Every file of the folder is compiled and its services are listed, so choose a folder that holds the service and what it imports. See [Add a folder to a request](#add-a-folder-to-a-request).
+- Gostman does not see the folders of the files you pick with **Add .proto files**, so it matches each `import` line to an added file by the file name at the end of the path. `google/api/field_behavior.proto` and `api/field_behavior.proto` both use an added `field_behavior.proto`, in every file that imports it, and the file is compiled once.
+- Adding a file with the same name (or, from a folder, the same path) replaces the earlier one. When its content is different, a notice names the file and stays with the request until you add that file again unchanged. Remove files clears the files and their notices.
+- The file picker keeps one file per base name. For two distinct files with the same base name, add their folder with **Add folder**, or set **Import roots** to read their original directory paths instead; without either, conflicting picked names still behave as before. An import cycle is reported with its file paths.
 - The address, headers and auth of the request are used for the connection.
 - A file over the attachment size limit is rejected with a message that names the file.
+
+### Add a folder to a request
+
+**Add folder** next to **Add .proto files** opens the system folder picker and adds the `.proto` files in the folder and its subfolders to this request only, without touching the collection settings. Gostman stores them in the request with their relative paths, like `grpcurl -import-path` with the folder as the import path, so two different `status.proto` files in different subfolders stay distinct and imports resolve without server reflection. The files appear by path in the Services line and are saved with the request. **Remove files** removes them again, and a file with the same path as an earlier one replaces it.
+
+- A folder with no `.proto` file, or one with unsafe or duplicate paths, is refused with a message and the request keeps the files it had.
+- The files of a request, picked or from folders, share one budget with the [uploaded Protobuf folders](#uploaded-protobuf-folders-web): 200 `.proto` files and 4 MB together in the desktop app, 3 MB in the web app, because every send carries them. A folder that would go past it is not added.
+- The request holds a copy of the files. The browser does not give Gostman the folder again, so select **Add folder** again after you change a file; the files with the same paths are replaced.
 
 ### Import roots (desktop and CLI)
 
@@ -92,6 +101,8 @@ A request file can set `grpcImportRoots: "proto, vendor/googleapis"`; the same k
 ### Uploaded Protobuf folders (web)
 
 In the web app, open the collection or folder **Settings → Protobuf → Add folder**. Select a local folder of `.proto` files. Gostman saves a copy inside the collection or folder with the relative directory structure preserved. The copy is available to all requests beneath that scope and survives a Gostman backup/export. The browser does not retain access to the original folder on disk; **Re-upload folder** replaces the copy and refreshes its recorded date.
+
+To keep a folder with one request instead, use **Add folder** on the request (see [Add a folder to a request](#add-a-folder-to-a-request)).
 
 For each gRPC request, add its service `.proto` entry file as usual. Dependencies are resolved lazily from the nearest folder's uploaded copy, then outer folders and the collection. The importer distinguishes same-name sources under different paths, as with `grpcurl -import-path`. Requests that use reflection or have no imports are unaffected. Uploaded copies and the files added to the request share one budget of 200 `.proto` files; on the web their total size is capped like attachments (3 MB), because every send carries them. Local disk import-root fields remain hidden on the web.
 

@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { toolWindow } from "../lib/dialogWindows"
 import { Button } from "./ui/button"
-import { MAX_UPLOADED_PROTO_FILES, maxUploadedProtoBytes, parseUploadedProtos, readUploadedFolder } from "../lib/grpcUploads"
-import { formatBytes } from "../lib/byteSize"
+import { parseUploadedProtos, readUploadedFolder } from "../lib/grpcUploads"
+import { uploadFailureText } from "../lib/grpcUploadFailure"
 import { formatDate } from "../lib/i18n/format"
 import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
 import { InfoTip } from "./ui/infoTip"
@@ -59,8 +59,7 @@ function WebProtoUpload({ settings, patch }) {
     try {
       const result = await readUploadedFolder(files)
       if (result.kind !== "success") {
-        const text = { empty: TEXT.uploadEmpty, paths: TEXT.uploadPaths, limit: TEXT.uploadLimit(MAX_UPLOADED_PROTO_FILES, formatBytes(maxUploadedProtoBytes())) }
-        setError(text[result.kind] || TEXT.uploadFailed)
+        setError(uploadFailureText(result.kind))
         return
       }
       patch({ grpcUploadedProtos: JSON.stringify(result.files), grpcUploadedAt: new Date().toISOString() })
