@@ -4,6 +4,13 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.19.1] - 2026-11-14
+
+### Fixed
+
+- gRPC: a picked `.proto` file under a `google/protobuf/` subfolder, such as Google's `compiler/plugin.proto`, serves its import again instead of clashing with the built-in copy with "symbol already defined". This was a regression in 1.19.0 (#37).
+- gRPC-Web: a response cut at the size limit in the middle of a frame or a base64 group keeps the complete messages and shows as truncated, instead of a network error or `2 UNKNOWN` (#40).
+
 ## [1.19.0] - 2026-11-14
 
 ### Added
