@@ -56,6 +56,15 @@
     "collectionMenu": "Collection settings",
     "restrictedNote": "This folder is not trusted, so its scripts, OAuth 2.0 settings, local MCP commands and file reads are switched off.",
     "protobufNote": "Shared import roots for gRPC .proto files. Enter workspace-relative directories, separated by commas. Requests inherit roots from their nearest folder, then the collection.",
-    "protobufPlaceholder": "proto, vendor/googleapis"
+    "protobufPlaceholder": "proto, vendor/googleapis",
+    "uploadFolder": "Add folder",
+    "refreshUpload": "Re-upload folder",
+    "removeUpload": "Remove uploaded copy",
+    "uploadHint": "Copy a folder of .proto files into this collection. Directory paths are retained, so imports with the same filename resolve separately. Select the service .proto file in each request.",
+    "uploadedCopy": "Uploaded copy: {{count}} .proto files, {{date}}. Re-upload to refresh.",
+    "uploadFailed": "Could not read the selected folder.",
+    "uploadEmpty": "That folder contains no .proto files.",
+    "uploadLimit": "Upload at most 200 .proto files, up to 4 MB together.",
+    "uploadPaths": "The selected folder has unsafe or duplicate .proto paths."
   }
 }

@@ -15,14 +15,15 @@ type ProtoFile struct {
 }
 
 type Target struct {
-	Address     string         `json:"address"`
-	Headers     string         `json:"headers"`
-	Inherited   []engine.Layer `json:"inherited,omitempty"`
-	Auth        engine.Auth    `json:"auth"`
-	Variables   string         `json:"variables"`
-	Options     engine.Options `json:"options"`
-	Protos      []ProtoFile    `json:"protos"`
-	ImportRoots []string       `json:"importRoots,omitempty"`
+	Address       string         `json:"address"`
+	Headers       string         `json:"headers"`
+	Inherited     []engine.Layer `json:"inherited,omitempty"`
+	Auth          engine.Auth    `json:"auth"`
+	Variables     string         `json:"variables"`
+	Options       engine.Options `json:"options"`
+	Protos        []ProtoFile    `json:"protos"`
+	ImportRoots   []string       `json:"importRoots,omitempty"`
+	ImportSources []ProtoFile    `json:"importSources,omitempty"`
 }
 
 type Call struct {
