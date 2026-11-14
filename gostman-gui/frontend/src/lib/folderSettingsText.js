@@ -8,6 +8,7 @@ const text = messages('folderSettings', english, (t) => ({
     inheritsSchemeFrom: (name, scheme) => t('folderSettings.inheritsSchemeFrom', { name, scheme }),
     authorizationHeader: AUTHORIZATION_HEADER,
     uploadedCopy: (count, date) => t('folderSettings.uploadedCopy', { count, date }),
+    uploadLimit: (files, size) => t('folderSettings.uploadLimit', { files, size }),
   },
 }))
 

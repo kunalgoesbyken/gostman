@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { toolWindow } from "../lib/dialogWindows"
 import { Button } from "./ui/button"
-import { parseUploadedProtos, readUploadedFolder } from "../lib/grpcUploads"
+import { MAX_UPLOADED_PROTO_FILES, maxUploadedProtoBytes, parseUploadedProtos, readUploadedFolder } from "../lib/grpcUploads"
+import { formatBytes } from "../lib/byteSize"
+import { formatDate } from "../lib/i18n/format"
 import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
 import { InfoTip } from "./ui/infoTip"
 import { Input } from "./ui/input"
@@ -46,7 +48,7 @@ function WebProtoUpload({ settings, patch }) {
   const [error, setError] = useState("")
   const [pending, setPending] = useState(false)
   const uploaded = useMemo(() => parseUploadedProtos(settings.grpcUploadedProtos), [settings.grpcUploadedProtos])
-  const date = settings.grpcUploadedAt ? new Date(settings.grpcUploadedAt).toLocaleDateString() : ""
+  const date = settings.grpcUploadedAt ? formatDate(new Date(settings.grpcUploadedAt)) : ""
 
   const onFiles = async (event) => {
     const files = Array.from(event.target.files || [])
@@ -57,7 +59,7 @@ function WebProtoUpload({ settings, patch }) {
     try {
       const result = await readUploadedFolder(files)
       if (result.kind !== "success") {
-        const text = { empty: TEXT.uploadEmpty, paths: TEXT.uploadPaths, limit: TEXT.uploadLimit }
+        const text = { empty: TEXT.uploadEmpty, paths: TEXT.uploadPaths, limit: TEXT.uploadLimit(MAX_UPLOADED_PROTO_FILES, formatBytes(maxUploadedProtoBytes())) }
         setError(text[result.kind] || TEXT.uploadFailed)
         return
       }

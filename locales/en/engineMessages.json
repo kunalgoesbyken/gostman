@@ -85,9 +85,9 @@
     "afterTrailers": "the response has data after its trailers",
     "missingTrailers": "the response has no trailers frame",
     "importRootsLimit": "The import roots exceed the permitted .proto file count or total size.",
+    "importMissing": "Add the file it imports to the request, list the folder that holds it under Import roots in the folder settings (on the web, upload that folder there), or use server reflection.",
     "importRootsUnavailable": "Import roots were not read because reading local files is off here. In the CLI, add --allow-files; in the desktop app, trust the folder; on the web, add the .proto files or use server reflection.",
     "uploadedFileUnsafe": "Uploaded Protobuf file {{path}} has an unsafe path.",
-    "uploadedFilesLimit": "The selected and uploaded Protobuf files exceed 200 files or 4 MB in total.",
-    "uploadedFilesInvalid": "The uploaded Protobuf folder copy is invalid. Re-upload the folder."
+    "uploadedFilesLimit": "The selected and uploaded Protobuf files are too many or too large together."
   }
 }

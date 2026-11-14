@@ -33,6 +33,19 @@ func compile(ctx context.Context, protos []ProtoFile) (*protoregistry.Files, err
 	return compileTarget(ctx, protos, nil, nil, engine.Policy{})
 }
 
+func missingImportHint(err error, roots []string, readsRoots bool) (string, bool) {
+	if !errors.Is(err, os.ErrNotExist) {
+		return "", false
+	}
+	if len(roots) == 0 {
+		return locales.New(locales.EngineGrpcImportMissing, nil).String(), true
+	}
+	if !readsRoots {
+		return locales.New(locales.EngineGrpcImportRootsUnavailable, nil).String(), true
+	}
+	return "", false
+}
+
 func compileTarget(ctx context.Context, protos []ProtoFile, roots []string, imports []ProtoFile, policy engine.Policy) (*protoregistry.Files, error) {
 	sources, err := namedSources(protos)
 	if err != nil {
@@ -72,8 +85,8 @@ func compileTarget(ctx context.Context, protos []ProtoFile, roots []string, impo
 		if ctx.Err() != nil {
 			return nil, ctx.Err()
 		}
-		if len(roots) > 0 && !readsRoots && errors.Is(err, os.ErrNotExist) {
-			return nil, configError("the .proto files do not compile: %v. %s", err, locales.New(locales.EngineGrpcImportRootsUnavailable, nil).String())
+		if hint, ok := missingImportHint(err, roots, readsRoots); ok {
+			return nil, configError("the .proto files do not compile: %v. %s", err, hint)
 		}
 		return nil, configError("the .proto files do not compile: %v", err)
 	}
@@ -349,16 +362,6 @@ func importRootResolver(roots []string, read engine.FileReader, count, size int)
 func safeImportPath(value string) bool {
 	return value != "" && !strings.ContainsAny(value, "\\:") && filepath.IsLocal(value) &&
 		!strings.HasPrefix(value, "~") && !strings.Contains(value, "//")
-}
-
-func safeImportRoot(root string, allowAbsolute bool) bool {
-	if strings.HasPrefix(root, "//") || strings.Contains(root, "/../") || strings.HasSuffix(root, "/..") {
-		return false
-	}
-	if allowAbsolute {
-		return filepath.IsAbs(filepath.FromSlash(root)) || root == "~" || strings.HasPrefix(root, "~/")
-	}
-	return safeImportPath(root)
 }
 
 func uploadedSources(imports []ProtoFile, selected map[string]string) (map[string]string, error) {

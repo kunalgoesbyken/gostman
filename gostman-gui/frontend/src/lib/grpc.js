@@ -37,7 +37,8 @@ export function toGrpcTarget(request, variables) {
   const { url, headers, auth, options, grpcProtos, inherited = [] } = request
   const importRoots = [...importRootsOf(request), ...[...inherited].reverse().flatMap(importRootsOf)]
   const protos = parseProtoFiles(grpcProtos)
-  return { address: url, headers, auth, options, variables, protos, importRoots, importSources: scopedProtos(inherited, protos), inherited }
+  const layers = inherited.map(({ grpcUploadedProtos, ...layer }) => layer)
+  return { address: url, headers, auth, options, variables, protos, importRoots, importSources: scopedProtos(inherited, protos), inherited: layers }
 }
 
 export function toGrpcCall(request, variables) {
