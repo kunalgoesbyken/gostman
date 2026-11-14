@@ -4,11 +4,17 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.20.0] - 2026-11-15
+
 ### Added
 
 - gRPC: **Import roots** on a request, and a **Protobuf** tab in folder and collection settings, resolve `.proto` imports by their full path from folders on disk, like `protoc -I` or `grpcurl -import-path`. Two different files with the same name, such as Envoy's `udpa/annotations/status.proto` and `xds/annotations/v3/status.proto`, now work together. A request's roots come first, then its nearest folder's outward, then the collection's. In a folder workspace roots are relative to the workspace and read only once it is trusted; in the desktop app without a folder workspace they are absolute or `~/` paths; the CLI reads them with `--allow-files`. The web app does not read local roots (#37).
 - gRPC: in the web app, **Add folder** in the **Protobuf** tab of collection and folder settings saves a copy of a folder's `.proto` files with their relative paths, so imports resolve without server reflection. Every gRPC request under that folder compiles against the copy, nearest folder first; files picked on the request come first. **Re-upload folder** refreshes the copy and **Remove uploaded copy** drops it. The copy is kept in backups and exports, and its total size is capped like attachments (3 MB). A missing import now ends with a hint on how to provide it (#37).
 - gRPC: **Add folder** next to **Add .proto files** on a request adds a whole folder of `.proto` files to that request, in the desktop and the web app. The files keep their relative paths, so imports resolve by their full path without reflection or collection settings, and two same-named files in different subfolders stay apart. They share the 200-file and size budget of the other `.proto` files of the request (#37).
+
+### Security
+
+- Gostman is built with Go 1.26 and Wails 2.17, which brings patched versions of `golang.org/x/crypto`, `golang.org/x/net`, `golang.org/x/image` and gRPC. The web app is built with Vite 6.
 
 ## [1.19.1] - 2026-11-14
 

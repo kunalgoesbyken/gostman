@@ -35,6 +35,7 @@ export const FEATURES = [
   { id: 'dns-override', group: 'requests', since: '1.9.0', platforms: ['desktop'], docs: 'secrets-and-network#name-resolution', action: { type: 'dialog', id: 'network' }, icon: 'globe' },
   { id: 'graphql-upload', group: 'requests', since: '1.9.0', docs: 'protocols#file-uploads', action: { type: 'sample', id: 'graphql' }, icon: 'upload' },
   { id: 'ws-security', group: 'requests', since: '1.9.0', docs: 'protocols#ws-security', action: { type: 'tab', id: 'auth' }, icon: 'shield-check' },
+  { id: 'grpc-import-paths', group: 'requests', since: '1.20.0', docs: 'protocols#add-a-folder-to-a-request', action: { type: 'sample', id: 'grpc' }, icon: 'waypoints' },
   { id: 'grpc-web', group: 'requests', since: '1.9.0', docs: 'protocols#transports', action: { type: 'sample', id: 'grpc' }, icon: 'waypoints' },
   { id: 'signalr', group: 'requests', since: '1.9.0', docs: 'protocols#signalr', icon: 'radio' },
   { id: 'tcp-udp', group: 'requests', since: '1.9.0', platforms: ['desktop'], docs: 'protocols#tcp-and-udp', icon: 'cable' },

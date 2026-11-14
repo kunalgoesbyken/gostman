@@ -1,6 +1,7 @@
 import { compareVersions } from './versions.js'
 
 export const RELEASES = [
+  { version: '1.20.0', ids: ['grpc-import-paths'] },
   { version: '1.19.0', ids: ['history-journal'] },
   { version: '1.18.0', ids: ['call-history'] },
   { version: '1.17.0', ids: ['test-data-templates'] },

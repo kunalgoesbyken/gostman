@@ -167,6 +167,11 @@
       "blurb": "Add a WS-Security UsernameToken (plain or digest) and Timestamp to a SOAP request from the Auth tab.",
       "synonyms": "soap wsse ws-security wsdl xml usernametoken digest"
     },
+    "grpcImportPaths": {
+      "title": "Protobuf folders and import roots",
+      "blurb": "Add a folder of .proto files to a request or a collection, or point at import roots on disk, so imports resolve by their full path without server reflection.",
+      "synonyms": "proto protobuf import path import roots folder upload protoc grpcurl envoy reflection"
+    },
     "grpcWeb": {
       "title": "gRPC-Web and Connect",
       "blurb": "Call gRPC services over gRPC-Web or Connect, which also works from the web app.",
