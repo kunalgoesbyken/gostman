@@ -84,9 +84,7 @@
     "repeatedTrailers": "the response has more than one trailers frame",
     "afterTrailers": "the response has data after its trailers",
     "missingTrailers": "the response has no trailers frame",
-    "importRootsDenied": "Import roots cannot read local files here. Use a trusted desktop folder or --allow-files in the CLI.",
-    "importRootsUnsafe": "Import root {{path}} must be a safe workspace-relative directory.",
     "importRootsLimit": "The import roots exceed the permitted .proto file count or total size.",
-    "importRootsUnavailable": "Local import roots are unavailable here. Add the required .proto files directly or use server reflection."
+    "importRootsUnavailable": "Import roots were not read because reading local files is off here. In the CLI, add --allow-files; in the desktop app, trust the folder; on the web, add the .proto files or use server reflection."
   }
 }

@@ -38,15 +38,10 @@ func compileTarget(ctx context.Context, protos []ProtoFile, roots []string, poli
 	if err != nil {
 		return nil, err
 	}
-	if len(roots) > 0 && policy.ReadFile == nil && policy.RequireImportRootAccess {
-		return nil, localizedConfigError(locales.EngineGrpcImportRootsDenied, nil)
-	}
+	readsRoots := len(roots) > 0 && policy.ReadFile != nil
 	var rootResolver protocompile.Resolver
-	if len(roots) > 0 && policy.ReadFile != nil {
-		rootResolver, err = importRootResolver(roots, policy, len(sources), sourceBytes(sources))
-		if err != nil {
-			return nil, err
-		}
+	if readsRoots {
+		rootResolver = importRootResolver(roots, policy.ReadFile, len(sources), sourceBytes(sources))
 	}
 	aliases, err := importAliases(ctx, sources, rootResolver)
 	if err != nil {
@@ -64,7 +59,7 @@ func compileTarget(ctx context.Context, protos []ProtoFile, roots []string, poli
 		if ctx.Err() != nil {
 			return nil, ctx.Err()
 		}
-		if len(roots) > 0 && policy.ReadFile == nil && strings.Contains(err.Error(), "could not resolve path") {
+		if len(roots) > 0 && !readsRoots && errors.Is(err, os.ErrNotExist) {
 			return nil, configError("the .proto files do not compile: %v. %s", err, locales.New(locales.EngineGrpcImportRootsUnavailable, nil).String())
 		}
 		return nil, configError("the .proto files do not compile: %v", err)
@@ -301,17 +296,10 @@ func sourceBytes(sources map[string]string) int {
 	return total
 }
 
-func importRootResolver(roots []string, policy engine.Policy, count, size int) (protocompile.Resolver, error) {
-	if policy.ReadFile == nil {
-		return nil, localizedConfigError(locales.EngineGrpcImportRootsDenied, nil)
-	}
+func importRootResolver(roots []string, read engine.FileReader, count, size int) protocompile.Resolver {
 	normalized := make([]string, len(roots))
 	for index, root := range roots {
-		root = strings.ReplaceAll(root, "\\", "/")
-		if !safeImportRoot(root, policy.AllowAbsoluteImportRoots) {
-			return nil, localizedConfigError(locales.EngineGrpcImportRootsUnsafe, locales.Params{"path": roots[index]})
-		}
-		normalized[index] = filepath.FromSlash(root)
+		normalized[index] = filepath.FromSlash(strings.ReplaceAll(root, "\\", "/"))
 	}
 	var mu sync.Mutex
 	cache := map[string][]byte{}
@@ -326,7 +314,7 @@ func importRootResolver(roots []string, policy engine.Policy, count, size int) (
 			if data, found := cache[file]; found {
 				return protocompile.SearchResult{Source: strings.NewReader(string(data))}, nil
 			}
-			data, err := policy.ReadFile(file)
+			data, err := read(file)
 			if errors.Is(err, os.ErrNotExist) {
 				continue
 			}
@@ -342,20 +330,10 @@ func importRootResolver(roots []string, policy engine.Policy, count, size int) (
 			return protocompile.SearchResult{Source: strings.NewReader(string(data))}, nil
 		}
 		return protocompile.SearchResult{}, os.ErrNotExist
-	}), nil
+	})
 }
 
 func safeImportPath(value string) bool {
 	return value != "" && !strings.ContainsAny(value, "\\:") && filepath.IsLocal(value) &&
 		!strings.HasPrefix(value, "~") && !strings.Contains(value, "//")
-}
-
-func safeImportRoot(root string, allowAbsolute bool) bool {
-	if strings.HasPrefix(root, "//") || strings.Contains(root, "/../") || strings.HasSuffix(root, "/..") {
-		return false
-	}
-	if allowAbsolute {
-		return filepath.IsAbs(filepath.FromSlash(root)) || root == "~" || strings.HasPrefix(root, "~/")
-	}
-	return safeImportPath(root)
 }

@@ -5,6 +5,7 @@ import { AUTH_OAUTH2, normalizeRequest } from './request'
 import { someText, mapText, textsIn } from './textValues'
 import { fileReferencesIn, hasFileReference, withoutFileReferences } from './variables'
 import { filePathOf } from './variableNames'
+import { importRootsOf } from './grpc'
 
 export const SCRIPT_FIELDS = ['preScript', 'postScript']
 
@@ -12,8 +13,6 @@ export const NO_AUTH = { type: '' }
 export const NO_SCRIPTS = Object.fromEntries(SCRIPT_FIELDS.map((field) => [field, '']))
 
 const hasScript = (request) => SCRIPT_FIELDS.some((field) => request[field].trim() !== '')
-
-const importRootsOf = (request) => String(request?.grpcImportRoots || '').split(/[,\n]/).map((root) => root.trim()).filter(Boolean)
 
 export const readsFiles = (request) => someText(request, hasFileReference) || attachesFile(request.body) || importRootsOf(request).length > 0
 

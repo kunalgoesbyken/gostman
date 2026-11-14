@@ -174,16 +174,12 @@ func (s *session) transmit(ctx context.Context, request Request) (engine.Respons
 	if request.Method == grpcMethod {
 		var call rpc.Call
 		scope, _ := s.sendable(request)
-		if err := s.scripts.Call("toGrpcCall", &call, request, scope.text()); err != nil {
+		inheriting := struct {
+			Request
+			Inherited []engine.Layer `json:"inherited"`
+		}{request, request.layers()}
+		if err := s.scripts.Call("toGrpcCall", &call, inheriting, scope.text()); err != nil {
 			return engine.Response{}, err
-		}
-		call.Target.Inherited = request.layers()
-		for i := len(call.Target.Inherited) - 1; i >= 0; i-- {
-			for _, root := range strings.FieldsFunc(call.Target.Inherited[i].GrpcImportRoots, func(char rune) bool { return char == ',' || char == '\n' }) {
-				if name := strings.TrimSpace(root); name != "" {
-					call.Target.ImportRoots = append(call.Target.ImportRoots, name)
-				}
-			}
 		}
 		return rpc.Invoke(ctx, call, s.policy), nil
 	}

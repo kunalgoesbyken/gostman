@@ -568,7 +568,7 @@ func missingFlow(flows []workspace.Flow, reference string) error {
 }
 
 func RunFlow(ctx context.Context, stored Collection, flow workspace.Flow, options Options, watch FlowWatch) (Report, error) {
-	session, err := NewSession(engine.Policy{Network: options.Network, ReadFile: options.Files, RequireImportRootAccess: true})
+	session, err := NewSession(engine.Policy{Network: options.Network, ReadFile: options.Files})
 	if err != nil {
 		return Report{}, err
 	}
