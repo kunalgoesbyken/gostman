@@ -7,9 +7,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# Both Go modules (repo root and `gostman-gui/`) declare `go 1.24.5`.
+# Both Go modules (repo root and `gostman-gui/`) declare `go 1.26.0`.
 env:
-  GO_VERSION: '1.24.5'
+  GO_VERSION: '1.26.11'
   NODE_VERSION: '20'
 
 permissions:

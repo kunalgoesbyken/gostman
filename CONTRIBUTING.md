@@ -1,6 +1,6 @@
 # Development
 
-Requirements: Go 1.24.5 or newer, Node.js 20 or newer, and the [Wails CLI](https://wails.io/docs/gettingstarted/installation) v2.11.
+Requirements: Go 1.26 or newer, Node.js 20 or newer, and the [Wails CLI](https://wails.io/docs/gettingstarted/installation) v2.17.
 
 ```bash
 git clone https://github.com/kunalgoesbyken/gostman.git
