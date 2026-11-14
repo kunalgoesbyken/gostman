@@ -21,7 +21,6 @@ const (
 	maxProtoBytes = 4 << 20
 
 	wellKnownFolder     = "google/protobuf/"
-	wellKnownPackage    = "google.protobuf"
 	descriptorProtoPath = wellKnownFolder + "descriptor.proto"
 )
 
@@ -212,10 +211,14 @@ func sameNamedFile(byBase map[string][]string, parsed map[string]parsedFile, imp
 	if len(candidates) != 1 {
 		return "", false
 	}
-	if strings.HasPrefix(imported, wellKnownFolder) && parsed[candidates[0]].pkg != wellKnownPackage {
+	if strings.HasPrefix(imported, wellKnownFolder) && parsed[candidates[0]].pkg != packageOfFolder(imported) {
 		return "", false
 	}
 	return candidates[0], true
+}
+
+func packageOfFolder(imported string) string {
+	return strings.ReplaceAll(path.Dir(imported), "/", ".")
 }
 
 func reachableFrom(graph map[string][]string, start string) map[string]bool {
