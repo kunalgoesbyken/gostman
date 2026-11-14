@@ -45,15 +45,17 @@ type Request struct {
 }
 
 type Settings struct {
-	Description     string      `json:"description"`
-	GrpcImportRoots string      `json:"grpcImportRoots,omitempty"`
-	Headers         string      `json:"headers"`
-	Auth            engine.Auth `json:"auth"`
-	PreScript       string      `json:"preScript"`
-	PostScript      string      `json:"postScript"`
-	Assertions      string      `json:"assertions"`
-	ScriptTimeoutMs int64       `json:"scriptTimeoutMs,omitempty"`
-	Notes           string      `json:"notes,omitempty"`
+	Description        string      `json:"description"`
+	GrpcImportRoots    string      `json:"grpcImportRoots,omitempty"`
+	GrpcUploadedProtos string      `json:"grpcUploadedProtos,omitempty"`
+	GrpcUploadedAt     string      `json:"grpcUploadedAt,omitempty"`
+	Headers            string      `json:"headers"`
+	Auth               engine.Auth `json:"auth"`
+	PreScript          string      `json:"preScript"`
+	PostScript         string      `json:"postScript"`
+	Assertions         string      `json:"assertions"`
+	ScriptTimeoutMs    int64       `json:"scriptTimeoutMs,omitempty"`
+	Notes              string      `json:"notes,omitempty"`
 }
 
 type Folder struct {

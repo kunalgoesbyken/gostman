@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/kunalgoesbyken/gostman/engine"
+	"github.com/kunalgoesbyken/gostman/locales"
 	"github.com/kunalgoesbyken/gostman/mcpclient"
 	"github.com/kunalgoesbyken/gostman/rpc"
 	"github.com/kunalgoesbyken/gostman/runner/sandbox"
@@ -180,6 +181,15 @@ func (s *session) transmit(ctx context.Context, request Request) (engine.Respons
 		}{request, request.layers()}
 		if err := s.scripts.Call("toGrpcCall", &call, inheriting, scope.text()); err != nil {
 			return engine.Response{}, err
+		}
+		for i := len(inheriting.Inherited) - 1; i >= 0; i-- {
+			if copy := inheriting.Inherited[i].GrpcUploadedProtos; copy != "" {
+				var files []rpc.ProtoFile
+				if err := json.Unmarshal([]byte(copy), &files); err != nil {
+					return engine.Response{}, locales.Caused(locales.EngineGrpcUploadedFilesInvalid, nil, err)
+				}
+				call.Target.ImportSources = append(call.Target.ImportSources, files...)
+			}
 		}
 		return rpc.Invoke(ctx, call, s.policy), nil
 	}
