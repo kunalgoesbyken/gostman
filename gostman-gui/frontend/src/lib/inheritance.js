@@ -24,6 +24,8 @@ export const normalizeScopeSettings = (raw) => ({
   assertions: textOf(raw?.assertions),
   notes: textOf(raw?.notes),
   grpcImportRoots: textOf(raw?.grpcImportRoots),
+  grpcUploadedProtos: textOf(raw?.grpcUploadedProtos),
+  grpcUploadedAt: textOf(raw?.grpcUploadedAt),
   scriptTimeoutMs: Math.max(0, Math.trunc(Number(raw?.scriptTimeoutMs)) || 0),
 })
 
@@ -63,7 +65,7 @@ export const collectionSettingsTarget = (state, folderId) => (
   holdsCollections(state.workspaceStatus.path) ? collectionIdOf(state.folders, folderId) : ROOT_SETTINGS_ID
 )
 
-export const layersOf = (lineage) => lineage.map(({ settings }) => ({ headers: settings.headers, auth: settings.auth, grpcImportRoots: settings.grpcImportRoots }))
+export const layersOf = (lineage) => lineage.map(({ settings }) => ({ headers: settings.headers, auth: settings.auth, grpcImportRoots: settings.grpcImportRoots, grpcUploadedProtos: settings.grpcUploadedProtos }))
 
 export const HEADER_SENT = 'sent'
 const HEADER_REPLACED = 'replaced'

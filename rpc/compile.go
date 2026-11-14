@@ -30,11 +30,15 @@ const (
 )
 
 func compile(ctx context.Context, protos []ProtoFile) (*protoregistry.Files, error) {
-	return compileTarget(ctx, protos, nil, engine.Policy{})
+	return compileTarget(ctx, protos, nil, nil, engine.Policy{})
 }
 
-func compileTarget(ctx context.Context, protos []ProtoFile, roots []string, policy engine.Policy) (*protoregistry.Files, error) {
+func compileTarget(ctx context.Context, protos []ProtoFile, roots []string, imports []ProtoFile, policy engine.Policy) (*protoregistry.Files, error) {
 	sources, err := namedSources(protos)
+	if err != nil {
+		return nil, err
+	}
+	shared, err := uploadedSources(imports, sources)
 	if err != nil {
 		return nil, err
 	}
@@ -43,15 +47,24 @@ func compileTarget(ctx context.Context, protos []ProtoFile, roots []string, poli
 	if readsRoots {
 		rootResolver = importRootResolver(roots, policy.ReadFile, len(sources), sourceBytes(sources))
 	}
-	aliases, err := importAliases(ctx, sources, rootResolver)
+	var available protocompile.CompositeResolver
+	if len(shared) > 0 {
+		available = append(available, &protocompile.SourceResolver{Accessor: protocompile.SourceAccessorFromMap(shared)})
+	}
+	if rootResolver != nil {
+		available = append(available, rootResolver)
+	}
+	var lookup protocompile.Resolver
+	if len(available) > 0 {
+		lookup = available
+	}
+	aliases, err := importAliases(ctx, sources, lookup)
 	if err != nil {
 		return nil, err
 	}
 	placeDescriptorProto(sources, aliases)
 	resolvers := protocompile.CompositeResolver{&protocompile.SourceResolver{Accessor: protocompile.SourceAccessorFromMap(sources)}}
-	if rootResolver != nil {
-		resolvers = append(resolvers, rootResolver)
-	}
+	resolvers = append(resolvers, available...)
 	resolvers = append(resolvers, forwardingResolver(aliases))
 	compiler := protocompile.Compiler{Resolver: protocompile.WithStandardImports(resolvers)}
 	compiled, err := compiler.Compile(ctx, sortedNames(sources)...)
@@ -164,7 +177,7 @@ func importAliases(ctx context.Context, sources map[string]string, roots protoco
 			if roots != nil {
 				if _, err := roots.FindFileByPath(imported); err == nil {
 					continue
-				} else if !errors.Is(err, os.ErrNotExist) {
+				} else if !errors.Is(err, os.ErrNotExist) && !errors.Is(err, protoregistry.NotFound) {
 					return nil, err
 				}
 			}
@@ -336,4 +349,39 @@ func importRootResolver(roots []string, read engine.FileReader, count, size int)
 func safeImportPath(value string) bool {
 	return value != "" && !strings.ContainsAny(value, "\\:") && filepath.IsLocal(value) &&
 		!strings.HasPrefix(value, "~") && !strings.Contains(value, "//")
+}
+
+func safeImportRoot(root string, allowAbsolute bool) bool {
+	if strings.HasPrefix(root, "//") || strings.Contains(root, "/../") || strings.HasSuffix(root, "/..") {
+		return false
+	}
+	if allowAbsolute {
+		return filepath.IsAbs(filepath.FromSlash(root)) || root == "~" || strings.HasPrefix(root, "~/")
+	}
+	return safeImportPath(root)
+}
+
+func uploadedSources(imports []ProtoFile, selected map[string]string) (map[string]string, error) {
+	files := make(map[string]string, len(imports))
+	count := len(selected)
+	size := sourceBytes(selected)
+	for _, file := range imports {
+		name := strings.ReplaceAll(file.Name, "\\", "/")
+		if !safeImportPath(name) || path.Clean(name) != name || !strings.HasSuffix(name, ".proto") {
+			return nil, localizedConfigError(locales.EngineGrpcUploadedFileUnsafe, locales.Params{"path": file.Name})
+		}
+		if _, chosen := selected[name]; chosen {
+			continue
+		}
+		if _, duplicate := files[name]; duplicate {
+			continue
+		}
+		count++
+		size += len(file.Content)
+		if count > maxProtoFiles || size > maxProtoBytes {
+			return nil, localizedConfigError(locales.EngineGrpcUploadedFilesLimit, nil)
+		}
+		files[name] = file.Content
+	}
+	return files, nil
 }
