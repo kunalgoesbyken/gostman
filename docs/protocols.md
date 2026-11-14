@@ -89,6 +89,12 @@ Import roots are read like `{{$file()}}`: in a folder workspace only inside that
 
 A request file can set `grpcImportRoots: "proto, vendor/googleapis"`; the same key in `gostman.yaml` or a folder's `folder.yaml` provides inherited roots for requests in that scope.
 
+### Uploaded Protobuf folders (web)
+
+In the web app, open the collection or folder **Settings → Protobuf → Add folder**. Select a local folder of `.proto` files. Gostman saves a copy inside the collection or folder with the relative directory structure preserved. The copy is available to all requests beneath that scope and survives a Gostman backup/export. The browser does not retain access to the original folder on disk; **Re-upload folder** replaces the copy and refreshes its recorded date.
+
+For each gRPC request, add its service `.proto` entry file as usual. Dependencies are resolved lazily from the nearest folder's uploaded copy, then outer folders and the collection. The importer distinguishes same-name sources under different paths, as with `grpcurl -import-path`. Requests that use reflection or have no imports are unaffected. Uploaded copies and the files added to the request share one budget of 200 `.proto` files; on the web their total size is capped like attachments (3 MB), because every send carries them. Local disk import-root fields remain hidden on the web.
+
 If the server reports no services, the panel shows No services were found.
 
 ### Call a method

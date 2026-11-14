@@ -13,13 +13,14 @@ import (
 const binaryKeySuffix = "-bin"
 
 type session struct {
-	conn        *connection
-	expansion   *engine.Expansion
-	metadata    metadata.MD
-	protos      []ProtoFile
-	importRoots []string
-	policy      engine.Policy
-	address     endpoint
+	conn          *connection
+	expansion     *engine.Expansion
+	metadata      metadata.MD
+	protos        []ProtoFile
+	importRoots   []string
+	importSources []ProtoFile
+	policy        engine.Policy
+	address       endpoint
 }
 
 func newExpansion(target Target) (*engine.Expansion, error) {
@@ -62,7 +63,7 @@ func openWith(target Target, expansion *engine.Expansion, policy engine.Policy) 
 	if err != nil {
 		return nil, err
 	}
-	return &session{conn: conn, expansion: expansion, metadata: outgoing, protos: target.Protos, importRoots: target.ImportRoots, policy: policy, address: address}, nil
+	return &session{conn: conn, expansion: expansion, metadata: outgoing, protos: target.Protos, importRoots: target.ImportRoots, importSources: target.ImportSources, policy: policy, address: address}, nil
 }
 
 func (s *session) close() {
@@ -78,7 +79,7 @@ func (s *session) connect(ctx context.Context) (context.Context, error) {
 
 func (s *session) files(ctx context.Context, service string) (*protoregistry.Files, error) {
 	if len(s.protos) > 0 {
-		return compileTarget(ctx, s.protos, s.importRoots, s.policy)
+		return compileTarget(ctx, s.protos, s.importRoots, s.importSources, s.policy)
 	}
 	return s.reflectService(ctx, service)
 }
