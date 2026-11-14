@@ -1,5 +1,9 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { toolWindow } from "../lib/dialogWindows"
+import { Button } from "./ui/button"
+import { MAX_UPLOADED_PROTO_FILES, maxUploadedProtoBytes, parseUploadedProtos, readUploadedFolder } from "../lib/grpcUploads"
+import { formatBytes } from "../lib/byteSize"
+import { formatDate } from "../lib/i18n/format"
 import { Dialog, DialogHeader, DialogTitle } from "./ui/dialog"
 import { InfoTip } from "./ui/infoTip"
 import { Input } from "./ui/input"
@@ -38,7 +42,53 @@ const TAB_DOCS = "docs"
 const TAB_NOTES = "notes"
 const VIEW_PRE = "preScript"
 const VIEW_POST = "postScript"
-const tabItems = () => Object.entries(TEXT.tabs).filter(([value]) => value !== TAB_PROTOBUF || isDesktopShell()).map(([value, label]) => ({ value, label, content: label }))
+const tabItems = () => Object.entries(TEXT.tabs).map(([value, label]) => ({ value, label, content: label }))
+function WebProtoUpload({ settings, patch }) {
+  const inputRef = useRef(null)
+  const [error, setError] = useState("")
+  const [pending, setPending] = useState(false)
+  const uploaded = useMemo(() => parseUploadedProtos(settings.grpcUploadedProtos), [settings.grpcUploadedProtos])
+  const date = settings.grpcUploadedAt ? formatDate(new Date(settings.grpcUploadedAt)) : ""
+
+  const onFiles = async (event) => {
+    const files = Array.from(event.target.files || [])
+    event.target.value = ""
+    if (files.length === 0) return
+    setError("")
+    setPending(true)
+    try {
+      const result = await readUploadedFolder(files)
+      if (result.kind !== "success") {
+        const text = { empty: TEXT.uploadEmpty, paths: TEXT.uploadPaths, limit: TEXT.uploadLimit(MAX_UPLOADED_PROTO_FILES, formatBytes(maxUploadedProtoBytes())) }
+        setError(text[result.kind] || TEXT.uploadFailed)
+        return
+      }
+      patch({ grpcUploadedProtos: JSON.stringify(result.files), grpcUploadedAt: new Date().toISOString() })
+    } catch {
+      setError(TEXT.uploadFailed)
+    } finally {
+      setPending(false)
+    }
+  }
+
+  return (
+    <Panel>
+      <div className="flex flex-col gap-3 p-4">
+        <p className="text-sm text-muted-foreground">{TEXT.uploadHint}</p>
+        <input ref={inputRef} type="file" multiple webkitdirectory="" directory="" className="hidden" onChange={onFiles} />
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="outline" size="sm" disabled={pending} onClick={() => inputRef.current?.click()}>
+            {uploaded.length ? TEXT.refreshUpload : TEXT.uploadFolder}
+          </Button>
+          {uploaded.length > 0 && <Button variant="outline" size="sm" onClick={() => patch({ grpcUploadedProtos: "", grpcUploadedAt: "" })}>{TEXT.removeUpload}</Button>}
+        </div>
+        {uploaded.length > 0 && <Notice>{TEXT.uploadedCopy(uploaded.length, date)}</Notice>}
+        {error && <Notice tone="destructive" role="alert">{error}</Notice>}
+      </div>
+    </Panel>
+  )
+}
+
 const VARIABLE_FEATURES = { enabled: false, secret: false, readOnly: false }
 const SCRIPT_VIEWS = [
   { value: VIEW_PRE, get label() { return TEXT.preScript } },
@@ -288,14 +338,16 @@ export function FolderSettings({ backend, scope, EditorComponent, onClose }) {
               onChange={patch}
             />
           </TabsContent>
-          {isDesktopShell() && <TabsContent value={TAB_PROTOBUF} className="h-full min-h-0">
-            <Panel>
-              <div className="p-4">
-                <p className="mb-3 text-sm text-muted-foreground">{TEXT.protobufNote}</p>
-                <Input dir="ltr" value={settings.grpcImportRoots} onChange={(event) => patch({ grpcImportRoots: event.target.value })} placeholder={TEXT.protobufPlaceholder} aria-label={TEXT.tabs.protobuf} spellCheck={false} />
-              </div>
-            </Panel>
-          </TabsContent>}
+          <TabsContent value={TAB_PROTOBUF} className="h-full min-h-0">
+            {isDesktopShell() ? (
+              <Panel>
+                <div className="p-4">
+                  <p className="mb-3 text-sm text-muted-foreground">{TEXT.protobufNote}</p>
+                  <Input dir="ltr" value={settings.grpcImportRoots} onChange={(event) => patch({ grpcImportRoots: event.target.value })} placeholder={TEXT.protobufPlaceholder} aria-label={TEXT.tabs.protobuf} spellCheck={false} />
+                </div>
+              </Panel>
+            ) : <WebProtoUpload settings={settings} patch={patch} />}
+          </TabsContent>
           <TabsContent value={TAB_VARS} className="h-full min-h-0">
             <VarsTab folder={folder} isCollection={ownsCollectionList} rootNote={rootNote} onChange={patch} />
           </TabsContent>

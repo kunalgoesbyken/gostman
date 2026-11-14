@@ -31,7 +31,7 @@ func Describe(ctx context.Context, target Target, policy engine.Policy) (Schema,
 
 func describe(ctx context.Context, target Target, policy engine.Policy) (Schema, error) {
 	if len(target.Protos) > 0 {
-		files, err := compileTarget(ctx, target.Protos, target.ImportRoots, policy)
+		files, err := compileTarget(ctx, target.Protos, target.ImportRoots, target.ImportSources, policy)
 		if err != nil {
 			return Schema{}, err
 		}

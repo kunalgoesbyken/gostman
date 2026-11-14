@@ -7,7 +7,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var settingsKeys = []string{"description", "headers", "auth", "preScript", "postScript", "assertions", "scriptTimeoutMs", "notes", "grpcImportRoots"}
+var settingsKeys = []string{"description", "headers", "auth", "preScript", "postScript", "assertions", "scriptTimeoutMs", "notes", "grpcImportRoots", "grpcUploadedProtos", "grpcUploadedAt"}
 
 func (b nodeBuilder) settings(root *yaml.Node, settings Settings, extras requestExtras) {
 	setField(root, "description", b.text(settings.Description))
@@ -19,6 +19,8 @@ func (b nodeBuilder) settings(root *yaml.Node, settings Settings, extras request
 	setField(root, "scriptTimeoutMs", integerNode(settings.ScriptTimeoutMs))
 	setField(root, "notes", b.jsonText(settings.Notes))
 	setField(root, "grpcImportRoots", b.text(settings.GrpcImportRoots))
+	setField(root, "grpcUploadedProtos", b.text(settings.GrpcUploadedProtos))
+	setField(root, "grpcUploadedAt", b.text(settings.GrpcUploadedAt))
 }
 
 func (b nodeBuilder) settingsAuth(auth engine.Auth, extras requestExtras) *yaml.Node {
@@ -30,15 +32,17 @@ func (b nodeBuilder) settingsAuth(auth engine.Auth, extras requestExtras) *yaml.
 
 func readSettings(fields *fieldReader, extras *requestExtras, failure *error) Settings {
 	return Settings{
-		Description:     fields.text("description"),
-		Headers:         fields.pairs("headers"),
-		Auth:            readAuth(fields.fields["auth"], extras, failure),
-		PreScript:       fields.text("preScript"),
-		PostScript:      fields.text("postScript"),
-		Assertions:      fields.jsonText("assertions", false, withEnabledDefaults),
-		ScriptTimeoutMs: fields.integer("scriptTimeoutMs"),
-		Notes:           fields.jsonText("notes", false, unchanged),
-		GrpcImportRoots: fields.text("grpcImportRoots"),
+		Description:        fields.text("description"),
+		Headers:            fields.pairs("headers"),
+		Auth:               readAuth(fields.fields["auth"], extras, failure),
+		PreScript:          fields.text("preScript"),
+		PostScript:         fields.text("postScript"),
+		Assertions:         fields.jsonText("assertions", false, withEnabledDefaults),
+		ScriptTimeoutMs:    fields.integer("scriptTimeoutMs"),
+		Notes:              fields.jsonText("notes", false, unchanged),
+		GrpcImportRoots:    fields.text("grpcImportRoots"),
+		GrpcUploadedProtos: fields.text("grpcUploadedProtos"),
+		GrpcUploadedAt:     fields.text("grpcUploadedAt"),
 	}
 }
 
