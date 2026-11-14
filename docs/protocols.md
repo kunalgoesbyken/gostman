@@ -77,9 +77,17 @@ The Services line shows where the service list comes from.
 - Select Add .proto files to pick one or more `.proto` files. When files are present, Gostman compiles them and uses them instead of reflection. The file names appear in the Services line.
 - Gostman does not see the folders of the files you add, so it matches each `import` line to an added file by the file name at the end of the path. `google/api/field_behavior.proto` and `api/field_behavior.proto` both use an added `field_behavior.proto`, in every file that imports it, and the file is compiled once.
 - Adding a file with the same name replaces the earlier one. When its content is different, a notice names the file and stays with the request until you add that file again unchanged. Remove files clears the files and their notices.
-- Two different files with the same name cannot be used together. When an import would make a file import itself, for example the only added `validate.proto` importing `buf/validate.proto`, Gostman names the import and the file. Rename one of the two files and change its import to match.
+- The file picker keeps one file per base name. For two distinct files with the same base name, set **Import roots** to read their original directory paths instead; without roots, conflicting picked names still behave as before. An import cycle is reported with its file paths.
 - The address, headers and auth of the request are used for the connection.
 - A file over the attachment size limit is rejected with a message that names the file.
+
+### Import roots (desktop and CLI)
+
+Add workspace-relative import directories, separated by commas, to the gRPC request's **Import roots** field, or set shared **Protobuf** import roots in the collection/folder settings. For a request, search order is: its own roots, nearest folder outward, then collection roots. Within each root, imports retain their path (as with `grpcurl -proto -import-path`), so two different `status.proto` files in different subdirectories remain distinct. The first matching root wins; explicitly supplied files take precedence. With no roots, the existing file-picker matching is unchanged.
+
+In a folder workspace, paths stay inside that workspace even if a symlink points out. The desktop app reads roots only after the workspace is trusted; `gostman run` and `gostman send` require `--allow-files` to load them. The hosted web proxy and agent sessions cannot read local import roots. For browser use, upload the required source files or use server reflection instead.
+
+A request file can set `grpcImportRoots: "proto, vendor/googleapis"`; the same key in `gostman.yaml` or a folder's `folder.yaml` provides inherited roots for requests in that scope.
 
 If the server reports no services, the panel shows No services were found.
 

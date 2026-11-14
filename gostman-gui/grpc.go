@@ -8,7 +8,7 @@ import (
 )
 
 func (a *App) DescribeGrpc(target rpc.Target) (rpc.Schema, error) {
-	return rpc.Describe(a.ctx, target, a.policy())
+	return rpc.Describe(a.ctx, target, a.grpcPolicy())
 }
 
 func (a *App) InvokeGrpc(id string, call rpc.Call) engine.Response {
@@ -16,5 +16,13 @@ func (a *App) InvokeGrpc(id string, call rpc.Call) engine.Response {
 	a.track(id, cancel)
 	defer a.release(id)
 
-	return rpc.Invoke(ctx, call, a.policy())
+	return rpc.Invoke(ctx, call, a.grpcPolicy())
+}
+
+func (a *App) grpcPolicy() engine.Policy {
+	policy := a.policy()
+	if _, isFolder := storage.current().(folderStore); isFolder {
+		policy.ReadFile = workspaceFiles()
+	}
+	return policy
 }

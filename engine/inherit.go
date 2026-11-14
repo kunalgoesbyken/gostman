@@ -10,8 +10,9 @@ import (
 const AuthInherit = "inherit"
 
 type Layer struct {
-	Headers string `json:"headers"`
-	Auth    Auth   `json:"auth"`
+	Headers         string `json:"headers"`
+	Auth            Auth   `json:"auth"`
+	GrpcImportRoots string `json:"grpcImportRoots,omitempty"`
 }
 
 type headerRow struct {

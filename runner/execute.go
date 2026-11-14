@@ -178,6 +178,13 @@ func (s *session) transmit(ctx context.Context, request Request) (engine.Respons
 			return engine.Response{}, err
 		}
 		call.Target.Inherited = request.layers()
+		for i := len(call.Target.Inherited) - 1; i >= 0; i-- {
+			for _, root := range strings.FieldsFunc(call.Target.Inherited[i].GrpcImportRoots, func(char rune) bool { return char == ',' || char == '\n' }) {
+				if name := strings.TrimSpace(root); name != "" {
+					call.Target.ImportRoots = append(call.Target.ImportRoots, name)
+				}
+			}
+		}
 		return rpc.Invoke(ctx, call, s.policy), nil
 	}
 	if request.Method == mcpMethod {

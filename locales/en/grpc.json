@@ -24,6 +24,8 @@
       "client": "Client streaming",
       "server": "Server streaming",
       "unary": "Unary"
-    }
+    },
+    "importRoots": "Import roots",
+    "importRootsHint": "Workspace-relative folders, separated by commas (desktop / CLI only)"
   }
 }

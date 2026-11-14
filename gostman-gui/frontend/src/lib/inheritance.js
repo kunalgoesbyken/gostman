@@ -23,6 +23,7 @@ export const normalizeScopeSettings = (raw) => ({
   postScript: textOf(raw?.postScript),
   assertions: textOf(raw?.assertions),
   notes: textOf(raw?.notes),
+  grpcImportRoots: textOf(raw?.grpcImportRoots),
   scriptTimeoutMs: Math.max(0, Math.trunc(Number(raw?.scriptTimeoutMs)) || 0),
 })
 
@@ -62,7 +63,7 @@ export const collectionSettingsTarget = (state, folderId) => (
   holdsCollections(state.workspaceStatus.path) ? collectionIdOf(state.folders, folderId) : ROOT_SETTINGS_ID
 )
 
-export const layersOf = (lineage) => lineage.map(({ settings }) => ({ headers: settings.headers, auth: settings.auth }))
+export const layersOf = (lineage) => lineage.map(({ settings }) => ({ headers: settings.headers, auth: settings.auth, grpcImportRoots: settings.grpcImportRoots }))
 
 export const HEADER_SENT = 'sent'
 const HEADER_REPLACED = 'replaced'
@@ -107,11 +108,11 @@ export function updatedScope(state, folderId, patch) {
 
 export const isBlankScope = (settings) => JSON.stringify(normalizeScopeSettings(settings)) === JSON.stringify(normalizeScopeSettings())
 
-export const hasActiveSettings =(raw) => hasActiveContent(normalizeScopeSettings(raw))
+export const hasActiveSettings =(raw) => hasActiveContent(normalizeScopeSettings(raw)) || Boolean(normalizeScopeSettings(raw).grpcImportRoots.trim())
 
 export const activeSettingsKinds = (raw) => activeKinds(normalizeScopeSettings(raw))
 
 export function withoutActiveSettings(raw) {
   const settings = withoutFileContent(normalizeScopeSettings(raw))
-  return { ...raw, ...settings, ...NO_SCRIPTS, auth: settings.auth.type === AUTH_OAUTH2 ? normalizeAuth(NO_AUTH) : settings.auth }
+  return { ...raw, ...settings, grpcImportRoots: "", ...NO_SCRIPTS, auth: settings.auth.type === AUTH_OAUTH2 ? normalizeAuth(NO_AUTH) : settings.auth }
 }

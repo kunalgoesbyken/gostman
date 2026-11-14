@@ -31,6 +31,7 @@ import { environmentForFolder, useAppStore, variableTextFor } from "../store/app
 const TAB_HEADERS = "headers"
 const TAB_AUTH = "auth"
 const TAB_VARS = "vars"
+const TAB_PROTOBUF = "protobuf"
 const TAB_SCRIPT = "script"
 const TAB_TESTS = "tests"
 const TAB_DOCS = "docs"
@@ -286,6 +287,14 @@ export function FolderSettings({ backend, scope, EditorComponent, onClose }) {
               isCollection={isCollection}
               onChange={patch}
             />
+          </TabsContent>
+          <TabsContent value={TAB_PROTOBUF} className="h-full min-h-0">
+            <Panel>
+              <div className="p-4">
+                <p className="mb-3 text-sm text-muted-foreground">{TEXT.protobufNote}</p>
+                <Input dir="ltr" value={settings.grpcImportRoots} onChange={(event) => patch({ grpcImportRoots: event.target.value })} placeholder={TEXT.protobufPlaceholder} aria-label={TEXT.tabs.protobuf} spellCheck={false} />
+              </div>
+            </Panel>
           </TabsContent>
           <TabsContent value={TAB_VARS} className="h-full min-h-0">
             <VarsTab folder={folder} isCollection={ownsCollectionList} rootNote={rootNote} onChange={patch} />

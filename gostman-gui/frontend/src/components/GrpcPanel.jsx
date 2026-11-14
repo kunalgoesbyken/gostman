@@ -88,7 +88,7 @@ function SchemaNotice({ schema, fileError }) {
 }
 
 export function GrpcPanel({ request, schema, editorPath, onUpdateRequest, onProtosChange, onLoadSchema, EditorComponent }) {
-  const { method, grpcMethod, grpcMessage, grpcProtos } = request
+  const { method, grpcMethod, grpcMessage, grpcProtos, grpcImportRoots = "" } = request
   const [fileError, setFileError] = useState("")
 
   const files = useMemo(() => parseProtoFiles(grpcProtos), [grpcProtos])
@@ -123,6 +123,12 @@ export function GrpcPanel({ request, schema, editorPath, onUpdateRequest, onProt
         </Button>
       </Toolbar>
       {replaced.length > 0 && <Notice tone="warning">{TEXT.replaced(replaced)}</Notice>}
+      <Toolbar>
+        <SectionLabel>{TEXT.importRoots}</SectionLabel>
+        <div className="min-w-0 flex-1">
+          <Input value={grpcImportRoots} onChange={(event) => onUpdateRequest({ grpcImportRoots: event.target.value })} placeholder={TEXT.importRootsHint} aria-label={TEXT.importRoots} dir="ltr" spellCheck={false} />
+        </div>
+      </Toolbar>
       <SchemaNotice schema={schema} fileError={fileError} />
       <Toolbar>
         <SectionLabel>{TEXT.method}</SectionLabel>
