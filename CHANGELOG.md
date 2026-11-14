@@ -4,6 +4,10 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Added
+
+- gRPC: **Import roots** on a request, and a **Protobuf** tab in folder and collection settings, resolve `.proto` imports by their full path from folders on disk, like `protoc -I` or `grpcurl -import-path`. Two different files with the same name, such as Envoy's `udpa/annotations/status.proto` and `xds/annotations/v3/status.proto`, now work together. A request's roots come first, then its nearest folder's outward, then the collection's. In a folder workspace roots are relative to the workspace and read only once it is trusted; in the desktop app without a folder workspace they are absolute or `~/` paths; the CLI reads them with `--allow-files`. The web app does not read local roots (#37).
+
 ## [1.19.1] - 2026-11-14
 
 ### Fixed
