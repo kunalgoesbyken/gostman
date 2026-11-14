@@ -34,6 +34,7 @@ const (
 	EngineGrpcImportConflict          Code = "engineMessages.grpc.importConflict"
 	EngineGrpcImportRootsDenied       Code = "engineMessages.grpc.importRootsDenied"
 	EngineGrpcImportRootsLimit        Code = "engineMessages.grpc.importRootsLimit"
+	EngineGrpcImportRootsUnavailable  Code = "engineMessages.grpc.importRootsUnavailable"
 	EngineGrpcImportRootsUnsafe       Code = "engineMessages.grpc.importRootsUnsafe"
 	EngineGrpcIncompleteFrame         Code = "engineMessages.grpc.incompleteFrame"
 	EngineGrpcMissingEnd              Code = "engineMessages.grpc.missingEnd"

@@ -27,19 +27,21 @@ const (
 var errBodyTooLarge = locales.Errorf(locales.EngineRequestBodyTooLarge, nil)
 
 type Policy struct {
-	BlockPrivate      bool
-	MaxResponseBytes  int64
-	MaxTimeout        time.Duration
-	Network           *Network
-	Permit            func(host string) bool
-	RevealSecrets     bool
-	MaxStreamDuration time.Duration
-	MinStreamRetry    time.Duration
-	RunCommands       bool
-	ReadFile          FileReader
-	OpenFile          FileOpener
-	RawSockets        bool
-	RecordBody        bool
+	BlockPrivate             bool
+	MaxResponseBytes         int64
+	MaxTimeout               time.Duration
+	Network                  *Network
+	Permit                   func(host string) bool
+	RevealSecrets            bool
+	MaxStreamDuration        time.Duration
+	MinStreamRetry           time.Duration
+	RunCommands              bool
+	ReadFile                 FileReader
+	AllowAbsoluteImportRoots bool
+	RequireImportRootAccess  bool
+	OpenFile                 FileOpener
+	RawSockets               bool
+	RecordBody               bool
 }
 
 func (p Policy) fileOpener() FileOpener {

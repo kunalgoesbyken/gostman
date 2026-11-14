@@ -13,18 +13,20 @@ export const NO_SCRIPTS = Object.fromEntries(SCRIPT_FIELDS.map((field) => [field
 
 const hasScript = (request) => SCRIPT_FIELDS.some((field) => request[field].trim() !== '')
 
-export const readsFiles = (request) => someText(request, hasFileReference) || attachesFile(request.body)
+const importRootsOf = (request) => String(request?.grpcImportRoots || '').split(/[,\n]/).map((root) => root.trim()).filter(Boolean)
+
+export const readsFiles = (request) => someText(request, hasFileReference) || attachesFile(request.body) || importRootsOf(request).length > 0
 
 export const withoutFileContent = (value) => mapText(value, withoutFileReferences)
 
-const fileReadsOf = (request) => [...textsIn(request).flatMap(fileReferencesIn), ...attachedPaths(request.body)]
+const fileReadsOf = (request) => [...textsIn(request).flatMap(fileReferencesIn), ...attachedPaths(request.body), ...importRootsOf(request)]
 
 export function addsFileReads(before, after) {
   const known = new Set(fileReadsOf(before))
   return fileReadsOf(after).some((read) => !known.has(read))
 }
 
-const readPathsOf = (value) => [...textsIn(value).flatMap(fileReferencesIn).map(filePathOf), ...attachedPaths(value.body)]
+const readPathsOf = (value) => [...textsIn(value).flatMap(fileReferencesIn).map(filePathOf), ...attachedPaths(value.body), ...importRootsOf(value)]
 
 export const filePathsIn = (values) => [...new Set(values.filter(Boolean).flatMap(readPathsOf).filter(Boolean))]
 
@@ -47,6 +49,7 @@ export function withoutActiveContent(request) {
   return normalizeRequest({
     ...stripped,
     ...NO_SCRIPTS,
+    grpcImportRoots: '',
     body: withoutAttachedFiles(stripped.body),
     auth: stripped.auth.type === AUTH_OAUTH2 ? NO_AUTH : stripped.auth,
     url: isLocalCommand(stripped) || isRawSocket(stripped) ? '' : stripped.url,

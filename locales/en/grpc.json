@@ -26,6 +26,6 @@
       "unary": "Unary"
     },
     "importRoots": "Import roots",
-    "importRootsHint": "Workspace-relative folders, separated by commas (desktop / CLI only)"
+    "importRootsHint": "Workspace-relative folders; absolute or ~/ paths in desktop app storage"
   }
 }

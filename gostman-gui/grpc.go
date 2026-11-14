@@ -21,8 +21,8 @@ func (a *App) InvokeGrpc(id string, call rpc.Call) engine.Response {
 
 func (a *App) grpcPolicy() engine.Policy {
 	policy := a.policy()
-	if _, isFolder := storage.current().(folderStore); isFolder {
-		policy.ReadFile = workspaceFiles()
-	}
+	_, isFolder := storage.current().(folderStore)
+	policy.ReadFile = workspaceFiles()
+	policy.AllowAbsoluteImportRoots = !isFolder
 	return policy
 }

@@ -92,7 +92,7 @@ func (r requestFlags) open(stored runner.Collection, fileRoot string) (*agent.Cl
 	if err != nil {
 		return nil, err
 	}
-	client, err := agent.NewScopedClient(engine.Policy{Network: network, ReadFile: r.files.beside(fileRoot)}, r.scope())
+	client, err := agent.NewScopedClient(engine.Policy{Network: network, ReadFile: r.files.beside(fileRoot), RequireImportRootAccess: true}, r.scope())
 	if err != nil {
 		return nil, err
 	}

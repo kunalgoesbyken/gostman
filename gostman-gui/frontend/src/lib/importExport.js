@@ -454,7 +454,7 @@ const OAUTH_TEXT_FIELDS = ['grant', 'authUrl', 'tokenUrl', 'clientId', 'clientSe
 const AUTH_TEXT_FIELDS = ['username', 'password', 'token', 'key', 'value', 'domain']
 const SCHEME_SECTIONS = Object.values(SCHEMES).filter((scheme) => scheme.section)
 const REQUEST_TEXT_FIELDS = ['id', 'description', 'url', 'headers', 'body', 'queryParams', 'folderId', 'graphqlQuery', 'graphqlVariables', 'extractors', 'assertions', ...SCRIPT_FIELDS, 'grpcMethod', 'grpcMessage', 'grpcProtos', 'grpcImportRoots', 'mcpMethod', 'mcpTool', 'mcpArguments', 'socketProtocol', 'socketMessages', 'vars', 'notes', 'jsonDepth', 'defaultView']
-const SCOPE_TEXT_FIELDS = ['description', 'headers', 'assertions', 'notes', ...SCRIPT_FIELDS]
+const SCOPE_TEXT_FIELDS = ['description', 'headers', 'assertions', 'notes', 'grpcImportRoots', ...SCRIPT_FIELDS]
 const BODY_TYPE_VALUES = [...BODY_TYPES, ...RAW_SOCKET_BODY_TYPES].map((type) => type.value)
 
 const stringOf = (value) => (typeof value === 'string' ? value : '')
