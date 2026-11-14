@@ -5,6 +5,8 @@
     "reflection": "Server reflection",
     "sendAsGrpc": "Send as gRPC",
     "addProtos": "Add .proto files",
+    "addFolder": "Add folder",
+    "addFolderTitle": "Add every .proto file in a folder and keep its path inside the folder, so imports resolve by their full path",
     "removeFiles": "Remove files",
     "load": "Load",
     "reload": "Reload",

@@ -1,5 +1,5 @@
 import { parseJSON } from './dataUtils'
-import { scopedProtos } from './grpcUploads'
+import { fitsUploadBudget, readUploadedFolder, scopedProtos } from './grpcUploads'
 import { GRPC_TEXT } from './grpcText'
 
 export const GRPC_METHOD = 'GRPC'
@@ -27,6 +27,13 @@ export function mergeProtoFiles(existing, added) {
   const readded = new Set(added.map((file) => file.name))
   const changed = (file) => earlier.has(file.name) && earlier.get(file.name) !== file.content
   return [...existing.filter((file) => !readded.has(file.name)), ...added.map((file) => (changed(file) ? { ...file, replaced: true } : file))]
+}
+
+export async function addUploadedFolder(existing, fileList) {
+  const result = await readUploadedFolder(fileList)
+  if (result.kind !== 'success') return result
+  const files = mergeProtoFiles(existing, result.files)
+  return fitsUploadBudget(files) ? { kind: 'success', files } : { kind: 'limit' }
 }
 
 export const replacedProtoNames = (files) => files.filter((file) => file.replaced).map((file) => file.name)

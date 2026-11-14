@@ -1,5 +1,5 @@
 import { Suspense, useMemo, useRef, useState } from "react"
-import { FilePlus } from "lucide-react"
+import { FilePlus, FolderPlus } from "lucide-react"
 import { Button } from "./ui/button"
 import { InfoTip } from "./ui/infoTip"
 import { Input } from "./ui/input"
@@ -9,15 +9,17 @@ import { EditorSkeleton } from "./ui/skeleton"
 import { maxAttachmentBytes } from "../lib/attachments"
 import { formatBytes } from "../lib/byteSize"
 import {
-  GRPC_METHOD, findMethod, isBlankMessage, mergeProtoFiles, methodKind, parseProtoFiles, readProtoFile, replacedProtoNames,
+  GRPC_METHOD, addUploadedFolder, findMethod, isBlankMessage, mergeProtoFiles, methodKind, parseProtoFiles, readProtoFile, replacedProtoNames,
 } from "../lib/grpc"
 import { GRPC_TEXT as TEXT } from "../lib/grpcText"
+import { uploadFailureText } from "../lib/grpcUploadFailure"
 import { isDesktopShell } from "../lib/windowControls"
 
 const tooLargeMessage = (file) => TEXT.tooLarge(file.name, formatBytes(file.size), formatBytes(maxAttachmentBytes()))
 
 function ProtoFilePicker({ files, onChange, onError }) {
   const inputRef = useRef(null)
+  const folderRef = useRef(null)
 
   const handlePick = async (event) => {
     const picked = Array.from(event.target.files)
@@ -32,12 +34,30 @@ function ProtoFilePicker({ files, onChange, onError }) {
     onChange(mergeProtoFiles(files, await Promise.all(picked.map(readProtoFile))))
   }
 
+  const handleFolder = async (event) => {
+    const picked = Array.from(event.target.files)
+    event.target.value = ""
+    if (picked.length === 0) return
+    const result = await addUploadedFolder(files, picked).catch(() => ({ kind: "failed" }))
+    if (result.kind !== "success") {
+      onError(uploadFailureText(result.kind))
+      return
+    }
+    onError("")
+    onChange(result.files)
+  }
+
   return (
     <>
       <input ref={inputRef} type="file" accept=".proto" multiple className="hidden" onChange={handlePick} />
+      <input ref={folderRef} type="file" multiple webkitdirectory="" directory="" className="hidden" onChange={handleFolder} />
       <Button variant="outline" size="sm" onClick={() => inputRef.current.click()}>
         <FilePlus />
         {TEXT.addProtos}
+      </Button>
+      <Button variant="outline" size="sm" title={TEXT.addFolderTitle} onClick={() => folderRef.current.click()}>
+        <FolderPlus />
+        {TEXT.addFolder}
       </Button>
     </>
   )
