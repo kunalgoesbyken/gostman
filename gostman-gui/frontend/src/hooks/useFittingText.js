@@ -10,6 +10,8 @@ const contextFor = (style) => {
   return measuringContext
 }
 
+export const textWidth = (element, text) => contextFor(getComputedStyle(element)).measureText(text).width
+
 const roomInside = (element, style) => element.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight)
 
 function fittingIndex(element, candidates) {

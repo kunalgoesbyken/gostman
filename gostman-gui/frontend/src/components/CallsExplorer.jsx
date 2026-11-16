@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { BarChart3, Download } from "lucide-react"
 import { Button } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
@@ -10,27 +10,30 @@ import {
   countByClass, countByReason, filterCalls, newestFirst, paddedSpan, statusClassOf, summarizeCalls, timeOf, timeSpan,
 } from "../lib/callHistory"
 import { ALL_REASONS, REASON_NAMES } from "../lib/noResponse"
-import { callLabel, durationText, momentText, sizeText } from "../lib/callDisplay"
+import { callLabel, durationText, momentText, shortMomentText, sizeText } from "../lib/callDisplay"
 import { formatNumber, formatPercent } from "../lib/i18n/format"
+import { layoutBars, nearestIndex } from "../lib/callBars"
 import { hasModifier } from "../lib/rovingFocus"
 import { RESPONSE_TEXT } from "../lib/responseText"
 import { HISTORY_TEXT } from "../lib/sidebarText"
 import { cn } from "../lib/utils"
+import { useElementWidth } from "../hooks/useElementWidth"
+import { textWidth } from "../hooks/useFittingText"
 
 const TEXT = HISTORY_TEXT.calls
-const WIDTH = 720
 const HEIGHT = 200
-const PAD_LEFT = 52
+const MIN_GUTTER_PX = 52
+const AXIS_GAP_PX = 8
 const PAD_RIGHT = 8
 const PAD_TOP = 8
 const PAD_BOTTOM = 22
-const PLOT_WIDTH = WIDTH - PAD_LEFT - PAD_RIGHT
 const PLOT_HEIGHT = HEIGHT - PAD_TOP - PAD_BOTTOM
 const UNKNOWN_HEIGHT = 3
 const MIN_ZOOM_PX = 4
 const ROWS_PAGE = 200
-const TIP_MARGIN_PERCENT = 14
-const PERCENT = 100
+const HIT_PX = 6
+const TIP_GAP_PX = 10
+const WIDE_AXIS = { gutter: MIN_GUTTER_PX, short: false }
 const NO_DURATION_FILTER = { min: "", max: "" }
 const KEY_STEPS = new Map([["ArrowRight", 1], ["ArrowLeft", -1]])
 
@@ -131,46 +134,112 @@ function RangeFilters({ duration, onDuration, view, onView, isZoomed, onReset })
   )
 }
 
-function svgX(svg, clientX) {
-  const box = svg.getBoundingClientRect()
-  if (box.width === 0) return PAD_LEFT
-  return Math.min(WIDTH - PAD_RIGHT, Math.max(PAD_LEFT, ((clientX - box.left) / box.width) * WIDTH))
+function tipPlace(x, tipWidth, width) {
+  const after = x + TIP_GAP_PX
+  if (after + tipWidth <= width) return { top: PAD_TOP, left: after }
+  const before = x - TIP_GAP_PX - tipWidth
+  if (before >= 0) return { top: PAD_TOP, left: before }
+  return { bottom: `calc(100% + ${TIP_GAP_PX}px)`, left: Math.max(0, Math.min(width - tipWidth, x - tipWidth / 2)) }
+}
+
+function ChartTip({ call, x, width }) {
+  const tipRef = useRef(null)
+  const tipWidth = useElementWidth(tipRef)
+  return (
+    <div ref={tipRef} aria-hidden="true" style={tipPlace(x, tipWidth, width)} className="pointer-events-none absolute z-10 rounded border border-border bg-background px-2 py-1.5 text-2xs shadow-lg">
+      <dl className="grid grid-cols-[auto_auto] items-center gap-x-3 gap-y-1 whitespace-nowrap">
+        <dt className="text-muted-foreground">{TEXT.time}</dt>
+        <dd className="font-mono">{momentText(timeOf(call))}</dd>
+        <dt className="text-muted-foreground">{TEXT.status}</dt>
+        <dd><CallStatus call={call} /></dd>
+        <dt className="text-muted-foreground">{TEXT.duration}</dt>
+        <dd className="font-mono tabular-nums">{durationText(call.durationMs)}</dd>
+        <dt className="text-muted-foreground">{TEXT.size}</dt>
+        <dd className="font-mono tabular-nums">{sizeText(call.size)}</dd>
+      </dl>
+    </div>
+  )
+}
+
+function useAxis(labelRef, width, { top, from, to }) {
+  const [axis, setAxis] = useState(WIDE_AXIS)
+  useLayoutEffect(() => {
+    const label = labelRef.current
+    if (!label) return
+    const gutter = Math.max(MIN_GUTTER_PX, Math.ceil(textWidth(label, top)) + AXIS_GAP_PX)
+    const short = textWidth(label, from) + textWidth(label, to) + AXIS_GAP_PX > width - PAD_RIGHT - gutter
+    setAxis((previous) => (previous.gutter === gutter && previous.short === short ? previous : { gutter, short }))
+  }, [labelRef, width, top, from, to])
+  return axis
 }
 
 function CallsChart({ calls, view, label, plotRef, onZoom, onOpen }) {
+  const figureRef = useRef(null)
+  const labelRef = useRef(null)
+  const width = useElementWidth(figureRef)
   const [drag, setDrag] = useState(null)
   const [hovered, setHovered] = useState(null)
-  const [activeIndex, setActiveIndex] = useState(null)
+  const [chosen, setChosen] = useState(null)
   const plotted = useMemo(() => newestFirst(calls).reverse(), [calls])
-  const active = activeIndex === null ? null : plotted[activeIndex] ?? null
-  const tipped = hovered ?? active
+  const chosenIndex = chosen ? plotted.indexOf(chosen) : -1
+  const activeIndex = chosenIndex < 0 ? null : chosenIndex
+  const active = activeIndex === null ? null : chosen
   const slowest = Math.max(1, ...calls.filter((call) => !call.noResponse).map((call) => call.durationMs ?? 0))
+  const slowestText = RESPONSE_TEXT.milliseconds(slowest)
+  const axis = useAxis(labelRef, width, { top: slowestText, from: momentText(view.from), to: momentText(view.to) })
+  const edgeText = axis.short ? shortMomentText : momentText
+  const plotLeft = axis.gutter
+  const plotRight = Math.max(plotLeft, width - PAD_RIGHT)
+  const plotWidth = plotRight - plotLeft
   const span = view.to - view.from || 1
-  const xOf = (time) => PAD_LEFT + ((time - view.from) / span) * PLOT_WIDTH
-  const timeAt = (x) => view.from + ((x - PAD_LEFT) / PLOT_WIDTH) * span
-  const barWidth = Math.max(1, Math.min(8, (PLOT_WIDTH / Math.max(1, calls.length)) * 0.7))
-  const tipLeft = tipped ? Math.min(PERCENT - TIP_MARGIN_PERCENT, Math.max(TIP_MARGIN_PERCENT, (xOf(timeOf(tipped)) / WIDTH) * PERCENT)) : 0
+  const timeAt = (x) => view.from + ((x - plotLeft) / (plotWidth || 1)) * span
+  const { positions, width: barWidth } = useMemo(
+    () => layoutBars(plotted.map((call) => plotLeft + ((timeOf(call) - view.from) / span) * plotWidth), { left: plotLeft, right: plotRight }),
+    [plotted, view.from, span, plotLeft, plotWidth, plotRight],
+  )
+  const tipped = drag ? null : hovered ?? active
+  const tippedIndex = tipped ? plotted.indexOf(tipped) : -1
 
+  const offsetX = (event) => event.clientX - plotRef.current.getBoundingClientRect().left
+  const inPlot = (x) => Math.min(plotRight, Math.max(plotLeft, x))
+  const callAt = (x) => {
+    const index = nearestIndex(positions, x)
+    if (index === null || Math.abs(positions[index] - x) > HIT_PX) return null
+    return plotted[index]
+  }
+  const zoomTo = (left, right) => {
+    const times = plotted.filter((_, index) => positions[index] + barWidth / 2 >= left && positions[index] - barWidth / 2 <= right).map(timeOf)
+    onZoom({ from: Math.min(timeAt(left), ...times), to: Math.max(timeAt(right), ...times) })
+  }
   const start = (event) => {
     if (event.button !== 0) return
     event.currentTarget.setPointerCapture?.(event.pointerId)
-    const x = svgX(plotRef.current, event.clientX)
-    setDrag({ from: x, to: x })
+    const pointer = offsetX(event)
+    setDrag({ from: inPlot(pointer), to: inPlot(pointer), pointer })
   }
   const move = (event) => {
-    if (drag) setDrag({ ...drag, to: svgX(plotRef.current, event.clientX) })
+    const pointer = offsetX(event)
+    if (drag) setDrag({ ...drag, to: inPlot(pointer), pointer })
+    else setHovered(callAt(pointer))
   }
   const end = () => {
     if (!drag) return
     const [left, right] = [Math.min(drag.from, drag.to), Math.max(drag.from, drag.to)]
     setDrag(null)
-    if (right - left >= MIN_ZOOM_PX) onZoom({ from: timeAt(left), to: timeAt(right) })
+    if (right - left >= MIN_ZOOM_PX) {
+      zoomTo(left, right)
+      return
+    }
+    const clicked = callAt(drag.pointer)
+    if (!clicked) return
+    setChosen(clicked)
+    onOpen(clicked)
   }
   const handleKeyDown = (event) => {
     if (hasModifier(event)) return
     if (event.key === "Escape" && active) {
       event.preventDefault()
-      setActiveIndex(null)
+      setChosen(null)
       onOpen(null)
       return
     }
@@ -182,43 +251,43 @@ function CallsChart({ calls, view, label, plotRef, onZoom, onOpen }) {
     const next = neighbourIndex(event.key, activeIndex, plotted.length)
     if (next === null) return
     event.preventDefault()
-    setActiveIndex(next)
+    setChosen(plotted[next])
   }
 
   return (
-    <figure aria-label={label} className="relative m-0">
+    <figure ref={figureRef} aria-label={label} className="relative m-0 w-full">
       <svg
         ref={plotRef}
         role="application"
         aria-label={TEXT.plotLabel}
         tabIndex={0}
-        viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+        width={width}
+        height={HEIGHT}
         onPointerDown={start}
         onPointerMove={move}
         onPointerUp={end}
         onPointerCancel={() => setDrag(null)}
+        onPointerLeave={() => setHovered(null)}
         onKeyDown={handleKeyDown}
-        className="h-auto w-full max-w-full cursor-crosshair touch-none select-none"
+        className="block cursor-crosshair touch-none select-none"
       >
-        <line x1={PAD_LEFT} x2={WIDTH - PAD_RIGHT} y1={PAD_TOP + PLOT_HEIGHT} y2={PAD_TOP + PLOT_HEIGHT} className="stroke-border" strokeWidth="1" />
-        <line x1={PAD_LEFT} x2={WIDTH - PAD_RIGHT} y1={PAD_TOP} y2={PAD_TOP} className="stroke-border" strokeDasharray="2 3" strokeWidth="1" />
-        <text x={PAD_LEFT - 4} y={PAD_TOP + 4} textAnchor="end" className="fill-muted-foreground text-[10px]">{RESPONSE_TEXT.milliseconds(slowest)}</text>
-        <text x={PAD_LEFT - 4} y={PAD_TOP + PLOT_HEIGHT} textAnchor="end" className="fill-muted-foreground text-[10px]">0</text>
-        <text x={PAD_LEFT} y={HEIGHT - 6} className="fill-muted-foreground text-[10px]">{momentText(view.from)}</text>
-        <text x={WIDTH - PAD_RIGHT} y={HEIGHT - 6} textAnchor="end" className="fill-muted-foreground text-[10px]">{momentText(view.to)}</text>
+        <line x1={plotLeft} x2={plotRight} y1={PAD_TOP + PLOT_HEIGHT} y2={PAD_TOP + PLOT_HEIGHT} className="stroke-border" strokeWidth="1" />
+        <line x1={plotLeft} x2={plotRight} y1={PAD_TOP} y2={PAD_TOP} className="stroke-border" strokeDasharray="2 3" strokeWidth="1" />
+        <text ref={labelRef} x={plotLeft - AXIS_GAP_PX / 2} y={PAD_TOP + 4} textAnchor="end" className="fill-muted-foreground text-[10px]">{slowestText}</text>
+        <text x={plotLeft - AXIS_GAP_PX / 2} y={PAD_TOP + PLOT_HEIGHT} textAnchor="end" className="fill-muted-foreground text-[10px]">0</text>
+        <text x={plotLeft} y={HEIGHT - 6} className="fill-muted-foreground text-[10px]">{edgeText(view.from)}</text>
+        <text x={plotRight} y={HEIGHT - 6} textAnchor="end" className="fill-muted-foreground text-[10px]">{edgeText(view.to)}</text>
         {plotted.map((call, index) => {
           const height = call.noResponse ? PLOT_HEIGHT : call.durationMs === null ? UNKNOWN_HEIGHT : Math.max(1, (call.durationMs / slowest) * PLOT_HEIGHT)
           return (
             <rect
               key={`${call.at}-${index}`}
-              x={xOf(timeOf(call)) - barWidth / 2}
+              x={positions[index] - barWidth / 2}
               y={PAD_TOP + PLOT_HEIGHT - height}
               width={barWidth}
               height={height}
               strokeWidth="1.5"
               className={cn(CLASS_FILL[statusClassOf(call)], call === tipped ? "stroke-foreground" : "stroke-transparent")}
-              onMouseEnter={() => setHovered(call)}
-              onMouseLeave={() => setHovered(null)}
             />
           )
         })}
@@ -233,11 +302,7 @@ function CallsChart({ calls, view, label, plotRef, onZoom, onOpen }) {
           />
         )}
       </svg>
-      {tipped && (
-        <div aria-hidden="true" style={{ left: `${tipLeft}%` }} className="pointer-events-none absolute top-0 z-10 -translate-x-1/2 whitespace-nowrap rounded border border-border bg-background px-2 py-1 font-mono text-2xs">
-          {callLabel(tipped)}
-        </div>
-      )}
+      {tippedIndex >= 0 && <ChartTip call={tipped} x={positions[tippedIndex]} width={width} />}
       <p role="status" className="sr-only">{active ? callLabel(active) : ""}</p>
       <figcaption className="text-2xs text-muted-foreground">{TEXT.zoomHint}</figcaption>
     </figure>
@@ -302,13 +367,14 @@ export function CallsExplorer({ calls, entry, onExport }) {
   const rowRefs = useRef(new Map())
   const plotRef = useRef(null)
   const view = zoom ?? fullView
-  const counts = useMemo(() => countByClass(calls), [calls])
-  const reasonCounts = useMemo(() => countByReason(calls), [calls])
+  const inPeriod = useMemo(() => filterCalls(calls, { classes: ALL_CLASSES, from: view.from, to: view.to }), [calls, view])
+  const counts = useMemo(() => countByClass(inPeriod), [inPeriod])
+  const reasonCounts = useMemo(() => countByReason(inPeriod), [inPeriod])
   const shown = useMemo(
     () => filterCalls(calls, { classes, reasons, minMs: millisecondsOf(duration.min), maxMs: millisecondsOf(duration.max), from: view.from, to: view.to }),
     [calls, classes, reasons, duration, view],
   )
-  const hasLegacy = calls.some((call) => call.durationMs === null && !call.noResponse)
+  const hasLegacy = shown.some((call) => call.durationMs === null && !call.noResponse)
   const setEdge = (edge, time) => {
     if (time === null) return
     const next = { ...view, [edge]: time }

@@ -4,6 +4,12 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Fixed
+
+- Calls chart: bars of calls sent close together no longer overlap; they are set side by side, never more than a few pixels from their time, and a dense burst is drawn as thin bars at its time. Dragging across bars zooms to those calls. The chart keeps its height and text size on wide panels instead of growing with the width, the longest duration label is no longer cut off, and the From and To labels drop the year when the chart is too narrow for both (#38).
+- Calls chart: hovering anywhere near a bar shows a tooltip beside it with the date and time, the status, the duration and the size of the call, and clicking a bar selects its call in the list (#38).
+- Calls tab: the counts next to the status and reason checkboxes are those of the period shown, so they match the summary line after zooming, and the note about calls without a duration shows only when such a call is shown (#38).
+
 ## [1.20.0] - 2026-11-15
 
 ### Added

@@ -9,6 +9,7 @@ import { TAB_BAR_TEXT } from './tabBarText'
 const TEXT = HISTORY_TEXT.calls
 const CSV = TEXT.csv
 const SECOND_OPTIONS = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }
+const SHORT_SECOND_OPTIONS = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }
 
 const BADGE_VARIANT = {
   [CLASS_SUCCESS]: 'success',
@@ -32,6 +33,8 @@ export function statusText(call) {
 export const statusVariantOf = (call) => BADGE_VARIANT[statusClassOf(call)]
 
 export const momentText = (time) => formatDateTime(new Date(time), SECOND_OPTIONS)
+
+export const shortMomentText = (time) => formatDateTime(new Date(time), SHORT_SECOND_OPTIONS)
 
 export const requestNameOf = (entry) => (entry.name && entry.name !== TAB_BAR_TEXT.newRequest ? entry.name : entry.url)
 
