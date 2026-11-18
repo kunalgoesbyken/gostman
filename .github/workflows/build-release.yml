@@ -101,7 +101,7 @@ jobs:
       - name: Build and package (Linux)
         if: matrix.name == 'linux'
         run: |
-          wails build -clean -platform linux/amd64 -tags webkit2_41
+          wails build -clean -platform linux/amd64 -tags webkit2_41,grpcnotrace
 
           root=package
           install -Dm755 build/bin/Gostman "$root/usr/bin/gostman"
@@ -160,7 +160,7 @@ jobs:
         if: matrix.name == 'windows'
         run: |
           export PATH="$PATH:/c/Program Files (x86)/NSIS"
-          wails build -clean -platform windows/amd64 -nsis
+          wails build -clean -platform windows/amd64 -nsis -tags grpcnotrace
           mv build/bin/Gostman.exe build/bin/Gostman-windows-amd64-portable.exe
           mv build/bin/Gostman-amd64-installer.exe build/bin/Gostman-windows-amd64.exe
 
@@ -178,7 +178,7 @@ jobs:
       - name: Build and package (macOS)
         if: matrix.name == 'macos'
         run: |
-          wails build -clean -platform darwin/universal
+          wails build -clean -platform darwin/universal -tags grpcnotrace
           codesign --force --deep --sign - build/bin/Gostman.app
 
           staging=dmg
@@ -200,10 +200,10 @@ jobs:
             archive="gostman-gui/build/bin/gostman-cli-$GOOS-$GOARCH"
             mkdir -p "$staging"
             if [ "$GOOS" = windows ]; then
-              go build -trimpath -ldflags "-s -w -X main.version=$VERSION" -o "$staging/gostman.exe" ./cmd/gostman
+              go build -tags grpcnotrace -trimpath -ldflags "-s -w -X main.version=$VERSION" -o "$staging/gostman.exe" ./cmd/gostman
               (cd "$staging" && 7z a -tzip "../../$archive.zip" gostman.exe)
             else
-              go build -trimpath -ldflags "-s -w -X main.version=$VERSION" -o "$staging/gostman" ./cmd/gostman
+              go build -tags grpcnotrace -trimpath -ldflags "-s -w -X main.version=$VERSION" -o "$staging/gostman" ./cmd/gostman
               tar -czf "$archive.tar.gz" -C "$staging" gostman
             fi
           done
