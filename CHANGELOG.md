@@ -4,6 +4,14 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.21.0] - 2026-11-19
+
+### Changed
+
+- Desktop: the request history is kept in its own file, `history.json`, next to `gostman.json`. Saving the history after a send no longer rewrites your collections, and saving a request no longer rewrites the history. With the default history size, a history save takes 25 ms instead of 88 ms next to 200 saved requests and 27 ms instead of 498 ms next to 5,000; saving a request takes 28 ms instead of 91 ms and 342 ms instead of 590 ms. The history moves on the first start; backups still hold it, and restoring a backup restores its history. Going back to 1.20 or earlier after this shows an empty history.
+- The app loads less before the first screen: YAML, HTML and JavaScript highlighting, the response compare view, the Auth, Vars, Extract, Checks, Notes and Settings tabs, the Flows, Specs and History lists and the Timeline and Request response tabs load when first opened, and are fetched in the background once the app is idle. The desktop start-up script is 1,275 KB instead of 1,356 KB and the editor 466 KB instead of 641 KB; the web app downloads 456 KB instead of 480 KB (compressed) before it shows.
+- Smaller downloads: the Windows installer is compressed with LZMA instead of zlib, and the apps and the command line are built without gRPC's debug pages, which Gostman never served. The command line is 0.6 MB smaller and the desktop app 0.3 MB.
+
 ## [1.20.1] - 2026-11-19
 
 ### Changed

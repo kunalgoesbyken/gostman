@@ -147,3 +147,36 @@ A Go benchmark in the desktop module called `SaveHistory` (decoding the history 
 | Load, 5,000 requests | 314 ms | 221 ms | 290 ms |
 
 Go 1.27 uses the same JSON engine without the experiment flag; built with `GOEXPERIMENT=nojsonv2` it decoded the 5,000-request file in 416 ms instead of 197 ms. `gostman run examples/todo-api --env Mock --reporter json` against `gostman mock` gave the same report from both builds, apart from times.
+
+## History in its own file (2026-11-19)
+
+The same Go benchmark as above, with `GOEXPERIMENT=jsonv2` on both sides: before is 1.20.1, where the history lives in `gostman.json`; after keeps it in `history.json`. The history held 50 requests with 500 calls each next to 200 or 5,000 saved requests with 1 KB JSON bodies; medians of 3 runs.
+
+| | Before | After |
+|---|---|---|
+| Save history, 200 requests | 88 ms | 25 ms |
+| Save history, 5,000 requests | 498 ms | 27 ms |
+| Save a request, 200 requests | 91 ms | 28 ms |
+| Save a request, 5,000 requests | 590 ms | 342 ms |
+
+Loading the data took the same time before and after.
+
+## Start-up script and download sizes (2026-11-19)
+
+Sizes of the built files in KB, raw / gzip -9.
+
+| | Before | After |
+|---|---|---|
+| Desktop entry script | 1,356 / 459 | 1,275 / 438 |
+| Desktop entry script and CSS | 1,489 / 503 | 1,408 / 482 |
+| Code editor chunks | 641 / 224 | 466 / 156 |
+| Web app before the first screen | 1,448 / 480 | 1,366 / 456 |
+
+In headless Chromium against `vite preview`, 12 to 13 alternating runs each on a busy machine, first paint and the time until Send shows did not change measurably; script time at settle went from 323 ms to 310 ms and the heap after GC from 7.6 MB to 7.0 MB.
+
+| Windows file | Before | After |
+|---|---|---|
+| `gostman.exe` (command line) | 30,649,856 bytes | 30,034,944 bytes |
+| `Gostman.exe` (desktop) | 38,694,912 bytes | 38,359,040 bytes |
+| Desktop exe compressed with deflate, as the installer was | 14.1 MB | 14.0 MB |
+| Desktop exe compressed with LZMA, as the installer is now | | 10.3 MB |
