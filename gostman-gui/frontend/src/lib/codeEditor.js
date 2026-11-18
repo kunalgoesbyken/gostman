@@ -210,7 +210,8 @@ const loadedLanguages = new Map()
 export const isLanguagePending = (language) => Object.hasOwn(LAZY_LANGUAGES, language) && !loadedLanguages.has(language)
 
 export async function loadLanguage(language) {
-  if (isLanguagePending(language)) loadedLanguages.set(language, await LAZY_LANGUAGES[language]())
+  if (!loadedLanguages.has(language)) loadedLanguages.set(language, await LAZY_LANGUAGES[language]())
+  return loadedLanguages.get(language)
 }
 
 export const languageExtension = (language) => LANGUAGES[language]?.() ?? loadedLanguages.get(language) ?? []

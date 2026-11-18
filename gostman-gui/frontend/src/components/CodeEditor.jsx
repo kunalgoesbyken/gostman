@@ -17,28 +17,33 @@ const labelExtension = (label) => (label ? EditorView.contentAttributes.of({ 'ar
 
 const isUserChange = (update) => update.docChanged && !update.transactions.some((transaction) => transaction.annotation(externalChange))
 
-function useLoadedLanguage(language) {
+const keepPlainText = () => {}
+
+function useLanguageExtension(language) {
+  const eager = useMemo(() => languageExtension(language), [language])
   const [loaded, setLoaded] = useState(null)
 
   useEffect(() => {
     if (!isLanguagePending(language)) return undefined
     let isCurrent = true
-    loadLanguage(language).then(() => isCurrent && setLoaded(language))
+    loadLanguage(language).then((extension) => {
+      if (isCurrent) setLoaded({ language, extension })
+    }, keepPlainText)
     return () => {
       isCurrent = false
     }
   }, [language])
 
-  return loaded
+  return loaded?.language === language ? loaded.extension : eager
 }
 
 export function useEditorConfig(language, variables, fileReads, formatting = NO_EXTENSION, label = '') {
   const { wrapLines } = usePreferences()
   const variableMap = useVariableMap()
-  const loadedLanguage = useLoadedLanguage(language)
+  const highlighting = useLanguageExtension(language)
   return useMemo(
-    () => [languageExtension(language), wrapExtension(wrapLines), variables ? variableExtension(variableMap, { fileReads }) : [], formatting, labelExtension(label)],
-    [language, loadedLanguage, wrapLines, variables, fileReads, variableMap, formatting, label],
+    () => [highlighting, wrapExtension(wrapLines), variables ? variableExtension(variableMap, { fileReads }) : [], formatting, labelExtension(label)],
+    [highlighting, wrapLines, variables, fileReads, variableMap, formatting, label],
   )
 }
 

@@ -1,4 +1,4 @@
-import { Suspense, memo, useEffect, useRef, useState } from "react"
+import { Suspense, lazy, memo, useEffect, useRef, useState } from "react"
 import { Check, FileCode, FolderPlus, Import, Plus, RotateCcw } from "lucide-react"
 import { IconButton } from "./ui/button"
 import { ContextMenu } from "./ui/ContextMenu"
@@ -18,13 +18,12 @@ import { useShortcutLabel } from "../hooks/useShortcuts"
 import { EDGE_END } from "../hooks/usePaneResize"
 import { hintWithShortcut } from "../lib/shortcuts"
 import { whenIdle } from "../lib/idle"
-import { lazyExport } from "../lib/lazyExport"
 import { useAppStore } from "../store/appStore"
 
 const loadSidebarLists = () => import("./sidebarLists")
-const FlowList = lazyExport(loadSidebarLists, "FlowList")
-const SpecList = lazyExport(loadSidebarLists, "SpecList")
-const HistoryList = lazyExport(loadSidebarLists, "HistoryList")
+const FlowList = lazy(() => loadSidebarLists().then((module) => ({ default: module.FlowList })))
+const SpecList = lazy(() => loadSidebarLists().then((module) => ({ default: module.SpecList })))
+const HistoryList = lazy(() => loadSidebarLists().then((module) => ({ default: module.HistoryList })))
 
 const LIST_OWNS_ADD = [VIEW_FLOWS, VIEW_SPECS]
 const VIEW_CLASS = "flex min-h-0 flex-1 flex-col"

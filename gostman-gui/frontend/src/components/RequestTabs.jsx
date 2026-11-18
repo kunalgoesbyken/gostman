@@ -11,7 +11,6 @@ import { KeyValueEditor } from "./KeyValueEditor"
 import { HEADER_SUGGESTIONS } from "../lib/httpHeaders"
 import { ParamsPanel } from "./ParamsPanel"
 import { whenIdle } from "../lib/idle"
-import { lazyExport } from "../lib/lazyExport"
 import { useAiEnabled } from "../lib/ai/session"
 import { TASK_DOCS } from "../lib/ai/tasks"
 import { BODY_FORM, BODY_MULTIPART, BODY_NONE } from "../lib/body"
@@ -43,12 +42,12 @@ const McpPanel = lazy(() => import("./McpPanel").then((module) => ({ default: mo
 const WebSocketPanel = lazy(() => import("./WebSocketPanel").then((module) => ({ default: module.WebSocketPanel })))
 
 const loadRequestPanels = () => import("./requestPanels")
-const AuthPanel = lazyExport(loadRequestPanels, "AuthPanel")
-const VariablesPanel = lazyExport(loadRequestPanels, "VariablesPanel")
-const ExtractPanel = lazyExport(loadRequestPanels, "ExtractPanel")
-const TestsPanel = lazyExport(loadRequestPanels, "TestsPanel")
-const NotesPanel = lazyExport(loadRequestPanels, "NotesPanel")
-const SettingsPanel = lazyExport(loadRequestPanels, "SettingsPanel")
+const AuthPanel = lazy(() => loadRequestPanels().then((module) => ({ default: module.AuthPanel })))
+const VariablesPanel = lazy(() => loadRequestPanels().then((module) => ({ default: module.VariablesPanel })))
+const ExtractPanel = lazy(() => loadRequestPanels().then((module) => ({ default: module.ExtractPanel })))
+const TestsPanel = lazy(() => loadRequestPanels().then((module) => ({ default: module.TestsPanel })))
+const NotesPanel = lazy(() => loadRequestPanels().then((module) => ({ default: module.NotesPanel })))
+const SettingsPanel = lazy(() => loadRequestPanels().then((module) => ({ default: module.SettingsPanel })))
 
 const ROW_BODY_TYPES = [BODY_FORM, BODY_MULTIPART]
 const PANEL_CLASS = "h-full min-h-0"
