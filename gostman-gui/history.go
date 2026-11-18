@@ -27,8 +27,12 @@ type storedData struct {
 	History json.RawMessage `json:"history,omitempty"`
 }
 
+func holdsHistory(raw json.RawMessage) bool {
+	return len(raw) > 0 && !bytes.Equal(raw, []byte("null"))
+}
+
 func (s storedData) carriesHistory() bool {
-	return len(s.History) > 0 && !bytes.Equal(s.History, []byte("null"))
+	return holdsHistory(s.History)
 }
 
 func readStored() (storedData, error) {
@@ -168,7 +172,7 @@ func withHistory(content []byte) []byte {
 	if json.Unmarshal(content, &document) != nil || document == nil {
 		return content
 	}
-	if raw, present := document["history"]; present && !bytes.Equal(raw, []byte("null")) {
+	if holdsHistory(document["history"]) {
 		return content
 	}
 	document["history"] = currentHistoryDocument()
