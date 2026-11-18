@@ -126,7 +126,7 @@ func snapshotDataFile(kind string) error {
 	}
 	target := filepath.Join(backupFolder(), backupName(kind, time.Now()))
 	temporary := target + ".tmp"
-	if err := os.WriteFile(temporary, content, backupFileMode); err != nil {
+	if err := os.WriteFile(temporary, withHistory(content), backupFileMode); err != nil {
 		return err
 	}
 	if err := os.Rename(temporary, target); err != nil {
@@ -171,7 +171,11 @@ func replaceDataFile(content []byte) error {
 	if err := snapshotDataFile(kindBeforeRestore); err != nil {
 		return err
 	}
-	return writeDataFile(content)
+	historySplit = false
+	if err := writeDataFile(content); err != nil {
+		return err
+	}
+	return migrateHistoryLocked()
 }
 
 func (a *App) ListBackups() ([]Backup, error) {

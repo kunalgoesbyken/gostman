@@ -45,6 +45,7 @@ func (a *App) startup(ctx context.Context) {
 	if placesBeforeShow {
 		a.restoreWindow()
 	}
+	migrateHistory()
 	startBackups()
 	a.loadNetwork()
 	restoreWorkspace()
@@ -166,26 +167,8 @@ func appDataPath() string {
 	return filepath.Join(os.Getenv("HOME"), ".local", "share", "Gostman")
 }
 
-func readData() (SavedData, error) {
-	var data SavedData
-	file, err := os.ReadFile(jsonfilePath)
-	if errors.Is(err, fs.ErrNotExist) || (err == nil && len(file) == 0) {
-		return data, nil
-	}
-	if err != nil {
-		return data, fmt.Errorf("failed to read data file: %w", err)
-	}
-	if err := json.Unmarshal(file, &data); err != nil {
-		return data, fmt.Errorf("data file is corrupted: %w", err)
-	}
-	return data, nil
-}
-
 func writeData(data SavedData) error {
-	if err := os.MkdirAll(appFolder, 0755); err != nil {
-		return fmt.Errorf("failed to create directory: %w", err)
-	}
-	encoded, err := json.Marshal(data)
+	encoded, err := json.Marshal(storedData{SavedData: data})
 	if err != nil {
 		return fmt.Errorf("failed to encode data: %w", err)
 	}
@@ -193,26 +176,19 @@ func writeData(data SavedData) error {
 }
 
 func writeDataFile(encoded []byte) error {
-	temporary := jsonfilePath + ".tmp"
-	if err := os.WriteFile(temporary, encoded, 0644); err != nil {
-		return fmt.Errorf("failed to write data file: %w", err)
-	}
-	if err := os.Rename(temporary, jsonfilePath); err != nil {
-		return fmt.Errorf("failed to replace data file: %w", err)
-	}
-	return nil
+	return writeAtomic(jsonfilePath, "data file", encoded)
 }
 
 func mutateData(mutate func(data *SavedData)) error {
 	dataMutex.Lock()
 	defer dataMutex.Unlock()
 
-	data, err := readData()
+	stored, err := readStored()
 	if err != nil {
 		return err
 	}
-	mutate(&data)
-	return writeData(data)
+	mutate(&stored.SavedData)
+	return writeStored(stored)
 }
 
 func withDefaultEnvironment(data SavedData) SavedData {
@@ -243,14 +219,15 @@ func (a *App) LoadData() (SavedData, error) {
 	dataMutex.RLock()
 	defer dataMutex.RUnlock()
 
-	data, err := readData()
+	stored, err := readStored()
 	if err != nil {
 		return SavedData{}, err
 	}
-	data, err = storage.current().collection(data)
+	data, err := storage.current().collection(stored.SavedData)
 	if err != nil {
 		return SavedData{}, err
 	}
+	data.History = loadHistory(stored)
 	data = withDefaultEnvironment(data)
 	if !data.Restricted {
 		data.Environments = vault.withSecrets(data.Environments, secretScope())
@@ -323,12 +300,6 @@ func (a *App) ShareSiblingOrder() error {
 	return storage.current().shareOrder()
 }
 
-func (a *App) SaveHistory(history []HistoryEntry) error {
-	return mutateData(func(data *SavedData) {
-		data.History = history
-	})
-}
-
 func (a *App) SaveEnvironments(environments []Environment, activeId string) error {
 	stripped, err := vault.withoutSecrets(environments, secretScope())
 	if err != nil {
@@ -359,10 +330,10 @@ func resetData() error {
 	if err := forgetBackups(); err != nil {
 		return err
 	}
-	if err := removeIfPresent(filepath.Join(appFolder, mockAppDataFile), filepath.Join(appFolder, captureAppDataFile), trashAppDataPath()); err != nil {
+	if err := removeIfPresent(filepath.Join(appFolder, mockAppDataFile), filepath.Join(appFolder, captureAppDataFile), trashAppDataPath(), historyPath, historyPath+corruptHistorySuffix); err != nil {
 		return err
 	}
-	return writeData(SavedData{})
+	return writeStored(storedData{})
 }
 
 func removeIfPresent(paths ...string) error {
