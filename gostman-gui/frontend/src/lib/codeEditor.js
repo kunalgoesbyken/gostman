@@ -4,10 +4,7 @@ import { HighlightStyle, indentUnit, syntaxHighlighting, syntaxTree } from '@cod
 import { indentWithTab } from '@codemirror/commands'
 import { lintGutter, linter } from '@codemirror/lint'
 import { json } from '@codemirror/lang-json'
-import { yaml } from '@codemirror/lang-yaml'
 import { xml, xmlLanguage } from '@codemirror/lang-xml'
-import { html } from '@codemirror/lang-html'
-import { javascript } from '@codemirror/lang-javascript'
 import { tags } from '@lezer/highlight'
 import { basicSetup } from 'codemirror'
 import { findJsonProblem, formatJson, lineAndColumn } from './jsonFormat'
@@ -199,13 +196,24 @@ function xmlErrors(view) {
 
 const LANGUAGES = {
   json: () => [json(), linter(jsonErrors)],
-  yaml: () => yaml(),
   xml: () => [xml(), linter(xmlErrors)],
-  html: () => html(),
-  javascript: () => [javascript(), linter(syntaxErrors)],
 }
 
-export const languageExtension = (language) => LANGUAGES[language]?.() ?? []
+const LAZY_LANGUAGES = {
+  yaml: async () => (await import('@codemirror/lang-yaml')).yaml(),
+  html: async () => (await import('@codemirror/lang-html')).html(),
+  javascript: async () => [(await import('@codemirror/lang-javascript')).javascript(), linter(syntaxErrors)],
+}
+
+const loadedLanguages = new Map()
+
+export const isLanguagePending = (language) => Object.hasOwn(LAZY_LANGUAGES, language) && !loadedLanguages.has(language)
+
+export async function loadLanguage(language) {
+  if (isLanguagePending(language)) loadedLanguages.set(language, await LAZY_LANGUAGES[language]())
+}
+
+export const languageExtension = (language) => LANGUAGES[language]?.() ?? loadedLanguages.get(language) ?? []
 
 const XML_PROBLEM_NODES = new Set(['MismatchedCloseTag', 'MissingCloseTag'])
 

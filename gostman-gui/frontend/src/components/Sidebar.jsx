@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState } from "react"
+import { Suspense, memo, useEffect, useRef, useState } from "react"
 import { Check, FileCode, FolderPlus, Import, Plus, RotateCcw } from "lucide-react"
 import { IconButton } from "./ui/button"
 import { ContextMenu } from "./ui/ContextMenu"
@@ -6,10 +6,7 @@ import { ResizablePane, Toolbar } from "./ui/panel"
 import { OverflowTabsList, TabCount, Tabs, TabsContent } from "./ui/tabs"
 import { CollectionTree } from "./CollectionTree"
 import { GlobalSearch } from "./GlobalSearch"
-import { HistoryList } from "./HistoryList"
 import { OpenTabsList } from "./OpenTabsList"
-import { FlowList } from "./flows/FlowList"
-import { SpecList } from "./specs/SpecList"
 import { IMPORT_TEXT } from "../lib/importText"
 import { SIDEBAR_PANE, isNarrowViewport } from "../lib/layout"
 import { SPEC_LIST_TEXT } from "../lib/specEditorText"
@@ -20,7 +17,14 @@ import { cn } from "../lib/utils"
 import { useShortcutLabel } from "../hooks/useShortcuts"
 import { EDGE_END } from "../hooks/usePaneResize"
 import { hintWithShortcut } from "../lib/shortcuts"
+import { whenIdle } from "../lib/idle"
+import { lazyExport } from "../lib/lazyExport"
 import { useAppStore } from "../store/appStore"
+
+const loadSidebarLists = () => import("./sidebarLists")
+const FlowList = lazyExport(loadSidebarLists, "FlowList")
+const SpecList = lazyExport(loadSidebarLists, "SpecList")
+const HistoryList = lazyExport(loadSidebarLists, "HistoryList")
 
 const LIST_OWNS_ADD = [VIEW_FLOWS, VIEW_SPECS]
 const VIEW_CLASS = "flex min-h-0 flex-1 flex-col"
@@ -60,6 +64,7 @@ export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory
   useEffect(() => {
     if (viewRequest) setView(viewRequest.view)
   }, [viewRequest])
+  useEffect(() => whenIdle(loadSidebarLists), [])
   const view = shown.includes(chosen) ? chosen : shown[0]
   const [menuPosition, setMenuPosition] = useState(null)
   const [addPosition, setAddPosition] = useState(null)
@@ -122,16 +127,22 @@ export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory
           <CollectionTree folders={folders} requests={requests} activeRequestId={activeRequestId} actions={actions} />
         </TabsContent>
         <TabsContent value={VIEW_FLOWS} className={VIEW_CLASS}>
-          <FlowList actions={actions.flows} onMonitor={actions.monitorFlow} />
+          <Suspense fallback={null}>
+            <FlowList actions={actions.flows} onMonitor={actions.monitorFlow} />
+          </Suspense>
         </TabsContent>
         <TabsContent value={VIEW_SPECS} className={VIEW_CLASS}>
-          <SpecList actions={actions.specs} />
+          <Suspense fallback={null}>
+            <SpecList actions={actions.specs} />
+          </Suspense>
         </TabsContent>
         <TabsContent value={VIEW_SEARCH} className={VIEW_CLASS}>
           <GlobalSearch requests={requests} history={requestHistory} tabs={tabs} actions={actions} />
         </TabsContent>
         <TabsContent value={VIEW_HISTORY} className={VIEW_CLASS}>
-          <HistoryList entries={requestHistory} folders={folders} actions={actions} />
+          <Suspense fallback={null}>
+            <HistoryList entries={requestHistory} folders={folders} actions={actions} />
+          </Suspense>
         </TabsContent>
       </Tabs>
       {addPosition && <ContextMenu position={addPosition} title={SIDEBAR_TEXT.add} items={addItems} onClose={() => setAddPosition(null)} />}

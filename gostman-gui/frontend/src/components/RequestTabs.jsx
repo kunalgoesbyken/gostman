@@ -4,18 +4,14 @@ import { Button } from "./ui/button"
 import { Panel, Toolbar } from "./ui/panel"
 import { OverflowTabsList, TabCount, Tabs, TabsContent } from "./ui/tabs"
 import { SkeletonLines } from "./ui/skeleton"
-import { AuthPanel } from "./AuthPanel"
 import { BodyPanel } from "./BodyPanel"
 import { FeatureHint } from "./FeatureHint"
-import { NotesPanel } from "./NotesPanel"
 import { InheritedHeaders } from "./InheritedHeaders"
 import { KeyValueEditor } from "./KeyValueEditor"
 import { HEADER_SUGGESTIONS } from "../lib/httpHeaders"
 import { ParamsPanel } from "./ParamsPanel"
-import { SettingsPanel } from "./SettingsPanel"
-import { VariablesPanel } from "./VariablesPanel"
-import { ExtractPanel } from "./ExtractPanel"
-import { TestsPanel } from "./TestsPanel"
+import { whenIdle } from "../lib/idle"
+import { lazyExport } from "../lib/lazyExport"
 import { useAiEnabled } from "../lib/ai/session"
 import { TASK_DOCS } from "../lib/ai/tasks"
 import { BODY_FORM, BODY_MULTIPART, BODY_NONE } from "../lib/body"
@@ -45,6 +41,14 @@ const GraphQLPanel = lazy(() => import("./GraphQLPanel").then((module) => ({ def
 const GrpcPanel = lazy(() => import("./GrpcPanel").then((module) => ({ default: module.GrpcPanel })))
 const McpPanel = lazy(() => import("./McpPanel").then((module) => ({ default: module.McpPanel })))
 const WebSocketPanel = lazy(() => import("./WebSocketPanel").then((module) => ({ default: module.WebSocketPanel })))
+
+const loadRequestPanels = () => import("./requestPanels")
+const AuthPanel = lazyExport(loadRequestPanels, "AuthPanel")
+const VariablesPanel = lazyExport(loadRequestPanels, "VariablesPanel")
+const ExtractPanel = lazyExport(loadRequestPanels, "ExtractPanel")
+const TestsPanel = lazyExport(loadRequestPanels, "TestsPanel")
+const NotesPanel = lazyExport(loadRequestPanels, "NotesPanel")
+const SettingsPanel = lazyExport(loadRequestPanels, "SettingsPanel")
 
 const ROW_BODY_TYPES = [BODY_FORM, BODY_MULTIPART]
 const PANEL_CLASS = "h-full min-h-0"
@@ -130,6 +134,7 @@ export const RequestTabs = memo(function RequestTabs({
   const isGraphQL = method === GRAPHQL_METHOD
 
   useLeadOnKindChange(kind, setActivePanel)
+  useEffect(() => whenIdle(loadRequestPanels), [])
 
   const headerRows = useMemo(() => parseRows(headers), [headers])
   const inheritedHeaders = useAppStore((state) => countInheritedHeaders(state, activeRequest.folderId, headerRows))
@@ -239,14 +244,16 @@ export const RequestTabs = memo(function RequestTabs({
         </TabsContent>
 
         <TabsContent value={AUTH_PANEL} className={PANEL_CLASS}>
-          <AuthPanel
-            key={tabId}
-            auth={auth}
-            tokenRequest={tokenRequest}
-            actions={actions}
-            inheritance={{ source: authSource, sourceType: authSourceType, noAuthValue: "" }}
-            onChange={(next) => onUpdateRequest({ auth: next })}
-          />
+          <Suspense fallback={<PanelFallback />}>
+            <AuthPanel
+              key={tabId}
+              auth={auth}
+              tokenRequest={tokenRequest}
+              actions={actions}
+              inheritance={{ source: authSource, sourceType: authSourceType, noAuthValue: "" }}
+              onChange={(next) => onUpdateRequest({ auth: next })}
+            />
+          </Suspense>
         </TabsContent>
 
         <TabsContent value={GRAPHQL_PANEL} className={PANEL_CLASS}>
@@ -313,55 +320,65 @@ export const RequestTabs = memo(function RequestTabs({
         </TabsContent>
 
         <TabsContent value={VARS_PANEL} className={PANEL_CLASS}>
-          <Panel>
-            <VariablesPanel key={tabId} rows={variableRows} onChange={(rows) => onUpdateRequest({ vars: serializeRows(rows) })} />
-          </Panel>
+          <Suspense fallback={<PanelFallback />}>
+            <Panel>
+              <VariablesPanel key={tabId} rows={variableRows} onChange={(rows) => onUpdateRequest({ vars: serializeRows(rows) })} />
+            </Panel>
+          </Suspense>
         </TabsContent>
 
         <TabsContent value={EXTRACT_PANEL} className={PANEL_CLASS}>
-          <ExtractPanel
-            key={tabId}
-            extractors={extractors}
-            response={response}
-            extraction={extraction}
-            onChange={(next) => onUpdateRequest({ extractors: next })}
-            onRun={() => actions.runExtractors(tabId)}
-          />
+          <Suspense fallback={<PanelFallback />}>
+            <ExtractPanel
+              key={tabId}
+              extractors={extractors}
+              response={response}
+              extraction={extraction}
+              onChange={(next) => onUpdateRequest({ extractors: next })}
+              onRun={() => actions.runExtractors(tabId)}
+            />
+          </Suspense>
         </TabsContent>
 
         <TabsContent value={TESTS_PANEL} className={PANEL_CLASS}>
-          <TestsPanel
-            key={tabId}
-            request={activeRequest}
-            editorPath={tabId}
-            onUpdateRequest={onUpdateRequest}
-            EditorComponent={EditorComponent}
-            response={response}
-            ai={isAiOn ? actions.ai : null}
-          />
+          <Suspense fallback={<PanelFallback />}>
+            <TestsPanel
+              key={tabId}
+              request={activeRequest}
+              editorPath={tabId}
+              onUpdateRequest={onUpdateRequest}
+              EditorComponent={EditorComponent}
+              response={response}
+              ai={isAiOn ? actions.ai : null}
+            />
+          </Suspense>
         </TabsContent>
 
         <TabsContent value={NOTES_PANEL} className={PANEL_CLASS}>
-          <NotesPanel key={tabId} notes={notes} onChange={(next) => onUpdateRequest({ notes: next })} />
+          <Suspense fallback={<PanelFallback />}>
+            <NotesPanel key={tabId} notes={notes} onChange={(next) => onUpdateRequest({ notes: next })} />
+          </Suspense>
         </TabsContent>
 
         <TabsContent value={SETTINGS_PANEL} className={PANEL_CLASS}>
-          <SettingsPanel
-            options={options}
-            settings={requestSettings(kind, options)}
-            description={activeRequest.description}
-            tags={activeRequest.tags}
-            defaultView={activeRequest.defaultView}
-            jsonDepth={activeRequest.jsonDepth}
-            defaultDepth={appDefaultDepth(isMcpRequest(activeRequest))}
-            showsViews={!isSocket}
-            onChange={(next) => onUpdateRequest({ options: next })}
-            onDefaultViewChange={(defaultView) => onUpdateRequest({ defaultView })}
-            onJsonDepthChange={(jsonDepth) => onUpdateRequest({ jsonDepth })}
-            onDescriptionChange={(description) => onUpdateRequest({ description })}
-            onTagsChange={(tags) => onUpdateRequest({ tags })}
-            onDocument={isAiOn ? () => actions.ai.start(TASK_DOCS) : null}
-          />
+          <Suspense fallback={<PanelFallback />}>
+            <SettingsPanel
+              options={options}
+              settings={requestSettings(kind, options)}
+              description={activeRequest.description}
+              tags={activeRequest.tags}
+              defaultView={activeRequest.defaultView}
+              jsonDepth={activeRequest.jsonDepth}
+              defaultDepth={appDefaultDepth(isMcpRequest(activeRequest))}
+              showsViews={!isSocket}
+              onChange={(next) => onUpdateRequest({ options: next })}
+              onDefaultViewChange={(defaultView) => onUpdateRequest({ defaultView })}
+              onJsonDepthChange={(jsonDepth) => onUpdateRequest({ jsonDepth })}
+              onDescriptionChange={(description) => onUpdateRequest({ description })}
+              onTagsChange={(tags) => onUpdateRequest({ tags })}
+              onDocument={isAiOn ? () => actions.ai.start(TASK_DOCS) : null}
+            />
+          </Suspense>
         </TabsContent>
       </div>
     </Tabs>

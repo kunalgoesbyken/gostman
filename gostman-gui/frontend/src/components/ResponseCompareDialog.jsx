@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react"
 import { Dialog, DialogBody, DialogHeader } from "./ui/dialog"
 import { toolWindow } from "../lib/dialogWindows"
 import { SegmentedControl } from "./ui/segmented"
-import { CodeDiff } from "./CodeEditor"
+import { CodeDiff } from "./CodeDiff"
 import { COMPARE_PARTS, describeResponse } from "../lib/responseHistory"
 import { RESPONSE_TEXT } from "../lib/responseText"
 

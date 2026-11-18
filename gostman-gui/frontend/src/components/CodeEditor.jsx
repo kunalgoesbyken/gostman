@@ -1,10 +1,9 @@
-import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { Annotation, Compartment, EditorState } from '@codemirror/state'
 import { EditorView } from '@codemirror/view'
-import { MergeView } from '@codemirror/merge'
 import { useVariableMap } from '../hooks/useVariableMap'
 import { usePreferences } from '../lib/preferences'
-import { baseExtensions, canFormat, diagnosticsExtension, formatDocument, formatKeymap, languageExtension, phraseExtension, refreshDiagnostics, revealOffset, variableExtension, wrapExtension } from '../lib/codeEditor'
+import { baseExtensions, canFormat, diagnosticsExtension, formatDocument, formatKeymap, isLanguagePending, languageExtension, loadLanguage, phraseExtension, refreshDiagnostics, revealOffset, variableExtension, wrapExtension } from '../lib/codeEditor'
 import { ghostText } from '../lib/ghostText'
 import { LARGE_BODY_CHARS } from '../lib/largeText'
 import './variables.css'
@@ -18,12 +17,28 @@ const labelExtension = (label) => (label ? EditorView.contentAttributes.of({ 'ar
 
 const isUserChange = (update) => update.docChanged && !update.transactions.some((transaction) => transaction.annotation(externalChange))
 
-function useEditorConfig(language, variables, fileReads, formatting = NO_EXTENSION, label = '') {
+function useLoadedLanguage(language) {
+  const [loaded, setLoaded] = useState(null)
+
+  useEffect(() => {
+    if (!isLanguagePending(language)) return undefined
+    let isCurrent = true
+    loadLanguage(language).then(() => isCurrent && setLoaded(language))
+    return () => {
+      isCurrent = false
+    }
+  }, [language])
+
+  return loaded
+}
+
+export function useEditorConfig(language, variables, fileReads, formatting = NO_EXTENSION, label = '') {
   const { wrapLines } = usePreferences()
   const variableMap = useVariableMap()
+  const loadedLanguage = useLoadedLanguage(language)
   return useMemo(
     () => [languageExtension(language), wrapExtension(wrapLines), variables ? variableExtension(variableMap, { fileReads }) : [], formatting, labelExtension(label)],
-    [language, wrapLines, variables, fileReads, variableMap, formatting, label],
+    [language, loadedLanguage, wrapLines, variables, fileReads, variableMap, formatting, label],
   )
 }
 
@@ -126,21 +141,3 @@ export const CodeEditor = forwardRef(function CodeEditor(
 
   return <div ref={hostRef} dir="ltr" data-surface={surface} className="overflow-hidden" style={{ height, fontSize: editorFontSize }} />
 })
-
-export function CodeDiff({ original, modified, language }) {
-  const hostRef = useRef(null)
-  const { editorFontSize } = usePreferences()
-  const config = useEditorConfig(language, false)
-
-  useEffect(() => {
-    const extensions = [baseExtensions, phraseExtension(), config, EditorState.readOnly.of(true)]
-    const view = new MergeView({
-      parent: hostRef.current,
-      a: { doc: original, extensions },
-      b: { doc: modified, extensions },
-    })
-    return () => view.destroy()
-  }, [original, modified, config])
-
-  return <div ref={hostRef} dir="ltr" className="h-full [&>.cm-mergeView]:h-full" style={{ fontSize: editorFontSize }} />
-}

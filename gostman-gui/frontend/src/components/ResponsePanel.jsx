@@ -30,8 +30,6 @@ import { OverflowTabsList, TabCount, Tabs } from "./ui/tabs"
 import { SkeletonLines } from "./ui/skeleton"
 import { TestResults, countPassed, hasTestOutput } from "./TestResults"
 import { VisualizeTab } from "./VisualizeTab"
-import { RequestBodyTab } from "./RequestBodyTab"
-import { TimelineTab } from "./TimelineTab"
 import { UnresolvedNotice } from "./UnresolvedNotice"
 import { useClipboardCopy } from "../hooks/useClipboardCopy"
 import { asSentence, lookup } from "../lib/dataUtils"
@@ -86,6 +84,8 @@ const TOOLBAR_ROW = 'h-[calc(2.5rem-1px)]'
 const ResponseCompareDialog = lazy(() => import("./ResponseCompareDialog").then((module) => ({ default: module.ResponseCompareDialog })))
 const AddChecksDialog = lazy(() => import("./AddChecksDialog").then((module) => ({ default: module.AddChecksDialog })))
 const CallsExplorer = lazy(() => import("./CallsExplorer").then((module) => ({ default: module.CallsExplorer })))
+const RequestBodyTab = lazy(() => import("./RequestBodyTab").then((module) => ({ default: module.RequestBodyTab })))
+const TimelineTab = lazy(() => import("./TimelineTab").then((module) => ({ default: module.TimelineTab })))
 
 const HISTORY_TEXT = RESPONSE_TEXT.history
 
@@ -577,8 +577,8 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
     if (activeTab === TAB_CALLS) return <CallsTab calls={calls} entry={historyEntry} loading={loading} onExport={onExportCalls} />
     if (loading) return <SkeletonLines label={RESPONSE_TEXT.sending} lines={6} />
     if (!shown) return <FeatureEmpty surface="response" icon={FileText} title={RESPONSE_TEXT.noResponseTitle} description={RESPONSE_TEXT.noResponseDescription} />
-    if (activeTab === TAB_REQUEST && hasSent) return <RequestBodyTab sent={shown.sent} onSave={past ? undefined : onSaveSent} />
-    if (activeTab === TAB_TIMELINE && hasTimeline) return <TimelineTab timeline={shown.timeline} />
+    if (activeTab === TAB_REQUEST && hasSent) return <Suspense fallback={null}><RequestBodyTab sent={shown.sent} onSave={past ? undefined : onSaveSent} /></Suspense>
+    if (activeTab === TAB_TIMELINE && hasTimeline) return <Suspense fallback={null}><TimelineTab timeline={shown.timeline} /></Suspense>
     if (shown.error) return <ErrorBody response={shown} onExplain={onExplain} onTrust={onTrust} />
     if (activeTab === TAB_TESTS && showsTests) return <TestResults tests={tests} />
     if (activeTab === TAB_CONSOLE) return <ConsolePanel />
