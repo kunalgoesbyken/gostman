@@ -12,6 +12,7 @@ on:
 env:
   WAILS_VERSION: 'v2.17.1'
   GO_VERSION: '1.26.11'
+  GOEXPERIMENT: jsonv2
   NODE_VERSION: '20'
 
 permissions:

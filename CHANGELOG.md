@@ -4,6 +4,13 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.20.1] - 2026-11-19
+
+### Changed
+
+- The desktop app and the command line parse JSON about twice as fast: they are built with the `encoding/json` engine that Go 1.27 turns on by default (`GOEXPERIMENT=jsonv2` on Go 1.26). This covers every call between the window and the app, the data file and CLI reports.
+- The desktop data file is written without indentation, so it is about 30% smaller. Saving the history after a send takes 78 ms instead of 131 ms with the default history size, and 275 ms instead of 542 ms with 5,000 saved requests; loading the data takes about 30% less time.
+
 ### Fixed
 
 - Calls chart: bars of calls sent close together no longer overlap; they are set side by side, never more than a few pixels from their time, and a dense burst is drawn as thin bars at its time. Dragging across bars zooms to those calls. The chart keeps its height and text size on wide panels instead of growing with the width, the longest duration label is no longer cut off, and the From and To labels drop the year when the chart is too narrow for both (#38).

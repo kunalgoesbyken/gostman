@@ -185,7 +185,7 @@ func writeData(data SavedData) error {
 	if err := os.MkdirAll(appFolder, 0755); err != nil {
 		return fmt.Errorf("failed to create directory: %w", err)
 	}
-	encoded, err := json.MarshalIndent(data, "", " ")
+	encoded, err := json.Marshal(data)
 	if err != nil {
 		return fmt.Errorf("failed to encode data: %w", err)
 	}

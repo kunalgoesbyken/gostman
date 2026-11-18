@@ -134,3 +134,16 @@ Production builds of the web app served by `vite preview`, headless Chromium 153
 ## Raw data
 
 The JSON files written by the scripts were kept outside the repository: `results-20261024-210338.json` (sample data), `results-20261024-210900.json` (5,000-request folder), `web-before.json` and `web-after.json`.
+
+## Desktop data file (2026-11-19)
+
+A Go benchmark in the desktop module called `SaveHistory` (decoding the history as it arrives from the window, then the read, update and write of `gostman.json`) and `readData` followed by encoding the result for the window. The history held 50 requests with 500 calls each, the defaults, next to 200 or 5,000 saved requests with 1 KB JSON bodies. Go 1.26.11, 6 iterations, 3 runs each; the values are the medians. Same machine, other jobs running.
+
+| | Before: Go 1.26 `encoding/json`, indented file | After: `GOEXPERIMENT=jsonv2`, compact file | Compact file only |
+|---|---|---|---|
+| Save history, 200 requests (4.2 MB file before, 3.0 MB after) | 131 ms | 78 ms | 98 ms |
+| Save history, 5,000 requests (24.3 MB before, 18.7 MB after) | 542 ms | 275 ms | 370 ms |
+| Load, 200 requests | 58 ms | 41 ms | 51 ms |
+| Load, 5,000 requests | 314 ms | 221 ms | 290 ms |
+
+Go 1.27 uses the same JSON engine without the experiment flag; built with `GOEXPERIMENT=nojsonv2` it decoded the 5,000-request file in 416 ms instead of 197 ms. `gostman run examples/todo-api --env Mock --reporter json` against `gostman mock` gave the same report from both builds, apart from times.
