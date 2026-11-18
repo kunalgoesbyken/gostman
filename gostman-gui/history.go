@@ -162,12 +162,16 @@ func currentHistoryDocument() json.RawMessage {
 	raw := readHistoryFile()
 	var history []json.RawMessage
 	if json.Unmarshal(raw, &history) != nil || history == nil {
-		return json.RawMessage(emptyHistory)
+		return noHistory()
 	}
 	return raw
 }
 
-func withHistory(content []byte) []byte {
+func noHistory() json.RawMessage {
+	return json.RawMessage(emptyHistory)
+}
+
+func withHistory(content []byte, history func() json.RawMessage) []byte {
 	var document map[string]json.RawMessage
 	if json.Unmarshal(content, &document) != nil || document == nil {
 		return content
@@ -175,7 +179,7 @@ func withHistory(content []byte) []byte {
 	if holdsHistory(document["history"]) {
 		return content
 	}
-	document["history"] = currentHistoryDocument()
+	document["history"] = history()
 	merged, err := json.Marshal(document)
 	if err != nil {
 		return content

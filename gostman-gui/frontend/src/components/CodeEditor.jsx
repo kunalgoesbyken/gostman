@@ -3,7 +3,7 @@ import { Annotation, Compartment, EditorState } from '@codemirror/state'
 import { EditorView } from '@codemirror/view'
 import { useVariableMap } from '../hooks/useVariableMap'
 import { usePreferences } from '../lib/preferences'
-import { baseExtensions, canFormat, diagnosticsExtension, formatDocument, formatKeymap, isLanguagePending, languageExtension, loadLanguage, phraseExtension, refreshDiagnostics, revealOffset, variableExtension, wrapExtension } from '../lib/codeEditor'
+import { baseExtensions, canFormat, diagnosticsExtension, formatDocument, formatKeymap, isLazyLanguage, languageExtension, loadLanguage, phraseExtension, refreshDiagnostics, revealOffset, variableExtension, wrapExtension } from '../lib/codeEditor'
 import { ghostText } from '../lib/ghostText'
 import { LARGE_BODY_CHARS } from '../lib/largeText'
 import './variables.css'
@@ -24,7 +24,7 @@ function useLanguageExtension(language) {
   const [loaded, setLoaded] = useState(null)
 
   useEffect(() => {
-    if (!isLanguagePending(language)) return undefined
+    if (!isLazyLanguage(language)) return undefined
     let isCurrent = true
     loadLanguage(language).then((extension) => {
       if (isCurrent) setLoaded({ language, extension })
