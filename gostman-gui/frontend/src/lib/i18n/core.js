@@ -1,7 +1,7 @@
 export const ENGLISH = 'en'
 export const LANGUAGE_MESSAGE = 'language'
 
-const PLURAL_SUFFIX = /_(zero|one|two|few|many|other)$/
+const PLURAL_SUFFIXES = new Set(['zero', 'one', 'two', 'few', 'many', 'other'])
 const PLACEHOLDER = /\{\{([A-Za-z][A-Za-z0-9]*)\}\}/g
 const PSEUDO_BASES = { 'en-XA': 'en', 'ar-XB': 'ar' }
 
@@ -111,19 +111,33 @@ export function registerEnglish(namespace, tree) {
 
 const placeholdersOf = (text) => [...text.matchAll(PLACEHOLDER)].map((match) => match[1])
 
-function leafShapes(tree) {
-  const shapes = new Map()
-  Object.entries(tree).forEach(([key, value]) => {
-    const name = key.replace(PLURAL_SUFFIX, '')
-    const shape = shapes.get(name) || { plural: false, names: new Set(), child: null }
+function pluralBase(key) {
+  const cut = key.lastIndexOf('_')
+  return cut >= 0 && PLURAL_SUFFIXES.has(key.slice(cut + 1)) ? key.slice(0, cut) : key
+}
+
+function groupKeys(tree) {
+  const groups = new Map()
+  Object.keys(tree).forEach((key) => {
+    const name = pluralBase(key)
+    const keys = groups.get(name)
+    if (keys) keys.push(key)
+    else groups.set(name, [key])
+  })
+  return groups
+}
+
+function leafShape(tree, keys) {
+  const shape = { plural: false, names: new Set(), child: null }
+  keys.forEach((key) => {
+    const value = tree[key]
     if (isPlainObject(value)) shape.child = value
     else {
-      shape.plural = shape.plural || name !== key
+      shape.plural = shape.plural || pluralBase(key) !== key
       placeholdersOf(value).forEach((placeholder) => shape.names.add(placeholder))
     }
-    shapes.set(name, shape)
   })
-  return shapes
+  return shape
 }
 
 function bindArgument({ plural, names }, argument) {
@@ -149,21 +163,34 @@ function memoisedText(namespace, key) {
   }
 }
 
+function describeLeaf(namespace, tree, keys, key) {
+  const shape = leafShape(tree, keys)
+  if (shape.child) return { value: shapeOf(namespace, shape.child, key) }
+  if (shape.plural || shape.names.size > 0) return { value: (argument) => format(namespace, key, bindArgument(shape, argument)) }
+  return { get: memoisedText(namespace, key) }
+}
+
+function defineLazy(target, name, describe) {
+  defineGetter(target, name, () => {
+    const descriptor = describe()
+    Object.defineProperty(target, name, { ...descriptor, enumerable: true, configurable: true })
+    return descriptor.get ? descriptor.get() : descriptor.value
+  })
+}
+
 function shapeOf(namespace, tree, prefix) {
   const target = {}
-  leafShapes(tree).forEach((shape, name) => {
+  groupKeys(tree).forEach((keys, name) => {
     const key = prefix ? `${prefix}.${name}` : name
-    if (shape.child) defineValue(target, name, shapeOf(namespace, shape.child, key))
-    else if (shape.plural || shape.names.size > 0) defineValue(target, name, (argument) => format(namespace, key, bindArgument(shape, argument)))
-    else defineGetter(target, name, memoisedText(namespace, key))
+    defineLazy(target, name, () => describeLeaf(namespace, tree, keys, key))
   })
   return target
 }
 
 function overlay(target, extra) {
   Object.entries(Object.getOwnPropertyDescriptors(extra)).forEach(([name, descriptor]) => {
-    const current = Object.getOwnPropertyDescriptor(target, name)
-    if (isPlainObject(descriptor.value) && current && isPlainObject(current.value)) overlay(current.value, descriptor.value)
+    const current = isPlainObject(descriptor.value) ? target[name] : undefined
+    if (isPlainObject(current)) overlay(current, descriptor.value)
     else Object.defineProperty(target, name, { ...descriptor, enumerable: true, configurable: true })
   })
   return target
