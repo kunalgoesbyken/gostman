@@ -363,7 +363,7 @@ function OpenCommandPalette({ mode, environments, activeEnvironmentId, workspace
         data-surface="menu"
         onMouseDown={(event) => event.stopPropagation()}
         onKeyDown={handleKeyDown}
-        className="flex max-h-full w-full max-w-xl flex-col overflow-hidden rounded-lg border border-border bg-background shadow-lg focus:outline-none"
+        className="flex max-h-[min(100%,36rem)] w-full max-w-xl flex-col overflow-hidden rounded-lg border border-border bg-background shadow-lg focus:outline-none"
       >
         <div className="flex h-10 shrink-0 items-center gap-2 border-b border-border px-3">
           <Search className="h-4 w-4 shrink-0 text-muted-foreground" />

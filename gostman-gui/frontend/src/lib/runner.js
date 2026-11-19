@@ -9,7 +9,7 @@ import { isSocketAddress } from './socketSessions'
 import { matchesTags } from './tags'
 import { folderChain } from './variableScopes'
 import { RUNNER_TEXT } from './runnerText'
-import { useAppStore, variableTextFor } from '../store/appStore'
+import { environmentFor, useAppStore, variableTextFor } from '../store/appStore'
 
 const BODY_LIMIT = 64 * 1024
 const BASE64 = 'base64'
@@ -20,7 +20,7 @@ const pause = (milliseconds) => new Promise((resolve) => setTimeout(resolve, mil
 
 const folderPath = (folderId) => folderChain(store().folders, folderId).map((folder) => folder.name).join(FOLDER_SEPARATOR)
 
-const identify = ({ id, name, method, url, folderId }) => ({ id, name, method, url, folder: folderPath(folderId) })
+const identify = ({ id, name, method, url, folderId, givenEnvironmentId }) => ({ id, name, method, url, folder: folderPath(folderId), environmentId: givenEnvironmentId })
 
 const flagged = (result, problem) => ({ ...result, error: [result.error, problem].filter(Boolean).join('\n'), hasFailed: true })
 
@@ -93,6 +93,8 @@ const STORE_SINK = {
   finish: () => store().finishRun(),
 }
 
+const inStartingEnvironment = (request) => ({ ...request, givenEnvironmentId: environmentFor(store(), request)?.id })
+
 export function createRunner(backend, execute, sink = STORE_SINK) {
   let current = null
   let sequence = 0
@@ -137,7 +139,7 @@ export function createRunner(backend, execute, sink = STORE_SINK) {
   async function start({ folderId, delayMs, stopOnFailure, parallel = 1, rows = [], iterations = 0, tagFilter = NO_TAG_FILTER }) {
     const run = { isStopped: false, isHalted: false, sendIds: new Set(), prompts: rememberPrompts(), giveSession: sessionGiver(store().sessionVariables) }
     current = run
-    const requests = requestsToRun(store(), folderId, tagFilter)
+    const requests = requestsToRun(store(), folderId, tagFilter).map(inStartingEnvironment)
     const count = iterationCount(rows, iterations)
     const isIterating = rows.length > 0 || count > 1
     sizeSandboxPool(parallel)

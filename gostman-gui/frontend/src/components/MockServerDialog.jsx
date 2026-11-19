@@ -1,8 +1,9 @@
 import { useMemo } from "react"
+import { useShallow } from "zustand/react/shallow"
 import { AlertTriangle, Play, Square } from "lucide-react"
 import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
-import { toolWindow } from "../lib/dialogWindows"
+import { MODELESS_WINDOWS } from "../lib/dialogWindows"
 import { Dialog } from "./ui/dialog"
 import { ToolDialogHeader } from "./ToolDialogHeader"
 import { Input } from "./ui/input"
@@ -93,20 +94,25 @@ function ServerControls({ mock, scopes, actions }) {
 }
 
 function ServerTabs({ mock }) {
+  const logCount = useMockStore((state) => state.log.length)
   return (
-    <div className="flex h-9 shrink-0 items-stretch border-b border-border px-3">
+    <div className="flex h-9 shrink-0 items-stretch border-b border-border px-3.5">
       <TabsList label={MOCK_TEXT.title}>
         <TabsTrigger value={TAB_ROUTES}>{MOCK_TEXT.tabs.routes}<TabCount>{mock.routes.length}</TabCount></TabsTrigger>
         <TabsTrigger value={TAB_RULES}>{MOCK_TEXT.tabs.rules}<TabCount>{mock.config.rules.length}</TabCount></TabsTrigger>
         <TabsTrigger value={TAB_BEHAVIOR}>{MOCK_TEXT.tabs.behavior}</TabsTrigger>
-        <TabsTrigger value={TAB_LOG}>{MOCK_TEXT.tabs.log}<TabCount>{mock.log.length}</TabCount></TabsTrigger>
+        <TabsTrigger value={TAB_LOG}>{MOCK_TEXT.tabs.log}<TabCount>{logCount}</TabCount></TabsTrigger>
       </TabsList>
     </div>
   )
 }
 
+const panelState = ({ tab, failure, config, routes, isRunning, isStarting, isLoadingSpec, folderId }) => (
+  { tab, failure, config, routes, isRunning, isStarting, isLoadingSpec, folderId }
+)
+
 function ServerPanel({ folders, requests, actions }) {
-  const mock = useMockStore()
+  const mock = useMockStore(useShallow(panelState))
   const scopes = useMemo(() => listFolders(buildCollectionTree(folders, requests)), [folders, requests])
   const examplesOf = useMemo(
     () => new Map([...requests, ...mock.config.spec.sources].map((source) => [source.id, parseExamples(source.examples)])),
@@ -128,7 +134,7 @@ function ServerPanel({ folders, requests, actions }) {
         <MockBehaviorTab settings={mock.config.settings} actions={actions} />
       </TabsContent>
       <TabsContent value={TAB_LOG} className="flex min-h-0 flex-1 flex-col">
-        <MockLogTab log={mock.log} isRunning={mock.isRunning} onClear={actions.clearLog} />
+        <MockLogTab onClear={actions.clearLog} />
       </TabsContent>
       <p role="status" className="shrink-0 border-t border-border px-4 py-2 text-xs text-muted-foreground">
         {describeRoutes(mock.routes)}
@@ -137,7 +143,7 @@ function ServerPanel({ folders, requests, actions }) {
   )
 }
 
-const MOCK_WINDOW = toolWindow("mock")
+const MOCK_WINDOW = MODELESS_WINDOWS.mock
 
 export function MockServerDialog({ folders, requests, actions }) {
   const isRunning = useMockStore((state) => state.isRunning)

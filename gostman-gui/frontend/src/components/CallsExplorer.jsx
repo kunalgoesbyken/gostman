@@ -408,7 +408,7 @@ export function CallsExplorer({ calls, entry, onExport }) {
   }, [focusRequest])
 
   return (
-    <div className="flex flex-col gap-3 px-4 py-3">
+    <div className="flex flex-col gap-3 p-3">
       <p role="status" className="sr-only">{TEXT.showing({ shown: formatNumber(shown.length), total: formatNumber(calls.length) })}</p>
       <div className="flex flex-wrap items-center gap-2">
         {shown.length > 0 && <p className="min-w-0 flex-1 text-xs tabular-nums">{summaryLineOf(shown)}</p>}

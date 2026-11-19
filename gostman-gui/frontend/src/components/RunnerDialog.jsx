@@ -4,12 +4,12 @@ import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
 import { CopyTextButton } from "./CopyTextButton"
-import { toolWindow } from "../lib/dialogWindows"
+import { MODELESS_WINDOWS } from "../lib/dialogWindows"
 import { Dialog } from "./ui/dialog"
 import { ToolDialogHeader } from "./ToolDialogHeader"
 import { FeatureEmpty } from "./FeatureEmpty"
 import { Input } from "./ui/input"
-import { Toolbar } from "./ui/panel"
+import { GHOST_AT_EDGE, Toolbar } from "./ui/panel"
 import { Select } from "./ui/select"
 import { MethodTag } from "./MethodTag"
 import { TestRow, countPassed } from "./TestResults"
@@ -121,7 +121,7 @@ export const ResultRow = memo(function ResultRow({ result }) {
         disabled={!canExpand}
         aria-expanded={canExpand ? isOpen : undefined}
         onClick={() => setIsOpen(!isOpen)}
-        className="flex min-h-9 w-full flex-wrap items-center gap-x-2 gap-y-0.5 px-3 py-1 text-start hover:bg-accent disabled:cursor-default disabled:hover:bg-transparent"
+        className="flex min-h-9 w-full flex-wrap items-center gap-x-2 gap-y-0.5 px-4 py-1 text-start hover:bg-accent disabled:cursor-default disabled:hover:bg-transparent"
       >
         <Icon aria-hidden="true" className={cn("h-3.5 w-3.5 shrink-0", tone)} />
         <span className="sr-only">{label}</span>
@@ -132,7 +132,7 @@ export const ResultRow = memo(function ResultRow({ result }) {
         <ResultSummary result={result} />
         {canExpand && <Chevron className="h-3.5 w-3.5 shrink-0 text-muted-foreground rtl:-scale-x-100" />}
       </button>
-      <div className="px-3">
+      <div className="px-4">
         {result.handled && <p className="pb-1.5 ps-[1.375rem] text-xs text-warning">{result.handled}</p>}
         {detail && <p className="whitespace-pre-line pb-1.5 ps-[1.375rem] text-xs text-muted-foreground">{detail}</p>}
         {hasUnresolved(result.unresolved) && (
@@ -168,7 +168,7 @@ function RequestChoice({ request, folders, isChecked, onToggle }) {
   const path = folderChain(folders, request.folderId).map((folder) => folder.name).join(PATH_SEPARATOR)
   return (
     <li className="border-b border-border">
-      <label className="flex h-9 cursor-pointer items-center gap-2 px-3 hover:bg-accent">
+      <label className="flex h-9 cursor-pointer items-center gap-2 px-4 hover:bg-accent">
         <input type="checkbox" checked={isChecked} aria-label={RUNNER_TEXT.includeRequest(request.name)} onChange={onToggle} className="h-3.5 w-3.5 shrink-0 accent-primary" />
         <MethodTag method={shownMethod(request)} className="w-12" />
         <span title={`${request.name}
@@ -209,14 +209,14 @@ function CoverageSection({ coverage }) {
 
   return (
     <details className="border-b border-border">
-      <summary className="flex min-h-9 cursor-pointer flex-wrap items-center gap-x-3 px-3 py-1 text-xs hover:bg-accent">
+      <summary className="flex min-h-9 cursor-pointer flex-wrap items-center gap-x-3 px-4 py-1 text-xs hover:bg-accent">
         <span className="font-medium text-foreground">{RUNNER_TEXT.coverageTitle}</span>
         <span className="text-muted-foreground">{RUNNER_TEXT.coverageOperations({ covered: coverage.operations.covered, total: coverage.operations.total, percent: coverage.operations.percent })}</span>
         <span className="text-muted-foreground">{RUNNER_TEXT.coverageResponses({ covered: coverage.responses.covered, total: coverage.responses.total, percent: coverage.responses.percent })}</span>
       </summary>
       <ul className="pb-1.5">
         {coverage.items.map((item) => (
-          <li key={`${item.method} ${item.path}`} className="flex flex-wrap items-center gap-x-2 px-3 py-0.5 text-xs">
+          <li key={`${item.method} ${item.path}`} className="flex flex-wrap items-center gap-x-2 px-4 py-0.5 text-xs">
             {item.covered ? <Check aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-success" /> : <X aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-destructive" />}
             <MethodTag method={item.method} className="w-12" />
             <span className="min-w-0 truncate font-mono text-foreground">{item.path}</span>
@@ -228,7 +228,7 @@ function CoverageSection({ coverage }) {
   )
 }
 
-const RUNNER_WINDOW = toolWindow("runner")
+const RUNNER_WINDOW = MODELESS_WINDOWS.runner
 
 export function RunnerDialog({ folders, requests, actions }) {
   const runner = useAppStore((s) => s.runner)
@@ -334,7 +334,7 @@ export function RunnerDialog({ folders, requests, actions }) {
       </Toolbar>
       <Toolbar className="h-auto flex-wrap py-1.5">
         <input ref={fileInput} type="file" accept={DATA_ACCEPT} hidden onChange={chooseData} />
-        <Button variant="ghost" size="sm" disabled={isRunning} onClick={() => fileInput.current.click()}>
+        <Button variant="ghost" size="sm" className={GHOST_AT_EDGE} disabled={isRunning} onClick={() => fileInput.current.click()}>
           <Upload />
           {RUNNER_TEXT.dataFile}
         </Button>
@@ -391,8 +391,8 @@ export function RunnerDialog({ folders, requests, actions }) {
           </>
         )}
       </div>
-      <div className="flex shrink-0 items-center gap-2 border-t border-border py-1 ps-4 pe-2">
-        <p role="status" className="min-w-0 flex-1 text-xs text-muted-foreground">
+      <div className="flex shrink-0 flex-wrap items-center justify-end gap-x-2 gap-y-1 border-t border-border py-1 ps-4 pe-2">
+        <p role="status" className="min-w-0 flex-1 basis-56 text-xs text-muted-foreground">
           {describeRun(results, { selected: requestCount, scoped: scoped.length }, isRunning, iterations)}
         </p>
         {results.length > 0 && (

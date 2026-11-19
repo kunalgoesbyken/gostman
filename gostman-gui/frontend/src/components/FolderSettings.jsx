@@ -199,7 +199,7 @@ function ScriptTab({ settings, path, isCollection, EditorComponent, onChange }) 
 function DocsTab({ description, onChange }) {
   return (
     <Panel>
-      <PanelBody>
+      <PanelBody className="px-4">
         <MarkdownField
           value={description}
           onChange={(next) => onChange({ description: next })}
@@ -298,6 +298,7 @@ export function FolderSettings({ backend, scope, EditorComponent, onClose }) {
   const update = useAppStore((state) => state.updateScopeSettings)
   const settings = useMemo(() => normalizeScopeSettings(source), [source])
   const patch = (changes) => update(scope.folderId, changes)
+  const note = tabNote(tab)
 
   useEffect(() => {
     if (!source) onClose()
@@ -311,7 +312,7 @@ export function FolderSettings({ backend, scope, EditorComponent, onClose }) {
       <Tabs value={tab} onValueChange={setTab} className="flex min-h-0 flex-1 flex-col">
         <DialogHeader onClose={onClose}>
           <DialogTitle>{title}</DialogTitle>
-          {tabNote(tab) && <InfoTip text={tabNote(tab)} />}
+          <span className="size-7 shrink-0 max-sm:empty:hidden">{note && <InfoTip text={note} />}</span>
           <OverflowTabsList label={title} items={tabItems()} moreLabel={TEXT.more} moreHint={TEXT.moreHint} className="ms-4 max-sm:ms-0" />
         </DialogHeader>
         {isRestricted && hasActiveSettings(settings) && <Notice tone="warning">{TEXT.restrictedNote}</Notice>}

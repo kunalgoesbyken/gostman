@@ -1,5 +1,5 @@
 import { Field } from "./ui/field"
-import { PanelBody } from "./ui/panel"
+import { FORM_COLUMN, PanelBody } from "./ui/panel"
 import { Select } from "./ui/select"
 import { Textarea } from "./ui/textarea"
 import { SecretInput, TextInput } from "./AuthInputs"
@@ -119,7 +119,7 @@ export function AuthPanel({ auth, tokenRequest, actions, inheritance, onChange }
 
   return (
     <PanelBody className="h-full">
-      <div className="flex max-w-xl flex-col gap-2">
+      <div className={FORM_COLUMN}>
         <Field label={AUTH_TEXT.type}>
           <Select value={auth.type} onChange={(event) => onFieldChange("type")(event.target.value)}>
             {typeOptions(inheritance).map((type) => (

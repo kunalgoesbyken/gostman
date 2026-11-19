@@ -81,7 +81,7 @@ Each request shows its folder path and the URL it was sent to, with secret value
 
 ### Monitors
 
-The **Monitors** dialog (the status bar, the command palette, **Monitor this folder** in a folder's menu and **Monitor this flow** in a flow's menu) runs a folder or a flow on a timer and keeps the results. A monitor has a name, what to run (all requests, a folder or a flow), an environment (the one in use, or a named one that is switched on only for the run), an interval from 1 minute to 24 hours, an optional data file for a folder, and notification settings.
+The **Monitors** dialog (the status bar, the command palette, **Monitor this folder** in a folder's menu and **Monitor this flow** in a flow's menu) runs a folder or a flow on a timer and keeps the results. A monitor has a name, what to run (all requests, a folder or a flow), an environment (the one in use, or a named one that only the monitor's requests use; the environment you have chosen does not change), an interval from 1 minute to 24 hours, an optional data file for a folder, and notification settings.
 
 - **While it runs.** Monitors run only while the app is open. In the web app they run only while the browser tab is open, and the dialog says so. Nothing runs when the app is closed, so use `gostman run --every` or a CI schedule for that; see [Scheduled runs](cli.md#scheduled-runs).
 - **Runs.** The run uses the same pipeline as **Run requests**: scripts, extract rules, cookies, tokens and checks. Pressing **Run now** starts one at once, and **Pause** stops the timer. Runs go one at a time, and a data file is kept in memory only, so choose it again after restarting.

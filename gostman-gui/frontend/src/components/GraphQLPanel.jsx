@@ -20,7 +20,8 @@ import { cn } from "../lib/utils"
 const EMPTY_VARIABLES = ["", "{}"]
 const SHOWN_TYPE_LIMIT = 100
 const NO_VARIABLES = new Map()
-const INVALID_FIELD = "border-destructive"
+const EDITOR_FIELD = "rounded-none border-0 px-3"
+const INVALID_FIELD = "ring-1 ring-inset ring-destructive"
 const PANE_SCHEMA = "schema"
 const PANE_BUILDER = "builder"
 
@@ -59,7 +60,7 @@ function matchTypes(types, search) {
 }
 
 function ErrorLine({ children }) {
-  return <p role="alert" title={children} className="shrink-0 truncate text-xs text-destructive">{children}</p>
+  return <p role="alert" title={children} className="shrink-0 truncate px-3 py-1 text-xs text-destructive">{children}</p>
 }
 
 function SchemaMembers({ members }) {
@@ -176,7 +177,7 @@ function VariablesSection({ variables, problem, onChange }) {
         {problem && <span className="min-w-0 truncate ps-2 text-xs text-destructive" title={problem}>{problem}</span>}
       </button>
       {isOpen && (
-        <div className="min-h-11 flex-1 px-3 pb-3 pt-1">
+        <div className="min-h-11 flex-1">
           <Textarea
             dir="ltr"
             value={variables}
@@ -184,7 +185,7 @@ function VariablesSection({ variables, problem, onChange }) {
             placeholder={TEXT.variablesPlaceholder}
             aria-label={TEXT.variablesLabel}
             aria-invalid={problem !== ""}
-            className={cn("h-full", problem && INVALID_FIELD)}
+            className={cn(EDITOR_FIELD, "h-full", problem && INVALID_FIELD)}
           />
         </div>
       )}
@@ -254,7 +255,7 @@ export function GraphQLPanel({ query, variables, environment, schema, method, on
             {TEXT.schema}
           </Button>
         </Toolbar>
-        <div className="flex min-h-[4.25rem] flex-[2] flex-col gap-1 p-3">
+        <div className="flex min-h-[4.25rem] flex-[2] flex-col">
           <Textarea
             dir="ltr"
             value={query}
@@ -262,11 +263,11 @@ export function GraphQLPanel({ query, variables, environment, schema, method, on
             placeholder={TEXT.queryPlaceholder}
             aria-label={TEXT.queryLabel}
             aria-invalid={queryError !== ""}
-            className={cn("min-h-0 flex-1", queryError && INVALID_FIELD)}
+            className={cn(EDITOR_FIELD, "min-h-0 flex-1", queryError && INVALID_FIELD)}
           />
           {queryError && <ErrorLine>{queryError}</ErrorLine>}
           {!isGraphQL && !queryError && (
-            <p className="shrink-0 truncate text-xs text-muted-foreground" title={TEXT.notSent(method)}>
+            <p className="shrink-0 truncate px-3 py-1 text-xs text-muted-foreground" title={TEXT.notSent(method)}>
               {TEXT.notSent(method)}
             </p>
           )}

@@ -2,6 +2,7 @@ import { GRAPHQL_METHOD } from './graphqlSchema'
 import { GRPC_METHOD, GRPC_PANEL } from './grpc'
 import { MCP_METHOD, MCP_PANEL, isLocalCommand } from './mcp'
 import { SOCKET_PANEL } from './socketSessions'
+import { REQUEST_SETTINGS_TEXT as TEXT } from './requestSettingsText'
 
 export const PARAMS_PANEL = 'params'
 export const HEADERS_PANEL = 'headers'
@@ -92,6 +93,19 @@ const SETTINGS_BY_KIND = {
   [KIND_GRPC]: [...CONNECTION_SETTINGS, SETTING_RPC_TRANSPORT],
   [KIND_MCP]: CONNECTION_SETTINGS,
   [KIND_MCP_COMMAND]: [SETTING_TIMEOUT],
+}
+
+const SETTINGS_HINT_KEYS = {
+  [KIND_GRAPHQL_SOCKET]: 'general',
+  [KIND_SOCKET]: 'general',
+  [KIND_GRPC]: 'grpc',
+  [KIND_MCP]: 'mcp',
+  [KIND_MCP_COMMAND]: 'mcpCommand',
+}
+
+export function settingsHint(kind) {
+  const key = SETTINGS_HINT_KEYS[kind]
+  return key ? TEXT.hints[key] : undefined
 }
 
 export const hasChangedSettings = (options) => SETTING_ORDER.some((setting) => Boolean(IS_CHANGED[setting](options)))

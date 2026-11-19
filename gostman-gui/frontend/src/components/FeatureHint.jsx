@@ -6,7 +6,7 @@ import { featureBlurb, featureDocsUrl, featureForSurface, featureTitle } from ".
 import { FEATURES_TEXT as TEXT } from "../lib/featuresText"
 import { hiddenHints, hideHint } from "../lib/helperHints"
 
-export function FeatureHint({ panel }) {
+export function FeatureHint({ panel, blurb }) {
   const surface = `tab:${panel}`
   const [hidden, setHidden] = useState(hiddenHints)
   const feature = featureForSurface(surface)
@@ -19,7 +19,7 @@ export function FeatureHint({ panel }) {
   return (
     <div role="note" className="flex shrink-0 items-center gap-2 border-b border-border px-3 py-1 text-2xs text-muted-foreground">
       <p className="min-w-0 flex-1 [overflow-wrap:anywhere]">
-        {featureBlurb(feature)}{" "}
+        {blurb ?? featureBlurb(feature)}{" "}
         <a href={url} target="_blank" rel="noopener noreferrer" onClick={(event) => openExternal(event, url)} className="text-primary underline-offset-2 hover:underline">
           {TEXT.learnMore}
         </a>

@@ -7,6 +7,7 @@ import { Dialog, DialogBody, DialogFooter, DialogHeader, DialogTitle } from "./u
 import { DesktopOnlyDetails } from "./DesktopOnly"
 import { LearnMore } from "./LearnMore"
 import { SearchField } from "./SearchField"
+import { GHOST_AT_EDGE } from "./ui/panel"
 import { openExternal } from "../lib/about"
 import { useFeatureAccess } from "../lib/featureAccess"
 import { featureBlurb, featureTitle, groupTitle, isMissingHere, isNewFeature, platformLabel, searchFeatures, shownFeatures } from "../lib/featureIndex"
@@ -24,9 +25,9 @@ const EXPLORE_WINDOW = toolWindow("explore")
 function GroupTabs({ group, onChange }) {
   const choices = ["", ...GROUPS]
   return (
-    <div role="tablist" aria-label={TEXT.groupsLabel} className="flex shrink-0 flex-wrap gap-1 border-b border-border px-2 py-1.5">
-      {choices.map((choice) => (
-        <Button key={choice || "all"} size="sm" variant={choice === group ? "secondary" : "ghost"} role="tab" aria-selected={choice === group} onClick={() => onChange(choice)} className="shrink-0">
+    <div role="tablist" aria-label={TEXT.groupsLabel} className="flex shrink-0 gap-1 overflow-x-auto border-b border-border px-4 py-1.5 scrollbar-none">
+      {choices.map((choice, index) => (
+        <Button key={choice || "all"} size="sm" variant={choice === group ? "secondary" : "ghost"} role="tab" aria-selected={choice === group} onClick={() => onChange(choice)} className={index === 0 ? GHOST_AT_EDGE : undefined}>
           {choice ? groupTitle(choice) : TEXT.allGroups}
         </Button>
       ))}
@@ -85,7 +86,7 @@ export function ExploreDialog({ onClose }) {
       <SearchField value={query} onChange={setQuery} placeholder={TEXT.searchPlaceholder} />
       <GroupTabs group={group} onChange={setGroup} />
       <DialogBody>
-        {showsNotice && <div className="mb-3 rounded-md border border-border p-3"><DesktopOnlyDetails featureId={focused.id} showsPurpose /></div>}
+        {showsNotice && <div className="mb-3 border-b border-border pb-3"><DesktopOnlyDetails featureId={focused.id} showsPurpose isStart /></div>}
         {!showsNotice && query === "" && !focused && <p className="mb-3 text-xs text-muted-foreground">{TEXT.intro}</p>}
         {features.length === 0 ? (
           <p className="py-6 text-center text-xs text-muted-foreground">{TEXT.nothingMatches(query)}</p>

@@ -4,9 +4,12 @@ import { DOCS_TEXT } from "../../lib/docsText"
 import { classes, keepVisible } from "../../docs/classes"
 import { parseNavState, readNavState, serverNavState, subscribeNavState, toggleNavEntry } from "../../docs/navState"
 
-const ROW = "flex min-w-0 flex-1 items-center rounded-md px-3 py-1.5 text-sm transition-colors"
+const ROW = "flex items-center rounded-md text-sm transition-colors"
 const IDLE = "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
 const CURRENT = "bg-muted/50 font-medium text-foreground"
+const LINK = "flex min-w-0 flex-1 items-center rounded-md px-3 py-1.5"
+const TOGGLE = "flex h-8 w-8 shrink-0 items-center justify-center rounded-md"
+const CHEVRON = "h-4 w-4 transition-transform"
 const OUTLINE_LINK = "block py-1 pl-3 pr-2 text-[0.8125rem] leading-snug text-muted-foreground transition-colors hover:text-foreground"
 
 function useNavState() {
@@ -35,8 +38,8 @@ function PageItem({ item, currentHref, state, id }) {
 
   return (
     <li>
-      <div className="flex items-center gap-0.5">
-        <a href={item.href} aria-current={isCurrent ? "page" : undefined} className={classes(ROW, isCurrent ? CURRENT : IDLE)}>
+      <div className={classes(ROW, isCurrent ? CURRENT : IDLE)}>
+        <a href={item.href} aria-current={isCurrent ? "page" : undefined} className={LINK}>
           {item.label}
         </a>
         {item.children ? (
@@ -46,9 +49,9 @@ function PageItem({ item, currentHref, state, id }) {
             aria-controls={outlineId}
             aria-label={DOCS_TEXT.showSections(item.label)}
             onClick={() => toggleNavEntry("pages", item.href, !open)}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground"
+            className={TOGGLE}
           >
-            <ChevronRight className={classes("h-3.5 w-3.5 transition-transform", open && "rotate-90")} />
+            <ChevronRight className={classes(CHEVRON, open && "rotate-90")} />
           </button>
         ) : null}
       </div>
@@ -68,10 +71,10 @@ function Group({ group, currentHref, state, id }) {
         aria-expanded={open}
         aria-controls={listId}
         onClick={() => toggleNavEntry("groups", group.title, !open)}
-        className="flex w-full items-center justify-between rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+        className="flex w-full items-center justify-between rounded-md py-1.5 ps-3 pe-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
       >
         {group.title}
-        <ChevronDown className={classes("h-3.5 w-3.5 transition-transform", !open && "-rotate-90")} />
+        <ChevronDown className={classes(CHEVRON, !open && "-rotate-90")} />
       </button>
       <ul id={listId} hidden={!open} className="mt-0.5 space-y-0.5">
         {group.items.map((item, index) => (

@@ -126,6 +126,17 @@ At the bottom of the window:
 - **Reset to defaults** restores every setting in the table, including the palette, custom colours and method colours. It keeps the shortcuts you changed (reset those in the Keyboard shortcuts dialog) and your tag colours.
 - **Done** closes the window.
 
+### Tool windows
+
+**Mock server**, **Capture**, **Monitors**, **Run requests** and **Load test** stay open beside your work. While one is open, the rest of the app keeps working: send requests, switch tabs and edit them, and watch a capture fill up or the mock server's log grow as you go.
+
+- Several can be open at once. Clicking a window brings it to the front.
+- Esc closes the window only while it has the focus. The app's keyboard shortcuts work everywhere outside it.
+- Opening a window that is already open brings it to the front and keeps what it shows. A run or a load test that is going keeps going. When none is going, **Run folder** on another folder, or **Load test** on another request, sets the window up for that one.
+- Closing the window of the mock server, a capture or the monitors leaves them running; the status bar shows each one, and clicking it opens the window again. Closing **Run requests** or **Load test** stops the run.
+- A run keeps the environment each request had when it started, so choosing another environment during a run changes only the requests you send yourself.
+- On a phone these windows fill the screen, like every other window.
+
 ### Themes and colours
 
 **Theme** has three options:

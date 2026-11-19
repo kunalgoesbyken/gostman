@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 import { EyeOff, SlidersHorizontal, TextCursorInput, X } from "lucide-react"
-import { BulkEditor, ModeSwitch, ROW_GRID, ROW_STACK } from "./KeyValueEditor"
+import { BulkEditor, ModeSwitch, ROW_GRID, ROW_STACK, ROW_TOGGLE } from "./KeyValueEditor"
 import { ScopeMark, hasScopeMark } from "./ScopeMark"
 import { VariableInput } from "./VariableInput"
 import { VariableValueField } from "./VariableValueField"
@@ -123,7 +123,7 @@ function VariableRow({ row, isDraft, isOpen, isReplaced, shownNames, onChange, o
           title={TEXT.useRowHint}
           checked={row.enabled}
           onChange={(event) => onChange({ enabled: event.target.checked })}
-          className={cn(isDraft && "invisible")}
+          className={cn(ROW_TOGGLE, isDraft && "invisible")}
         />
         <VariableInput
           value={row.key}

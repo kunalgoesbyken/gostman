@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import { Check, ExternalLink, ListChecks } from "lucide-react"
-import { Button } from "./ui/button"
+import { Button, ICON_ONLY_ON_PHONE } from "./ui/button"
 import { openExternal } from "../lib/about"
 import { WEB_APP_URL } from "../lib/constants"
 import { rememberWelcomeDismissed } from "../lib/welcome"
@@ -11,7 +11,7 @@ import { ONBOARDING_TEXT as TEXT } from "../lib/onboardingText"
 import { cn } from "../lib/utils"
 import { docPath, docSlug } from "../docs/manifest"
 import { useAppStore } from "../store/appStore"
-import { alignInline, isRtl } from "../hooks/direction"
+import { isRtl } from "../hooks/direction"
 import { usePopoverDismiss } from "../hooks/usePopoverDismiss"
 import { wrapTab } from "../hooks/useFocusTrap"
 import "./variables.css"
@@ -98,7 +98,7 @@ function VariableLegend({ entries }) {
 function Step({ id, number, isDone, isNext, onBegin }) {
   const text = TEXT.steps[id]
   return (
-    <li className={cn("flex gap-3 rounded-md px-2 py-0.5", isNext && "bg-accent py-2")} aria-current={isNext ? "step" : undefined}>
+    <li className={cn("flex gap-3 rounded-md px-2 py-1", isNext && "bg-accent py-2")} aria-current={isNext ? "step" : undefined}>
       <StepMarker number={number} isDone={isDone} isNext={isNext} />
       <div className="min-w-0 flex-1">
         <p className={cn("text-xs font-medium leading-5", isDone && "text-muted-foreground")}>
@@ -181,8 +181,9 @@ function Popover({ anchor, buttonRef, onClose, children }) {
     target?.focus()
   }, [])
   const width = Math.min(POPOVER_WIDTH, window.innerWidth - VIEWPORT_MARGIN * 2)
-  const left = Math.max(VIEWPORT_MARGIN, Math.min(alignInline(isRtl() ? anchor.left + width : anchor.right, width), window.innerWidth - width - VIEWPORT_MARGIN))
-  const style = { top: anchor.bottom + VIEWPORT_MARGIN / 2, left, width }
+  const endAligned = isRtl() ? anchor.left : anchor.right - width
+  const left = Math.max(VIEWPORT_MARGIN, Math.min(endAligned, window.innerWidth - width - VIEWPORT_MARGIN))
+  const style = { top: anchor.bottom + VIEWPORT_MARGIN, left, width }
   return createPortal(
     <div
       ref={popoverRef}
@@ -226,7 +227,7 @@ export function GettingStartedButton({ onBegin }) {
         aria-expanded={Boolean(anchor)}
         title={APP_TEXT.labelled(TEXT.next, nextTitle)}
         onClick={toggle}
-        className="min-w-0 shrink"
+        className={cn("min-w-0 shrink", ICON_ONLY_ON_PHONE)}
       >
         <ListChecks />
         <span className="hidden truncate xl:inline">{APP_TEXT.labelled(TEXT.next, nextTitle)}</span>

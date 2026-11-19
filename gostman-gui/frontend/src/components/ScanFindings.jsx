@@ -9,7 +9,7 @@ function Finding({ finding, onGoToRequest }) {
   const { location } = finding
   const canOpen = location.kind === "request" && location.requestId && onGoToRequest
   return (
-    <li className="flex items-start gap-3 border-b border-border px-3 py-2 text-xs">
+    <li className="flex items-start gap-3 border-b border-border px-4 py-2 text-xs">
       <Badge variant={SEVERITY_VARIANTS[finding.severity]} className="mt-0.5 w-14 justify-center">
         {SCAN_TEXT.severity[finding.severity]}
       </Badge>

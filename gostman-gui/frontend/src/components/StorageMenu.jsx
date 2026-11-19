@@ -1,6 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useRef } from "react"
 import { AlertTriangle, ChevronDown, Folder, HardDrive, ShieldAlert } from "lucide-react"
-import { Button } from "./ui/button"
+import { Button, ICON_ONLY_ON_PHONE } from "./ui/button"
 import { DialogPending } from "./ui/dialog"
 import { WorkspaceMenu } from "./WorkspaceMenu"
 import { inlineStart } from "../hooks/direction"
@@ -10,6 +10,7 @@ import { APP_TEXT } from "../lib/appText"
 import { WORKSPACE_TEXT as TEXT } from "../lib/workspaceText"
 import { useAppStore } from "../store/appStore"
 import { useGitStore } from "../lib/gitSession"
+import { cn } from "../lib/utils"
 
 const GitPanel = lazy(() => import("./GitPanel").then((module) => ({ default: module.GitPanel })))
 
@@ -34,7 +35,7 @@ function useGitState(git, path) {
 function BrowserStorage() {
   const showAlert = useAppStore((s) => s.showAlert)
   return (
-    <Button variant="ghost" title={TEXT.browserHint} onClick={() => showAlert(TEXT.browserLabel, TEXT.browserHint)} className={BUTTON_CLASS}>
+    <Button variant="ghost" title={TEXT.browserHint} onClick={() => showAlert(TEXT.browserLabel, TEXT.browserHint)} className={cn(BUTTON_CLASS, ICON_ONLY_ON_PHONE)}>
       <HardDrive />
       <span className="truncate max-sm:sr-only">{TEXT.browserLabel}</span>
     </Button>

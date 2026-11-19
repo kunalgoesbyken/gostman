@@ -17,8 +17,8 @@ import { cn } from "../lib/utils"
 
 const VariableValueDialog = lazy(() => import("./VariableValueDialog").then((module) => ({ default: module.VariableValueDialog })))
 
-const COLUMNS = "grid grid-cols-[1.5rem_minmax(0,1fr)_minmax(0,1.5fr)_1.5rem_1.5rem_1.5rem] items-center gap-x-2 px-3"
-const REFERENCE_COLUMNS = "grid grid-cols-[1.5rem_minmax(0,1fr)_minmax(0,1.5fr)_1.5rem_1.5rem_1.5rem_1.5rem] items-center gap-x-2 px-3"
+const COLUMNS = "grid grid-cols-[1.5rem_minmax(0,1fr)_minmax(0,1.5fr)_1.5rem_1.5rem_1.5rem] items-center gap-x-2 px-4"
+const REFERENCE_COLUMNS = "grid grid-cols-[1.5rem_minmax(0,1fr)_minmax(0,1.5fr)_1.5rem_1.5rem_1.5rem_1.5rem] items-center gap-x-2 px-4"
 const NEWLINE = "\n"
 const MULTILINE_ROWS = 6
 const BLANK_ROW = { name: "", value: "", secret: false, enabled: true }
@@ -211,7 +211,7 @@ const isUnmarkedCredential = (row, isDraft, features) => (
 
 function CredentialHint({ onMarkSecret }) {
   return (
-    <div role="status" className="flex items-center gap-2 px-3 pb-2 text-xs text-warning">
+    <div role="status" className="flex items-center gap-2 px-4 pb-2 text-xs text-warning">
       <span className="min-w-0 flex-1">{TEXT.looksLikeCredential}</span>
       <Button variant="outline" size="sm" onClick={onMarkSecret}>{TEXT.secret}</Button>
     </div>

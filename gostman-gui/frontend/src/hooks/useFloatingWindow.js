@@ -4,6 +4,7 @@ import { readStored, removeStored, writeStored } from "../lib/storage"
 
 const STORAGE_PREFIX = "gostman.window."
 const MARGIN_PX = 8
+const DOCK_GAP_PX = 32
 const KEY_STEP_PX = 16
 const DEFAULT_MIN_WIDTH_PX = 360
 const DEFAULT_MIN_HEIGHT_PX = 240
@@ -69,6 +70,13 @@ function fitted(rect, viewport, limits) {
 const centred = ({ width, height, x, y }, viewport, limits) =>
   fitted({ width, height, x: x ?? (viewport.width - width) / 2, y: y ?? (viewport.height - height) / 2 }, viewport, limits)
 
+const isRightToLeft = () => document.documentElement.dir === "rtl"
+
+const docked = ({ width, height }, viewport, limits) =>
+  fitted({ width, height, x: isRightToLeft() ? 0 : viewport.width - width, y: viewport.height - height - DOCK_GAP_PX }, viewport, limits)
+
+const placed = (options, viewport, limits) => (options.docked ? docked : centred)(options, viewport, limits)
+
 const moved = (rect, delta, viewport, limits) => fitted({ ...rect, x: rect.x + delta.x, y: rect.y + delta.y }, viewport, limits)
 
 function resizedSpan(position, size, delta, side, minSize, extent) {
@@ -107,7 +115,7 @@ export function useFloatingWindow(options) {
 
   const viewport = { width, height }
   const limits = { minWidth: options.minWidth ?? DEFAULT_MIN_WIDTH_PX, minHeight: options.minHeight ?? DEFAULT_MIN_HEIGHT_PX }
-  const rect = chosen ? fitted(chosen, viewport, limits) : centred(options, viewport, limits)
+  const rect = chosen ? fitted(chosen, viewport, limits) : placed(options, viewport, limits)
 
   const choose = (next) => {
     setChosen(next)

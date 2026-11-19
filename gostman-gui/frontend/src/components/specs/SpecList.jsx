@@ -33,7 +33,7 @@ function SpecRow({ spec, isActive, actions, onMenu }) {
         aria-current={isActive || undefined}
         onClick={() => actions.open(spec.id)}
         onKeyDown={handleKeyDown}
-        className={cn("flex h-8 min-w-0 flex-1 items-center gap-2 ps-3 pe-9 text-start text-xs hover:bg-accent", isActive ? "bg-accent text-foreground" : "text-muted-foreground")}
+        className={cn("flex h-7 min-w-0 flex-1 items-center gap-2 ps-3 pe-9 text-start text-xs hover:bg-accent", isActive ? "bg-accent text-foreground" : "text-muted-foreground")}
       >
         <FileCode aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
         <span className="min-w-0 flex-1 truncate text-foreground">{spec.name}</span>
@@ -98,16 +98,16 @@ export const SpecList = memo(function SpecList({ actions }) {
           title={TEXT.emptyTitle}
           description={TEXT.emptyDescription}
           before={(
-            <div className="flex flex-col items-center gap-1.5">
+            <>
               <Button size="sm" onClick={() => actions.create()}>
                 <Plus />
                 {TEXT.newSpec}
               </Button>
-              <Button size="sm" variant="ghost" aria-haspopup="menu" aria-expanded={Boolean(addPosition)} onClick={openAddMenu}>
+              <Button size="sm" variant="outline" aria-haspopup="menu" aria-expanded={Boolean(addPosition)} onClick={openAddMenu}>
                 <Import />
                 {TEXT.importSpec}
               </Button>
-            </div>
+            </>
           )}
         />
         {fileInput}

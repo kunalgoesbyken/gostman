@@ -14,11 +14,11 @@ import { FEATURES_TEXT } from "../lib/featuresText"
 import { useAppStore } from "../store/appStore"
 
 const BOX = "rounded-md border border-border p-3"
-const COLUMNS = "grid grid-cols-[repeat(auto-fit,minmax(min(100%,19rem),1fr))] items-start gap-3"
+const COLUMNS = "grid grid-cols-[repeat(auto-fit,minmax(min(100%,19rem),1fr))] gap-3"
 
 function Section({ title, className, children }) {
   return (
-    <section aria-label={title} className={cn(BOX, "flex flex-col gap-1.5", className)}>
+    <section aria-label={title} className={cn(BOX, "flex flex-col gap-2", className)}>
       <h3 className="text-xs font-semibold">{title}</h3>
       {children}
     </section>
@@ -46,7 +46,7 @@ function OtherWays({ actions }) {
   const openExplore = useAppStore((s) => s.openExplore)
   return (
     <Section title={TEXT.otherTitle}>
-      <ul className="-mx-2 flex flex-col">
+      <ul className="-mx-2 flex flex-col gap-0.5">
         <ActionRow icon={Compass} title={TEXT.exploreTitle} hint={FEATURES_TEXT.exploreHint(shownFeatures().length)} onClick={() => openExplore()} />
         <ActionRow icon={Import} title={TEXT.importTitle} hint={TEXT.importHint} onClick={actions.openImport} />
         {actions.storage && (
@@ -97,14 +97,12 @@ export function WelcomePanel({ actions, relay, onDismiss }) {
         {relay && usesHostedRelay && <p className="text-xs text-muted-foreground">{TEXT.hostedRelayNote}</p>}
 
         <div className={COLUMNS}>
-          <div className="flex min-w-0 flex-col gap-3">
-            <div className={BOX}>
-              <GettingStartedChecklist progress={progress} onBegin={actions.beginOnboardingStep} />
-            </div>
-            <Shortcuts />
+          <div className={cn(BOX, "min-w-0")}>
+            <GettingStartedChecklist progress={progress} onBegin={actions.beginOnboardingStep} />
           </div>
           <OtherWays actions={actions} />
         </div>
+        <Shortcuts />
       </div>
     </section>
   )

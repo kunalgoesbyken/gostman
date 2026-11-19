@@ -1,6 +1,5 @@
 import { create } from 'zustand'
 import { ROOT_ID } from '../collectionTree'
-import { choiceFor } from '../environmentScope'
 import { createFlowRunner, runResults, useFlowRunStore } from '../flows/flowRunner'
 import { normalizeFlow } from '../flows/model'
 import { MONITORS_TEXT } from '../monitorsText'
@@ -8,6 +7,9 @@ import { createRunner, requestsToRun } from '../runner'
 import { iterationCount } from '../runData'
 import { readStored } from '../storage'
 import { useAppStore } from '../../store/appStore'
+import { MODELESS_WINDOWS } from '../dialogWindows'
+import { showWindow } from '../windowLayers'
+import { workspacePathOf } from '../workspacePath'
 import {
   EVENT_FAILED,
   EVENT_PASSED,
@@ -49,13 +51,14 @@ export const useMonitorStore = create(() => ({
   hasData: {},
   failures: {},
   editing: null,
+  drafts: 0,
   selectedId: '',
 }))
 
 const state = () => useMonitorStore.getState()
 const patch = (changes) => useMonitorStore.setState(changes)
 const app = () => useAppStore.getState()
-const scopeOf = () => app().workspaceStatus?.path || ''
+const scopeOf = () => workspacePathOf(app())
 const keyOf = () => `${STORAGE_PREFIX}${scopeOf()}`
 const withKey = (table, id, value) => ({ ...table, [id]: value })
 const without = (table, id) => Object.fromEntries(Object.entries(table).filter(([key]) => key !== id))
@@ -116,23 +119,21 @@ export const nameOfTarget = (monitor, appState) => {
 
 const rowsFor = new Map()
 
-function useEnvironment(environmentId, folderId) {
-  if (!environmentId) return () => {}
-  const before = { activeEnvironmentId: app().activeEnvironmentId, environmentChoices: app().environmentChoices }
-  useAppStore.setState(choiceFor(app(), folderId, environmentId))
-  return () => useAppStore.setState(before)
-}
+const inEnvironment = (environmentId) => (request) => (environmentId ? { ...request, givenEnvironmentId: environmentId } : request)
 
 export function createMonitorActions(backend, { execute }) {
   const history = backend.monitors
   const timers = new Map()
   let queue = Promise.resolve()
 
-  const flowRunner = createFlowRunner(execute, (sendId) => backend.cancel(sendId))
+  const executeIn = (environmentId) => {
+    const pin = inEnvironment(environmentId)
+    return (request, ...rest) => execute(pin(request), ...rest)
+  }
 
   async function runFolder(monitor, rows) {
     const results = []
-    const runner = createRunner(backend, execute, { ...QUIET, add: (result) => results.push(result) })
+    const runner = createRunner(backend, executeIn(monitor.environmentId), { ...QUIET, add: (result) => results.push(result) })
     const planned = requestsToRun(app(), monitor.targetId, NO_TAGS).length * iterationCount(rows, 0)
     await runner.start({ folderId: monitor.targetId, delayMs: 0, stopOnFailure: false, parallel: 1, rows, iterations: 0, tagFilter: NO_TAGS })
     return { results, planned, outcome: '' }
@@ -142,6 +143,7 @@ export function createMonitorActions(backend, { execute }) {
     const flow = app().flows.find((candidate) => candidate.id === monitor.targetId)
     if (!flow) throw new Error(MONITORS_TEXT.form.targetRequired)
     const tabId = `monitor-${monitor.id}`
+    const flowRunner = createFlowRunner(executeIn(monitor.environmentId), (sendId) => backend.cancel(sendId))
     await flowRunner.start(tabId, normalizeFlow(flow))
     const run = useFlowRunStore.getState().runs[tabId]
     const results = runResults(run)
@@ -168,24 +170,19 @@ export function createMonitorActions(backend, { execute }) {
   async function execution(monitor) {
     const rows = rowsFor.get(monitor.id) || []
     const startedAt = new Date()
-    const restore = useEnvironment(monitor.environmentId, monitor.kind === KIND_FOLDER ? monitor.targetId : ROOT_ID)
-    try {
-      const ran = monitor.kind === KIND_FLOW ? await runFlow(monitor) : await runFolder(monitor, rows)
-      const appState = app()
-      const inScope = monitor.kind === KIND_FLOW ? appState.requests : requestsToRun(appState, monitor.targetId, NO_TAGS)
-      const environmentId = monitor.environmentId || appState.activeEnvironmentId
-      return buildRecord({
-        monitor,
-        target: nameOfTarget(monitor, appState) || monitor.name,
-        environment: appState.environments.find((candidate) => candidate.id === environmentId)?.name || '',
-        startedAt,
-        finishedAt: new Date(),
-        ...ran,
-        clean: cleanerFor(hiddenValues(appState, inScope, rows)),
-      })
-    } finally {
-      restore()
-    }
+    const ran = monitor.kind === KIND_FLOW ? await runFlow(monitor) : await runFolder(monitor, rows)
+    const appState = app()
+    const inScope = (monitor.kind === KIND_FLOW ? appState.requests : requestsToRun(appState, monitor.targetId, NO_TAGS)).map(inEnvironment(monitor.environmentId))
+    const environmentId = monitor.environmentId || appState.activeEnvironmentId
+    return buildRecord({
+      monitor,
+      target: nameOfTarget(monitor, appState) || monitor.name,
+      environment: appState.environments.find((candidate) => candidate.id === environmentId)?.name || '',
+      startedAt,
+      finishedAt: new Date(),
+      ...ran,
+      clean: cleanerFor(hiddenValues(appState, inScope, rows)),
+    })
   }
 
   async function perform(id) {
@@ -253,18 +250,20 @@ export function createMonitorActions(backend, { execute }) {
     patch({ monitors })
   }
 
+  const startDraft = (draft) => patch({ editing: draft, drafts: state().drafts + 1 })
+
+  const draftFor = (target) => ({ ...blankMonitor(target.kind, target.id), dataName: target.data?.name ?? '', rows: target.data?.rows })
+
   function open(target) {
-    const monitors = state().monitors
-    patch({
-      isOpen: true,
-      editing: target ? { ...blankMonitor(target.kind, target.id), dataName: target.data?.name ?? '', rows: target.data?.rows } : null,
-      selectedId: state().selectedId || monitors[0]?.id || '',
-    })
+    const wasOpen = state().isOpen
+    if (target) startDraft(draftFor(target))
+    patch({ isOpen: true, selectedId: state().selectedId || state().monitors[0]?.id || '' })
+    if (wasOpen) showWindow(MODELESS_WINDOWS.monitors.id)
   }
 
   const close = () => patch({ isOpen: false, editing: null })
   const select = (id) => patch({ selectedId: id, editing: null })
-  const startNew = () => patch({ editing: blankMonitor() })
+  const startNew = () => startDraft(blankMonitor())
   const startEdit = (id) => patch({ editing: state().monitors.find((monitor) => monitor.id === id) || null })
   const cancelEdit = () => patch({ editing: null })
 
@@ -314,7 +313,7 @@ export function createMonitorActions(backend, { execute }) {
     adopt(loadDefinitions())
     let path = scopeOf()
     useAppStore.subscribe((next) => {
-      const current = next.workspaceStatus?.path || ''
+      const current = workspacePathOf(next)
       if (current === path) return
       path = current
       adopt(loadDefinitions())

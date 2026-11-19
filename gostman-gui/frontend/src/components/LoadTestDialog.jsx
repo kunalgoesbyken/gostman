@@ -2,7 +2,7 @@ import { Gauge, Play, Square } from "lucide-react"
 import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
 import { DataTable } from "./ui/dataTable"
-import { toolWindow } from "../lib/dialogWindows"
+import { MODELESS_WINDOWS } from "../lib/dialogWindows"
 import { Dialog, DialogBody } from "./ui/dialog"
 import { ToolDialogHeader } from "./ToolDialogHeader"
 import { FeatureEmpty } from "./FeatureEmpty"
@@ -27,7 +27,7 @@ const percentileColumns = () => [
   { header: LOAD_TEST_TEXT.percentileColumns.value, key: "value" },
 ]
 
-const LOAD_TEST_WINDOW = toolWindow("load-test")
+const LOAD_TEST_WINDOW = MODELESS_WINDOWS.loadTest
 
 const fixed = (number) => formatNumber(number, { minimumFractionDigits: FRACTION_DIGITS, maximumFractionDigits: FRACTION_DIGITS })
 

@@ -2,6 +2,7 @@ import { useEffect } from "react"
 import { isApplePlatform, isDesktopApp } from "../lib/platform"
 import { usePreferences } from "../lib/preferences"
 import { activeShortcuts, matchesBinding, shortcutLabelFor } from "../lib/shortcuts"
+import { hasModal, isInWindow } from "../lib/windowLayers"
 
 export function useShortcutLabel(id) {
   return shortcutLabelFor(id, usePreferences().shortcuts)
@@ -17,6 +18,7 @@ export function useShortcuts(handlers, isEnabled) {
     const isApple = isApplePlatform()
 
     const handleKeyDown = (event) => {
+      if (hasModal() || isInWindow(event.target)) return
       const match = bindings.find(({ binding }) => matchesBinding(binding, event, isApple))
       const run = match && handlers[match.shortcut.id]
       if (!run) return

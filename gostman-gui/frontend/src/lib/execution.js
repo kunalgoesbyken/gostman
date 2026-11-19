@@ -249,13 +249,13 @@ async function renewAuth(backend, request, lineage, variables) {
 let scriptSends = 0
 let consoleSequence = 0
 
-function createScriptSender(backend, trace) {
+function createScriptSender(backend, trace, givenEnvironmentId) {
   let sent = 0
   return async (target) => {
     if (sent >= MAX_SENDS) throw new Error(EXECUTION_TEXT.sendLimit(MAX_SENDS))
     sent += 1
     const { requests } = store()
-    const request = scriptedRequest(target, requests)
+    const request = { ...scriptedRequest(target, requests), givenEnvironmentId }
     if (typeof target !== 'string' && readsFiles(request)) throw new Error(EXECUTION_TEXT.scriptFileReads)
     const timed = { ...request, options: { ...request.options, timeoutMs: request.options.timeoutMs || SEND_TIMEOUT_MS, noFollowRedirects: true } }
     const variables = variablesText(timed, {})
@@ -308,7 +308,7 @@ export function createExecutor(backend) {
       return stop(request, error.message)
     }
     if (problems.length > 0) return stop(request, blockedMessage(problems))
-    const context = { send: createScriptSender(backend, trace), trace, referenced, timeoutMs: lineage[0]?.settings.scriptTimeoutMs }
+    const context = { send: createScriptSender(backend, trace, original.givenEnvironmentId), trace, referenced, timeoutMs: lineage[0]?.settings.scriptTimeoutMs }
 
     const inherited = layersOf(lineage)
     const preRequestSteps = preSteps(lineage, request)

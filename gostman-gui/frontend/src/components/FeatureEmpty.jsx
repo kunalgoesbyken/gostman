@@ -7,29 +7,31 @@ import { featureBlurb, featureDocsUrl, featureForSurface, featureTitle } from ".
 import { featureIcon } from "../lib/featureIcons"
 import { FEATURES_TEXT as TEXT } from "../lib/featuresText"
 
-function FeatureActions({ feature, hideTry }) {
+function FeatureActions({ feature, hideTry, hideLearnMore }) {
   const canTry = useFeatureAccess((s) => s.canTry(feature.id, true))
   const open = useFeatureAccess((s) => s.open)
   const url = featureDocsUrl(feature)
   return (
-    <div className="flex flex-wrap justify-center gap-2">
+    <>
       {canTry && !hideTry && <Button size="sm" aria-label={TEXT.tryItLabel(featureTitle(feature))} onClick={() => open(feature.id, true)}>{TEXT.tryIt}</Button>}
-      <a
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label={TEXT.learnMoreLabel(featureTitle(feature))}
-        onClick={(event) => openExternal(event, url)}
-        className={buttonVariants({ variant: "outline", size: "sm" })}
-      >
-        {TEXT.learnMore}
-        <ExternalLink />
-      </a>
-    </div>
+      {!hideLearnMore && (
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={TEXT.learnMoreLabel(featureTitle(feature))}
+          onClick={(event) => openExternal(event, url)}
+          className={buttonVariants({ variant: "outline", size: "sm" })}
+        >
+          {TEXT.learnMore}
+          <ExternalLink />
+        </a>
+      )}
+    </>
   )
 }
 
-export function FeatureEmpty({ surface, icon, title, description, className, before, hideTry }) {
+export function FeatureEmpty({ surface, icon, title, description, className, before, hideTry, hideLearnMore }) {
   const feature = featureForSurface(surface)
   if (!feature) return <EmptyState icon={icon} title={title} description={description} className={className} />
   return (
@@ -39,10 +41,10 @@ export function FeatureEmpty({ surface, icon, title, description, className, bef
       description={description ?? featureBlurb(feature)}
       className={className}
       action={(
-        <div className="flex flex-col items-center gap-2">
+        <>
           {before}
-          <FeatureActions feature={feature} hideTry={hideTry} />
-        </div>
+          <FeatureActions feature={feature} hideTry={hideTry} hideLearnMore={hideLearnMore} />
+        </>
       )}
     />
   )

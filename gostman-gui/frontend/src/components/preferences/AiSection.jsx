@@ -4,7 +4,7 @@ import { BrandIcon } from "../ui/brandIcon"
 import { Button } from "../ui/button"
 import { Checkbox } from "../ui/checkbox"
 import { Combobox } from "../ui/combobox"
-import { Field } from "../ui/field"
+import { ACTION_CONTROL, ACTION_FIELD, ACTION_FIELD_COLUMNS, Field } from "../ui/field"
 import { Input } from "../ui/input"
 import { Select } from "../ui/select"
 import { Skeleton } from "../ui/skeleton"
@@ -12,6 +12,7 @@ import { AI_TEXT } from "../../lib/aiText"
 import { PROVIDERS, hostOf, providerById } from "../../lib/ai/providers"
 import { STATUS_ERROR, STATUS_OK, STATUS_RUNNING, useAiStore } from "../../lib/ai/session"
 import { isAiEnabled, isConfigured } from "../../lib/ai/settings"
+import { cn } from "../../lib/utils"
 
 const TEXT = AI_TEXT.settings
 const CHECKBOX_CLASS = "h-auto min-h-6 items-start justify-start py-0.5 text-start text-xs text-foreground"
@@ -27,29 +28,27 @@ function KeyField({ actions, keyStored, provider }) {
 
   if (keyStored) {
     return (
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 sm:col-span-2">
         <span className="flex items-center gap-1 text-xs text-muted-foreground"><Check className="h-3.5 w-3.5" />{TEXT.keySaved}</span>
         <Button size="sm" variant="outline" onClick={actions.removeKey}>{TEXT.removeKey}</Button>
       </div>
     )
   }
   return (
-    <div className="flex min-w-0 flex-col gap-1.5">
-      <div className="flex gap-2">
-        <Input
-          type="password"
-          autoComplete="off"
-          value={draft}
-          placeholder={provider.keyRequired ? TEXT.pasteKey : TEXT.optionalKey}
-          aria-label={TEXT.apiKey}
-          onChange={(event) => setDraft(event.target.value)}
-          dir="ltr"
-          className="min-w-0 font-mono"
-        />
-        <Button size="sm" disabled={!draft.trim()} onClick={save}>{TEXT.saveKey}</Button>
-      </div>
+    <div className={ACTION_CONTROL}>
+      <Input
+        type="password"
+        autoComplete="off"
+        value={draft}
+        placeholder={provider.keyRequired ? TEXT.pasteKey : TEXT.optionalKey}
+        aria-label={TEXT.apiKey}
+        onChange={(event) => setDraft(event.target.value)}
+        dir="ltr"
+        className="min-w-0 font-mono"
+      />
+      <Button size="sm" disabled={!draft.trim()} onClick={save}>{TEXT.saveKey}</Button>
       {actions.holdsKeyOnDevice && (
-        <Checkbox checked={remember} onChange={(event) => setRemember(event.target.checked)} className={CHECKBOX_CLASS}>
+        <Checkbox checked={remember} onChange={(event) => setRemember(event.target.checked)} className={cn(CHECKBOX_CLASS, "col-span-2")}>
           {TEXT.remember}
         </Checkbox>
       )}
@@ -71,23 +70,23 @@ const modelsMessage = (models, provider) => {
 
 function ModelField({ settings, models, provider, canList, actions }) {
   return (
-    <div className="flex min-w-0 flex-col gap-1.5">
-      <div className="flex gap-2">
-        <Combobox
-          value={settings.model}
-          suggestions={models.list}
-          placeholder={provider.modelHint}
-          aria-label={TEXT.model}
-          spellCheck={false}
-          onChange={(event) => actions.saveSettings({ model: event.target.value })}
-          dir="ltr"
-          className="min-w-0 font-mono"
-        />
-        <Button size="sm" variant="outline" disabled={!canList || models.status === STATUS_RUNNING} onClick={actions.listModels}>
-          {TEXT.listModels}
-        </Button>
+    <div className={ACTION_CONTROL}>
+      <Combobox
+        value={settings.model}
+        suggestions={models.list}
+        placeholder={provider.modelHint}
+        aria-label={TEXT.model}
+        spellCheck={false}
+        onChange={(event) => actions.saveSettings({ model: event.target.value })}
+        dir="ltr"
+        className="min-w-0 font-mono"
+      />
+      <Button size="sm" variant="outline" disabled={!canList || models.status === STATUS_RUNNING} onClick={actions.listModels}>
+        {TEXT.listModels}
+      </Button>
+      <div className="col-span-2 empty:hidden">
+        <StatusLine status={models.status} message={modelsMessage(models, provider)} />
       </div>
-      <StatusLine status={models.status} message={modelsMessage(models, provider)} />
     </div>
   )
 }
@@ -195,12 +194,14 @@ export function AiSection({ actions }) {
           {TEXT.allowInsecure}
         </Checkbox>
       )}
-      <Field label={TEXT.apiKey} grouped>
-        <KeyField key={settings.provider} actions={actions} keyStored={keyStored} provider={provider} />
-      </Field>
-      <Field label={TEXT.model} grouped>
-        <ModelField settings={settings} models={models} provider={provider} canList={!needsKey} actions={actions} />
-      </Field>
+      <div className={ACTION_FIELD_COLUMNS}>
+        <Field label={TEXT.apiKey} grouped className={ACTION_FIELD}>
+          <KeyField key={settings.provider} actions={actions} keyStored={keyStored} provider={provider} />
+        </Field>
+        <Field label={TEXT.model} grouped className={ACTION_FIELD}>
+          <ModelField settings={settings} models={models} provider={provider} canList={!needsKey} actions={actions} />
+        </Field>
+      </div>
       <ConnectionTest test={test} onRun={actions.testConnection} disabled={needsKey || !settings.model.trim()} />
       <SkippedPreviews settings={settings} onReset={actions.askBeforeEveryAction} />
       <p className="text-2xs text-muted-foreground">{actions.holdsKeyOnDevice ? TEXT.browserNote : TEXT.desktopNote}</p>

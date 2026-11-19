@@ -18,6 +18,7 @@ const TYPED_COLUMNS = "grid-cols-[1.5rem_minmax(0,1fr)_5rem_minmax(0,1.5fr)_1.75
 
 export const ROW_GRID = "grid items-center gap-x-2"
 export const ROW_STACK = "flex flex-col gap-1"
+export const ROW_TOGGLE = "justify-start"
 
 const MIN_BULK_LINES = 6
 
@@ -63,7 +64,7 @@ function Row({ row, columns, typed, isDraft, keyLabel, valueLabel, suggestions, 
         label={TEXT.sendRow}
         checked={row.enabled}
         onChange={(event) => onChange({ enabled: event.target.checked })}
-        className={cn(isDraft && "invisible")}
+        className={cn(ROW_TOGGLE, isDraft && "invisible")}
       />
       <VariableInput
         value={row.key}

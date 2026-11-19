@@ -42,10 +42,10 @@ function SpecToolbar({ tab, spec, isDirty, isLinked, isPreviewOpen, actions, onT
   const saveShortcut = useShortcutLabel("saveRequest")
   const rename = (event) => actions.updateDraft(tab.id, { ...spec, name: event.target.value })
   return (
-    <div className="flex min-h-11 shrink-0 flex-wrap items-center gap-2 border-b border-border px-3 py-1">
+    <div className="flex min-h-11 shrink-0 items-center gap-2 border-b border-border px-3 py-1 max-sm:flex-wrap">
       <FileCode aria-hidden="true" className="h-4 w-4 shrink-0 text-muted-foreground" />
-      <Input value={spec.name} aria-label={TEXT.nameLabel} onChange={rename} className="h-7 max-w-xs border-transparent text-sm font-medium hover:border-input focus:border-input" />
-      {isDirty && <span aria-label={TEXT.unsaved} title={TEXT.unsaved} className="h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground" />}
+      <Input value={spec.name} aria-label={TEXT.nameLabel} onChange={rename} className="h-7 max-w-xs flex-1 border-transparent text-sm font-medium hover:border-input focus:border-input" />
+      <span aria-label={TEXT.unsaved} title={TEXT.unsaved} className={cn("h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground", !isDirty && "invisible")} />
       <SegmentedControl label={TEXT.formatLabel} options={formatOptions()} value={spec.format} onChange={(format) => actions.convert(tab.id, format)} />
       <div className="ms-auto flex shrink-0 flex-wrap items-center gap-1">
         <ToolbarButton icon={BookOpen} label={TEXT.viewDocs} hint={TEXT.viewDocsHint} onClick={() => actions.viewDocs(tab.id)} />
@@ -125,8 +125,8 @@ export function SpecView({ tab, actions }) {
         </div>
         {isPreviewOpen && (
           <ResizablePane pane={SPEC_EDITOR_PANE} edge={EDGE_START} as="section" aria-label={TEXT.previewLabel} className={cn("flex min-h-0 shrink-0 flex-col border-s border-border max-sm:h-1/2 max-sm:w-full sm:relative sm:w-[var(--pane-width)]")}>
-            <div className="flex h-9 shrink-0 items-center border-b border-border px-2">
-              <SpecBrowserTabs browser={browser} tabs={EDITOR_BROWSER_TABS} />
+            <div className="flex h-10 shrink-0 items-center border-b border-border px-2">
+              <SpecBrowserTabs browser={browser} tabs={EDITOR_BROWSER_TABS} className="h-full" />
             </div>
             <SpecBrowserBody browser={browser} />
           </ResizablePane>

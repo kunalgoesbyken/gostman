@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { FileText, FolderOpen, Upload } from "lucide-react"
 import { BrandIcon } from "./ui/brandIcon"
 import { Button } from "./ui/button"
+import { Field } from "./ui/field"
 import { Input } from "./ui/input"
 import { Select } from "./ui/select"
 import { Textarea } from "./ui/textarea"
@@ -68,9 +69,10 @@ function ImportSummary({ result, grow, onImport, onBrowse }) {
   const notes = notesIn(remarks)
   const skipped = skippedOf(result)
   const isUnlinked = result.spec && !result.spec.source
+  const isGrowing = grow && (result.sources?.length > 1 || isUnlinked || notes.length + warnings.length + skipped.length > 0)
   return (
-    <div role="status" className={cn("flex items-start gap-3 rounded-md border border-border p-3", grow ? "min-h-0 flex-1" : "shrink-0")}>
-      <div className={cn("min-w-0 flex-1 overflow-y-auto text-xs [overflow-wrap:anywhere]", grow ? "self-stretch" : "max-h-40")}>
+    <div role="status" className={cn("flex items-start gap-3 rounded-md border border-border p-3", isGrowing ? "min-h-0 flex-1" : "shrink-0")}>
+      <div className={cn("min-w-0 flex-1 overflow-y-auto text-xs [overflow-wrap:anywhere]", isGrowing ? "self-stretch" : "max-h-40")}>
         {result.sources ? <SourceLines result={result} /> : (
           <p className="font-medium text-foreground">
             {result.label}: {describeCounts(countImported(result))}
@@ -131,20 +133,19 @@ function AddressRow({ address, onChange, onLoad, onPickFile }) {
 
 function FormatRow({ format, onFormat, showStatic, skipStatic, onSkipStatic }) {
   return (
-    <div className="flex shrink-0 flex-wrap items-center gap-3 text-xs">
-      <label className="flex items-center gap-2 text-muted-foreground">
-        {IMPORT_TEXT.formatLabel}
-        <Select value={format} onChange={(event) => onFormat(event.target.value)} aria-label={IMPORT_TEXT.formatLabel} className="w-auto min-w-48">
+    <Field label={IMPORT_TEXT.formatLabel} grouped>
+      <div className="flex min-w-0 flex-col gap-1.5">
+        <Select value={format} onChange={(event) => onFormat(event.target.value)} aria-label={IMPORT_TEXT.formatLabel}>
           {IMPORT_FORMATS.map((option) => <option key={option.value} value={option.value} icon={<BrandIcon brand={option.value} fallback={FileText} />}>{option.label}</option>)}
         </Select>
-      </label>
-      {showStatic && (
-        <label className="flex items-center gap-2 text-muted-foreground">
-          <input type="checkbox" checked={skipStatic} onChange={(event) => onSkipStatic(event.target.checked)} />
-          {IMPORT_TEXT.skipStatic}
-        </label>
-      )}
-    </div>
+        {showStatic && (
+          <label className="flex items-center gap-2 text-xs text-muted-foreground">
+            <input type="checkbox" checked={skipStatic} onChange={(event) => onSkipStatic(event.target.checked)} />
+            {IMPORT_TEXT.skipStatic}
+          </label>
+        )}
+      </div>
+    </Field>
   )
 }
 

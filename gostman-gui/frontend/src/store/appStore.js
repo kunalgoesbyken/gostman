@@ -44,8 +44,9 @@ const persistenceFailureMessage = (error) => (isStorageFull(error)
 
 const CLOSED_ALERT = { isOpen: false, title: '', message: '', confirmText: '', variant: 'default' }
 const CLOSED_CONFIRM = { isOpen: false, title: '', message: '', confirmText: '', variant: 'default', onConfirm: null, onCancel: null, alternative: null }
-const CLOSED_RUNNER = { isOpen: false, folderId: '', isRunning: false, results: [] }
+const CLOSED_RUNNER = { isOpen: false, folderId: '', isRunning: false, results: [], openings: 0 }
 const CLOSED_DEPENDENCY_GRAPH = { isOpen: false, folderId: '' }
+const keepsRunner = (runner, folderId) => runner.isOpen && (runner.isRunning || folderId === undefined)
 const CLOSED_VARIABLE_PROMPT = { isOpen: false, names: [], defaults: {}, isForRun: false, problemsOf: () => [], resolve: null }
 const CLOSED_PROMPT = { isOpen: false, title: '', message: '', placeholder: '', defaultValue: '', confirmText: '', onConfirm: null }
 const CLOSED_DELETE_DATA = { isOpen: false, onDelete: null }
@@ -187,7 +188,7 @@ const restoreEnvironments = (data) => {
 
 const contextFolderId = (state, request) => (request || selectActiveTab(state)?.request)?.folderId || ''
 
-export const environmentFor = (state, request) => chosenEnvironment(state, contextFolderId(state, request))
+export const environmentFor = (state, request) => chosenEnvironment(state, contextFolderId(state, request), request?.givenEnvironmentId)
 
 export const environmentForFolder = (state, folderId) => chosenEnvironment(state, folderId)
 
@@ -835,7 +836,7 @@ export const useAppStore = create(
         openSpecDialog: (specDialog) => set({ specDialog }),
         closeSpecDialog: () => set({ specDialog: null }),
 
-        openRunner: (folderId = '') => set({ runner: { ...CLOSED_RUNNER, isOpen: true, folderId } }),
+        openRunner: (folderId) => set((state) => (keepsRunner(state.runner, folderId) ? state : { runner: { ...CLOSED_RUNNER, isOpen: true, folderId: folderId ?? '', openings: state.runner.openings + 1 } })),
         closeRunner: () => set({ runner: CLOSED_RUNNER }),
         openDependencyGraph: (folderId = '') => set({ dependencyGraph: { isOpen: true, folderId }, commandPaletteOpen: false }),
         closeDependencyGraph: () => set({ dependencyGraph: CLOSED_DEPENDENCY_GRAPH }),
@@ -980,12 +981,10 @@ export const selectIsDialogOpen = (state) => (
   || state.negativeDialog !== null
   || state.settingsDialogOpen
   || state.examplesDialogOpen
-  || state.mockDialogOpen
   || state.environmentDialogOpen
   || state.folderSettings !== null
   || state.variablePrompt.isOpen
   || state.specDialog !== null
-  || state.runner.isOpen
   || state.dependencyGraph.isOpen
   || state.alertDialog.isOpen
   || state.confirmDialog.isOpen

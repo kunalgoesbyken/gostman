@@ -28,7 +28,8 @@ func (j *Journal) trim() {
 		excess++
 	}
 	if excess > 0 {
-		j.exchanges = slices.Clone(j.exchanges[excess:])
+		clear(j.exchanges[:excess])
+		j.exchanges = j.exchanges[excess:]
 	}
 }
 

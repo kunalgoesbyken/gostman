@@ -1,7 +1,8 @@
 import { cn } from "../../lib/utils"
+import { ROW_INSET } from "./panel"
 
-const CELL = "truncate px-3 py-1.5 text-start"
-const HEADER_CELL = "whitespace-normal px-3 py-1.5 text-start align-bottom [overflow-wrap:anywhere]"
+const CELL = `truncate ${ROW_INSET} py-1.5 text-start`
+const HEADER_CELL = `whitespace-normal ${ROW_INSET} py-1.5 text-start align-bottom [overflow-wrap:anywhere]`
 
 const textOf = (column, row) => (column.text ? column.text(row) : row[column.key])
 

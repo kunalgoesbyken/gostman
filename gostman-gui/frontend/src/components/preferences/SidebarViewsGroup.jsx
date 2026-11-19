@@ -31,7 +31,7 @@ export function SidebarViewsGroup({ preferences }) {
   const views = preferences.sidebarViews
   return (
     <PreferenceGroup title={PREFERENCES_TEXT.fields.sidebarViews} hint={PREFERENCES_TEXT.sidebarViewsHint}>
-      <ul className="max-w-sm space-y-1">
+      <ul className="space-y-1">
         {views.map((entry, index) => <ViewRow key={entry.id} views={views} entry={entry} index={index} />)}
       </ul>
     </PreferenceGroup>

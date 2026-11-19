@@ -7,6 +7,8 @@ import { isMcpRequest } from './mcp'
 import { isSocketAddress } from './socketSessions'
 import { isStreamRequest } from './sse'
 import { selectActiveTab, selectActiveVariables, useAppStore } from '../store/appStore'
+import { MODELESS_WINDOWS } from './dialogWindows'
+import { showWindow } from './windowLayers'
 
 const MS_PER_SECOND = 1000
 
@@ -77,10 +79,13 @@ export function createLoadTestActions(backend) {
   }
 
   function open() {
+    if (state().isRunning) return showWindow(MODELESS_WINDOWS.loadTest.id)
+    const wasOpen = state().isOpen
     const appState = useAppStore.getState()
     const request = withInheritance(appState, selectActiveTab(appState).request)
     const variables = selectActiveVariables(appState)
     patch({ ...INITIAL_STATE, isOpen: true, request, variables, blocked: unsupportedReason(request, variables) })
+    if (wasOpen) showWindow(MODELESS_WINDOWS.loadTest.id)
   }
 
   function stop() {

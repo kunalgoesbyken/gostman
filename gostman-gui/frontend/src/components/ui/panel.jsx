@@ -14,8 +14,12 @@ export function Panel({ className, ...props }) {
   return <div className={cn("flex h-full min-h-0 min-w-0 flex-col", className)} {...props} />
 }
 
+export const ROW_INSET = "px-3 [[role=dialog]_&]:px-4"
+
+export const GHOST_AT_EDGE = "-ms-2.5"
+
 export function Toolbar({ className, ...props }) {
-  return <div className={cn("flex h-10 shrink-0 items-center gap-2 border-b border-border px-3", className)} {...props} />
+  return <div className={cn("flex h-10 shrink-0 items-center gap-2 border-b border-border", ROW_INSET, className)} {...props} />
 }
 
 export const STACKED_TOOLBAR = "max-sm:h-auto max-sm:min-h-10 max-sm:flex-wrap max-sm:justify-end max-sm:py-1.5"
@@ -40,7 +44,7 @@ export function SectionLabel({ className, ...props }) {
 export function Notice({ tone = "muted", icon: Icon, edge = "border-b", className, children, ...props }) {
   return (
     <div
-      className={cn("flex shrink-0 items-start gap-2 border-border px-3 py-2 text-xs [overflow-wrap:anywhere]", edge, NOTICE_TONES[tone], className)}
+      className={cn("flex shrink-0 items-start gap-2 border-border py-2 text-xs [overflow-wrap:anywhere]", ROW_INSET, edge, NOTICE_TONES[tone], className)}
       {...props}
     >
       {Icon && <Icon className="mt-0.5 h-3.5 w-3.5 shrink-0" />}
@@ -84,3 +88,5 @@ export function ResizablePane({ as: Tag = "div", pane, edge, label = DIALOG_TEXT
     </Tag>
   )
 }
+
+export const FORM_COLUMN = "flex max-w-xl flex-col gap-2"

@@ -8,6 +8,9 @@ import { DIALOG_TEXT } from './dialogText'
 import { isAsking } from './exampleActions'
 import { toPort } from './mockServer'
 import { useAppStore } from '../store/appStore'
+import { MODELESS_WINDOWS } from './dialogWindows'
+import { showWindow } from './windowLayers'
+import { isAnotherWorkspace } from './workspacePath'
 
 export const NEW_FOLDER = 'capture:new-folder'
 
@@ -162,13 +165,22 @@ export function createCaptureActions(backend, mockActions) {
     if (capture().isRunning) await loadWorkbench()
   })
 
+  function reopenWorkbench() {
+    clearTimeout(saveTimer)
+    saveTimer = null
+    return report(loadWorkbench)()
+  }
+
   if (server) {
     useAppStore.subscribe((state, previous) => {
-      if (previous.isRestricted && !state.isRestricted && capture().isOpen) report(loadWorkbench)()
+      if (!capture().isOpen) return
+      if (isAnotherWorkspace(state, previous)) reopenWorkbench()
+      else if (previous.isRestricted && !state.isRestricted) report(loadWorkbench)()
     })
   }
 
   async function open() {
+    if (capture().isOpen) return showWindow(MODELESS_WINDOWS.capture.id)
     patch({ isOpen: true, failure: '' })
     if (server) await refresh()
   }

@@ -36,7 +36,7 @@ function grouped(items, groupOf) {
 
 function GroupHeading({ group, count }) {
   return (
-    <li role="presentation" className="sticky top-0 z-10 flex h-7 items-center gap-1.5 border-b border-border bg-background px-3 text-2xs font-medium text-muted-foreground">
+    <li role="presentation" className="sticky top-0 z-10 flex h-7 items-center gap-1.5 border-b border-border bg-background px-4 text-2xs font-medium text-muted-foreground">
       <Folder aria-hidden="true" className="h-3 w-3 shrink-0" />
       <span className="min-w-0 truncate">{group.label}</span>
       <span className="ms-auto shrink-0 tabular-nums">{count}</span>
@@ -85,7 +85,7 @@ function Picker({ words, items, searchText, groupOf, renderItem, floating, onCho
                         tabIndex={-1}
                         onMouseMove={() => setActive(ordered.indexOf(item))}
                         onClick={() => onChoose(item)}
-                        className={cn("flex h-9 w-full items-center gap-2 px-3 text-start", group.label && "ps-6", item === chosen && "bg-accent")}
+                        className={cn("flex h-9 w-full items-center gap-2 px-4 text-start", group.label && "ps-7", item === chosen && "bg-accent")}
                       >
                         {renderItem(item)}
                       </button>

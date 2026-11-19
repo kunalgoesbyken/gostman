@@ -63,7 +63,7 @@ export function CollectionVariablesTable({ holder, query = "", note }) {
             dir="ltr"
             autoComplete="off"
             onChange={(event) => editText(event.target.value)}
-            className="min-h-0 flex-1 rounded-none border-0 px-3"
+            className="min-h-0 flex-1 rounded-none border-0 px-4"
           />
           {held > 0 && <Notice edge="border-t">{TEXT.heldRows(held)}</Notice>}
         </>

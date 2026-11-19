@@ -104,9 +104,9 @@ export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory
       className="flex w-72 max-w-full shrink-0 flex-col border-e border-border max-md:absolute max-md:inset-y-0 max-md:start-0 max-md:z-30 max-md:bg-background max-md:shadow-lg md:relative md:w-[var(--sidebar-width)]"
     >
       <Tabs value={view} onValueChange={setView} className="flex min-h-0 flex-1 flex-col">
-        <Toolbar className="ps-2 pe-1">
+        <Toolbar className="pe-1">
           <div
-            className="flex min-w-0 flex-1"
+            className="flex min-w-0 flex-1 self-stretch"
             onContextMenu={(event) => {
               event.preventDefault()
               setMenuPosition({ x: event.clientX, y: event.clientY })
@@ -127,7 +127,7 @@ export const Sidebar = memo(function Sidebar({ folders, requests, requestHistory
         </TabsContent>
         <TabsContent value={VIEW_FLOWS} className={VIEW_CLASS}>
           <Suspense fallback={null}>
-            <FlowList actions={actions.flows} onMonitor={actions.monitorFlow} />
+            <FlowList actions={actions.flows} monitors={actions.monitors} />
           </Suspense>
         </TabsContent>
         <TabsContent value={VIEW_SPECS} className={VIEW_CLASS}>

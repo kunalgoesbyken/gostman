@@ -3,8 +3,12 @@ import { textToBase64 } from './base64'
 import { DIALOG_TEXT } from './dialogText'
 import { MOCK_TEXT } from './mockText'
 import { ROOT_ID, buildCollectionTree, collectRequests } from './collectionTree'
-import { selectActiveVariables, useAppStore } from '../store/appStore'
+import { useAppStore, variableTextFor } from '../store/appStore'
+import { scopeState } from './variableScopes'
 import { isWebAddress } from './webAddress'
+import { MODELESS_WINDOWS } from './dialogWindows'
+import { showWindow } from './windowLayers'
+import { isAnotherWorkspace } from './workspacePath'
 
 export const ROUTE_SERVED = 'served'
 export const ROUTE_NO_EXAMPLE = 'no-example'
@@ -145,10 +149,26 @@ const toSource = ({ id, name, method, url, examples }) => ({ id, name, method, u
 
 const sourcesInScope = () => requestsInScope().map(toSource)
 
+const signatureWithoutOpenState = ({ isOpen, ...folder }) => JSON.stringify(folder)
+
+const sameFolder = (folder, other) => folder === other || signatureWithoutOpenState(folder) === signatureWithoutOpenState(other)
+
+const foldersChanged = (folders, previous) => (
+  folders !== previous && (folders.length !== previous.length || folders.some((folder, index) => !sameFolder(folder, previous[index])))
+)
+
+const scopeVariables = (state) => variableTextFor(state, { folderId: mock().folderId })
+
+function variablesChanged(state, previous) {
+  const now = scopeState(state)
+  const before = scopeState(previous)
+  return Object.keys(now).some((key) => now[key] !== before[key]) && scopeVariables(state) !== scopeVariables(previous)
+}
+
 const affectsRoutes = (state, previous) => (
   state.requests !== previous.requests
-  || state.folders !== previous.folders
-  || selectActiveVariables(state) !== selectActiveVariables(previous)
+  || foldersChanged(state.folders, previous.folders)
+  || variablesChanged(state, previous)
 )
 
 export function specSourceOf(text) {
@@ -188,8 +208,8 @@ export function createMockActions(backend) {
   const planRoutes = async () => {
     const { config } = mock()
     return mock().isRunning
-      ? (await server.update(sourcesInScope(), selectActiveVariables(app()), config)).routes
-      : server.routes(sourcesInScope(), selectActiveVariables(app()), config)
+      ? (await server.update(sourcesInScope(), scopeVariables(app()), config)).routes
+      : server.routes(sourcesInScope(), scopeVariables(app()), config)
   }
 
   async function refresh() {
@@ -229,10 +249,23 @@ export function createMockActions(backend) {
     refreshSoon()
   }
 
+  async function reopenWorkspace() {
+    clearTimeout(saveTimer)
+    saveTimer = null
+    patch({ folderId: ROOT_ID })
+    try {
+      patch({ config: normalizeConfig(await server.loadConfig()) })
+    } catch (error) {
+      patch({ failure: messageOf(error) })
+    }
+    await refresh()
+  }
+
   function watch() {
     if (stopWatching) return
     stopWatching = useAppStore.subscribe((state, previous) => {
-      if (affectsRoutes(state, previous)) refreshSoon()
+      if (isAnotherWorkspace(state, previous)) reopenWorkspace()
+      else if (affectsRoutes(state, previous)) refreshSoon()
     })
   }
 
@@ -244,6 +277,7 @@ export function createMockActions(backend) {
   }
 
   async function open() {
+    if (app().mockDialogOpen) return showWindow(MODELESS_WINDOWS.mock.id)
     app().openMockDialog()
     if (!server) return
     watch()
@@ -279,7 +313,7 @@ export function createMockActions(backend) {
     revision += 1
     patch({ isStarting: true, failure: '' })
     try {
-      const state = await server.start(sourcesInScope(), selectActiveVariables(app()), mock().config)
+      const state = await server.start(sourcesInScope(), scopeVariables(app()), mock().config)
       adopt(state)
       patch({ routes: state.routes })
     } catch (error) {

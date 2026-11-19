@@ -100,7 +100,7 @@ export function MonitorForm({ draft: initial, hasWebhooks, onSave, onCancel }) {
 
   return (
     <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
-      <PanelBody className="flex flex-col gap-3">
+      <PanelBody className="flex flex-col gap-3 p-4">
         <Field label={TEXT.form.name}>
           <Input value={draft.name} placeholder={TEXT.form.namePlaceholder} onChange={(event) => change({ name: event.target.value })} />
         </Field>
@@ -181,7 +181,7 @@ export function MonitorForm({ draft: initial, hasWebhooks, onSave, onCancel }) {
         </Field>
         {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
       </PanelBody>
-      <div className="flex shrink-0 justify-end gap-2 border-t border-border px-3 py-2">
+      <div className="flex shrink-0 justify-end gap-2 border-t border-border px-4 py-2">
         <Button type="button" variant="ghost" size="sm" onClick={onCancel}>{TEXT.form.cancel}</Button>
         <Button type="submit" size="sm">{TEXT.form.save}</Button>
       </div>

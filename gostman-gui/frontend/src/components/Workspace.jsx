@@ -17,7 +17,7 @@ import { RequestTabs } from "./RequestTabs"
 import { VariablesView } from "./VariablesView"
 import { AppSkeleton } from "./AppSkeleton"
 import { Button } from "./ui/button"
-import { DialogPending } from "./ui/dialog"
+import { DialogPending, DialogSuspense } from "./ui/dialog"
 import { EmptyState } from "./ui/emptyState"
 import { WelcomePanel } from "./WelcomePanel"
 import { GettingStartedButton, useOnboardingCompletion } from "./GettingStarted"
@@ -86,6 +86,7 @@ const activeFirst = (environments, activeId) => [
   ...environments.filter((environment) => environment.id !== activeId),
 ]
 const REQUEST_AREA_STYLE = { minHeight: MIN_REQUEST_HEIGHT_PX }
+const CORNER_STACK = "pointer-events-none fixed inset-x-4 bottom-10 z-40 flex flex-col gap-2 sm:inset-x-auto sm:end-4 sm:items-end [&>*]:pointer-events-auto"
 
 const store = () => useAppStore.getState()
 
@@ -283,6 +284,7 @@ export function LoadedWorkspace({ backend, onBack }) {
   const closeSpecDialog = useAppStore((s) => s.closeSpecDialog)
   const settings = useAppStore((s) => s.settings)
   const isRunnerOpen = useAppStore((s) => s.runner.isOpen)
+  const runnerOpenings = useAppStore((s) => s.runner.openings)
   const isDependencyGraphOpen = useAppStore((s) => s.dependencyGraph.isOpen)
   const folderSettings = useAppStore((s) => s.folderSettings)
   const collectionSettings = useAppStore((s) => s.collectionSettings)
@@ -297,7 +299,7 @@ export function LoadedWorkspace({ backend, onBack }) {
   const monitorsDialogOpen = useMonitorStore((s) => s.isOpen)
   const aiDialog = useAiStore((s) => s.dialog !== null)
   const isAiOn = useAiEnabled()
-  const isDialogOpen = useAppStore(selectIsDialogOpen) || captureDialogOpen || loadTestDialogOpen || monitorsDialogOpen || aiDialog
+  const isDialogOpen = useAppStore(selectIsDialogOpen) || aiDialog
   const sharedLink = useSyncExternalStore(subscribeToSharedLink, pendingSharedLink, noLink)
   const openLink = useSyncExternalStore(subscribeToOpenLink, currentOpenLink, noLink)
 
@@ -557,18 +559,19 @@ export function LoadedWorkspace({ backend, onBack }) {
         {scanDialogOpen && <ScanDialog scan={actions.scan} collection={scannedCollection} onGoToRequest={goToRequest} onClose={closeScanDialog} />}
         {settingsDialogOpen && <NetworkDialog settings={settings} actions={actions} onClose={closeSettingsDialog} />}
         {examplesDialogOpen && <ExamplesDialog request={activeRequest} actions={actions.examples} EditorComponent={CodeEditor} />}
-        {mockDialogOpen && <MockServerDialog folders={folders} requests={requests} actions={actions.mock} />}
-        {captureDialogOpen && <CaptureDialog folders={folders} requests={requests} onTrust={actions.storage?.confirmTrust} actions={actions.capture} />}
-        {loadTestDialogOpen && <LoadTestDialog actions={actions.loadTest} />}
-        {monitorsDialogOpen && <MonitorsDialog actions={actions.monitors} />}
         {specDialog?.mode === "view" && <SpecViewer dialog={specDialog} actions={actions.openapi} onClose={closeSpecDialog} />}
         {specDialog?.mode === "diff" && <SpecDiffDialog dialog={specDialog} actions={actions.openapi} onClose={closeSpecDialog} />}
         {specDialog?.mode === "sync" && <SpecSyncDialog dialog={specDialog} link={specLinks[specDialog.folderId]} actions={actions.openapi} onClose={closeSpecDialog} />}
         {folderSettings && <FolderSettings backend={backend} scope={folderSettings} EditorComponent={CodeEditor} onClose={closeFolderSettings} />}
         {aiDialog && <AiDialog actions={actions.ai} />}
-        {isRunnerOpen && <RunnerDialog folders={folders} requests={requests} actions={actions} />}
         {isDependencyGraphOpen && <DependencyGraphDialog folders={folders} requests={requests} actions={actions} />}
       </Suspense>
+
+      {mockDialogOpen && <DialogSuspense><MockServerDialog folders={folders} requests={requests} actions={actions.mock} /></DialogSuspense>}
+      {captureDialogOpen && <DialogSuspense><CaptureDialog folders={folders} requests={requests} onTrust={actions.storage?.confirmTrust} actions={actions.capture} /></DialogSuspense>}
+      {loadTestDialogOpen && <DialogSuspense><LoadTestDialog actions={actions.loadTest} /></DialogSuspense>}
+      {monitorsDialogOpen && <DialogSuspense><MonitorsDialog actions={actions.monitors} /></DialogSuspense>}
+      {isRunnerOpen && <DialogSuspense><RunnerDialog key={runnerOpenings} folders={folders} requests={requests} actions={actions} /></DialogSuspense>}
 
       {isFrameless && <WindowEdges />}
       <StatusBar
@@ -581,8 +584,10 @@ export function LoadedWorkspace({ backend, onBack }) {
         onExport={exportWorkspace}
       />
 
-      <NoticeToast />
-      <TourCard />
+      <div className={CORNER_STACK}>
+        <NoticeToast />
+        <TourCard />
+      </div>
 
       <AppDialogs onCommand={actions.runCommand} secrets={actions.secrets} listFonts={backend.listInstalledFonts} windowFrame={backend.windowFrame} hasWorkspaces={Boolean(actions.storage)} isAiOn={isAiOn} ai={actions.ai} trash={actions.trash} backups={actions.backups} relay={backend.relay} updates={backend.updates} />
     </div>

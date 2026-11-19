@@ -3,7 +3,7 @@ import { FileJson, Search, Send } from "lucide-react"
 import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
 import { EmptyState } from "./ui/emptyState"
-import { ResizablePane, SPLIT_LIST, SPLIT_PANES } from "./ui/panel"
+import { ROW_INSET, ResizablePane, SPLIT_LIST, SPLIT_PANES } from "./ui/panel"
 import { EDGE_END } from "../hooks/usePaneResize"
 import { SPEC_PANE } from "../lib/layout"
 import { Tabs, TabsList, TabsTrigger } from "./ui/tabs"
@@ -42,7 +42,7 @@ function groupRows(summary, query) {
 function OperationRow({ row, isActive, onSelect }) {
   if (row.kind === "tag") {
     return (
-      <div style={{ height: ROW_HEIGHT_PX }} className="flex items-center px-3 text-xs font-semibold text-foreground">
+      <div style={{ height: ROW_HEIGHT_PX }} className={cn("flex items-center text-xs font-semibold text-foreground", ROW_INSET)}>
         <span className="truncate">{row.tag || SPEC_TEXT.untagged}</span>
       </div>
     )
@@ -54,7 +54,7 @@ function OperationRow({ row, isActive, onSelect }) {
       style={{ height: ROW_HEIGHT_PX }}
       onClick={() => onSelect(operation)}
       title={operation.summary || operation.key}
-      className={cn("flex w-full items-center gap-2 px-3 text-start text-xs", isActive ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground")}
+      className={cn("flex w-full items-center gap-2 text-start text-xs", ROW_INSET, isActive ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground")}
     >
       <MethodTag method={operation.method} className="w-12" />
       <span dir="ltr" className={cn("truncate", operation.deprecated && "line-through")}>{operation.path}</span>
@@ -170,7 +170,7 @@ function ModelList({ names, query, selected, onSelect }) {
       type="button"
       style={{ height: ROW_HEIGHT_PX }}
       onClick={() => onSelect(name)}
-      className={cn("flex w-full items-center px-3 text-start font-mono text-xs", name === selected ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground")}
+      className={cn("flex w-full items-center text-start font-mono text-xs", ROW_INSET, name === selected ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground")}
     >
       <span dir="ltr" className="truncate">{name}</span>
     </button>

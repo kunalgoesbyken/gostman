@@ -14,19 +14,21 @@ export function wrapTab(event, container) {
   target.focus()
 }
 
-export function useFocusTrap(ref) {
+const isFocusLost = () => !document.activeElement || document.activeElement === document.body
+
+export function useFocusTrap(ref, isTrapped = true) {
   const [origin] = useState(focusOrigin)
 
   useEffect(() => {
     const container = ref.current
     if (!container.contains(document.activeElement)) container.focus()
     const trap = (event) => {
-      if (event.key === "Tab" && !event.defaultPrevented) wrapTab(event, container)
+      if (isTrapped && event.key === "Tab" && !event.defaultPrevented) wrapTab(event, container)
     }
     container.addEventListener("keydown", trap)
     return () => {
       container.removeEventListener("keydown", trap)
-      if (!container.isConnected) returnFocusTo(origin)
+      if (!container.isConnected && isFocusLost()) returnFocusTo(origin)
     }
-  }, [ref, origin])
+  }, [ref, origin, isTrapped])
 }

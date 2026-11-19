@@ -31,9 +31,11 @@ function OpenTabRow({ tab, saved, isActive, onSelect, onClose, onOpenMenu }) {
         aria-current={isActive ? "true" : undefined}
         tabIndex={isActive ? 0 : -1}
         onClick={() => onSelect(tab.id)}
-        className="flex h-8 min-w-0 flex-1 items-center gap-1.5 ps-3 text-start"
+        className="flex h-7 min-w-0 flex-1 items-center gap-1.5 ps-3 text-start"
       >
-        <TabMark tab={tab} />
+        <span className="flex w-10 shrink-0 items-center">
+          <TabMark compact tab={tab} />
+        </span>
         <span className={cn("truncate", tab.isPreview && "italic")}>{title}</span>
         {isDirty && <span aria-label={TEXT.unsaved} className="h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground" />}
       </button>

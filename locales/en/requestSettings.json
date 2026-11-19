@@ -27,6 +27,12 @@
     "tags": "Tags",
     "tagsPlaceholder": "smoke, regression",
     "description": "Description",
-    "descriptionPlaceholder": "What this request does (Markdown), shown in generated documentation"
+    "descriptionPlaceholder": "What this request does (Markdown), shown in generated documentation",
+    "hints": {
+      "general": "Tag this request and describe it for the generated documentation.",
+      "grpc": "Set the timeout, TLS verification and transport for a single call.",
+      "mcp": "Set the timeout and TLS verification for a single request.",
+      "mcpCommand": "Set the timeout for a single call."
+    }
   }
 }

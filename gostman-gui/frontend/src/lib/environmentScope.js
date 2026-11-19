@@ -41,9 +41,12 @@ export function offeredEnvironments(environments, folders, folderId) {
 
 const findById = (environments, id) => (id ? environments.find((environment) => environment.id === id) : undefined)
 
-export function chosenEnvironment(state, folderId) {
+export function chosenEnvironment(state, folderId, givenId) {
   const { collectionId, own, shared } = offeredEnvironments(state.environments, state.folders, folderId)
-  if (own.length > 0) return findById([...own, ...shared], state.environmentChoices?.[collectionId]) || own[0]
+  const offered = [...own, ...shared]
+  const given = findById(offered, givenId)
+  if (given) return given
+  if (own.length > 0) return findById(offered, state.environmentChoices?.[collectionId]) || own[0]
   return findById(shared, state.activeEnvironmentId) || shared[0]
 }
 

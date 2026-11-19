@@ -80,6 +80,7 @@ const NO_HISTORY = []
 const MENU_GAP_PX = 4
 const LINK_BUTTON = 'font-medium text-primary underline-offset-2 hover:underline'
 const TOOLBAR_ROW = 'h-[calc(2.5rem-1px)]'
+const TIMING_VISIBILITY = 'max-md:hidden [html[data-response-layout=right]_&]:max-2xl:hidden'
 
 const ResponseCompareDialog = lazy(() => import("./ResponseCompareDialog").then((module) => ({ default: module.ResponseCompareDialog })))
 const AddChecksDialog = lazy(() => import("./AddChecksDialog").then((module) => ({ default: module.AddChecksDialog })))
@@ -328,7 +329,7 @@ function ErrorBody({ response, onExplain, onTrust }) {
 function StatusSummary({ response }) {
   if (response.error) {
     const label = response.error === RESTRICTED_ERROR ? RESPONSE_TEXT.error : lookup(ERROR_TITLES, response.error) || RESPONSE_TEXT.error
-    return <Badge variant="outline">{label}</Badge>
+    return <Badge variant="serverError">{label}</Badge>
   }
   const timing = `${RESPONSE_TEXT.milliseconds(response.durationMs)} · ${formatBytes(response.size)}`
   const detail = [timing, breakdownTitle(response.timeline)].filter(Boolean).join('\n\n')
@@ -337,7 +338,7 @@ function StatusSummary({ response }) {
       <Badge variant={statusVariant(response)} title={response.status} className="min-w-0 shrink font-mono">
         <span className="truncate">{response.status}</span>
       </Badge>
-      <span title={detail} className="min-w-0 truncate font-mono text-2xs text-muted-foreground max-md:hidden">{timing}</span>
+      <span title={detail} className={cn('min-w-0 truncate font-mono text-2xs text-muted-foreground', TIMING_VISIBILITY)}>{timing}</span>
     </>
   )
 }
@@ -637,24 +638,26 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
       >
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col">
           <Toolbar className={cn("h-auto min-h-10 flex-wrap gap-y-0 ps-1.5 pe-1.5", !isOpen && "border-b-0")}>
-            {!isFullscreen && !docked && (
-              <IconButton
-                label={isCollapsed ? RESPONSE_TEXT.expand : RESPONSE_TEXT.collapse}
-                icon={isCollapsed ? ChevronUp : ChevronDown}
-                onClick={toggleCollapse}
-              />
-            )}
-            {showsTabs ? (
-              <OverflowTabsList
-                label={RESPONSE_TEXT.sections}
-                items={tabItems}
-                moreLabel={RESPONSE_TEXT.more}
-                moreHint={RESPONSE_TEXT.moreHint}
-                className={cn(TOOLBAR_ROW, "ps-1.5")}
-              />
-            ) : (
-              <SectionLabel className="ps-1.5">{RESPONSE_TEXT.panel}</SectionLabel>
-            )}
+            <div className={cn(TOOLBAR_ROW, "flex min-w-40 flex-1 items-center gap-2")}>
+              {!isFullscreen && !docked && (
+                <IconButton
+                  label={isCollapsed ? RESPONSE_TEXT.expand : RESPONSE_TEXT.collapse}
+                  icon={isCollapsed ? ChevronUp : ChevronDown}
+                  onClick={toggleCollapse}
+                />
+              )}
+              {showsTabs ? (
+                <OverflowTabsList
+                  label={RESPONSE_TEXT.sections}
+                  items={tabItems}
+                  moreLabel={RESPONSE_TEXT.more}
+                  moreHint={RESPONSE_TEXT.moreHint}
+                  className="ps-1.5"
+                />
+              ) : (
+                <SectionLabel className="ps-1.5">{RESPONSE_TEXT.panel}</SectionLabel>
+              )}
+            </div>
 
             <div className="ms-auto flex min-w-0 max-w-full items-center gap-2">
               <div role="status" className={cn(TOOLBAR_ROW, "flex min-w-0 items-center gap-2")}>

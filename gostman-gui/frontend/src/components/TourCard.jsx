@@ -40,7 +40,7 @@ export const TourCard = memo(function TourCard() {
   useEffect(() => {
     if (!isShown) return undefined
     const skipOnEscape = (event) => {
-      if (event.key === "Escape" && !event.defaultPrevented && !document.querySelector("[role=dialog], [role=menu]")) finish()
+      if (event.key === "Escape" && !event.defaultPrevented && !document.querySelector("[role=dialog]:not([aria-modal=false]), [role=menu]")) finish()
     }
     window.addEventListener("keydown", skipOnEscape)
     return () => window.removeEventListener("keydown", skipOnEscape)
@@ -51,7 +51,7 @@ export const TourCard = memo(function TourCard() {
   const body = id === "variables" ? TEXT.steps.variables.body({ example: VARIABLE_EXAMPLE }) : id === "explore" ? TEXT.steps.explore.body({ shortcut: paletteShortcut }) : TEXT.steps[id].body
 
   return (
-    <section aria-label={TEXT.label} className="fixed inset-x-4 bottom-10 z-30 flex flex-col gap-2 rounded-md border border-border bg-background p-3 text-xs sm:inset-x-auto sm:start-4 sm:w-80">
+    <section aria-label={TEXT.label} className="flex flex-col gap-2 rounded-md border border-border bg-background p-3 text-xs sm:w-80">
       <p className="text-2xs text-muted-foreground">{TEXT.progress({ current: step + 1, total: TOUR_FINISHED })}</p>
       <h2 className="text-sm font-semibold">{TEXT.steps[id].title}</h2>
       <p className="text-muted-foreground">{body}</p>

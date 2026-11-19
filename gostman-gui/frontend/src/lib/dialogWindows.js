@@ -5,3 +5,13 @@ const SIZES = {
 }
 
 export const toolWindow = (id, size = "standard") => ({ id, ...SIZES[size] })
+
+const modelessWindow = (id, size) => ({ ...toolWindow(id, size), modeless: true, docked: true })
+
+export const MODELESS_WINDOWS = {
+  mock: modelessWindow("mock"),
+  capture: modelessWindow("capture", "wide"),
+  monitors: modelessWindow("monitors"),
+  runner: modelessWindow("runner"),
+  loadTest: modelessWindow("load-test"),
+}

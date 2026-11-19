@@ -1,17 +1,18 @@
-import { Suspense, lazy, useMemo, useState } from "react"
+import { Suspense, lazy, memo, useCallback, useMemo, useState } from "react"
+import { useShallow } from "zustand/react/shallow"
 import { AlertTriangle, Download, FileDigit, GitCompare, FileText, Info, List, Play, Radio, Square, X } from "lucide-react"
 import { Badge } from "./ui/badge"
 import { Button, IconButton } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
 import { DataTable } from "./ui/dataTable"
-import { toolWindow } from "../lib/dialogWindows"
+import { MODELESS_WINDOWS } from "../lib/dialogWindows"
 import { Dialog } from "./ui/dialog"
 import { ToolDialogHeader } from "./ToolDialogHeader"
 import { EmptyState } from "./ui/emptyState"
 import { FeatureEmpty } from "./FeatureEmpty"
 import { InfoTip } from "./ui/infoTip"
 import { Input } from "./ui/input"
-import { Notice, SectionLabel, Toolbar } from "./ui/panel"
+import { Notice, STACKED_TOOLBAR, SectionLabel, Toolbar } from "./ui/panel"
 import { SegmentedControl } from "./ui/segmented"
 import { Select } from "./ui/select"
 import { TabCount } from "./ui/tabs"
@@ -117,10 +118,10 @@ function StatusBadge({ exchange }) {
   )
 }
 
-function ExchangeRow({ exchange, isChecked, isCurrent, onToggle, onInspect }) {
+const ExchangeRow = memo(function ExchangeRow({ exchange, isChecked, isCurrent, onToggle, onInspect }) {
   return (
-    <div className={cn("flex h-7 items-center gap-2 border-b border-border px-3", isCurrent && "bg-accent")}>
-      <Checkbox label={CAPTURE_TEXT.selectExchange(titleOf(exchange))} checked={isChecked} onChange={() => onToggle(exchange.id)} />
+    <div className={cn("flex h-7 items-center gap-2 border-b border-border px-4", isCurrent && "bg-accent")}>
+      <Checkbox className="justify-start" label={CAPTURE_TEXT.selectExchange(titleOf(exchange))} checked={isChecked} onChange={() => onToggle(exchange.id)} />
       <button type="button" aria-current={isCurrent} onClick={() => onInspect(exchange.id)} className={cn(COLUMNS, "h-full text-start")}>
         <span className={`${CELL} text-muted-foreground`}>{formatTime(exchange.time, CLOCK_OPTIONS)}</span>
         <MethodTag method={exchange.method} />
@@ -131,12 +132,12 @@ function ExchangeRow({ exchange, isChecked, isCurrent, onToggle, onInspect }) {
       </button>
     </div>
   )
-}
+})
 
 function ListHeader({ isAllChecked, onToggleAll }) {
   return (
-    <div className="flex h-8 shrink-0 items-center gap-2 border-b border-border px-3">
-      <Checkbox label={CAPTURE_TEXT.selectAll} checked={isAllChecked} onChange={onToggleAll} />
+    <div className="flex h-8 shrink-0 items-center gap-2 border-b border-border px-4">
+      <Checkbox className="justify-start" label={CAPTURE_TEXT.selectAll} checked={isAllChecked} onChange={onToggleAll} />
       <div className={COLUMNS}>
         <SectionLabel title={CAPTURE_TEXT.columns.time} className="truncate">{CAPTURE_TEXT.columns.time}</SectionLabel>
         <SectionLabel title={CAPTURE_TEXT.columns.method} className="truncate">{CAPTURE_TEXT.columns.method}</SectionLabel>
@@ -173,7 +174,7 @@ function MessageBody({ message }) {
   if (message.bodyEncoding === ENCODING_BASE64) {
     return <EmptyState icon={FileDigit} title={CAPTURE_TEXT.binaryBody(formatBytes(message.size))} description={message.contentType} />
   }
-  return <pre dir="ltr" className="whitespace-pre-wrap p-3 font-mono text-xs text-foreground [overflow-wrap:anywhere]">{readable(message.body)}</pre>
+  return <pre dir="ltr" className="whitespace-pre-wrap p-4 font-mono text-xs text-foreground [overflow-wrap:anywhere]">{readable(message.body)}</pre>
 }
 
 function MessageHeaders({ headers }) {
@@ -192,7 +193,7 @@ function ExchangeDetail({ exchange, actions }) {
 
   return (
     <section aria-label={CAPTURE_TEXT.selectedExchange} className="flex h-64 shrink-0 flex-col border-t border-border">
-      <Toolbar>
+      <Toolbar className={STACKED_TOOLBAR}>
         <SegmentedControl label={CAPTURE_TEXT.message} options={sides()} value={side} onChange={setSide} />
         <SegmentedControl label={CAPTURE_TEXT.messageSection} options={parts} value={part} onChange={setPart} />
         <span title={exchange.url} className={`${CELL} min-w-0 flex-1 text-end text-muted-foreground`}>{exchange.url}</span>
@@ -220,13 +221,18 @@ function ExchangeDetail({ exchange, actions }) {
   )
 }
 
+const callsState = ({ log, detail, isRunning, address }) => ({ log, detail, isRunning, address })
+
+const panelState = ({ view, config, held, comparison, failure, isRunning, isStarting, upstream, port }) => (
+  { view, config, held, comparison, failure, isRunning, isStarting, upstream, port }
+)
+
 function CallsView({ folders, requests, actions }) {
-  const capture = useCaptureStore()
+  const { log, detail, isRunning, address } = useCaptureStore(useShallow(callsState))
   const [query, setQuery] = useState("")
   const [checked, setChecked] = useState(() => new Set())
   const [target, setTarget] = useState(NEW_FOLDER)
 
-  const { log, detail, isRunning, address, failure } = capture
   const shown = useMemo(() => {
     const needle = query.trim().toLowerCase()
     return needle ? log.filter(matches(needle)) : log
@@ -234,11 +240,11 @@ function CallsView({ folders, requests, actions }) {
   const selected = useMemo(() => log.filter((exchange) => checked.has(exchange.id)), [log, checked])
   const isAllChecked = shown.length > 0 && shown.every((exchange) => checked.has(exchange.id))
 
-  const toggle = (id) => setChecked((current) => {
+  const toggle = useCallback((id) => setChecked((current) => {
     const next = new Set(current)
     if (!next.delete(id)) next.add(id)
     return next
-  })
+  }), [])
   const toggleAll = () => setChecked(isAllChecked ? new Set() : new Set(shown.map((exchange) => exchange.id)))
   const clear = () => {
     setChecked(new Set())
@@ -247,11 +253,12 @@ function CallsView({ folders, requests, actions }) {
 
   return (
     <>
-      <Toolbar>
+      <Toolbar className="h-auto min-h-10 flex-wrap py-1.5">
         <SectionLabel>{CAPTURE_TEXT.exchanges}</SectionLabel>
         <TabCount>{shown.length}</TabCount>
         <Input
           type="search"
+          className="min-w-48 flex-1"
           value={query}
           placeholder={CAPTURE_TEXT.filterPlaceholder}
           aria-label={CAPTURE_TEXT.filterLabel}
@@ -308,7 +315,7 @@ function CallsView({ folders, requests, actions }) {
 }
 
 function CapturePanel({ folders, requests, onTrust, actions }) {
-  const capture = useCaptureStore()
+  const capture = useCaptureStore(useShallow(panelState))
   const { view, config, held, comparison, failure } = capture
   const views = [
     { value: VIEW_CALLS, label: CAPTURE_TEXT.views.calls },
@@ -335,7 +342,7 @@ function CapturePanel({ folders, requests, onTrust, actions }) {
   )
 }
 
-const CAPTURE_WINDOW = toolWindow("capture", "wide")
+const CAPTURE_WINDOW = MODELESS_WINDOWS.capture
 
 export function CaptureDialog({ folders, requests, onTrust, actions }) {
   const isRunning = useCaptureStore((state) => state.isRunning)

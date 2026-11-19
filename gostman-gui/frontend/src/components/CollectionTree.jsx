@@ -124,11 +124,11 @@ function TreeEmptyState({ isSearching, hasClipboard, actions }) {
       title={TREE_TEXT.emptyTitle}
       description={TREE_TEXT.emptyDescription}
       action={(
-        <div className="flex flex-wrap justify-center gap-2">
+        <>
           <Button size="sm" onClick={() => actions.newRequest()}><Plus />{TREE_TEXT.newRequest}</Button>
           <Button size="sm" variant="outline" onClick={actions.openImport}><Upload />{TREE_TEXT.emptyImport}</Button>
           {hasClipboard && <Button size="sm" variant="outline" onClick={() => actions.tree.pasteItem(null)}><ClipboardPaste />{TREE_TEXT.paste}</Button>}
-        </div>
+        </>
       )}
     />
   )

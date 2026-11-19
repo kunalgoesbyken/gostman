@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react"
 import { Activity, Check, ChevronDown, ChevronRight, Pause, Pencil, Play, Plus, Trash2, X } from "lucide-react"
 import { Button, IconButton } from "./ui/button"
-import { toolWindow } from "../lib/dialogWindows"
+import { MODELESS_WINDOWS } from "../lib/dialogWindows"
 import { Dialog } from "./ui/dialog"
 import { ToolDialogHeader } from "./ToolDialogHeader"
 import { EmptyState } from "./ui/emptyState"
@@ -17,7 +17,7 @@ import { formatDateTime, formatPercent, formatTime } from "../lib/i18n/format"
 import { cn } from "../lib/utils"
 import { useAppStore } from "../store/appStore"
 
-const WINDOW = toolWindow("monitors")
+const WINDOW = MODELESS_WINDOWS.monitors
 const SHOWN_RUNS = 30
 
 function LastOutcome({ monitor, isRunning, lastPassed }) {
@@ -35,7 +35,7 @@ function MonitorRow({ monitor, isSelected, isRunning, history, onSelect }) {
         type="button"
         aria-current={isSelected ? "true" : undefined}
         onClick={onSelect}
-        className={cn("flex min-h-9 w-full items-center gap-2 border-b border-border px-3 py-1.5 text-start hover:bg-accent", isSelected && "bg-accent")}
+        className={cn("flex min-h-9 w-full items-center gap-2 border-b border-border px-4 py-1.5 text-start hover:bg-accent", isSelected && "bg-accent")}
       >
         <LastOutcome monitor={monitor} isRunning={isRunning} lastPassed={last?.passed} />
         <span className="min-w-0 flex-1 truncate text-xs text-foreground">{monitor.name}</span>
@@ -51,7 +51,7 @@ function RunRow({ record }) {
   const Chevron = isOpen ? ChevronDown : ChevronRight
   return (
     <li className="border-b border-border">
-      <button type="button" aria-expanded={isOpen} disabled={failures.length === 0} onClick={() => setIsOpen(!isOpen)} className="flex min-h-9 w-full flex-wrap items-center gap-x-3 gap-y-0.5 px-3 py-1 text-start hover:bg-accent disabled:cursor-default disabled:hover:bg-transparent">
+      <button type="button" aria-expanded={isOpen} disabled={failures.length === 0} onClick={() => setIsOpen(!isOpen)} className="flex min-h-9 w-full flex-wrap items-center gap-x-3 gap-y-0.5 px-4 py-1 text-start hover:bg-accent disabled:cursor-default disabled:hover:bg-transparent">
         <span className={cn("w-12 shrink-0 text-2xs font-medium uppercase", record.passed ? "text-success" : "text-destructive")}>{record.passed ? TEXT.passed : TEXT.failed}</span>
         <span className="shrink-0 font-mono text-2xs text-muted-foreground">{formatDateTime(new Date(record.startedAt))}</span>
         <span className="min-w-0 flex-1 truncate text-xs text-foreground">{TEXT.runLine({ passed: record.summary.passed, failed: record.summary.failed })}</span>
@@ -59,7 +59,7 @@ function RunRow({ record }) {
         {failures.length > 0 && <Chevron className="h-3.5 w-3.5 shrink-0 text-muted-foreground rtl:-scale-x-100" />}
       </button>
       {isOpen && (
-        <ul aria-label={TEXT.failedChecks} className="flex flex-col gap-1 px-3 pb-2 ps-6">
+        <ul aria-label={TEXT.failedChecks} className="flex flex-col gap-1 px-4 pb-2 ps-6">
           {failures.map((entry, index) => (
             <li key={index} className="text-xs">
               <p className="text-foreground">{entry.name}</p>
@@ -84,11 +84,11 @@ function Stat({ label, value }) {
 
 function MonitorDetail({ monitor, history, isRunning, nextRun, needsData, failure, actions }) {
   const trend = useMemo(() => trendOf(history), [history])
-  const target = nameOfTarget(monitor, useAppStore.getState())
+  const target = useAppStore((state) => nameOfTarget(monitor, state))
   const schedule = monitor.paused ? TEXT.paused : nextRun ? TEXT.nextRun(formatTime(new Date(nextRun))) : ""
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-      <Toolbar className={cn("h-auto flex-wrap py-1.5")}>
+      <Toolbar className="h-auto flex-wrap py-1.5">
         <div className="min-w-0 flex-1">
           <p className="truncate text-xs font-medium text-foreground">{monitor.name}</p>
           <p className="truncate text-2xs text-muted-foreground">{[target, schedule].filter(Boolean).join(" · ")}</p>
@@ -104,20 +104,20 @@ function MonitorDetail({ monitor, history, isRunning, nextRun, needsData, failur
       {needsData && <Notice tone="warning">{TEXT.needsData}</Notice>}
       {failure && <Notice tone="destructive" role="alert">{failure}</Notice>}
       <PanelBody className="p-0">
-        <div className="grid grid-cols-2 gap-3 p-3 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-4">
           <Stat label={TEXT.passRate} value={trend.runs > 0 ? formatPercent(trend.passRate) : "-"} />
           <Stat label={TEXT.lastRun} value={trend.last ? (trend.last.passed ? TEXT.passed : TEXT.failed) : TEXT.neverRun} />
           <Stat label={TEXT.p95} value={trend.runs > 0 ? RUNNER_TEXT.duration(trend.p95Ms) : "-"} />
           <Stat label={TEXT.history} value={TEXT.runsCount(trend.runs)} />
         </div>
         {trend.runs > 0 && (
-          <div className="border-t border-border p-3">
+          <div className="border-t border-border p-4">
             <MonitorChart points={trend.points} />
           </div>
         )}
         <div className="border-t border-border">
           {trend.runs === 0 ? (
-            <p className="p-3 text-xs text-muted-foreground">{TEXT.noRuns}</p>
+            <p className="p-4 text-xs text-muted-foreground">{TEXT.noRuns}</p>
           ) : (
             <ul aria-label={TEXT.history}>
               {[...history].reverse().slice(0, SHOWN_RUNS).map((record) => <RunRow key={record.id} record={record} />)}
@@ -137,6 +137,7 @@ export function MonitorsDialog({ actions }) {
   const failures = useMonitorStore((s) => s.failures)
   const hasData = useMonitorStore((s) => s.hasData)
   const editing = useMonitorStore((s) => s.editing)
+  const drafts = useMonitorStore((s) => s.drafts)
   const selectedId = useMonitorStore((s) => s.selectedId)
   const selected = monitors.find((monitor) => monitor.id === selectedId) || monitors[0]
   const note = actions.hasWebhooks ? TEXT.desktopNote : TEXT.webNote
@@ -175,7 +176,7 @@ export function MonitorsDialog({ actions }) {
             </ul>
           </div>
           {editing ? (
-            <MonitorForm key={editing.id || "new"} draft={editing} hasWebhooks={actions.hasWebhooks} onSave={actions.save} onCancel={actions.cancelEdit} />
+            <MonitorForm key={editing.id || `draft-${drafts}`} draft={editing} hasWebhooks={actions.hasWebhooks} onSave={actions.save} onCancel={actions.cancelEdit} />
           ) : (
             selected && (
               <MonitorDetail

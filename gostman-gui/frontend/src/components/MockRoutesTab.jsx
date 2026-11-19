@@ -14,7 +14,7 @@ import { localizedText } from "../lib/localized"
 import { MOCK_TEXT } from "../lib/mockText"
 import { cn } from "../lib/utils"
 
-const ROUTE_COLUMNS = "grid grid-cols-[1.25rem_3.5rem_minmax(0,1.25fr)_minmax(0,1fr)_minmax(0,11rem)_1.75rem] items-center gap-2 px-3"
+const ROUTE_COLUMNS = "grid grid-cols-[1.25rem_3.5rem_minmax(0,1.25fr)_minmax(0,1fr)_minmax(0,11rem)_1.75rem] items-center gap-2 px-4"
 const CELL = "truncate font-mono text-xs"
 const SWITCHABLE = [ROUTE_SERVED, ROUTE_DISABLED, ROUTE_NO_EXAMPLE, ROUTE_CONFLICT]
 
@@ -40,6 +40,7 @@ function RouteRow({ route, examples, selected, isOpen, behavior, actions, onTogg
     <div className="border-b border-border">
       <div className={`${ROUTE_COLUMNS} h-9`}>
         <Checkbox
+          className="justify-start"
           label={MOCK_TEXT.routeSwitch(route.name)}
           checked={route.state !== ROUTE_DISABLED}
           disabled={!SWITCHABLE.includes(route.state)}
@@ -52,7 +53,7 @@ function RouteRow({ route, examples, selected, isOpen, behavior, actions, onTogg
         <IconButton label={MOCK_TEXT.routeBehavior(route.name)} icon={SlidersHorizontal} size="icon-xs" aria-expanded={isOpen} onClick={onToggleBehavior} />
       </div>
       {isOpen && (
-        <div className="px-3 pb-3 pt-1">
+        <div className="px-4 pb-3 pt-1">
           <MockBehaviorFields value={behavior} onChange={(next) => actions.setRouteBehavior(route.requestId, next)} />
         </div>
       )}

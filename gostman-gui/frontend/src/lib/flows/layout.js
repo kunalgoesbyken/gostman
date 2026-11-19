@@ -322,7 +322,7 @@ function placeContainer(item, x, y) {
 function placeLanes(lanes, x, y) {
   lanes.x = x
   lanes.y = y
-  let left = x
+  let left = x + COLUMN_GAP / 2
   lanes.items.forEach((item) => {
     place(item, left, y + GAP)
     left += item.width + COLUMN_GAP

@@ -1,4 +1,5 @@
-import { createContext, useContext, useEffect, useId, useRef } from "react"
+import { createContext, Suspense, useContext, useEffect, useId, useRef, useSyncExternalStore } from "react"
+import { createPortal } from "react-dom"
 import { GripVertical, X } from "lucide-react"
 import { IconButton } from "./button"
 import { Skeleton, SkeletonLines } from "./skeleton"
@@ -7,10 +8,14 @@ import { useFocusTrap } from "../../hooks/useFocusTrap"
 import { DIALOG_TEXT } from "../../lib/dialogText"
 import { APP_TEXT } from "../../lib/appText"
 import { cn } from "../../lib/utils"
+import { dropWindow, hasModal, holdModal, isTopModal, openWindows, raiseWindow, subscribeToWindows, windowLayer, windowProps } from "../../lib/windowLayers"
 
 const DIALOG_OVERLAY = "fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 max-sm:p-2"
 const FLOATING_LAYER = "fixed inset-0 z-50"
 const FLOATING_PANEL = "fixed max-h-none max-w-none shadow-2xl ring-1 ring-foreground/10"
+const MODELESS_LAYER = "pointer-events-none fixed inset-0"
+const MODELESS_PANEL = "pointer-events-auto"
+const DIALOG_PANEL = "flex max-h-full w-full flex-col overflow-hidden rounded-lg border border-border bg-background shadow-lg focus:outline-none"
 
 const DIALOG_SIZES = {
   sm: "max-w-md",
@@ -30,21 +35,33 @@ const EDGE_HANDLES = {
 
 const FloatingContext = createContext(null)
 
-const openDialogs = []
-
-const isTopmost = (ref) => openDialogs[openDialogs.length - 1] === ref
+const WindowContext = createContext(false)
 
 const keepFocusInDialog = (event) => event.preventDefault()
+
+const stopMouseDown = (event) => event.stopPropagation()
 
 const CODE_EDITOR = ".cm-editor"
 
 const isInEditor = (event) => Boolean(event.target.closest?.(CODE_EDITOR))
 
-function useOpenDialog(ref) {
+function useOpenDialog(ref, isModal = true) {
+  useEffect(() => (isModal ? holdModal(ref) : undefined), [ref, isModal])
+}
+
+function useWindowLayer(id, isModeless) {
+  const order = useSyncExternalStore(subscribeToWindows, openWindows, openWindows)
   useEffect(() => {
-    openDialogs.push(ref)
-    return () => openDialogs.splice(openDialogs.indexOf(ref), 1)
-  }, [ref])
+    if (!isModeless) return undefined
+    raiseWindow(id)
+    return () => dropWindow(id)
+  }, [id, isModeless])
+  return windowLayer(order, id)
+}
+
+function closesOnEscape(event, dialog, isModeless) {
+  if (event.key !== "Escape" || event.defaultPrevented) return false
+  return isModeless ? dialog.current.contains(event.target) && !hasModal() : isTopModal(dialog)
 }
 
 export function ResizeHandles({ frame }) {
@@ -60,44 +77,58 @@ export function ResizeHandles({ frame }) {
 export function Dialog({ label, size = "sm", floating, closesFromEditor = false, onClose, className, children }) {
   const dialogRef = useRef(null)
   const frame = useFloatingWindow(floating)
-  useFocusTrap(dialogRef)
+  const isModeless = Boolean(frame && floating.modeless)
+  const layer = useWindowLayer(floating?.id, isModeless)
+  const isInsideWindow = useContext(WindowContext)
+  useFocusTrap(dialogRef, !isModeless)
 
-  useOpenDialog(dialogRef)
+  useOpenDialog(dialogRef, !isModeless)
 
   useEffect(() => {
     const closeOnEscape = (event) => {
-      if (event.key !== "Escape" || event.defaultPrevented || !isTopmost(dialogRef)) return
+      if (!closesOnEscape(event, dialogRef, isModeless)) return
       if (isInEditor(event) && !closesFromEditor) return
       event.preventDefault()
       onClose()
     }
     window.addEventListener("keydown", closeOnEscape)
     return () => window.removeEventListener("keydown", closeOnEscape)
-  }, [onClose, closesFromEditor])
+  }, [onClose, closesFromEditor, isModeless])
 
-  return (
+  const panel = (
+    <div
+      ref={dialogRef}
+      tabIndex={-1}
+      role="dialog"
+      aria-modal={!isModeless}
+      aria-label={label}
+      data-surface="dialog"
+      style={frame?.style}
+      {...(isModeless ? windowProps(floating.id) : { onMouseDown: stopMouseDown })}
+      className={cn(DIALOG_PANEL, DIALOG_SIZES[size], className, frame && FLOATING_PANEL, isModeless && MODELESS_PANEL)}
+    >
+      <FloatingContext.Provider value={frame}>{children}</FloatingContext.Provider>
+    </div>
+  )
+
+  if (isModeless) {
+    return (
+      <WindowContext.Provider value>
+        <div className={MODELESS_LAYER} style={{ zIndex: layer }} onPointerDownCapture={() => raiseWindow(floating.id)}>
+          {panel}
+          <ResizeHandles frame={frame} />
+        </div>
+      </WindowContext.Provider>
+    )
+  }
+
+  const modal = (
     <div className={frame ? FLOATING_LAYER : DIALOG_OVERLAY} onMouseDown={frame ? keepFocusInDialog : onClose}>
-      <div
-        ref={dialogRef}
-        tabIndex={-1}
-        role="dialog"
-        aria-modal="true"
-        aria-label={label}
-        data-surface="dialog"
-        style={frame?.style}
-        onMouseDown={(event) => event.stopPropagation()}
-        className={cn(
-          "flex max-h-full w-full flex-col overflow-hidden rounded-lg border border-border bg-background shadow-lg focus:outline-none",
-          DIALOG_SIZES[size],
-          className,
-          frame && FLOATING_PANEL
-        )}
-      >
-        <FloatingContext.Provider value={frame}>{children}</FloatingContext.Provider>
-      </div>
+      {panel}
       {frame && <ResizeHandles frame={frame} />}
     </div>
   )
+  return isInsideWindow ? createPortal(<WindowContext.Provider value={false}>{modal}</WindowContext.Provider>, document.body) : modal
 }
 
 export function DialogPending() {
@@ -113,6 +144,10 @@ export function DialogPending() {
       </div>
     </div>
   )
+}
+
+export function DialogSuspense({ children }) {
+  return <Suspense fallback={<DialogPending />}>{children}</Suspense>
 }
 
 export function WindowGrip({ frame }) {
@@ -139,7 +174,7 @@ export function DialogHeader({ onClose, children }) {
   const frame = useContext(FloatingContext)
 
   return (
-    <div className={cn("flex h-10 shrink-0 items-center gap-2 border-b border-border ps-4 pe-2 max-sm:h-auto max-sm:min-h-10 max-sm:py-1", frame && "touch-none select-none")} {...frame?.headerProps}>
+    <div className={cn("flex h-10 shrink-0 items-center gap-2 border-b border-border ps-4 pe-2 max-sm:h-auto max-sm:min-h-10 max-sm:items-start max-sm:py-1.5 max-sm:[&_h2]:leading-7", frame && "touch-none select-none")} {...frame?.headerProps}>
       {frame && <WindowGrip frame={frame} />}
       <div className="flex h-full min-w-0 flex-1 items-center gap-2 max-sm:h-auto max-sm:flex-wrap">{children}</div>
       {onClose && <IconButton label={DIALOG_TEXT.close} icon={X} onClick={onClose} />}

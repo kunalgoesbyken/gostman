@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect } from "react"
 import { AlertDialog } from "./ui/AlertDialog"
 import { ConfirmDialog } from "./ui/ConfirmDialog"
 import { PromptDialog } from "./ui/PromptDialog"
-import { DialogPending } from "./ui/dialog"
+import { DialogSuspense } from "./ui/dialog"
 import { VariablePromptDialog } from "./VariablePromptDialog"
 import { whenIdle } from "../lib/idle"
 import { useTrashStore } from "../lib/trashSession"
@@ -20,10 +20,6 @@ const ShortcutsDialog = lazy(() => import("./ShortcutsDialog").then((module) => 
 const EnvironmentDialog = lazy(() => import("./EnvironmentDialog").then((module) => ({ default: module.EnvironmentDialog })))
 const DeleteDataDialog = lazy(() => import("./DeleteDataDialog").then((module) => ({ default: module.DeleteDataDialog })))
 const TrashDialog = lazy(() => import("./TrashDialog").then((module) => ({ default: module.TrashDialog })))
-
-function Pending({ children }) {
-  return <Suspense fallback={<DialogPending />}>{children}</Suspense>
-}
 
 export function AppDialogs({ onCommand, secrets, listFonts, windowFrame, hasWorkspaces, isAiOn, ai, trash, backups, relay, updates }) {
   const isTrashOpen = useTrashStore((s) => s.isOpen)
@@ -81,15 +77,15 @@ export function AppDialogs({ onCommand, secrets, listFonts, windowFrame, hasWork
         onCommand={onCommand}
       /></Suspense>}
 
-      {aboutOpen && <Pending><AboutDialog onClose={closeAbout} /></Pending>}
-      {exploreOpen && <Pending><ExploreDialog onClose={closeExplore} /></Pending>}
-      {whatsNewOpen && <Pending><WhatsNewDialog onClose={closeWhatsNew} /></Pending>}
-      {preferencesDialogOpen && <Pending><PreferencesDialog listFonts={listFonts} windowFrame={windowFrame} onCommand={onCommand} backups={backups} relay={relay} updates={updates} ai={ai} onClose={closePreferencesDialog} /></Pending>}
-      {shortcutsDialogOpen && <Pending><ShortcutsDialog onClose={closeShortcutsDialog} /></Pending>}
-      {environmentDialogOpen && <Pending><EnvironmentDialog secrets={secrets} onClose={closeEnvironmentDialog} /></Pending>}
-      {isTrashOpen && <Pending><TrashDialog actions={trash} /></Pending>}
+      {aboutOpen && <DialogSuspense><AboutDialog onClose={closeAbout} /></DialogSuspense>}
+      {exploreOpen && <DialogSuspense><ExploreDialog onClose={closeExplore} /></DialogSuspense>}
+      {whatsNewOpen && <DialogSuspense><WhatsNewDialog onClose={closeWhatsNew} /></DialogSuspense>}
+      {preferencesDialogOpen && <DialogSuspense><PreferencesDialog listFonts={listFonts} windowFrame={windowFrame} onCommand={onCommand} backups={backups} relay={relay} updates={updates} ai={ai} onClose={closePreferencesDialog} /></DialogSuspense>}
+      {shortcutsDialogOpen && <DialogSuspense><ShortcutsDialog onClose={closeShortcutsDialog} /></DialogSuspense>}
+      {environmentDialogOpen && <DialogSuspense><EnvironmentDialog secrets={secrets} onClose={closeEnvironmentDialog} /></DialogSuspense>}
+      {isTrashOpen && <DialogSuspense><TrashDialog actions={trash} /></DialogSuspense>}
       <VariablePromptDialog />
-      {deleteDataDialog.isOpen && <Pending>
+      {deleteDataDialog.isOpen && <DialogSuspense>
         <DeleteDataDialog
           onDelete={() => {
             closeDeleteData()
@@ -101,7 +97,7 @@ export function AppDialogs({ onCommand, secrets, listFonts, windowFrame, hasWork
           }}
           onClose={closeDeleteData}
         />
-      </Pending>}
+      </DialogSuspense>}
 
       <ConfirmDialog
         isOpen={confirmDialog.isOpen}

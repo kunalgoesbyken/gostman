@@ -35,7 +35,7 @@ function FlowRow({ flow, isActive, actions, onMenu }) {
         onClick={() => actions.open(flow.id)}
         onKeyDown={handleKeyDown}
         className={cn(
-          "flex h-8 min-w-0 flex-1 items-center gap-2 ps-3 pe-9 text-start text-xs hover:bg-accent",
+          "flex h-7 min-w-0 flex-1 items-center gap-2 ps-3 pe-9 text-start text-xs hover:bg-accent",
           isActive ? "bg-accent text-foreground" : "text-muted-foreground"
         )}
       >
@@ -54,14 +54,14 @@ function FlowRow({ flow, isActive, actions, onMenu }) {
   )
 }
 
-const menuItems = (flowId, actions, onMonitor) => [
+const menuItems = (flowId, actions, monitors) => [
   { id: "rename", label: FLOW_TEXT.rename, icon: Pencil, onSelect: () => actions.rename(flowId) },
   { id: "duplicate", label: FLOW_TEXT.duplicate, icon: Copy, onSelect: () => actions.duplicate(flowId) },
-  { id: "monitor", label: MONITORS_TEXT.menuFlow, icon: Activity, onSelect: () => onMonitor(flowId) },
+  { id: "monitor", label: MONITORS_TEXT.menuFlow, icon: Activity, onSelect: () => monitors.open({ kind: "flow", id: flowId }) },
   { id: "delete", label: FLOW_TEXT.remove, icon: Trash2, destructive: true, onSelect: () => actions.remove(flowId) },
 ]
 
-export const FlowList = memo(function FlowList({ actions, onMonitor }) {
+export const FlowList = memo(function FlowList({ actions, monitors }) {
   const flows = useAppStore((s) => s.flows)
   const openDependencyGraph = useAppStore((s) => s.openDependencyGraph)
   const activeFlowId = useAppStore((s) => selectActiveTab(s).flowId)
@@ -76,16 +76,16 @@ export const FlowList = memo(function FlowList({ actions, onMonitor }) {
         title={FLOW_TEXT.emptyTitle}
         description={FLOW_TEXT.emptyDescription}
         before={(
-          <div className="flex flex-col items-center gap-1.5">
+          <>
             <Button size="sm" onClick={() => actions.create(false)}>
               <Plus />
               {FLOW_TEXT.newFlow}
             </Button>
-            <Button size="sm" variant="ghost" onClick={() => actions.create(true)}>
+            <Button size="sm" variant="outline" onClick={() => actions.create(true)}>
               <LayoutTemplate />
               {FLOW_TEXT.example}
             </Button>
-          </div>
+          </>
         )}
       />
     )
@@ -106,7 +106,7 @@ export const FlowList = memo(function FlowList({ actions, onMonitor }) {
           <FlowRow key={flow.id} flow={flow} isActive={flow.id === activeFlowId} actions={actions} onMenu={(flowId, position) => setMenu({ flowId, position })} />
         ))}
       </ul>
-      {menu && <ContextMenu position={menu.position} title="" items={menuItems(menu.flowId, actions, onMonitor)} onClose={() => setMenu(null)} />}
+      {menu && <ContextMenu position={menu.position} title="" items={menuItems(menu.flowId, actions, monitors)} onClose={() => setMenu(null)} />}
     </div>
   )
 })

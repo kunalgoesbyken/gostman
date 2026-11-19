@@ -141,7 +141,7 @@ function RequestFields({ step, index, requests, onPatch, onPickRequest, EditorCo
   return (
     <>
       <Section title={TEXT.request}>
-        <Button variant="outline" onClick={onPickRequest} className="h-auto min-h-8 w-full justify-start py-1.5">
+        <Button variant="outline" size="sm" onClick={onPickRequest} className="w-full justify-start">
           {request ? <MethodTag method={request.method} className="w-12" /> : null}
           <span className={cn("min-w-0 truncate", !request && "text-muted-foreground")}>{request ? request.path : step.request || FLOW_CANVAS_TEXT.chooseRequest}</span>
         </Button>
@@ -359,7 +359,7 @@ function FlowFields({ step, flows, onPatch, onPickFlow, onOpenFlow, targets, inB
   return (
     <>
       <Section title={TEXT.flow}>
-        <Button variant="outline" onClick={onPickFlow} className="h-auto min-h-8 w-full justify-start py-1.5">
+        <Button variant="outline" size="sm" onClick={onPickFlow} className="w-full justify-start">
           <Workflow aria-hidden="true" className="text-muted-foreground" />
           <span className={cn("min-w-0 truncate", !called && "text-muted-foreground")}>{called ? called.name : step.flow || FLOW_CANVAS_TEXT.noFlow}</span>
         </Button>

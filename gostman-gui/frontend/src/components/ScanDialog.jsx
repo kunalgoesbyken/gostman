@@ -16,7 +16,7 @@ function ScanResult({ state, onGoToRequest }) {
   if (state.isScanning) return <p role="status" className="p-4 text-xs text-muted-foreground">{SCAN_TEXT.scanning}</p>
   if (state.error) return <p role="alert" className="p-4 text-xs text-destructive [overflow-wrap:anywhere]">{SCAN_TEXT.failed(state.error)}</p>
   if (state.report.findings.length === 0) {
-    return <FeatureEmpty surface="scan" icon={ShieldCheck} title={SCAN_TEXT.clean} description={SCAN_TEXT.cleanDescription} />
+    return <FeatureEmpty surface="scan" hideLearnMore icon={ShieldCheck} title={SCAN_TEXT.clean} description={SCAN_TEXT.cleanDescription} />
   }
   return <ScanFindings findings={state.report.findings} onGoToRequest={onGoToRequest} />
 }

@@ -237,6 +237,11 @@
       "blurb": "Every request you send is kept, with its response status, so you can open it again.",
       "synonyms": "history recent sent previous"
     },
+    "toolWindows": {
+      "title": "Tool windows beside your work",
+      "blurb": "Keep Mock server, Capture, Monitors, Run requests and Load test open while you send requests and edit, and watch a capture or a mock log fill up as you go.",
+      "synonyms": "parallel modeless non-modal window side by side background mock capture monitor runner load test status bar"
+    },
     "historyJournal": {
       "title": "History journal and Calls tab",
       "blurb": "See every send in one timeline by day, follow a request's calls in the Calls tab with why a call got no response, and export them as CSV.",

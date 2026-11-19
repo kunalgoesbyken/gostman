@@ -13,7 +13,7 @@ import { COOKIES_TEXT as TEXT } from "../lib/cookiesText"
 import { TREE_TEXT } from "../lib/treeText"
 
 const TABLE_WIDTH = "min-w-[40rem]"
-const COLUMNS = "grid grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1fr)_4rem_minmax(0,1fr)_1.75rem] items-center gap-2 px-3"
+const COLUMNS = "grid grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1fr)_4rem_minmax(0,1fr)_1.75rem] items-center gap-2 px-4"
 const CELL = "truncate font-mono text-xs"
 
 const matches = (cookie, needle) => `${cookie.name}\n${cookie.domain}`.toLowerCase().includes(needle)

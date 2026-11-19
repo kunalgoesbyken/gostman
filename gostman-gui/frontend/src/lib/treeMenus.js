@@ -51,7 +51,7 @@ function folderMenuItems(folder, context) {
   return [
     { id: "new-request", label: TREE_TEXT.newRequest, icon: Plus, onSelect: () => actions.newRequest(folder.id) },
     { id: "run", label: TREE_TEXT.runFolder, icon: ListChecks, onSelect: () => actions.openRunner(folder.id) },
-    { id: "monitor", label: MONITORS_TEXT.menuFolder, icon: Activity, onSelect: () => actions.monitorFolder(folder.id) },
+    { id: "monitor", label: MONITORS_TEXT.menuFolder, icon: Activity, onSelect: () => actions.monitors.open({ kind: "folder", id: folder.id }) },
     { id: "share", label: TREE_TEXT.shareFolder, icon: Share2, onSelect: () => actions.shareFolder(folder.id) },
     { id: "settings", label: isCollection ? FOLDER_SETTINGS_TEXT.collectionMenu : FOLDER_SETTINGS_TEXT.menuSettings, icon: Settings2, onSelect: () => actions.openFolderSettings(folder.id) },
     {

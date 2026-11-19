@@ -7,6 +7,7 @@ import { LearnMore } from "./LearnMore"
 import { featureBlurb, featureById, featureToolLabel, webAlternative } from "../lib/featureIndex"
 import { FEATURES_TEXT as TEXT } from "../lib/featuresText"
 import { downloadFor, downloadUrl } from "./landing/downloads"
+import { cn } from "../lib/utils"
 import { useBrowserOs } from "../hooks/useBrowserOs"
 import { RELEASES_URL } from "../lib/siteLinks"
 
@@ -22,9 +23,9 @@ function DownloadLink() {
   )
 }
 
-function TerminalLine({ command }) {
+function TerminalLine({ command, isStart }) {
   return (
-    <div className="flex flex-col items-center gap-1.5">
+    <div className={cn("flex flex-col gap-1.5", isStart ? "items-start" : "items-center")}>
       <p className="text-xs text-muted-foreground">{TEXT.cliLine}</p>
       <div className="flex items-center gap-2">
         <code dir="ltr" className="rounded bg-muted px-2 py-1 font-mono text-xs">{command}</code>
@@ -34,15 +35,15 @@ function TerminalLine({ command }) {
   )
 }
 
-export function DesktopOnlyDetails({ featureId, showsPurpose = false }) {
+export function DesktopOnlyDetails({ featureId, showsPurpose = false, isStart = false }) {
   const feature = featureById(featureId)
   return (
-    <div role="status" className="flex flex-col items-center gap-3 text-center">
+    <div role="status" className={cn("flex flex-col", isStart ? "items-start gap-2 text-start" : "items-center gap-3 text-center")}>
       <p className="text-sm font-medium">{TEXT.desktopOnlyTitle(featureToolLabel(feature))}</p>
       {showsPurpose && <p className="max-w-prose text-xs text-muted-foreground">{featureBlurb(feature)}</p>}
       <p className="max-w-prose text-xs text-muted-foreground">{webAlternative(feature) ?? TEXT.desktopOnlyBody}</p>
-      {feature.command && <TerminalLine command={feature.command} />}
-      <div className="flex flex-wrap justify-center gap-2">
+      {feature.command && <TerminalLine command={feature.command} isStart={isStart} />}
+      <div className={cn("flex flex-wrap gap-2", !isStart && "justify-center")}>
         <DownloadLink />
         <LearnMore feature={feature} />
       </div>

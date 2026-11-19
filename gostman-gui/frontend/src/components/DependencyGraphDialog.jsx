@@ -66,7 +66,7 @@ export function DependencyGraphDialog({ folders, requests, actions }) {
         </Notice>
       )}
       {shown.length === 0 ? (
-        <EmptyState icon={Workflow} title={DEPENDENCIES_TEXT.none} description={DEPENDENCIES_TEXT.noneDescription} />
+        <EmptyState icon={Workflow} title={DEPENDENCIES_TEXT.none} description={DEPENDENCIES_TEXT.noneDescription} className="min-h-0 flex-1" />
       ) : (
         <div className="flex min-h-0 flex-1 flex-col">
           <div dir="ltr" className="flex shrink-0 overflow-hidden border-b border-border py-1.5" style={{ paddingInlineStart: PADDING_PX, gap: GAP_PX }}>

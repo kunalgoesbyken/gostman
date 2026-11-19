@@ -33,7 +33,7 @@ function HeldEditor({ held, actions }) {
   })
 
   return (
-    <section aria-label={isResponse ? TEXT.response : TEXT.request} className="flex flex-col gap-2 border-b border-border p-3">
+    <section aria-label={isResponse ? TEXT.response : TEXT.request} className="flex flex-col gap-2 border-b border-border p-4">
       <Toolbar>
         <SectionLabel>{isResponse ? TEXT.response : TEXT.request}</SectionLabel>
         <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">{TEXT.heldBy({ rule: held.rule })}</span>

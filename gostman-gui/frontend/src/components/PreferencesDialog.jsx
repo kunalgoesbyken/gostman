@@ -5,8 +5,8 @@ import { Checkbox } from "./ui/checkbox"
 import { Combobox } from "./ui/combobox"
 import { toolWindow } from "../lib/dialogWindows"
 import { Dialog, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
-import { Input } from "./ui/input"
-import { ResizablePane, SPLIT_LIST, SPLIT_PANES } from "./ui/panel"
+import { CONTROL_BASE, CONTROL_SIZES, Input } from "./ui/input"
+import { GHOST_AT_EDGE, ResizablePane, SPLIT_LIST, SPLIT_PANES } from "./ui/panel"
 import { EDGE_END } from "../hooks/usePaneResize"
 import { PREFERENCES_PANE } from "../lib/layout"
 import { Select } from "./ui/select"
@@ -94,6 +94,8 @@ const digitsOnly = (text) => {
   return digits === "" ? "" : String(Number(digits))
 }
 
+const NUMBER_FIELD = "flex w-36 items-center gap-1.5 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-ring focus-within:[outline-style:solid]"
+
 function NumberRow({ label, hint, suffix, range, value, onCommit }) {
   const [draft, setDraft] = useState(String(value))
   const isValid = draft !== "" && isWithin(range, Number(draft))
@@ -108,7 +110,7 @@ function NumberRow({ label, hint, suffix, range, value, onCommit }) {
 
   return (
     <PreferenceRow label={label} hint={hint}>
-      <span className="flex items-center gap-2">
+      <span className={cn(CONTROL_BASE, CONTROL_SIZES.sm, NUMBER_FIELD)}>
         <Input
           inputMode="numeric"
           autoComplete="off"
@@ -118,9 +120,9 @@ function NumberRow({ label, hint, suffix, range, value, onCommit }) {
           value={draft}
           onChange={change}
           onBlur={() => setDraft(String(value))}
-          className="w-20"
+          className="h-full border-0 px-0 text-end focus-visible:outline-none"
         />
-        {suffix && <span className="text-xs text-muted-foreground">{suffix}</span>}
+        {suffix && <span className="shrink-0 text-muted-foreground">{suffix}</span>}
       </span>
     </PreferenceRow>
   )
@@ -192,9 +194,11 @@ function FontsSection({ preferences, installedFonts }) {
       <FontRow label={fields.interfaceFont} hint={PREFERENCES_TEXT.interfaceFontHint} name="interfaceFont" suggestions={installedFonts.fonts} preferences={preferences} />
       <FontRow label={fields.codeFont} hint={PREFERENCES_TEXT.codeFontHint} name="codeFont" isCode suggestions={installedFonts.fonts} preferences={preferences} />
       {installedFonts.load && installedFonts.fonts.length === 0 && (
-        <Button variant="outline" size="sm" onClick={installedFonts.load}>{PREFERENCES_TEXT.suggestFonts}</Button>
+        <div className="flex justify-end">
+          <Button variant="outline" size="sm" onClick={installedFonts.load}>{PREFERENCES_TEXT.suggestFonts}</Button>
+        </div>
       )}
-      {installedFonts.status && <p role="status" className="text-2xs text-muted-foreground">{installedFonts.status}</p>}
+      {installedFonts.status && <p role="status" className="text-end text-2xs text-muted-foreground">{installedFonts.status}</p>}
       <NumberRow
         label={fields.editorFontSize}
         hint={PREFERENCES_TEXT.editorFontSizeHint}
@@ -391,14 +395,14 @@ export function PreferencesDialog({ listFonts, windowFrame, onCommand, backups, 
           role="tabpanel"
           id={panelId}
           aria-labelledby={tabIdOf(selected)}
-          className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-6 py-5 [overflow-wrap:anywhere] max-sm:p-4"
+          className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-6 pb-5 pt-2 [overflow-wrap:anywhere] max-sm:p-4"
         >
-          <h3 className="mb-5 text-sm font-semibold">{selected.title}</h3>
+          <h3 className="mb-5 flex h-8 items-center text-sm font-semibold max-sm:h-auto">{selected.title}</h3>
           <div className="space-y-4">{selected.render({ preferences, windowFrame, installedFonts, onCommand, backups, relay, updates, ai })}</div>
         </div>
       </div>
       <DialogFooter>
-        <Button variant="ghost" className="me-auto" onClick={openShortcuts}>
+        <Button variant="ghost" className={cn("me-auto", GHOST_AT_EDGE)} onClick={openShortcuts}>
           <Keyboard />
           <span className="max-sm:sr-only">{PREFERENCES_TEXT.shortcuts}</span>
         </Button>

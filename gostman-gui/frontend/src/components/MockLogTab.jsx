@@ -1,20 +1,21 @@
-import { useState } from "react"
+import { memo, useCallback, useState } from "react"
 import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
 import { SectionLabel } from "./ui/panel"
 import { TabCount } from "./ui/tabs"
 import { MethodTag } from "./MethodTag"
 import { formatTime } from "../lib/i18n/format"
+import { useMockStore } from "../lib/mockServer"
 import { MOCK_TEXT } from "../lib/mockText"
 import { statusVariant } from "../lib/response"
 
-const LOG_COLUMNS = "grid grid-cols-[4.5rem_4rem_minmax(0,1.5fr)_minmax(0,1fr)_2.5rem_3.5rem] items-center gap-2 px-3"
+const LOG_COLUMNS = "grid grid-cols-[4.5rem_4rem_minmax(0,1.5fr)_minmax(0,1fr)_2.5rem_3.5rem] items-center gap-2 px-4"
 const CELL = "truncate font-mono text-xs"
 const CLOCK_OPTIONS = { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" }
 
 function EntryDetails({ entry }) {
   return (
-    <div className="flex flex-col gap-1 border-b border-border bg-muted/30 px-3 py-2 text-xs">
+    <div className="flex flex-col gap-1 border-b border-border bg-muted/30 px-4 py-2 text-xs">
       <SectionLabel>{MOCK_TEXT.logHeaders}</SectionLabel>
       <dl dir="ltr" className="grid grid-cols-[minmax(0,12rem)_minmax(0,1fr)] gap-x-3 font-mono">
         {entry.headers.map((header, index) => (
@@ -40,10 +41,10 @@ function RouteCell({ entry }) {
   return <span title={title} className="truncate text-xs text-muted-foreground">{label}</span>
 }
 
-function LogRow({ entry, isOpen, onToggle }) {
+const LogRow = memo(function LogRow({ entry, isOpen, onToggle }) {
   return (
     <li>
-      <button type="button" aria-expanded={isOpen} onClick={onToggle} className={`${LOG_COLUMNS} h-7 w-full border-b border-border text-start hover:bg-accent`}>
+      <button type="button" aria-expanded={isOpen} onClick={() => onToggle(entry.id)} className={`${LOG_COLUMNS} h-7 w-full border-b border-border text-start hover:bg-accent`}>
         <span className={`${CELL} text-muted-foreground`}>{formatTime(entry.time, CLOCK_OPTIONS)}</span>
         <MethodTag method={entry.method} />
         <span title={entry.path} className={`${CELL} text-foreground`}>{entry.path}</span>
@@ -54,13 +55,16 @@ function LogRow({ entry, isOpen, onToggle }) {
       {isOpen && <EntryDetails entry={entry} />}
     </li>
   )
-}
+})
 
-export function MockLogTab({ log, isRunning, onClear }) {
+export function MockLogTab({ onClear }) {
+  const log = useMockStore((state) => state.log)
+  const isRunning = useMockStore((state) => state.isRunning)
   const [openId, setOpenId] = useState(0)
+  const toggle = useCallback((id) => setOpenId((current) => (current === id ? 0 : id)), [])
   return (
     <>
-      <div className="flex h-8 shrink-0 items-center gap-2 border-b border-border ps-3 pe-1.5">
+      <div className="flex h-8 shrink-0 items-center gap-2 border-b border-border ps-4 pe-1.5">
         <SectionLabel>{MOCK_TEXT.logCount}</SectionLabel>
         <TabCount>{log.length}</TabCount>
         <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">{MOCK_TEXT.logMasked}</span>
@@ -68,11 +72,11 @@ export function MockLogTab({ log, isRunning, onClear }) {
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto">
         {log.length === 0 ? (
-          <p className="px-3 py-2 text-xs text-muted-foreground">{isRunning ? MOCK_TEXT.logEmptyRunning : MOCK_TEXT.logEmptyStopped}</p>
+          <p className="px-4 py-2 text-xs text-muted-foreground">{isRunning ? MOCK_TEXT.logEmptyRunning : MOCK_TEXT.logEmptyStopped}</p>
         ) : (
           <ul aria-label={MOCK_TEXT.logLabel}>
             {log.map((entry) => (
-              <LogRow key={entry.id} entry={entry} isOpen={openId === entry.id} onToggle={() => setOpenId(openId === entry.id ? 0 : entry.id)} />
+              <LogRow key={entry.id} entry={entry} isOpen={openId === entry.id} onToggle={toggle} />
             ))}
           </ul>
         )}

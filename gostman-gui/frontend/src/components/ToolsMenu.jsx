@@ -1,6 +1,6 @@
 import { useRef, useState } from "react"
 import { Wrench } from "lucide-react"
-import { Button } from "./ui/button"
+import { Button, ICON_ONLY_ON_PHONE } from "./ui/button"
 import { ContextMenu } from "./ui/ContextMenu"
 import { useFeatureAccess } from "../lib/featureAccess"
 import { FEATURES_TEXT } from "../lib/featuresText"
@@ -16,7 +16,7 @@ export function ToolsMenu({ style }) {
   }
   return (
     <>
-      <Button ref={buttonRef} variant="ghost" aria-haspopup="menu" aria-expanded={Boolean(anchor)} title={FEATURES_TEXT.toolsMenuHint} onClick={toggle} style={style}>
+      <Button ref={buttonRef} variant="ghost" aria-haspopup="menu" aria-expanded={Boolean(anchor)} title={FEATURES_TEXT.toolsMenuHint} onClick={toggle} style={style} className={ICON_ONLY_ON_PHONE}>
         <Wrench />
         <span className="max-sm:sr-only">{FEATURES_TEXT.toolsMenu}</span>
       </Button>

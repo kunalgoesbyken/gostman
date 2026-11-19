@@ -103,7 +103,7 @@ function HeadersField({ headers, onCommit }) {
 
 function RuleForm({ rule, onChange }) {
   return (
-    <div className="flex flex-col gap-3 px-3 pb-3 pt-1">
+    <div className="flex flex-col gap-3 px-4 pb-3 pt-1">
       <div className="grid grid-cols-[minmax(0,1fr)_8rem_minmax(0,1.5fr)] gap-2">
         <Input value={rule.name} onChange={(event) => onChange({ name: event.target.value })} placeholder={MOCK_TEXT.ruleName} aria-label={MOCK_TEXT.ruleName} />
         <Select value={rule.method} onChange={(event) => onChange({ method: event.target.value })} aria-label={MOCK_TEXT.methodLabel}>
@@ -146,7 +146,7 @@ export function MockRuleEditor({ rule, position, isLast, actions }) {
   const onChange = (changes) => actions.updateRule(rule.id, changes)
   return (
     <li className="border-b border-border">
-      <div className="flex h-9 items-center gap-2 px-3">
+      <div className="flex h-9 items-center gap-2 px-4">
         <Checkbox label={MOCK_TEXT.ruleSwitch(label)} checked={!rule.disabled} onChange={(event) => onChange({ disabled: !event.target.checked })} />
         <span className="w-4 shrink-0 text-end font-mono text-3xs text-muted-foreground">{position}</span>
         <button type="button" aria-expanded={isOpen} onClick={() => setIsOpen(!isOpen)} className="flex min-w-0 flex-1 items-center gap-2 text-start text-xs">

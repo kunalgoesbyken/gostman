@@ -88,10 +88,11 @@ func (a *App) UpdateMock(sources []mock.Source, variables string, config mock.Co
 		return MockState{}, fmt.Errorf("the mock server is not running")
 	}
 	config.Files = workspaceFiles()
-	if _, err := mockServer.Update(sources, variables, config); err != nil {
+	routes, err := mockServer.Update(sources, variables, config)
+	if err != nil {
 		return MockState{}, err
 	}
-	return currentMockState(), nil
+	return MockState{Running: true, Address: mockServer.Address(), Routes: routes, Log: []mock.Entry{}}, nil
 }
 
 func (a *App) StopMock() error {

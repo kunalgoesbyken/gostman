@@ -26,7 +26,7 @@ import { appDefaultDepth } from "../lib/jsonDepth"
 import { readParamRows } from "../lib/queryString"
 import {
   AUTH_PANEL, BODY_PANEL, EXTRACT_PANEL, FILES_PANEL, GRAPHQL_PANEL, HEADERS_PANEL, NOTES_PANEL, PARAMS_PANEL, SETTINGS_PANEL, TESTS_PANEL, VARS_PANEL,
-  hasChangedSettings, hasProtocolPanel, leadSection, requestKind, requestSections, requestSettings,
+  hasChangedSettings, hasProtocolPanel, leadSection, requestKind, requestSections, requestSettings, settingsHint,
 } from "../lib/requestSections"
 import { REQUEST_TABS_TEXT as TEXT } from "../lib/requestTabsText"
 import { countActiveAssertions } from "../lib/scripting/assertions"
@@ -204,7 +204,7 @@ export const RequestTabs = memo(function RequestTabs({
         </Button>
       </Toolbar>
 
-      <FeatureHint panel={shownPanel} />
+      <FeatureHint panel={shownPanel} blurb={shownPanel === SETTINGS_PANEL ? settingsHint(kind) : undefined} />
 
       <div className="min-h-0 flex-1 overflow-hidden">
         <TabsContent value={PARAMS_PANEL} className={PANEL_CLASS}>

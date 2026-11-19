@@ -52,6 +52,8 @@ import { createTreeActions } from './treeActions'
 import { createFlowActions } from './flowActions'
 import { createSpecEditorActions } from './specEditorActions'
 import { createFeatureActions } from './featureActions'
+import { MODELESS_WINDOWS } from './dialogWindows'
+import { showWindow } from './windowLayers'
 import { placedAfterRoot } from './treeMoves'
 import { focusAddressSoon } from './panes'
 import { ROW_FOLDER, ROW_REQUEST, folderDepth } from './collectionTree'
@@ -315,6 +317,12 @@ export function createWorkspaceActions(backend) {
     store().setSettings(withoutPassphrases(settings))
   }
 
+  function openRunner(folderId) {
+    const wasOpen = store().runner.isOpen
+    store().openRunner(folderId)
+    if (wasOpen) showWindow(MODELESS_WINDOWS.runner.id)
+  }
+
   function closeRunner() {
     runner.stop()
     store().closeRunner()
@@ -510,9 +518,9 @@ export function createWorkspaceActions(backend) {
     const run = runner.describeRun()
     if (!run) return undefined
     const { runner: state } = store()
-    const requests = new Map(store().requests.map((request) => [request.id, request]))
     const environmentOf = (folderId) => environmentForFolder(store(), folderId)?.name
-    const environment = environmentsUsed(state.results, (result) => environmentOf(requests.get(result.id)?.folderId)) || environmentOf(state.folderId) || ''
+    const usedBy = (result) => store().environments.find((environment) => environment.id === result.environmentId)?.name
+    const environment = environmentsUsed(state.results, usedBy) || environmentOf(state.folderId) || ''
     const coverage = await runCoverage(state.results)
     const { file, type, build } = REPORT_FORMATS[format]
     return saveTextFile(file, await build(state.results, run, environment, null, coverage), type)
@@ -740,7 +748,7 @@ export function createWorkspaceActions(backend) {
     [STEP_SAVE]: saveLatestRequest,
     [STEP_VARIABLE]: () => store().openEnvironmentDialog(),
     [STEP_CHECK]: openTests,
-    [STEP_RUN]: () => store().openRunner(),
+    [STEP_RUN]: () => openRunner(),
     [STEP_EXPLORE]: () => {
       store().completeOnboardingStep(STEP_EXPLORE)
       store().openExplore()
@@ -792,8 +800,6 @@ export function createWorkspaceActions(backend) {
     share: () => store().openImportDialog(SHARE_TAB),
     collectionSettings: () => store().openFolderSettings(collectionSettingsTarget(store(), activeTab().request.folderId)),
     allCollectionsSettings: () => store().openFolderSettings(),
-    monitorFolder: (folderId) => monitors.open({ kind: 'folder', id: folderId }),
-    monitorFlow: (flowId) => monitors.open({ kind: 'flow', id: flowId }),
     preferences: () => store().openPreferencesDialog(),
     lintSpec: openapi.lintLatest,
     diffSpecs: () => openapi.openDiff(),
@@ -824,6 +830,7 @@ export function createWorkspaceActions(backend) {
     loadTest,
     examples,
     flows,
+    openRunner,
     hasStorage: Boolean(storageActions),
     openExport,
     saveRequests: (requests) => backend.saveRequests(requests),
@@ -859,7 +866,7 @@ export function createWorkspaceActions(backend) {
     pickFile: (title) => backend.network.pickFile(title),
     collectionNetwork: () => backend.network.collection(),
     saveCollectionPassphrase: (host, certFile, passphrase) => backend.network.saveCollectionPassphrase(host, certFile, passphrase),
-    openRunner: (folderId) => store().openRunner(folderId),
+    openRunner,
     openDependencyGraph: (folderId) => store().openDependencyGraph(folderId),
     openNegative: (folderId) => store().openNegativeDialog(folderId),
     negative: { run: runNegative, close: () => store().closeNegativeDialog() },

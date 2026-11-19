@@ -60,7 +60,7 @@ function ListItem({ label, color, icon, isSelected, isActive, onSelect }) {
       type="button"
       onClick={onSelect}
       aria-current={isSelected}
-      className={cn("flex h-8 w-full items-center gap-2 px-3 text-start text-xs", isSelected ? "bg-muted text-foreground" : "text-muted-foreground hover:bg-accent")}
+      className={cn("flex h-8 w-full items-center gap-2 px-4 text-start text-xs", isSelected ? "bg-muted text-foreground" : "text-muted-foreground hover:bg-accent")}
     >
       <ListMarker icon={icon} color={color} />
       <span className="min-w-0 flex-1 truncate">{label}</span>
@@ -148,7 +148,7 @@ function EnvironmentEditor({ scope, environment, environments, isActive, scoping
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-3 border-b border-border px-3 py-2">
+      <div className="flex flex-wrap items-center gap-3 border-b border-border px-4 py-2">
         <Input value={name} onChange={(event) => editName(event.target.value)} aria-label={TEXT.name} placeholder={TEXT.namePlaceholder} controlSize="md" className="w-48" />
         <ColorPicker label={TEXT.colour} value={environment.color} onChange={(color) => patch({ color })} />
         <ExtendsSelect environment={environment} environments={environments} onChange={(parent) => patch({ extends: parent })} />
@@ -207,7 +207,7 @@ function SessionValuesViewer() {
   const [query, setQuery] = useState("")
   return (
     <>
-      <div className="flex items-center justify-between border-b border-border px-3 py-2">
+      <div className="flex items-center justify-between border-b border-border px-4 py-2">
         <InfoTip text={TEXT.sessionNote} />
         <Button variant="outline" size="sm" disabled={rows.length === 0} onClick={clearSessionVariables}>
           <Trash2 />
@@ -342,14 +342,14 @@ export function EnvironmentDialog({ secrets, onClose }) {
               {sections.map((section) => (
                 <Fragment key={section.key}>
                   {section.separated && <div role="separator" className="my-1 border-t border-border" />}
-                  {section.label && <SectionLabel className="block truncate px-3 pb-1 pt-2" title={section.label}>{section.label}</SectionLabel>}
+                  {section.label && <SectionLabel className="block truncate px-4 pb-1 pt-2" title={section.label}>{section.label}</SectionLabel>}
                   {section.items.map((item) => (
                     <ListItem key={item.id} {...item} isSelected={item.id === resolvedSelection} onSelect={() => setSelectedId(item.id)} />
                   ))}
                 </Fragment>
               ))}
             </div>
-            <div className="p-2 pb-0 sm:hidden">
+            <div className="px-4 pt-2 sm:hidden">
               <Select value={resolvedSelection} onChange={(event) => setSelectedId(event.target.value)} aria-label={TEXT.title}>
                 {sections.map((section) => (section.label
                   ? <optgroup key={section.key} label={section.label}>{sectionOptions(section)}</optgroup>
@@ -357,7 +357,7 @@ export function EnvironmentDialog({ secrets, onClose }) {
                 ))}
               </Select>
             </div>
-            <div className="border-t border-border p-2">
+            <div className="border-t border-border px-4 py-2">
               <Button variant="outline" size="sm" className="w-full" onClick={create}>
                 <Plus />
                 {isGlobal ? TEXT.newGlobal : TEXT.newEnvironment}

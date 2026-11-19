@@ -123,7 +123,7 @@ const NO_FILTERS = { range: RANGE_ANY, folderId: ALL_FOLDERS, tag: ALL_TAGS, sta
 function HistoryFilters({ filters, onChange, folderOptions, tags, canGroup, isGrouped, onGroupedChange, view, onViewChange }) {
   const choose = (name) => (event) => onChange({ ...filters, [name]: event.target.value })
   return (
-    <div className="flex flex-col gap-1 px-2 pb-1">
+    <div className="flex flex-col gap-1 px-3 pb-1">
       <SegmentedControl
         label={HISTORY_TEXT.view}
         options={HISTORY_VIEWS.map((name) => ({ value: name, label: HISTORY_TEXT.views[name] }))}

@@ -203,7 +203,7 @@ function TimingSection({ rule, onChange }) {
 
 function RuleForm({ rule, onChange }) {
   return (
-    <div className="flex flex-col gap-3 px-3 pb-3 pt-1">
+    <div className="flex flex-col gap-3 px-4 pb-3 pt-1">
       <Input value={rule.name} onChange={(event) => onChange({ name: event.target.value })} placeholder={TEXT.ruleName} aria-label={TEXT.ruleName} />
       <MatchFields match={rule.match} onChange={(match) => onChange({ match })} />
       <EditFields title={TEXT.requestEdits} edit={rule.request} onChange={(request) => onChange({ request })} />
@@ -227,7 +227,7 @@ function RuleRow({ rule, position, isLast, isLocked, actions }) {
   const onChange = (changes) => actions.updateRule(rule.id, changes)
   return (
     <li className="border-b border-border">
-      <div className="flex h-9 items-center gap-2 px-3">
+      <div className="flex h-9 items-center gap-2 px-4">
         <Checkbox label={TEXT.switch(label)} checked={!rule.disabled} disabled={isLocked} onChange={(event) => onChange({ disabled: !event.target.checked })} />
         <span className="w-4 shrink-0 text-end font-mono text-3xs text-muted-foreground">{position}</span>
         <button type="button" aria-expanded={isOpen} onClick={() => setIsOpen(!isOpen)} className="flex min-w-0 flex-1 items-center gap-2 text-start text-xs">
@@ -256,7 +256,7 @@ export function CaptureRulesTab({ config, onTrust, actions }) {
   const { rules } = config
   return (
     <>
-      <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-border px-3 py-2">
+      <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-border px-4 py-2">
         <p className="min-w-0 flex-1 text-xs text-muted-foreground max-sm:basis-full">{TEXT.hint}</p>
         <label className="flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
           {TEXT.breakTimeout}
@@ -282,7 +282,7 @@ export function CaptureRulesTab({ config, onTrust, actions }) {
       </div>
       {isLocked && <Notice tone="warning">{TEXT.restricted}</Notice>}
       {isLocked && onTrust && (
-        <div className="flex shrink-0 border-b border-border px-3 py-2">
+        <div className="flex shrink-0 border-b border-border px-4 py-2">
           <Button variant="outline" size="sm" onClick={onTrust}>{TEXT.trust}</Button>
         </div>
       )}

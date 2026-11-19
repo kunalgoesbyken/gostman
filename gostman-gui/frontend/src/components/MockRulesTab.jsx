@@ -9,7 +9,7 @@ export function MockRulesTab({ rules, actions }) {
   const fileInput = useRef(null)
   return (
     <>
-      <div className="flex shrink-0 items-center gap-2 border-b border-border px-3 py-2">
+      <div className="flex shrink-0 items-center gap-2 border-b border-border px-4 py-2">
         <p className="min-w-0 flex-1 text-xs text-muted-foreground">{MOCK_TEXT.rulesHint}</p>
         <input ref={fileInput} type="file" accept=".yaml,.yml,.json" className="hidden" onChange={(event) => {
           const [file] = event.target.files

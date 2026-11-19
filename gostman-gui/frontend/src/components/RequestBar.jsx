@@ -40,10 +40,10 @@ function useDetectedProtocol(requestId, protocolId) {
   return [detected, () => { pickedRef.current = true }]
 }
 
-function SendButton({ loading, socketStatus, hint, onSend, onCancel, onDisconnect }) {
+function SendButton({ size, loading, socketStatus, hint, onSend, onCancel, onDisconnect }) {
   if (loading) {
     return (
-      <Button variant="destructive" onClick={onCancel} className="max-sm:flex-1">
+      <Button variant="destructive" size={size} onClick={onCancel} className="max-sm:flex-1">
         <X />
         {TEXT.cancel}
       </Button>
@@ -51,7 +51,7 @@ function SendButton({ loading, socketStatus, hint, onSend, onCancel, onDisconnec
   }
   if (socketStatus !== null && socketStatus !== SOCKET_IDLE) {
     return (
-      <Button variant="outline" onClick={onDisconnect} className="max-sm:flex-1">
+      <Button variant="outline" size={size} onClick={onDisconnect} className="max-sm:flex-1">
         <Unplug />
         {TEXT.disconnect}
       </Button>
@@ -59,7 +59,7 @@ function SendButton({ loading, socketStatus, hint, onSend, onCancel, onDisconnec
   }
   const label = socketStatus === null ? TEXT.send : TEXT.connect
   return (
-    <Button onClick={onSend} title={hint(label)} className="max-sm:flex-1">
+    <Button size={size} onClick={onSend} title={hint(label)} className="max-sm:flex-1">
       {socketStatus === null ? <Send className="rtl:-scale-x-100" /> : <Plug />}
       {label}
     </Button>
@@ -70,7 +70,7 @@ function ActionButton({ icon: Icon, label, hint, ...props }) {
   return (
     <Button aria-label={label} title={hint} {...props}>
       <Icon />
-      <span className="hidden lg:inline">{label}</span>
+      <span className="hidden xl:inline">{label}</span>
     </Button>
   )
 }
@@ -128,8 +128,11 @@ export const RequestBar = memo(function RequestBar({
     if (!loading) onSend()
   }
 
+  const isVariablesView = view === VIEW_VARIABLES
+
   const sendButton = (
     <SendButton
+      size={isVariablesView ? "sm" : undefined}
       loading={loading}
       socketStatus={socketStatus}
       hint={(label) => hintWithShortcut(label, sendShortcut)}
@@ -139,12 +142,12 @@ export const RequestBar = memo(function RequestBar({
     />
   )
 
-  if (view === VIEW_VARIABLES) {
+  if (isVariablesView) {
     return (
       <div data-pane="address" className="flex shrink-0 items-center gap-2 border-b border-border px-3 py-2">
         <h2 title={activeRequest.name} className="min-w-0 flex-1 truncate px-2 text-sm font-medium">{activeRequest.name || TEXT.untitled}</h2>
-        <ViewSwitch view={view} onChange={onViewChange} />
         {sendButton}
+        <ViewSwitch view={view} onChange={onViewChange} />
       </div>
     )
   }
@@ -158,7 +161,7 @@ export const RequestBar = memo(function RequestBar({
           title={activeRequest.name}
           onChange={(event) => onNameChange(event.target.value)}
           aria-label={TEXT.name}
-          className="border-transparent text-sm font-medium hover:border-border focus:border-border"
+          className="-ms-2 flex-1 border-0 text-sm font-medium hover:ring-1 hover:ring-inset hover:ring-border focus:ring-1 focus:ring-inset focus:ring-border"
         />
         {detected && <Badge role="status" className="shrink-0">{TEXT.detected(TEXT.protocols[detected])}</Badge>}
         {onViewChange && <ViewSwitch view={view} onChange={onViewChange} />}

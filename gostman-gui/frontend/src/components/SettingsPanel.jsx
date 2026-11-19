@@ -6,7 +6,7 @@ import { Checkbox } from "./ui/checkbox"
 import { Field } from "./ui/field"
 import { Input } from "./ui/input"
 import { Select } from "./ui/select"
-import { PanelBody } from "./ui/panel"
+import { FORM_COLUMN, PanelBody } from "./ui/panel"
 import { TagsInput } from "./ui/tagsInput"
 import { SSE_SETTINGS_TEXT } from "../lib/sseText"
 import { BUILT_IN_TIMEOUT_SECONDS, usePreferences } from "../lib/preferences"
@@ -40,7 +40,7 @@ export function SettingsPanel({ options, settings, description, tags, defaultVie
 
   return (
     <PanelBody className="h-full">
-      <div className="flex max-w-xl flex-col gap-2">
+      <div className={FORM_COLUMN}>
         {settings.has(SETTING_TIMEOUT) && (
           <Field label={TEXT.timeout}>
             <Input
@@ -51,13 +51,13 @@ export function SettingsPanel({ options, settings, description, tags, defaultVie
               placeholder={TEXT.timeoutPlaceholder(defaultTimeoutMs(preferences))}
               onChange={(event) => update({ timeoutMs: toWholeNumber(event.target.value) })}
               dir="ltr"
-              className="max-w-48 font-mono"
+              className="font-mono"
             />
           </Field>
         )}
         {settings.has(SETTING_HTTP_VERSION) && (
           <Field label={TEXT.httpVersion}>
-            <Select value={options.httpVersion || ""} onChange={(event) => update({ httpVersion: event.target.value })} className="max-w-48">
+            <Select value={options.httpVersion || ""} onChange={(event) => update({ httpVersion: event.target.value })}>
               {HTTP_VERSION_CHOICES.map((choice) => (
                 <option key={choice.value} value={choice.value}>{choice.label}</option>
               ))}
@@ -66,7 +66,7 @@ export function SettingsPanel({ options, settings, description, tags, defaultVie
         )}
         {settings.has(SETTING_RPC_TRANSPORT) && (
           <Field label={TEXT.rpcTransport}>
-            <Select value={options.rpcTransport || ""} onChange={(event) => update({ rpcTransport: event.target.value })} className="max-w-48">
+            <Select value={options.rpcTransport || ""} onChange={(event) => update({ rpcTransport: event.target.value })}>
               {RPC_TRANSPORT_CHOICES.map((choice) => (
                 <option key={choice.value} value={choice.value}>{choice.label}</option>
               ))}
@@ -100,7 +100,7 @@ export function SettingsPanel({ options, settings, description, tags, defaultVie
                 placeholder={SSE_SETTINGS_TEXT.maxEventsPlaceholder}
                 onChange={(event) => update({ streamMaxEvents: toWholeNumber(event.target.value) })}
                 dir="ltr"
-                className="max-w-48 font-mono"
+                className="font-mono"
               />
             </Field>
             <Field label={SSE_SETTINGS_TEXT.maxSeconds}>
@@ -111,14 +111,14 @@ export function SettingsPanel({ options, settings, description, tags, defaultVie
                 placeholder={SSE_SETTINGS_TEXT.maxSecondsPlaceholder}
                 onChange={(event) => update({ streamMaxSeconds: toWholeNumber(event.target.value) })}
                 dir="ltr"
-                className="max-w-48 font-mono"
+                className="font-mono"
               />
             </Field>
           </>
         )}
         {showsViews && (
           <Field label={TEXT.opensIn}>
-            <Select value={defaultView || VIEW_FULL} onChange={(event) => onDefaultViewChange(event.target.value === VIEW_FULL ? "" : event.target.value)} className="max-w-48">
+            <Select value={defaultView || VIEW_FULL} onChange={(event) => onDefaultViewChange(event.target.value === VIEW_FULL ? "" : event.target.value)}>
               <option value={VIEW_FULL}>{TEXT.opensInFull}</option>
               <option value={VIEW_VARIABLES}>{TEXT.opensInVariables}</option>
             </Select>
@@ -126,7 +126,7 @@ export function SettingsPanel({ options, settings, description, tags, defaultVie
         )}
         {showsViews && (
           <Field label={TEXT.jsonDepth}>
-            <Select value={isDepthSetting(jsonDepth) ? jsonDepth : ""} onChange={(event) => onJsonDepthChange(event.target.value)} className="max-w-48">
+            <Select value={isDepthSetting(jsonDepth) ? jsonDepth : ""} onChange={(event) => onJsonDepthChange(event.target.value)}>
               <option value="">{TEXT.jsonDepthDefault(defaultDepth)}</option>
               {DEPTH_SETTINGS.map((setting) => (
                 <option key={setting} value={setting}>{depthLabel(setting)}</option>
