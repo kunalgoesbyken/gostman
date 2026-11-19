@@ -45,7 +45,7 @@ func (a *App) startup(ctx context.Context) {
 	if placesBeforeShow {
 		a.restoreWindow()
 	}
-	migrateHistory()
+	migrateSections()
 	startBackups()
 	a.loadNetwork()
 	restoreWorkspace()
@@ -114,8 +114,8 @@ type Request struct {
 	FolderId         string         `json:"folderId"`
 	GraphqlQuery     string         `json:"graphqlQuery"`
 	GraphqlVariables string         `json:"graphqlVariables"`
-	Auth             engine.Auth    `json:"auth"`
-	Options          engine.Options `json:"options"`
+	Auth             engine.Auth    `json:"auth,omitzero"`
+	Options          engine.Options `json:"options,omitzero"`
 	Extractors       string         `json:"extractors"`
 	Assertions       string         `json:"assertions"`
 	Examples         string         `json:"examples"`
@@ -227,7 +227,8 @@ func (a *App) LoadData() (SavedData, error) {
 	if err != nil {
 		return SavedData{}, err
 	}
-	data.History = loadHistory(stored)
+	data.History = loadSection[HistoryEntry](historySection, stored)
+	data.Cookies = loadSection[engine.CookieInfo](cookiesSection, stored)
 	data = withDefaultEnvironment(data)
 	if !data.Restricted {
 		data.Environments = vault.withSecrets(data.Environments, secretScope())
@@ -330,7 +331,8 @@ func resetData() error {
 	if err := forgetBackups(); err != nil {
 		return err
 	}
-	if err := removeIfPresent(filepath.Join(appFolder, mockAppDataFile), filepath.Join(appFolder, captureAppDataFile), trashAppDataPath(), historyPath, historyPath+corruptHistorySuffix); err != nil {
+	leftovers := append(sectionFiles(), filepath.Join(appFolder, mockAppDataFile), filepath.Join(appFolder, captureAppDataFile), trashAppDataPath())
+	if err := removeIfPresent(leftovers...); err != nil {
 		return err
 	}
 	return writeStored(storedData{})

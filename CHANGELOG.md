@@ -4,6 +4,12 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Changed
+
+- Desktop: cookies are kept in their own file, `cookies.json`, next to `gostman.json`, as the history already is. A response that sets a cookie no longer rewrites your collections: saving the cookies takes about 2 ms instead of 400 ms next to 2,000 saved requests and about 1 ms instead of 1.4 s next to 10,000. The cookies move on the first start, backups still hold them and restoring a backup restores its cookies. Going back to 1.21 or earlier after this shows no cookies.
+- Desktop: starting the app no longer decodes your data file twice just to find the network settings and the history, and the automatic backup runs in the background. With 2,000 saved requests the work before the window can load its data takes 60 ms instead of 340 ms.
+- Desktop: a saved request no longer stores empty authentication and request options, which halves the data file (6.7 MB to 3.6 MB with 2,000 requests) and speeds up every save and load.
+
 ## [1.21.0] - 2026-11-19
 
 ### Changed

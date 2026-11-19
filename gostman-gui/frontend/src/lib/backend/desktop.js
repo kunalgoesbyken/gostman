@@ -72,7 +72,7 @@ import { allowDiskAttachments } from '../attachments'
 import { toGrpcCall, toGrpcTarget } from '../grpc'
 import { toMcpCall, toMcpTarget } from '../mcp'
 import { withPreferredTimeout } from '../preferences'
-import { toEngineRequest } from '../request'
+import { normalizeRequest, toEngineRequest } from '../request'
 import { WORKSPACE_TEXT } from '../workspaceText'
 import { failureResponse } from '../response'
 import { createStorageGate } from './storageGate'
@@ -80,8 +80,13 @@ import { localRecords } from '../storage'
 
 const DISK_CHANGED_EVENT = 'workspace:changed'
 
+async function saveRequests(requests) {
+  const saved = await SaveRequests(requests)
+  return saved.map(normalizeRequest)
+}
+
 async function saveRequest(request) {
-  const [saved] = await SaveRequests([request])
+  const [saved] = await saveRequests([request])
   return saved
 }
 
@@ -133,7 +138,7 @@ export const desktopBackend = {
   streamCapSeconds: 0,
   load,
   saveRequest,
-  saveRequests: (requests) => SaveRequests(requests),
+  saveRequests,
   deleteRequests: (ids) => DeleteRequests(ids),
   saveFolders: (folders) => SaveFolders(folders),
   saveFlows: (flows) => SaveFlows(flows),

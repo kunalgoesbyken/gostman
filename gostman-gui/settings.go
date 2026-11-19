@@ -212,12 +212,11 @@ func (s *networkState) forget() {
 
 func (a *App) loadNetwork() {
 	dataMutex.RLock()
-	data, err := readData()
+	settings, err := readSettings()
 	dataMutex.RUnlock()
 	if err != nil {
 		return
 	}
-	settings := data.Settings
 	settings.Certificates = withPassphrases(passphraseScope, settings.Certificates)
 	config, err := globalConfig(settings)
 	if err != nil {
@@ -307,10 +306,4 @@ func (a *App) SaveCollectionPassphrase(host, certFile, passphrase string) error 
 
 func (a *App) PickFile(title string) (string, error) {
 	return wailsruntime.OpenFileDialog(a.ctx, wailsruntime.OpenDialogOptions{Title: title})
-}
-
-func (a *App) SaveCookies(cookies []engine.CookieInfo) error {
-	return mutateData(func(data *SavedData) {
-		data.Cookies = cookies
-	})
 }
