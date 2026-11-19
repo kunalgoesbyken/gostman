@@ -4,6 +4,18 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.23.0] - 2026-11-19
+
+### Added
+
+- Minimize tool windows to the status bar (#52). Every tool window has a minimize button; the window hides and its work goes on. The status bar shows each tool that is open, minimized or still working, with what it is doing (the mock server's port, captured calls, active monitors, *5 of 8* for a run, requests sent by a load test). Green means running, amber means Capture is holding requests for you, red means a request in a run failed, a monitor is failing, a load test had errors or negative tests found problems. Runs, load tests and negative tests fill a progress bar under their entry. Click an entry to bring the window back or minimize it again; the button beside it starts or stops the mock server, the capture and the load test, stops a run, and pauses or resumes all monitors. When a minimized run, load test or negative test finishes, or a hidden capture holds a request, a notice says so with **Show**.
+- **Live** in the status bar lists the WebSocket connections, SSE streams (including ones reconnecting on their own) and flow runs open in any tab, with **Show** and **Stop** for each, and their tabs carry a dot.
+- New tool windows open offset from the ones already open instead of on top of them.
+
+### Changed
+
+- **Negative tests** is a tool window like **Run requests**: it stays open beside your work, can be minimized, and shows its progress in the status bar. Closing it stops the run; before, a run went on with nothing showing it and no way to stop it.
+
 ## [1.22.0] - 2026-11-19
 
 ### Added
