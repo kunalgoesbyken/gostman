@@ -26,6 +26,7 @@ import { reconcileTabs } from '../lib/tabReconcile'
 import { isNarrowViewport, rememberSidebarOpen, rememberedSidebarOpen } from '../lib/layout'
 import { reorderTabs, stepTab } from '../lib/tabOrder'
 import { SCOPE_COLLECTION, SCOPE_ENVIRONMENT, SCOPE_GLOBAL, SCOPE_SESSION } from '../lib/scripting/scopes'
+import { collectionHostsBy } from '../lib/scripting/destinations'
 import { resolveLayers, scopeLayers, scriptLayers, variableText, withSecretMarks } from '../lib/variableScopes'
 import { currentFormValues } from '../lib/variablesForm'
 import { choiceFor, chosenEnvironment, isSameScope, isScoped, variableHolderFor } from '../lib/environmentScope'
@@ -943,26 +944,52 @@ export function selectTabHistoryEntry(state, tabId) {
 
 const sameInputs = (first, second) => first !== null && first.every((input, index) => Object.is(input, second[index]))
 
-let lastInputs = null
-let lastResolved = null
-
-export function selectResolvedVariables(state) {
-  const request = selectActiveTab(state)?.request
-  const inputs = [
-    state.globalEnvironments, state.activeGlobalEnvironmentId, state.collectionVariables, state.collectionVariablesMeta, state.environments,
-    state.activeEnvironmentId, state.environmentChoices, state.folders, state.dotEnv, request?.folderId, request?.vars, state.sessionVariables, state.isRestricted,
-  ]
-  if (sameInputs(lastInputs, inputs)) return lastResolved
-  lastInputs = inputs
-  lastResolved = resolveLayers(scopeLayers(state, request))
-  return lastResolved
+function onceFor(inputsOf, compute) {
+  let lastInputs = null
+  let lastValue = null
+  return (state) => {
+    const inputs = inputsOf(state)
+    if (sameInputs(lastInputs, inputs)) return lastValue
+    lastInputs = inputs
+    lastValue = compute(state)
+    return lastValue
+  }
 }
+
+const scopeInputs = (state) => [
+  state.globalEnvironments, state.activeGlobalEnvironmentId, state.collectionVariables, state.collectionVariablesMeta, state.environments,
+  state.activeEnvironmentId, state.environmentChoices, state.folders, state.dotEnv, state.sessionVariables, state.isRestricted,
+]
+
+export const selectResolvedVariables = onceFor(
+  (state) => {
+    const request = selectActiveTab(state)?.request
+    return [...scopeInputs(state), request?.folderId, request?.vars]
+  },
+  (state) => resolveLayers(scopeLayers(state, selectActiveTab(state)?.request)),
+)
 
 export const variableTextFor = (state, request, referenced = {}) => variableText(resolveLayers(scopeLayers(state, request, referenced)))
 
 export const scriptLayersFor = (state, request, referenced = {}) => scriptLayers(scopeLayers(state, request, referenced))
 
 export const selectActiveVariables = (state) => variableText(selectResolvedVariables(state))
+
+function addressVariableText(state) {
+  const texts = new Map()
+  return (request) => {
+    const folderId = request.folderId ?? ''
+    if (!texts.has(folderId)) texts.set(folderId, new Map())
+    const forFolder = texts.get(folderId)
+    if (!forFolder.has(request.vars)) forFolder.set(request.vars, variableTextFor(state, request))
+    return forFolder.get(request.vars)
+  }
+}
+
+export const selectScriptHosts = onceFor(
+  (state) => [state.requests, ...scopeInputs(state)],
+  (state) => collectionHostsBy(state.requests, addressVariableText(state)),
+)
 
 export const resolvedVariablesFor = (state, folderId) => resolveLayers(scopeLayers(state, { folderId }))
 

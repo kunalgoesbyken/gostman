@@ -15,7 +15,7 @@ import { CHECK_RUN_TEXT } from './checksText'
 import { EXECUTION_TEXT } from './executionText'
 import { consoleGroup } from './consoleLog'
 import { createContractChecker, linkFor } from './contractCheck'
-import { addressHost, collectionHostsBy, isPermittedHost } from './scripting/destinations'
+import { addressHost, isPermittedHost } from './scripting/destinations'
 import { holdsBack, reasonFor } from './scripting/flow'
 import { MAX_SENDS, SEND_TIMEOUT_MS, extractAllowance } from './scripting/limits'
 import { errorLine } from './scripting/console'
@@ -34,7 +34,7 @@ import { isPromptName } from './variableNames'
 import { shownUrl } from './shownUrl'
 import { sampleTransport } from './sampleResponses'
 import { isSampleRequest } from './samples'
-import { environmentFor, scriptLayersFor, useAppStore, variableTextFor } from '../store/appStore'
+import { environmentFor, scriptLayersFor, selectScriptHosts, useAppStore, variableTextFor } from '../store/appStore'
 
 const CONFIG_ERROR = 'config'
 const CANCELLED_ERROR = 'cancelled'
@@ -63,7 +63,7 @@ function createTrace() {
   return { entries, timed }
 }
 
-const scriptHosts = () => collectionHostsBy(store().requests, (candidate) => variablesText(candidate, {}))
+const scriptHosts = () => selectScriptHosts(store())
 
 async function runStage(stage, job, request, { send, trace, referenced, timeoutMs }) {
   const layers = scriptLayersFor(store(), request, referenced)

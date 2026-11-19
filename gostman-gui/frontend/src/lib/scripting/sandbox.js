@@ -84,7 +84,7 @@ function release(worker, isReusable) {
   else worker.terminate()
 }
 
-function runInWorker(job, send, { limit, message }, isReusable) {
+function runInWorker(job, send, allowance, isReusable) {
   keepWarm()
   return new Promise((resolve) => {
     const worker = isReusable ? checkWorker() : scriptWorker()
@@ -97,7 +97,7 @@ function runInWorker(job, send, { limit, message }, isReusable) {
       keepWarm()
       resolve(result)
     }
-    timer = setTimeout(() => finish(failure(message), false), limit)
+    timer = setTimeout(() => finish(failure(allowance.message), false), allowance.limit)
     worker.onmessage = ({ data }) => {
       if (data.type === MESSAGE_RESULT) finish(data.result, true)
       if (data.type === MESSAGE_SEND) answer(worker, data, send)

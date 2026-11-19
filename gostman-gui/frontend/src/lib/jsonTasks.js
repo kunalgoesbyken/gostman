@@ -58,6 +58,12 @@ function run(task, payload, deadline) {
 export const formatJsonText = (text) => run('format', { text }).then((result) => result.text)
 
 export function filterJsonText(text, path, withValue) {
-  const { limit, message } = filterAllowance()
-  return run('filter', { text, path, withValue }, { limit, outcome: { active: true, error: message } })
+  const allowance = filterAllowance()
+  const deadline = {
+    limit: allowance.limit,
+    get outcome() {
+      return { active: true, error: allowance.message }
+    },
+  }
+  return run('filter', { text, path, withValue }, deadline)
 }

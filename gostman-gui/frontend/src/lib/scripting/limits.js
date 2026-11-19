@@ -22,7 +22,12 @@ const scriptTimeout = (milliseconds) => {
 
 const allowance = (milliseconds, timedOut) => {
   const limit = scriptTimeout(milliseconds)
-  return { limit, message: timedOut(limit / 1000) }
+  return {
+    limit,
+    get message() {
+      return timedOut(limit / 1000)
+    },
+  }
 }
 
 export const scriptAllowance = (milliseconds, hasScript = true) => (

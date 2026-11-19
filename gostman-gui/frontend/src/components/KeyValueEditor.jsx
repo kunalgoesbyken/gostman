@@ -1,5 +1,6 @@
-import { useId, useState } from "react"
+import { memo, useCallback, useId, useRef, useState } from "react"
 import { X } from "lucide-react"
+import { shallow } from "zustand/shallow"
 import { Button, IconButton } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
 import { VariableInput, VariableTextarea } from "./VariableInput"
@@ -57,13 +58,16 @@ function ValueCell({ row, label, suggest, onChange }) {
   )
 }
 
-function Row({ row, columns, typed, isDraft, keyLabel, valueLabel, suggestions, onChange, onReplace, onRemove }) {
+const sameRowProps = ({ row: before, ...beforeRest }, { row: after, ...afterRest }) => shallow(before, after) && shallow(beforeRest, afterRest)
+
+const Row = memo(function Row({ row, index, columns, typed, isDraft, keyLabel, valueLabel, suggestions, onChange, onReplace, onRemove }) {
+  const change = (patch) => onChange(index, patch)
   return (
     <div className={cn(ROW_GRID, columns, !row.enabled && "opacity-50")}>
       <Checkbox
         label={TEXT.sendRow}
         checked={row.enabled}
-        onChange={(event) => onChange({ enabled: event.target.checked })}
+        onChange={(event) => change({ enabled: event.target.checked })}
         className={cn(ROW_TOGGLE, isDraft && "invisible")}
       />
       <VariableInput
@@ -73,24 +77,24 @@ function Row({ row, columns, typed, isDraft, keyLabel, valueLabel, suggestions, 
         placeholder={keyLabel}
         aria-label={keyLabel}
         spellCheck={false}
-        onChange={(event) => onChange({ key: event.target.value })}
+        onChange={(event) => change({ key: event.target.value })}
         className="font-mono"
       />
       {typed && (
         <Select
           value={row.type || ROW_TEXT}
-          onChange={(event) => onReplace(event.target.value === ROW_FILE ? asFileRow(row) : asTextRow(row))}
+          onChange={(event) => onReplace(index, event.target.value === ROW_FILE ? asFileRow(row) : asTextRow(row))}
           aria-label={TEXT.fieldType}
         >
           <option value={ROW_TEXT}>{TEXT.text}</option>
           <option value={ROW_FILE}>{TEXT.file}</option>
         </Select>
       )}
-      <ValueCell row={row} label={valueLabel} suggest={suggestions && ((text) => suggestions.values(row.key, text))} onChange={onChange} />
-      <IconButton label={TEXT.removeRow} icon={X} onClick={onRemove} className={cn(isDraft && "invisible")} />
+      <ValueCell row={row} label={valueLabel} suggest={suggestions && ((text) => suggestions.values(row.key, text))} onChange={change} />
+      <IconButton label={TEXT.removeRow} icon={X} onClick={() => onRemove(index)} className={cn(isDraft && "invisible")} />
     </div>
   )
-}
+}, sameRowProps)
 
 export function BulkEditor({ rows, keyLabel, onChange }) {
   const hintId = useId()
@@ -123,10 +127,16 @@ export function BulkEditor({ rows, keyLabel, onChange }) {
 function TableEditor({ rows, typed, fileRows, keyLabel, valueLabel, suggestions, onChange }) {
   const columns = typed ? TYPED_COLUMNS : PLAIN_COLUMNS
   const shown = [...rows, draftRow(typed, fileRows)]
+  const latest = useRef(null)
+  latest.current = { shown, fileRows, onChange }
 
-  const commit = (next) => onChange(next.filter((row) => !(fileRows ? isBlankFileRow(row) : isBlankRow(row))))
-  const replaceRow = (index, replacement) => commit(shown.map((row, at) => (at === index ? replacement : row)))
-  const removeRow = (index) => commit(shown.filter((_, at) => at !== index))
+  const commit = useCallback((next) => {
+    const { fileRows: isFile, onChange: report } = latest.current
+    report(next.filter((row) => !(isFile ? isBlankFileRow(row) : isBlankRow(row))))
+  }, [])
+  const replaceRow = useCallback((index, replacement) => commit(latest.current.shown.map((row, at) => (at === index ? replacement : row))), [commit])
+  const editRow = useCallback((index, patch) => replaceRow(index, { ...latest.current.shown[index], ...patch }), [replaceRow])
+  const removeRow = useCallback((index) => commit(latest.current.shown.filter((_, at) => at !== index)), [commit])
 
   return (
     <>
@@ -136,15 +146,16 @@ function TableEditor({ rows, typed, fileRows, keyLabel, valueLabel, suggestions,
           <Row
             key={index}
             row={row}
+            index={index}
             columns={columns}
             typed={typed}
             isDraft={index === rows.length}
             keyLabel={keyLabel}
             valueLabel={valueLabel}
             suggestions={suggestions}
-            onChange={(patch) => replaceRow(index, { ...row, ...patch })}
-            onReplace={(replacement) => replaceRow(index, replacement)}
-            onRemove={() => removeRow(index)}
+            onChange={editRow}
+            onReplace={replaceRow}
+            onRemove={removeRow}
           />
         ))}
       </div>

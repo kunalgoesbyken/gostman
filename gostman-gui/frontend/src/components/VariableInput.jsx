@@ -110,9 +110,8 @@ function useCompletion(fieldRef, { value, suggest, fileReads, onChange, onKeyDow
   const refresh = (field, explicit = false) => {
     const caret = field.selectionStart ?? 0
     const reference = field.selectionEnd === caret ? referenceAtCaret(field.value, caret, explicit) : null
-    const placement = placeBelow(field)
-    if (reference) setOpen({ ...reference, caret, explicit, placement })
-    else setOpen(suggest ? { whole: true, placement } : null)
+    if (reference) setOpen({ ...reference, caret, explicit, placement: placeBelow(field) })
+    else setOpen(suggest ? { whole: true, placement: placeBelow(field) } : null)
     setActive(reference || field.value.trim() ? 0 : NOTHING_ACTIVE)
     if (onCaretMove) requestAnimationFrame(onCaretMove)
   }

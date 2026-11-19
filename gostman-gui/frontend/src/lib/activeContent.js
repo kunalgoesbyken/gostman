@@ -18,14 +18,19 @@ export const readsFiles = (request) => someText(request, hasFileReference) || at
 
 export const withoutFileContent = (value) => mapText(value, withoutFileReferences)
 
-const fileReadsOf = (request) => [...textsIn(request).flatMap(fileReferencesIn), ...attachedPaths(request.body), ...importRootsOf(request)]
+const textReadsOf = (texts) => texts.flatMap(fileReferencesIn)
+
+const otherReadsOf = (request) => [...attachedPaths(request.body), ...importRootsOf(request)]
 
 export function addsFileReads(before, after) {
-  const known = new Set(fileReadsOf(before))
-  return fileReadsOf(after).some((read) => !known.has(read))
+  const beforeTexts = new Set(textsIn(before))
+  const addedTexts = textsIn(after).filter((text) => !beforeTexts.has(text))
+  const knownTextReads = addedTexts.length > 0 ? textReadsOf([...beforeTexts]) : []
+  const known = new Set([...knownTextReads, ...otherReadsOf(before)])
+  return [...textReadsOf(addedTexts), ...otherReadsOf(after)].some((read) => !known.has(read))
 }
 
-const readPathsOf = (value) => [...textsIn(value).flatMap(fileReferencesIn).map(filePathOf), ...attachedPaths(value.body), ...importRootsOf(value)]
+const readPathsOf = (value) => [...textReadsOf(textsIn(value)).map(filePathOf), ...otherReadsOf(value)]
 
 export const filePathsIn = (values) => [...new Set(values.filter(Boolean).flatMap(readPathsOf).filter(Boolean))]
 

@@ -20,6 +20,8 @@ function existingCalls(body) {
 
 const nextId = (calls) => Math.max(FIRST_ID - 1, ...calls.map((call) => (Number.isInteger(call.id) ? call.id : 0))) + 1
 
+export const canAddJsonRpcCall = (body) => existingCalls(body) !== null
+
 export function addJsonRpcCall(body) {
   const calls = existingCalls(body)
   if (calls === null) return null

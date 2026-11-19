@@ -27,7 +27,10 @@ export function findReferences(text) {
   }))
 }
 
+const STRUCTURE_STARTS = new Set(["{", "[", '"'])
+
 function parsedJSON(text) {
+  if (!STRUCTURE_STARTS.has(text.trimStart().charAt(0))) return null
   try {
     return { value: JSON.parse(text) }
   } catch {

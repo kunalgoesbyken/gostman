@@ -29,7 +29,8 @@ import { useEditorFormatting } from "../hooks/useEditorFormatting"
 import { EMPTY_ATTACHMENT } from "../lib/attachments"
 import { BODY_TEXT } from "../lib/bodyText"
 import { isPlainObject, lookup, parseJSON } from "../lib/dataUtils"
-import { addJsonRpcCall } from "../lib/jsonRpc"
+import { addJsonRpcCall, canAddJsonRpcCall } from "../lib/jsonRpc"
+import { useDebouncedValue } from "../hooks/useDebouncedValue"
 import { parseRows, serializeRows } from "../lib/rows"
 import { SOAP_11, soapTemplate } from "../lib/soap"
 
@@ -101,10 +102,13 @@ function BodyEditor({ request, editorPath, editorRef, onChange, onFormat, Editor
   )
 }
 
-function JsonRpcButton({ body, onChange }) {
-  const extended = addJsonRpcCall(body)
+const JSON_RPC_SETTLE_MS = 300
+
+function JsonRpcButton({ body, scope, onChange }) {
+  const settledBody = useDebouncedValue(body, JSON_RPC_SETTLE_MS, scope)
+  const isAvailable = useMemo(() => canAddJsonRpcCall(settledBody), [settledBody])
   return (
-    <Button variant="outline" size="sm" title={BODY_TEXT.jsonRpcTitle} disabled={extended === null} onClick={() => onChange(extended)}>
+    <Button variant="outline" size="sm" title={BODY_TEXT.jsonRpcTitle} disabled={!isAvailable} onClick={() => onChange(addJsonRpcCall(body) ?? body)}>
       {BODY_TEXT.jsonRpc}
     </Button>
   )
@@ -125,7 +129,7 @@ export function BodyPanel({ request: stored, drafts, editorPath, replacedByGraph
       <Toolbar>
         <SegmentedControl label={BODY_TEXT.typeLabel} options={bodyTypesFor(request.method)} value={request.bodyType} onChange={handleTypeChange} />
         {RAW_SOCKET_METHODS.includes(request.method) && <InfoTip text={request.method === 'NATS' ? BODY_TEXT.natsSocket : BODY_TEXT.rawSocket} />}
-        {request.bodyType === BODY_JSON && <JsonRpcButton body={request.body} onChange={(body) => onUpdateRequest({ body })} />}
+        {request.bodyType === BODY_JSON && <JsonRpcButton body={request.body} scope={request.id} onChange={(body) => onUpdateRequest({ body })} />}
         {isFormattedType(request.bodyType) && (
           <FormatButton
             language={request.bodyType}
