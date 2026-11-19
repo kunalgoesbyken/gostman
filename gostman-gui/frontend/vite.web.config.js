@@ -6,7 +6,7 @@ import { createHash } from 'crypto'
 import { readFileSync, writeFileSync } from 'fs'
 import { LOCALE_CHUNK_PREFIX, localesPlugin } from './i18n/plugin.js'
 import { EDITOR_PREFETCH_ID, ROUTE_PREFETCH_ID } from './src/lib/routePrefetch.js'
-import { CLIENT_ROUTE, DOCS_ENTRY, PAGE_ENTRIES, SITE_ENTRY, chunkClosure, siteDefine, siteMeta } from './site.config.js'
+import { CLIENT_ROUTE, DOCS_ENTRY, PAGE_ENTRIES, SITE_ENTRY, chunkClosure, siteDefine, siteMeta, workerOptions } from './site.config.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -201,6 +201,7 @@ function stampServiceWorker() {
 
 export default defineConfig({
   define: siteDefine,
+  worker: workerOptions,
   plugins: [
     react(),
     localesPlugin(),

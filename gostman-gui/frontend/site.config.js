@@ -354,3 +354,5 @@ async function fetchGitHubStars() {
 const githubStars = await fetchGitHubStars()
 
 export const siteDefine = { __SITE_URL__: JSON.stringify(siteUrl), __GITHUB_STARS__: JSON.stringify(githubStars), __APP_VERSION__: JSON.stringify(appVersion) }
+
+export const workerOptions = { rollupOptions: { output: { entryFileNames: 'assets/[name].[hash].js' } } }

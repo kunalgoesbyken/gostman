@@ -2,7 +2,7 @@ import {defineConfig} from 'vite'
 import react from '@vitejs/plugin-react'
 import {resolve, dirname} from 'path'
 import {fileURLToPath} from 'url'
-import {siteDefine} from './site.config.js'
+import {siteDefine, workerOptions} from './site.config.js'
 import {localesPlugin} from './i18n/plugin.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -11,6 +11,7 @@ export default defineConfig({
   define: siteDefine,
   plugins: [react(), localesPlugin()],
   cacheDir: 'node_modules/.vite-desktop',
+  worker: workerOptions,
   build: {
     outDir: 'dist',
     emptyOutDir: true,
