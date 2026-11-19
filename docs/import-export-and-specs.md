@@ -6,7 +6,7 @@ This page covers the Import and Export dialog, what an import does and does not 
 
 Open the dialog with the **Import** button in the header or the **Import data**, **Export data** and **Share collection** commands in the command palette. It has three tabs: **Import**, **Export** and **Share**. The Share tab is covered in [Sharing and documentation](sharing-and-docs.md).
 
-![The Import tab with Choose files and Choose folder, the format list, an OpenAPI address field and a box to paste content](../screenshots/import.png)
+![The Import tab with Choose files and Choose folder, the format list, an OpenAPI address field and a box to paste content](../screenshots/import.webp)
 
 ## Importing
 
@@ -147,7 +147,7 @@ Pasting a share link, or choosing a share file, shows a preview with the request
 
 The **Export** tab previews the content, shows how many requests, folders and environments the collection has, and offers a copy button and **Save file**. With more than one collection, **Collection** exports one of them, with its own and the shared environments, or all of them; the file is named after the collection. A secret scan runs on the collection and shows a notice when it finds credentials; it does not block the export, see [Notices in Share and Export](runner-load-and-scan.md#notices-in-share-and-export). The preview shows the first 20,000 characters; the saved file is complete.
 
-![The Export tab with All collections and the Gostman format selected, Copy and Save file buttons, a note that secret values are left out, and the export preview](../screenshots/export.png)
+![The Export tab with All collections and the Gostman format selected, Copy and Save file buttons, a note that secret values are left out, and the export preview](../screenshots/export.webp)
 
 | Format | What you get |
 | --- | --- |

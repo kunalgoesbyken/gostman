@@ -35,7 +35,7 @@ In VS Code, the [VS Code extension](vscode.md) runs collections and flows from t
 
 Tools return JSON both as text and as structured content, describe themselves with read-only and destructive hints, and report progress during `run_folder` (requests done out of the planned total) and `load_test` when the client asks for it. While a request, a run or a load test is going on, `list_requests`, `get_request`, `save_request`, `import_requests`, `lint_spec` and `scan_secrets` still answer; tools that use the session's cookies and variables wait for it to finish.
 
-![The tools gostman mcp offers an agent: list_requests, get_request, send_request, run_folder, last_response, save_request, import_requests, the environment and variable tools, lint_spec, scan_secrets, load_test and the mock server tools](../screenshots/term-mcp-tools.png)
+![The tools gostman mcp offers an agent: list_requests, get_request, send_request, run_folder, last_response, save_request, import_requests, the environment and variable tools, lint_spec, scan_secrets, load_test and the mock server tools](../screenshots/term-mcp-tools.webp)
 
 ### A collection as tools
 

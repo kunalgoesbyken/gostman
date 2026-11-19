@@ -18,7 +18,7 @@ The lock is available on environment, global and collection variables. It is not
 
 A variable can read its value from a secret manager or a password manager instead of holding it. You set this up in two steps: add a connection once, then point variables at it.
 
-![The Secret managers dialog adding a HashiCorp Vault connection named team-vault with its address, mount and KV version](../screenshots/secret-managers.png)
+![The Secret managers dialog adding a HashiCorp Vault connection named team-vault with its address, mount and KV version](../screenshots/secret-managers.webp)
 
 The collection stores only the reference: the connection name, the path, an optional JSON field and an optional version. The connection itself, with its address and sign-in details, is kept on this computer with credentials in the system keychain, and is never part of a collection. A collection you clone cannot point your credentials at its own server.
 
@@ -88,7 +88,7 @@ If the connection name on a variable does not exist on this computer, the row sh
 
 In the address bar, the request tables and the editors, a variable that reads from a secret manager is tinted with its connection's colour and has a dashed underline, so a request shows at a glance which fields come from which connection. Plain variables keep a solid underline.
 
-![The address bar with stripe_key tinted orange for vault-prod and probe_ref tinted blue for team-1password, and the hover card of stripe_key naming vault-prod, HashiCorp Vault, the secret path and the JSON field](../screenshots/secret-origins.png)
+![The address bar with stripe_key tinted orange for vault-prod and probe_ref tinted blue for team-1password, and the hover card of stripe_key naming vault-prod, HashiCorp Vault, the secret path and the JSON field](../screenshots/secret-origins.webp)
 
 Hover over the variable to see where its value comes from: the connection's colour, the service's logo, the connection name and service, the secret path, and the field and version if they are set. The value itself stays masked. A variable that uses a connection that is off has a dotted, muted underline, and one whose connection does not exist on this computer is marked like an undefined variable; the hover card says which.
 
@@ -100,7 +100,7 @@ If a secret cannot be read, the request is not sent, and the message names the v
 
 Each connection in **Secret managers** has an **On** switch. Switch a connection **Off** while its service is unavailable, or so that its app stops asking you to unlock it. Its settings and saved credentials stay, so switching it **On** again is all it takes to read from it again.
 
-![The Secret managers dialog with the connection staging-vault switched Off and team-vault On](../screenshots/secret-managers-off.png)
+![The Secret managers dialog with the connection staging-vault switched Off and team-vault On](../screenshots/secret-managers-off.webp)
 
 While a connection is off:
 
@@ -108,9 +108,9 @@ While a connection is off:
 - In the environment, the connection list shows it as `staging-vault (off)`, and the variable says that it is empty until you turn the connection on.
 - The request's **Timeline** has a **Secret managers** step with how many secrets were read and how long it took, and a line for each variable that was left empty.
 
-![An environment where the variable stagingKey reads from staging-vault (off), with the note that the variable is empty](../screenshots/secret-variable-off.png)
+![An environment where the variable stagingKey reads from staging-vault (off), with the note that the variable is empty](../screenshots/secret-variable-off.webp)
 
-![The Timeline of a request: Secret managers read 1 secret, stagingKey is empty because the connection staging-vault is off, then the POST request](../screenshots/timeline-secret-managers.png)
+![The Timeline of a request: Secret managers read 1 secret, stagingKey is empty because the connection staging-vault is off, then the POST request](../screenshots/timeline-secret-managers.webp)
 
 ### Password managers
 
@@ -177,7 +177,7 @@ Gostman runs the Secrets Manager CLI (`bws`) with the access token of a machine 
 
 Gostman keeps the cookies that responses set and sends them back to the same site on later requests. Run the **Manage cookies** command, or select **Cookies** in the status bar at the bottom of the window, to see them in the **Cookies** dialog.
 
-![The Cookies dialog listing the session_id and locale cookies for localhost with their path and expiry](../screenshots/cookies.png)
+![The Cookies dialog listing the session_id and locale cookies for localhost with their path and expiry](../screenshots/cookies.webp)
 
 - The table lists **Name**, **Value**, **Domain**, **Path** and **Expires** for each cookie, and the title shows the count.
 - **Filter by name or domain** narrows the list.
@@ -191,7 +191,7 @@ Two switches in a request's **Settings** tab change this for one request: clear 
 
 Network settings sets the proxy and certificates used when the desktop app sends requests: HTTP, GraphQL, gRPC, WebSocket, server-sent events, MCP over HTTP and OAuth 2 token requests. Run the **Network settings** command from the command palette, or select **Network** in the status bar at the bottom of the window.
 
-![The Network settings dialog with a custom proxy, hosts that bypass it and a CA certificate picker](../screenshots/network.png)
+![The Network settings dialog with a custom proxy, hosts that bypass it and a CA certificate picker](../screenshots/network.webp)
 
 Network settings are desktop only. In the web version the dialog shows `Available in the desktop app`: requests from the web version go through the hosted relay, which cannot use a proxy or certificates from your machine. To use them from the web version, run [`gostman relay`](cli.md#local-relay-for-the-web-app) with `--cacert`, `--client-cert` or `--proxy` and choose the local relay.
 

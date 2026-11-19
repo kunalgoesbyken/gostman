@@ -34,7 +34,7 @@ Checked on 26 October 2026. Plans and limits change often, so read the current [
 - **MQTT.** Gostman has an MQTT client; Insomnia's documentation does not list one. See [MQTT](protocols.md#mqtt).
 - **An agent server built for secrets.** `gostman mcp` replaces secret values with their names in what the agent sees and limits the hosts the agent can call.
 
-![A Gostman collection on disk: a todo-api folder holding one YAML file per request, environments, a flow and a data file, with the first lines of the List todos request file showing its method, URL, extraction rule and checks](../screenshots/term-files.png)
+![A Gostman collection on disk: a todo-api folder holding one YAML file per request, environments, a flow and a data file, with the first lines of the List todos request file showing its method, URL, extraction rule and checks](../screenshots/term-files.webp)
 
 ## Where Insomnia is stronger
 

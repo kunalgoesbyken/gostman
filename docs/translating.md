@@ -6,7 +6,7 @@ This page is for people who want to translate or review, and for developers who 
 
 What is translated: the app, desktop and web. What stays English: the command line, the documentation, the landing page, generated files (exports, run reports, code snippets), AI prompts and the errors that script libraries throw inside your scripts.
 
-![Preferences open on Language, with the language list set to Same as the system and the links to ask on GitHub or translate on Weblate](../screenshots/preferences-language.png)
+![Preferences open on Language, with the language list set to Same as the system and the links to ask on GitHub or translate on Weblate](../screenshots/preferences-language.webp)
 
 ## Request a language or report a translation
 

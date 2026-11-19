@@ -23,7 +23,7 @@ Typing the same host into every request makes it hard to point the collection at
 
 Send it again to confirm nothing changed, then press **Save**. See [Variables](variables.md) for every scope and how they override each other.
 
-![List todos with the URL written as {{base_url}}/todos?userId=1, the Mock environment chosen in the header and the 200 OK response with its three checks passing](../screenshots/first-request.png)
+![List todos with the URL written as {{base_url}}/todos?userId=1, the Mock environment chosen in the header and the 200 OK response with its three checks passing](../screenshots/first-request.webp)
 
 ## 3. Group requests in a folder
 
@@ -48,13 +48,13 @@ A request that returns the wrong data with a `200` status still looks like a suc
 
 Change the expected `userId` to `2` and send again to see a failure, then change it back.
 
-![The Checks tab of List todos with three assertion rows: res.status equals 200, res.body is an array and res.body[0].userId equals 1](../screenshots/checks-tab.png)
+![The Checks tab of List todos with three assertion rows: res.status equals 200, res.body is an array and res.body[0].userId equals 1](../screenshots/checks-tab.webp)
 
 ## 5. Reuse a value from one response in the next request
 
 Real flows chain requests: log in, then use the token; create a record, then fetch it by its id.
 
-![The Extract tab of List todos: a rule that saves $[0].id as todo_id, its value 1 from the last response, and the confirmation that it was saved](../screenshots/extract.png)
+![The Extract tab of List todos: a rule that saves $[0].id as todo_id, its value 1 from the last response, and the confirmation that it was saved](../screenshots/extract.webp)
 
 1. On **List todos**, open the **Extract** tab and add a rule: set **Variable** to `todo_id`, **From** to **JSON body** and **Path or name** to `$[0].id`, and leave **Keep in** on **Environment**.
 2. Press **Save** and send **List todos**. The rule copies the first todo's id into `todo_id` in the active environment.
@@ -82,7 +82,7 @@ For checks that do not fit in one row, such as validating against a JSON Schema 
 
 Choose **Run requests** at the top of the sidebar, then **Run**. The runner sends every request in order, applies the extraction rules and checks, and shows a summary you can download as an HTML report. Requests run top to bottom, so keep **List todos** above **Get one todo**.
 
-![The Run requests dialog: all three requests selected, then the run finished with every request at 3 of 3 checks and the footer reading Ran 3 of 3, 3 passed, 0 failed](../screenshots/gif-run-collection.gif)
+![The Run requests dialog: all three requests selected, then the run finished with every request at 3 of 3 checks and the footer reading Ran 3 of 3, 3 passed, 0 failed](../screenshots/gif-run-collection.webp)
 
 ## 8. Keep it as files and run it from the command line
 
@@ -111,7 +111,7 @@ Under each request is the address it was sent to, with the variables filled in.
 
 The command exits with `1` when a request or a check fails, which is what a CI pipeline needs.
 
-![The terminal output of gostman run: three requests passed with their status, time and checks, and a summary of 3 requests and 9 checks passed](../screenshots/term-run.png)
+![The terminal output of gostman run: three requests passed with their status, time and checks, and a summary of 3 requests and 9 checks passed](../screenshots/term-run.webp)
 
 ## 9. Run it once per row of a data file
 

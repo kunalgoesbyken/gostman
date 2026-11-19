@@ -7,7 +7,7 @@ Every folder and every collection can carry settings that the requests below the
 
 The command palette has **Collection settings**, which opens the settings of the active request's collection (in the app's own storage, a request outside any folder gets **Settings for all collections**), and, in the app's own storage, **Settings for all collections**.
 
-![Folder settings for the Auth folder on the Headers tab, with X-Client and X-User-Id headers sent with every request in the folder](../screenshots/folder-settings.png)
+![Folder settings for the Auth folder on the Headers tab, with X-Client and X-User-Id headers sent with every request in the folder](../screenshots/folder-settings.webp)
 
 | Tab | What it holds |
 | --- | --- |

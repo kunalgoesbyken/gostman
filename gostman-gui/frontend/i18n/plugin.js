@@ -114,5 +114,3 @@ export function localesPlugin() {
     },
   }
 }
-
-export const isLocaleChunk = (fileName) => fileName.startsWith(`assets/${LOCALE_CHUNK_PREFIX}`)

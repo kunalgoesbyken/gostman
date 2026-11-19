@@ -6,7 +6,7 @@ This page covers the sidebar and collection tree, request tabs, the welcome pane
 
 The sidebar has two views, **Collections** and **History**. The History tab shows a count of saved entries when there are any.
 
-![Gostman with the storefront-api folder open: folders of requests in the sidebar, a search field, a request and its response](../screenshots/app.png)
+![Gostman with the storefront-api folder open: folders of requests in the sidebar, a search field, a request and its response](../screenshots/app.webp)
 
 The buttons next to the view tabs are:
 
@@ -57,7 +57,7 @@ You can rearrange the tree in three ways:
 
 Hold Ctrl (Command on macOS) and click rows to add or remove them from a selection, or click one row and then Shift+click another to select everything between them. The selected rows are tinted and a bar above the tree shows `3 selected` with **Move to folder…**, **Delete** and **Clear selection**. On a phone, or whenever you have no modifier key, choose **Select** in a row's menu; while a selection exists, tapping rows adds and removes them.
 
-![Four requests selected in the sidebar, the selection bar above the tree and the Move to folder menu listing the folders](../screenshots/multi-select.png)
+![Four requests selected in the sidebar, the selection bar above the tree and the Move to folder menu listing the folders](../screenshots/multi-select.webp)
 
 - **Move to folder…** lists the folders, as the menu for one item does. The items keep their relative order, are added at the end of the folder and move as one step, so **Undo** (or Ctrl+Z) puts them all back. A folder is never moved into itself or one of its own subfolders; when a selected folder and something inside it are both selected, the folder moves with its contents.
 - **Delete** asks first and says how many requests and folders it will delete. As with a single folder, anything inside a deleted folder that you did not select moves up one level. This cannot be undone.
@@ -103,13 +103,13 @@ A folder also has **Rename** and **Delete**.
 
 **Colour and tags…** on a folder, or **Tags…** on a request, opens a small window:
 
-![The Colour and tags window for the Users folder: orange selected as the folder colour, the WIP tag, and the colour of the WIP tag](../screenshots/colour-and-tags.png)
+![The Colour and tags window for the Users folder: orange selected as the folder colour, the WIP tag, and the colour of the WIP tag](../screenshots/colour-and-tags.webp)
 
 - **Folder colour** offers six colours and a custom one (the swatch with a plus), which opens your system's colour picker. Choose the selected colour again to remove it. The colour is saved with the folder, in `folder.yaml` for a folder workspace, so everyone who opens the collection sees it.
 - **Tags** adds and removes tags. Type a tag and press Enter, or pick one used elsewhere in the collection. A request's tags can also be edited in its **Settings** tab.
 - **Tag colours** sets the colour of each tag. Without a choice, a colour is picked from the tag's name, so a tag looks the same on every computer. A tag you colour keeps that colour everywhere it appears; these choices are kept on this device and survive **Reset to defaults**.
 
-![The sidebar with orange, teal and purple folders, WIP and Billing folder tags, and request tags such as Smoke, Todo and Testing](../screenshots/folder-colours-tags.png)
+![The sidebar with orange, teal and purple folders, WIP and Billing folder tags, and request tags such as Smoke, Todo and Testing](../screenshots/folder-colours-tags.webp)
 
 Folder tags apply to every request inside the folder, including requests in its subfolders. The sidebar search, the runner's **Only tags** and **Skip tags** filters, and `gostman run --tags` and `--exclude-tags` all treat them as the request's own tags.
 
@@ -207,7 +207,7 @@ Opening a restricted folder shows a notice that says so. A request that is stopp
 
 The **Git** panel is a desktop feature. It works on the open folder, so open or save the collection to a folder first, or clone a repository from the workspace menu. Open it with **Git** in the workspace menu, or with the branch name in the status bar at the bottom of the window (it reads **Git** when the folder is not a repository yet). The panel refreshes when the app window regains focus.
 
-![The Git panel with one changed request file, its diff showing the URL change, and a commit message ready to commit](../screenshots/git-panel.png)
+![The Git panel with one changed request file, its diff showing the URL change, and a commit message ready to commit](../screenshots/git-panel.webp)
 
 If the panel cannot work, it says why:
 

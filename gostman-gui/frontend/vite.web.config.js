@@ -1,11 +1,10 @@
 import { defineConfig, normalizePath } from 'vite'
 import react from '@vitejs/plugin-react'
-import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { createHash } from 'crypto'
 import { readFileSync, writeFileSync } from 'fs'
-import { localesPlugin, isLocaleChunk } from './i18n/plugin.js'
+import { localesPlugin } from './i18n/plugin.js'
 import { EDITOR_PREFETCH_ID, ROUTE_PREFETCH_ID } from './src/lib/routePrefetch.js'
 import { CLIENT_ROUTE, DOCS_ENTRY, PAGE_ENTRIES, SITE_ENTRY, chunkClosure, siteDefine, siteMeta } from './site.config.js'
 
@@ -120,26 +119,30 @@ function preloadedOnLanding(module) {
   }
 }
 
-const SANDBOX_WORKER_PREFIX = 'assets/sandbox.worker.'
 const SHARED_RUNTIME_MODULE = '/node_modules/react-dom/cjs/'
+
+const FIRST_SCREEN_MODULES = [
+  'src/components/Workspace.jsx',
+  'src/lib/backend/web.js',
+  'src/components/sidebarLists.js',
+  'src/components/ui/CommandPalette.jsx',
+  'src/components/CodeEditor.jsx',
+]
 
 const chunkFileName = (chunk) =>
   chunk.moduleIds.some((id) => id.includes(SHARED_RUNTIME_MODULE)) ? 'assets/react.[hash].js' : 'assets/[name].[hash].js'
 
-const linkedChunks = (bundle, fileName, seen = new Set()) => {
-  if (seen.has(fileName) || !bundle[fileName]) return seen
-  seen.add(fileName)
-  const { imports, dynamicImports } = bundle[fileName]
-  imports.concat(dynamicImports).forEach((linked) => linkedChunks(bundle, linked, seen))
-  return seen
-}
-
-function pageOnlyChunks(bundle) {
-  const entries = Object.values(bundle).filter((item) => item.type === 'chunk' && item.isEntry)
-  const reach = (list) => new Set(list.flatMap((entry) => [...linkedChunks(bundle, entry.fileName)]))
-  const isPage = (entry) => PAGE_ENTRIES.includes(entry.name)
-  const app = reach(entries.filter((entry) => !isPage(entry)))
-  return new Set([...reach(entries.filter(isPage))].filter((fileName) => !app.has(fileName)))
+function firstScreenAssets(bundle) {
+  const chunks = Object.values(bundle).filter((item) => item.type === 'chunk')
+  const lazyRoots = FIRST_SCREEN_MODULES.map((module) => {
+    const chunk = dynamicEntryOf(chunks, module)
+    if (!chunk) throw new Error(`${module} is not a lazy chunk, so the service worker cannot precache it`)
+    return chunk
+  })
+  const roots = [...chunks.filter((chunk) => chunk.isEntry && !PAGE_ENTRIES.includes(chunk.name)), ...lazyRoots]
+  const scripts = new Set(roots.flatMap((chunk) => [...chunkClosure(bundle, chunk.fileName)]))
+  const styles = [...scripts].flatMap((fileName) => [...(bundle[fileName].viteMetadata?.importedCss ?? [])])
+  return [...scripts, ...styles]
 }
 
 function stampServiceWorker() {
@@ -150,12 +153,7 @@ function stampServiceWorker() {
     apply: 'build',
     writeBundle(options, bundle) {
       outDir = options.dir
-      const pageOnly = pageOnlyChunks(bundle)
-      assets = Object.values(bundle)
-        .filter((item) => (item.type === 'chunk' || item.fileName.endsWith('.css')) && !item.fileName.startsWith(SANDBOX_WORKER_PREFIX))
-        .filter((item) => !pageOnly.has(item.fileName) && !isLocaleChunk(item.fileName))
-        .map((item) => `/${item.fileName}`)
-        .sort()
+      assets = [...new Set(firstScreenAssets(bundle))].map((fileName) => `/${fileName}`).sort()
     },
     closeBundle() {
       if (!outDir) return
@@ -172,14 +170,6 @@ export default defineConfig({
   plugins: [
     react(),
     localesPlugin(),
-    nodePolyfills({
-      globals: {
-        Buffer: true,
-        global: true,
-        process: true,
-      },
-      include: ['buffer', 'process', 'util', 'stream', 'events', 'path', 'querystring', 'url', 'string_decoder', 'http', 'https', 'os', 'assert', 'constants', 'zlib', 'tty', 'domain', 'punycode', 'console', 'vm'],
-    }),
     serveWebEntryInDev('index-web.html'),
     renameHtmlEntry('index-web.html', 'index.html'),
     preloadedRoutePage(CLIENT_ROUTE, 'src/components/Workspace.jsx'),

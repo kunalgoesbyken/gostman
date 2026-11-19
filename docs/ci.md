@@ -17,7 +17,7 @@ A run with both kinds of failure exits 3.
 
 A 4xx or 5xx status alone is not a failure. Add a check such as `res.status equals 200` to the request.
 
-![A failing run in the terminal: Get one todo returned 200 OK but one of its three checks failed, the summary shows 1 failed request and the exit code is 1](../screenshots/term-run-failing.png)
+![A failing run in the terminal: Get one todo returned 200 OK but one of its three checks failed, the summary shows 1 failed request and the exit code is 1](../screenshots/term-run-failing.webp)
 
 ## Secrets
 
@@ -60,7 +60,7 @@ gostman run api --reporter text --reporter junit:report.xml --reporter html:repo
 
 At most one reporter can go without a file, and it prints to stdout. When every report goes to a file, the text summary is printed.
 
-![One run writing a text summary to the terminal, a JUnit file and an HTML report](../screenshots/term-reports.png)
+![One run writing a text summary to the terminal, a JUnit file and an HTML report](../screenshots/term-reports.webp)
 
 ## Contract checks
 

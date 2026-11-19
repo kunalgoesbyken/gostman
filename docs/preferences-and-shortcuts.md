@@ -6,7 +6,7 @@ This page covers the command palette and its commands, the Preferences window, t
 
 The command palette runs most actions in Gostman from the keyboard.
 
-![The command palette filtered by run, listing Run requests and other matching commands, saved requests and history entries](../screenshots/command-palette.png)
+![The command palette filtered by run, listing Run requests and other matching commands, saved requests and history entries](../screenshots/command-palette.webp)
 
 Open it with Ctrl+K, or with the **Commands** button in the header (shown on wide windows). Type to filter, use the up and down arrows to move, press Enter to run the highlighted row and Esc to close it. The **?** button in the palette opens the Keyboard shortcuts dialog.
 
@@ -77,11 +77,11 @@ Some commands appear only when they apply:
 
 Open **Preferences** from the command palette or with **Preferences** in the status bar. Changes apply as soon as you make them, and the window does not dim the app, so you see each change in place. They are saved on this device, in local storage under `gostman.preferences`.
 
-![The Preferences window open on its Theme section, with the theme, contrast, accent colour and the eight palettes, over the app](../screenshots/preferences.png)
+![The Preferences window open on its Theme section, with the theme, contrast, accent colour and the eight palettes, over the app](../screenshots/preferences.webp)
 
 Preferences is a window you can move and resize inside the app. Its sections, in order, are Appearance, Theme, Fonts, Editor, Requests, Language, AI, Privacy and Data. Pick one on the left; Preferences opens on Appearance the first time and on the last section you used after that. Run requests, Collection settings, Network, Mock server, Capture, Cookies, Environments, Load test, Scan and Import, Export and Share are windows of the same kind.
 
-![Resizing the sidebar by dragging its edge, hiding and showing it from the header, then moving and resizing the Preferences window and trying a palette](../screenshots/window-tour.gif)
+![Resizing the sidebar by dragging its edge, hiding and showing it from the header, then moving and resizing the Preferences window and trying a palette](../screenshots/window-tour.webp)
 
 - Drag the title bar to move it, and drag an edge or a corner to resize it. It always stays inside the app.
 - With the keyboard, focus the grip at the left of the title (**Move window**): the arrow keys move the window and Shift with the arrow keys resizes it.
@@ -89,7 +89,7 @@ Preferences is a window you can move and resize inside the app. Its sections, in
 - Size and position are remembered, per window. On a phone every window fills the screen instead.
 - Esc closes it, and with several windows open it closes only the one on top. Clicking outside does not close it, so you can keep one open beside your work. When a window is made small, its content scrolls.
 
-![The Run requests window being dragged smaller over the request editor, with its list of requests scrolling inside](../screenshots/floating-dialogs.png)
+![The Run requests window being dragged smaller over the request editor, with its list of requests scrolling inside](../screenshots/floating-dialogs.webp)
 
 | Section | Setting | Options | Default |
 | --- | --- | --- | --- |
@@ -150,13 +150,13 @@ At the bottom of the window:
 
 The last swatch, marked with a plus, picks a custom accent. Gostman keeps your colour where it is readable and darkens or lightens it where it is not, so text in the accent colour reaches 4.5:1 against the window. When it changes your colour, a note under **Accent colour** shows the shade used in each mode.
 
-![A custom yellow accent selected, with the note that it is shown as #8f7307 in light mode and #facc15 in dark mode](../screenshots/custom-accent.png)
+![A custom yellow accent selected, with the note that it is shown as #8f7307 in light mode and #facc15 in dark mode](../screenshots/custom-accent.webp)
 
 **Palette** sets the background and text colours of the whole window. Each palette has a light and a dark version, shown side by side in its preview, and most give the sidebar a slightly different tone.
 
 **Custom colours** set the background and text colour of one part of the window on top of the palette:
 
-![Custom colours with a dark sidebar in the light theme: the sidebar row shows its colours and a contrast of 11.8:1, and the sidebar behind the window has changed](../screenshots/custom-colours.png)
+![Custom colours with a dark sidebar in the light theme: the sidebar row shows its colours and a contrast of 11.8:1, and the sidebar behind the window has changed](../screenshots/custom-colours.webp)
 
 | Part | Covers |
 | --- | --- |
@@ -178,15 +178,15 @@ The last swatch, marked with a plus, picks a custom accent. Gostman keeps your c
 
 **Method colours** set the colour of each request method (GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, GRAPHQL, GRPC and MCP) in the sidebar, tabs, history, runner and the method menu of the address bar. Each method has a **Text** colour and a **Background**; with a background, the method is shown as a badge. They work like custom colours: **Light** and **Dark** choose the version you edit, **Contrast** warns below 4.5:1, and the reset buttons clear one method or all of them.
 
-![Method colours with white text on green, amber, blue, red and purple backgrounds for GET, POST, PUT, DELETE and PATCH, each with its contrast ratio](../screenshots/method-colours.png)
+![Method colours with white text on green, amber, blue, red and purple backgrounds for GET, POST, PUT, DELETE and PATCH, each with its contrast ratio](../screenshots/method-colours.webp)
 
-![The same method badges in the sidebar, the open tab and the method menu of the address bar](../screenshots/method-badges.png)
+![The same method badges in the sidebar, the open tab and the method menu of the address bar](../screenshots/method-badges.webp)
 
 **Share a theme**: **Copy theme** copies the palette, the accent colour, and every custom and method colour, for both versions, as text. **Import theme** takes such text and applies it. A theme only holds colours; anything else, or a colour not written as `#rrggbb`, is refused.
 
 Theme, contrast and accent also apply to the landing page and the documentation in the same browser, and the palette to the landing page.
 
-![Gostman in the light theme with a request and its JSON response](../screenshots/appearance.png)
+![Gostman in the light theme with a request and its JSON response](../screenshots/appearance.webp)
 
 **Text size** scales all text and the spacing around it. **Compact** density makes everything a little smaller again. **Editor font size** is separate and sets the size of the code editors.
 
@@ -216,7 +216,7 @@ The AI section holds the consent line, the switch to turn AI on, the provider, b
 
 **Delete all data** opens a confirmation that lists exactly what is deleted and what is kept. It warns at the top that the automatic backups are deleted too, so they cannot bring the data back. The delete button stays off until you type the word it asks for; **Export first** opens the export instead. The command palette's **Delete all data** opens the same confirmation.
 
-![The Delete all data confirmation listing what is deleted and what is kept, with a field to type "delete", and Cancel, Export first and Delete all data buttons](../screenshots/delete-all-data.png)
+![The Delete all data confirmation listing what is deleted and what is kept, with a field to type "delete", and Cancel, Export first and Delete all data buttons](../screenshots/delete-all-data.webp)
 
 | | Desktop app | Web version |
 | --- | --- | --- |
@@ -275,7 +275,7 @@ The desktop app has an **Updates** section; the web version is always current, s
 
 Open the Keyboard shortcuts dialog with Ctrl+/, with the **Keyboard shortcuts** command, with the **?** button of the palette or with the **Keyboard shortcuts** button in Preferences. It lists every shortcut in four groups: **General**, **Request**, **Tabs** and **Navigation**. Below them, **Moving around** lists the keys that work inside lists, tabs and menus; those cannot be changed.
 
-![The Keyboard shortcuts dialog listing general, request and tab shortcuts, each with buttons to change or remove it](../screenshots/shortcuts.png)
+![The Keyboard shortcuts dialog listing general, request and tab shortcuts, each with buttons to change or remove it](../screenshots/shortcuts.webp)
 
 ### Default shortcuts
 
@@ -339,7 +339,7 @@ Your changes are saved with your preferences.
 
 Everything in the main window can be reached without a mouse.
 
-![The Keyboard shortcuts dialog showing the navigation shortcuts and the Moving around keys](../screenshots/keyboard-navigation.png)
+![The Keyboard shortcuts dialog showing the navigation shortcuts and the Moving around keys](../screenshots/keyboard-navigation.webp)
 
 ### Panes
 

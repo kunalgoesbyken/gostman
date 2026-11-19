@@ -87,7 +87,7 @@ test("matches the schema", () => {
 
 Scripts that use Ajv, `const validate = new (require("ajv"))().compile(schema)`, keep working; `validate.errors` has Ajv's fields.
 
-![The Checks tab of a request with assertion rows, and under the response the Checks tab listing each check that passed](../screenshots/checks-tab.png)
+![The Checks tab of a request with assertion rows, and under the response the Checks tab listing each check that passed](../screenshots/checks-tab.webp)
 
 ## Packages and the vault
 

@@ -4,7 +4,7 @@ Short recipes for common jobs. Each one lists the steps and links to the referen
 
 Not sure where a feature is? **Explore features** in the app searches all of them and opens each with sample data.
 
-![Opening Explore features from the command palette and searching it for snapshot and for secrets](../screenshots/gif-explore-features.gif)
+![Opening Explore features from the command palette and searching it for snapshot and for secrets](../screenshots/gif-explore-features.webp)
 
 ## Move a collection from Postman, Insomnia, Bruno or .http files
 

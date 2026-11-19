@@ -30,7 +30,7 @@ Scripts can change the order with `setNextRequest`; see [Scripting](scripting-an
 
 All controls except **Stop** are disabled while a run is going. **Run** is disabled when no request is in scope or every request is cleared. The run, its totals, the planned count in the footer and the HTML report use only the requests left checked.
 
-![The Run requests list with two requests cleared: the count reads 10 of 12 requests and Select all and Select none sit beside it](../screenshots/runner-select.png)
+![The Run requests list with two requests cleared: the count reads 10 of 12 requests and Select all and Select none sit beside it](../screenshots/runner-select.webp)
 
 ### Data files
 
@@ -92,13 +92,13 @@ The **Monitors** dialog (the status bar, the command palette, **Monitor this fol
 
 `gostman run --every 5m` and `gostman flow run --every 5m` repeat a run until it is stopped, save each run to a local history, and post to a Slack, Teams, Discord or plain webhook when it fails. `gostman history` shows the pass rate and the p50 and p95 duration of each request. See [Scheduled runs](cli.md#scheduled-runs).
 
-![The Run requests dialog running a three-request collection: the selection before the run, then every request passed with its status, time and checks](../screenshots/gif-run-collection.gif)
+![The Run requests dialog running a three-request collection: the selection before the run, then every request passed with its status, time and checks](../screenshots/gif-run-collection.webp)
 
 ## Load test
 
 The Load test dialog sends the current request many times at once and measures how the server responds. Open it with the **Load test** button next to **Code** in the request bar, or with the **Load test this request** command while the request you want to test is the active tab.
 
-![A finished load test with 20 workers for 5 seconds: every request succeeded, with a latency table from min to max](../screenshots/load-test.png)
+![A finished load test with 20 workers for 5 seconds: every request succeeded, with a latency table from min to max](../screenshots/load-test.webp)
 
 The button and the command appear only in the desktop app. In the web version neither the request bar nor the palette offers them. The button is also hidden for gRPC and MCP requests.
 
@@ -145,7 +145,7 @@ For thresholds that fail a pipeline, a fixed request count or a ramp-up, use `go
 
 The Scan for secrets dialog looks through your collection for credentials that were typed into it, before you share or commit it. Open it with the **Scan for secrets** command.
 
-![The Scan for secrets dialog with one medium finding: a JSON Web Token in the token variable of the Local environment, shown only as eyJh****](../screenshots/scan.png)
+![The Scan for secrets dialog with one medium finding: a JSON Web Token in the token variable of the Local environment, shown only as eyJh****](../screenshots/scan.webp)
 
 It looks for well-known token formats, random-looking values in credential fields and passwords typed into auth settings. Values written as `{{variables}}` are not reported. Nothing leaves the window except the check itself, and only a few characters of a value are ever shown.
 

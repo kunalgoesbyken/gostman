@@ -74,7 +74,7 @@ Params and Headers use a table with a checkbox, a name and a value for each row.
 - The Params rows mirror the query string in the URL. Unchecked rows are kept in the table but not sent.
 - Header names and values suggest as you type. Click a header name field, or start typing, and a list shows the usual request headers with the best match first: names that start with what you typed, then names that contain it, each group with the common ones on top. For a well-known header the value field suggests values too: media types for `Content-Type`, `Accept` values, `Cache-Control` directives, `Authorization` schemes (`Bearer `, `Basic `), `Accept-Encoding` and more. Use the arrow keys with Enter or Tab to pick one, and Esc to close the list; anything you type that is not in the list stays as you wrote it. The list also works in folder and collection headers, and typing `{{` in a value still lists your variables.
 
-  ![The Headers table with "con" typed in the first row and a list of Content-Type, Content-Length, Connection and other matching header names under it](../screenshots/header-suggestions.png)
+  ![The Headers table with "con" typed in the first row and a list of Content-Type, Content-Length, Connection and other matching header names under it](../screenshots/header-suggestions.webp)
 - Gostman sends `User-Agent: Gostman/<version>` unless a header of the request, a folder or an auth setting sets one. The web app's proxy sends `Gostman` without a version.
 - The Headers tab shows a count of headers inherited from folders or the collection, and lists them under **Inherited** below the table with the folder they come from. Click the folder name to open its settings. An inherited header that a row of the request replaces is marked **Replaced**, and one that an unchecked row with the same name stops is marked **Switched off**. See [Folder and collection settings](folder-settings.md).
 
@@ -88,7 +88,7 @@ Authorization: Bearer {{token}}
 // X-Debug: 1
 ```
 
-![The Headers tab in bulk edit: four headers as name: value lines, the last one starting with // so it is not sent](../screenshots/bulk-edit.png)
+![The Headers tab in bulk edit: four headers as name: value lines, the last one starting with // so it is not sent](../screenshots/bulk-edit.webp)
 
 - The name ends at the first colon, and spaces around the name and the value are dropped.
 - A line that starts with `//` or `#` is kept without being sent, like an unchecked row; switching back to text writes it with `//`.
@@ -122,11 +122,11 @@ Details:
 - Switching between raw types (JSON, Text, XML, SOAP) keeps the same text. Switching between the groups None, Form URL-encoded, Multipart, File and raw types keeps a separate draft for each group, so you can switch back without losing it.
 - For JSON and XML, **Format** at the right of the toolbar (or Shift+Alt+F in the editor) indents the body. `{{variables}}` are kept as written, also where JSON expects a value, and numbers, key order and duplicate keys are left exactly as they are. Undo (Ctrl+Z) restores the previous text. When the body is not valid, nothing is changed: a notice names the problem with its line and column, for example "The JSON cannot be formatted at line 3, column 3: Expected ',' or '}' after the property value", the cursor moves to that place, and **Go to line** takes you back to it later. The same message appears when you hover the underlined spot while typing.
 
-  ![A JSON body with a missing comma: the notice reads "The JSON cannot be formatted at line 4, column 3: Expected ',' or '}' after the property value" with a Go to line 4 link](../screenshots/format-error.png)
+  ![A JSON body with a missing comma: the notice reads "The JSON cannot be formatted at line 4, column 3: Expected ',' or '}' after the property value" with a Go to line 4 link](../screenshots/format-error.webp)
 - For SOAP, the toolbar offers SOAP 1.1 and SOAP 1.2, a SOAPAction field and a Format XML button. Choosing SOAP with an empty body inserts a SOAP 1.1 template.
 - When the method is GRAPHQL, the Body tab shows a notice: the body is built from the GraphQL tab and the Body tab is not sent.
 
-![Multipart body with two text fields, a file field and a disabled row](../screenshots/request-body.png)
+![Multipart body with two text fields, a file field and a disabled row](../screenshots/request-body.webp)
 
 ### Auth
 
@@ -150,7 +150,7 @@ The Type list in the Auth tab holds these choices:
 
 JWT Bearer and ASAP also apply to WebSocket and gRPC connections, because they do not depend on the body.
 
-![The Auth tab set to JWT Bearer with HS256, a masked secret, a JSON payload that uses {{user_id}} and {{$timestamp}}, a kid header field and the Authorization header placement](../screenshots/auth-jwt.png)
+![The Auth tab set to JWT Bearer with HS256, a masked secret, a JSON payload that uses {{user_id}} and {{$timestamp}}, a kid header field and the Authorization header placement](../screenshots/auth-jwt.webp)
 
 Password, token and secret fields accept `{{variables}}` like other fields, with the same suggestions and colours. A value made only of placeholders, such as `{{token}}`, stays readable; a value with typed text in it is masked, and the eye button shows it. Auth overrides a header or parameter of the same name.
 
@@ -252,7 +252,7 @@ Notes are plain text shared with everyone who has the workspace. Do not paste se
 
 URL, header, parameter and body fields recognise `{{name}}`. Defined names are underlined, and hovering one shows its value and where it comes from. Typing `{{` opens a list of names; use the arrow keys with Enter or Tab to pick one, and Escape to close the list. Ctrl+Space opens the same list without typing `{{`: the word before the caret filters it, and the name you pick is written with its braces. With nothing before the caret, it lists your variables first and then the dynamic ones.
 
-![Ctrl+Space after typing "us" in a JSON body lists userEmail, userId and userToken with their values, the token masked](../screenshots/variable-suggestions.png) Secret values are masked in these hints.
+![Ctrl+Space after typing "us" in a JSON body lists userEmail, userId and userToken with their values, the token masked](../screenshots/variable-suggestions.webp) Secret values are masked in these hints.
 
 When a sent request used a name that nothing defines, the response panel says so and lists the names. Select a name, or **Open Environments**, to open the Environments dialog with a new row for that name in the active environment, ready for its value.
 
@@ -262,7 +262,7 @@ A name written as `{{?name}}` is asked for when you send the request. A dialog t
 
 The response panel sits below the request. Drag its top edge to resize it and double-click the edge to reset the height; the height you choose is kept for the next time you open the app. The chevron button collapses it, and the fullscreen button expands it.
 
-![A PNG image response shown in the Body tab of the response panel](../screenshots/response-image.png)
+![A PNG image response shown in the Body tab of the response panel](../screenshots/response-image.webp)
 
 Before the first send the panel reads "No response yet". While a request runs it shows placeholder lines.
 
@@ -293,9 +293,9 @@ Each tab keeps its last 10 responses while the app is open. They are kept in mem
 4. Select **Back to the latest**, or send the request again, to return to the newest response.
 5. **Export as HAR**, at the end of the same list, saves the kept responses as a HAR 1.2 file with the request line and headers that were sent. `Authorization`, `Cookie`, `Proxy-Authorization` and `Set-Cookie` values and secret values show as `***`. Responses that failed without an answer are left out.
 
-![The response panel showing an earlier response under the notice Showing the response from, with Compare with the latest and Back to the latest](../screenshots/response-history.png)
+![The response panel showing an earlier response under the notice Showing the response from, with Compare with the latest and Back to the latest](../screenshots/response-history.webp)
 
-![The Compare responses dialog: the earlier body on the left, the latest on the right, with the changed Authorization token highlighted](../screenshots/response-compare.png)
+![The Compare responses dialog: the earlier body on the left, the latest on the right, with the changed Authorization token highlighted](../screenshots/response-compare.webp)
 
 ### Tabs
 
@@ -501,4 +501,4 @@ Copy copies the snippet for the selected language, and the dialog opens on the l
 
 A File body and the file rows of a Multipart body are read from disk by the snippet, using the file name you attached: put the file next to the snippet or change the path. Multipart text rows are sent as form fields, and the snippet uses each language's own multipart support where it has one; Java, Kotlin, Swift and Node.js (http) build the multipart body themselves, and wget, which has no multipart option, writes the body to `form-body.tmp` first.
 
-![The Generate code dialog with cURL selected, showing a POST with a JSON body and a bearer Authorization header](../screenshots/code.png)
+![The Generate code dialog with cURL selected, showing a POST with a JSON body and a bearer Authorization header](../screenshots/code.webp)

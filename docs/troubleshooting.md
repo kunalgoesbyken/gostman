@@ -36,7 +36,7 @@ Problems people run into most often, with the reason and the fix. If yours is no
 
 **A request works in another tool but not in Gostman.** Press **Code** and copy the request as cURL to see exactly what Gostman sends, including inherited headers and auth, then compare.
 
-![The response panel after sending to a port where nothing listens: a Network error that says it could not connect and names the address that refused](../screenshots/connection-error.png)
+![The response panel after sending to a port where nothing listens: a Network error that says it could not connect and names the address that refused](../screenshots/connection-error.webp)
 
 ## Chaining and variables
 

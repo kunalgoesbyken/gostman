@@ -4,7 +4,7 @@ Each release includes `gostman-cli-<os>-<arch>` archives with a single `gostman`
 
 On macOS the binary is not notarized: run `xattr -d com.apple.quarantine gostman` once.
 
-![gostman run printing one line per request with its method, name, status, time and checks, the resolved URL under it, and a summary](../screenshots/term-run.png)
+![gostman run printing one line per request with its method, name, status, time and checks, the resolved URL under it, and a summary](../screenshots/term-run.webp)
 
 ## Commands
 
@@ -75,7 +75,7 @@ An environment variable can read its value from HashiCorp Vault (KV 1 and 2), AW
 
 `--reporter text|json|junit|html|markdown`, or `format:file` to write that report to a file. Repeat it to write several reports in one run: `--reporter text --reporter junit:report.xml --reporter html:report.html`. At most one reporter can go without a file, and it prints to stdout; when every report goes to a file, the text summary is printed. `--output file` names the file of the reporter given without one, so `--reporter junit --output report.xml` works as before. `--reporter html:report.html` writes one self-contained page with a summary, every request's timing, checks, request and response, and a filter for failures; response bodies are included, so add `--redact` before sharing it. `--reporter markdown:summary.md` writes the counts and every failed check as Markdown for a CI job summary or a pull request comment. The desktop and web runner dialogs take a data file and a parallel count the same way and can download the same report. Colour is off when `NO_COLOR` is set or the output is not a terminal.
 
-![One run writing a text summary to the terminal, a JUnit file and an HTML report](../screenshots/term-reports.png)
+![One run writing a text summary to the terminal, a JUnit file and an HTML report](../screenshots/term-reports.webp)
 
 ### Contract checks
 
@@ -122,7 +122,7 @@ gostman run orders-api --flow Checkout --env CI
 
 The text report adds a `FLOW` line for every step that sends no request, and a request that failed but that the flow handled, by trying again or going to another step, is printed in yellow with the reason. The steps of a flow run by a **Run flow** step are indented under it. The exit status follows the outcome of the flow, see [Exit codes](#exit-codes); the JSON report adds a `flow` object with the outcome, its message and every step in order, with the steps of a nested flow under the step that ran it. See [Flows](flows.md) for the steps and the file format.
 
-![gostman flow run executing the Check todos flow: a retried request, the steps of a loop, a failed check with the value that was found, and the reason the flow failed](../screenshots/term-flow.png)
+![gostman flow run executing the Check todos flow: a retried request, the steps of a loop, a failed check with the value that was found, and the reason the flow failed](../screenshots/term-flow.webp)
 
 ## Scheduled runs
 
@@ -173,7 +173,7 @@ For a flow, 0 means it reached its end or an End step marked passed, and a failu
 
 
 
-![gostman run exiting with 1: the failed check is listed under its request with the value that was found](../screenshots/term-run-failing.png)
+![gostman run exiting with 1: the failed check is listed under its request with the value that was found](../screenshots/term-run-failing.webp)
 
 ## Load testing
 
@@ -205,7 +205,7 @@ gostman scan orders-api --fail-on high
 - It is a heuristic. It can miss a token glued to other characters, a human-chosen password that does not look random, and files outside the collection such as `.env`. A clean scan is not proof that nothing is exposed.
 - The desktop and web apps have a **Scan for secrets** command, the Share tab warns before you create a link or file when something is found, and the Export tab shows a notice.
 
-![gostman scan reporting that it scanned three requests, one folder and two environments and found nothing](../screenshots/term-scan.png)
+![gostman scan reporting that it scanned three requests, one folder and two environments and found nothing](../screenshots/term-scan.webp)
 
 ## Negative tests
 

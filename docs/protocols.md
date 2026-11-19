@@ -155,7 +155,7 @@ Enter a `ws://` or `wss://` URL. The Send button becomes Connect, and the WebSoc
 - Placeholders in the message and in its event or topic are filled in when you send it: environment variables, and dynamic values such as `{{$randomEmail}}` or `{{$faker.date.future}}`. Type `{{` or `faker.` to pick one. The log shows the message as it was sent. A variable that is not defined is sent as written, and a warning in the log names it. A message that cannot be filled in at all, for example one that uses `{{$file(...)}}`, is not sent, and goes back into the box.
 - Sent messages are text. Clear empties the log.
 
-![The WebSocket tab: the log shows a sent message whose generated id and email were filled in, and the message box suggests faker.date names](../screenshots/websocket-variables.png)
+![The WebSocket tab: the log shows a sent message whose generated id and email were filled in, and the message box suggests faker.date names](../screenshots/websocket-variables.webp)
 
 ### Message log
 
@@ -172,7 +172,7 @@ Save keeps the message box, and the event or topic, under a name. The saved mess
 
 Choose Socket.IO in the protocol list. Gostman speaks Socket.IO 3 and 4 (Engine.IO 4) over WebSocket.
 
-![A Socket.IO session that joined the / namespace, received a welcome event, emitted question with a JSON argument and received question:ack back](../screenshots/socketio.png)
+![A Socket.IO session that joined the / namespace, received a welcome event, emitted question with a JSON argument and received question:ack back](../screenshots/socketio.webp)
 
 - The URL path is the namespace: `ws://localhost:3000/admin` joins `/admin`, and `ws://localhost:3000` joins `/`. Gostman connects to `/socket.io/` on that host. A URL that already starts with `/socket.io/` is used as written and joins `/`.
 - **Path**, below the toolbar, changes `/socket.io/` for servers set up with another path, such as `/api/socket`. A URL that starts with that path joins `/`.
@@ -186,7 +186,7 @@ Choose Socket.IO in the protocol list. Gostman speaks Socket.IO 3 and 4 (Engine.
 
 Choose MQTT in the protocol list to talk to a broker over MQTT 3.1.1 on WebSocket, for example `ws://localhost:8080/mqtt`. The `mqtt` subprotocol is sent for you.
 
-![An MQTT session subscribed to sensors/#, receiving readings on sensors/warehouse and sensors/cold-store](../screenshots/mqtt.png)
+![An MQTT session subscribed to sensors/#, receiving readings on sensors/warehouse and sensors/cold-store](../screenshots/mqtt.webp)
 
 - Set Auth to Basic to send a user name and password; other auth types send none. Each connection uses a new client ID that starts with `gostman-` and a clean session.
 - Type a topic filter such as `sensors/#` and select Subscribe. The broker's answer is shown in the log.
@@ -201,7 +201,7 @@ Choose **SignalR** in the protocol list, with the hub address (for example `wss:
 
 A GRAPHQL request with a `ws://` or `wss://` URL connects with the `graphql-transport-ws` protocol, which the `graphql-ws` library, Apollo Server and most current servers use.
 
-![A GraphQL subscription over WebSocket: the connection is acknowledged, then each result arrives as next](../screenshots/graphql-subscription.png)
+![A GraphQL subscription over WebSocket: the connection is acknowledged, then each result arrives as next](../screenshots/graphql-subscription.webp)
 
 1. Write the subscription in the GraphQL tab, with its variables.
 2. Select Connect. Gostman sends `connection_init` with the request's headers and auth as its payload, which is where most servers read credentials, then subscribes once the server acknowledges.
@@ -323,7 +323,7 @@ Choose MCP in the protocol list and enter the server's URL. An MCP tab appears. 
 
 In the desktop app, write `stdio:` followed by the command that starts the server, for example `stdio:npx -y @modelcontextprotocol/server-everything` or `stdio:python server.py`.
 
-![The Run a program on this computer? confirmation showing the command stdio:storefront-mcp](../screenshots/mcp-stdio-confirm.png)
+![The Run a program on this computer? confirmation showing the command stdio:storefront-mcp](../screenshots/mcp-stdio-confirm.webp)
 
 - The first time a command runs, Gostman shows it and asks **Run a program on this computer?**. Cancel is the default. You are asked again when the command or its environment changes, or the app restarts.
 - The command is split into a program and its arguments; it is not passed to a shell, so pipes, `&&` and `$VAR` have no special meaning. Put an argument with spaces in double or single quotes.
@@ -332,7 +332,7 @@ In the desktop app, write `stdio:` followed by the command that starts the serve
 - In a folder you have not trusted, local commands are switched off like scripts. The collection runner runs a local command only after you have confirmed it from its tab.
 - The web app, `gostman run` and the MCP server for coding agents never start local commands.
 
-![An MCP request to a local server started with the command storefront-mcp: the server line, the get_product tool, its JSON arguments and the response](../screenshots/mcp-stdio.png)
+![An MCP request to a local server started with the command storefront-mcp: the server line, the get_product tool, its JSON arguments and the response](../screenshots/mcp-stdio.webp)
 
 ![An MCP request with the server line storefront-mcp 1.2.0, the search_products tool, JSON arguments and an OK response](../gostman-gui/frontend/src/assets/landing/mcp.webp)
 

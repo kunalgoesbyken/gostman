@@ -4,7 +4,7 @@ A flow chains saved requests into a scenario: send one request after another, tr
 
 Use the [runner](runner-load-and-scan.md#run-requests) to check every request of a folder, in order. Use a flow when the order matters and depends on the answers: a login whose token the next calls need, an order you poll until it is ready, a clean-up that only runs when something failed, or a bug that needs five calls in a precise sequence to show up.
 
-![The Checkout flow on the canvas: Reset, Login and Keep the token, then Wait until the order is ready with a retry loop drawn on its left and a red "fails" branch going down to Cancel order, then Order ready? with a green "true" branch to List orders and a "false" branch to Cancel order](../screenshots/flow-canvas.png)
+![The Checkout flow on the canvas: Reset, Login and Keep the token, then Wait until the order is ready with a retry loop drawn on its left and a red "fails" branch going down to Cancel order, then Order ready? with a green "true" branch to List orders and a "false" branch to Cancel order](../screenshots/flow-canvas.webp)
 
 ## Draw a flow
 
@@ -41,7 +41,7 @@ Conditions use only the declarative checks, never JavaScript, so a flow by itsel
 
 A run stops after 1,000 requests, so a loop with no way out ends with a message instead of running forever. Change the limit in the flow settings, up to 10,000. A loop that sends no request at all stops after 10,000 steps.
 
-![The step panel for Wait until the order is ready: its request Shop/Order status, five attempts 200 ms apart, the Until check res.body.state equals ready, and When it fails, go to Cancel order](../screenshots/flow-step.png)
+![The step panel for Wait until the order is ready: its request Shop/Order status, five attempts 200 ms apart, the Until check res.body.state equals ready, and When it fails, go to Cancel order](../screenshots/flow-step.webp)
 
 ## Flow variables, inputs and outputs
 
@@ -119,7 +119,7 @@ The **Run** tab lists every step that ran, in order. Requests use the same rows 
 
 Values set by **Set variables** and **For each** stay in the session after the run, like values from Extract rules, so you can send a request by hand with them; they are never saved. The variables of a **Send request** step are removed again after it is sent.
 
-![A finished run of Checkout: every card has a green tick, Wait until the order is ready shows 3/5, and the Run tab lists Reset, Login, Keep the token with its values, two attempts of Order status that failed and were handled, the third that passed, and the branch Order ready? True, going to List orders](../screenshots/flow-run.png)
+![A finished run of Checkout: every card has a green tick, Wait until the order is ready shows 3/5, and the Run tab lists Reset, Login, Keep the token with its values, two attempts of Order status that failed and were handled, the third that passed, and the branch Order ready? True, going to List orders](../screenshots/flow-run.webp)
 
 ## Run from the command line
 
@@ -134,7 +134,7 @@ gostman run orders-api --flow Checkout --env CI
 
 The text report prints each request as `gostman run` does, a `FLOW` line for every other step, and the outcome of the flow at the end. A failure the flow handled is printed in yellow with the reason, and counted apart. The steps of a flow run by a **Run flow** step are printed indented between a line that starts it and the line with its outcome.
 
-![The output of gostman flow run Checkout: PASS lines for Reset and Login, a FLOW line for Keep the token, two yellow FAIL lines for Order status with "Attempt 1 of 5 failed; trying again", a PASS on attempt 3 of 5, FLOW lines for the If and For each steps, and the summary Flow Checkout passed: Order checked](../screenshots/flow-cli.png)
+![The output of gostman flow run Checkout: PASS lines for Reset and Login, a FLOW line for Keep the token, two yellow FAIL lines for Order status with "Attempt 1 of 5 failed; trying again", a PASS on attempt 3 of 5, FLOW lines for the If and For each steps, and the summary Flow Checkout passed: Order checked](../screenshots/flow-cli.webp)
 
 The exit status follows the flow: 0 when it reaches its end or an **End** step marked passed, 1 when it fails (an unhandled failure, a failed **End** step, the request limit or an interrupt), 2 when the command or the flow is wrong, for example a step that points to a missing request, and 3 when the request that failed it got no response. The JSON report adds a `flow` object with the outcome, the message and every step in the order it ran; the steps of a **Run flow** step are in its own `steps`, and the requests they sent carry `inFlow` (the name of that flow) and `depth`. An **If** or **Switch** step has `branch`, the way it went: `then` or `else`, or `case:0`, `case:1` and so on for the case of a **Switch** that matched (`else` when none did). JUnit adds one test case for the flow and one for every **Run flow** step, and reports handled failures as skipped.
 

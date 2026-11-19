@@ -4,7 +4,7 @@ Gostman has no paid tier, no account and no licence key, so every feature in the
 
 Every feature listed here is also in **Explore features** in the app, a searchable catalogue with a **Try it** button for each one; see [Find a feature](getting-started.md#find-a-feature).
 
-![The Explore features dialog filtered by the word secrets, listing Scan secrets, Variable dependencies, Environments, Variable scopes and Typed variables, each with Try it and Learn more](../screenshots/explore-features.png)
+![The Explore features dialog filtered by the word secrets, listing Scan secrets, Variable dependencies, Environments, Variable scopes and Typed variables, each with Try it and Learn more](../screenshots/explore-features.webp)
 
 ## What the download includes
 

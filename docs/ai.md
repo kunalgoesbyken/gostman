@@ -4,7 +4,7 @@ AI is off by default. While it is off, Gostman shows no AI buttons, AI commands 
 
 To turn it on, open Preferences and choose **AI** (or run "AI settings" from the command palette), tick the consent line, turn AI on, pick a provider, paste a key if the provider needs one, and choose a model. The note at the top says whether AI is off, on, or on but still missing a model or key. Use "Test connection" to check it. If you start an AI action before a model or key is set, Preferences opens on this section. "Turn off AI and forget keys" switches everything off again and deletes the saved keys; while AI is off it reads "Forget AI keys and settings" and appears only when there is something to forget.
 
-![The AI section of Preferences: the consent line, the switch to turn AI on, provider, base URL, model id and API key fields](../screenshots/ai-settings.png)
+![The AI section of Preferences: the consent line, the switch to turn AI on, provider, base URL, model id and API key fields](../screenshots/ai-settings.webp)
 
 Providers: Anthropic, OpenAI, Google Gemini, OpenRouter, Ollama, LM Studio and any OpenAI-compatible base URL. Plain `http` base URLs are refused unless the host is loopback or you allow it for that address.
 

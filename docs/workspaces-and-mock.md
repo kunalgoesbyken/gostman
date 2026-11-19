@@ -17,7 +17,7 @@ The control next to the logo shows where the collection lives. **Open folder** k
 - The open folder is not part of the app's [automatic backups](preferences-and-shortcuts.md#backups); its history is whatever you commit to Git.
 - A folder you did not create opens with its scripts, OAuth 2.0 settings, local MCP commands and file reads switched off until you choose **Trust this folder**.
 
-![The folder menu next to the logo: This computer, the recent folder, Open folder, Save collection to folder, Clone repository, Git, Reload from disk and Close folder](../screenshots/folder-menu.png)
+![The folder menu next to the logo: This computer, the recent folder, Open folder, Save collection to folder, Clone repository, Git, Reload from disk and Close folder](../screenshots/folder-menu.webp)
 
 ## Examples and the mock server (desktop)
 
