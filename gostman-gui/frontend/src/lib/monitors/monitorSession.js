@@ -303,11 +303,16 @@ export function createMonitorActions(backend, { execute }) {
     if (monitor) app().showConfirm(MONITORS_TEXT.deleteTitle, MONITORS_TEXT.deleteMessage(monitor.name), () => remove(id), null, 'destructive')
   }
 
-  function togglePause(id) {
-    const monitors = state().monitors.map((monitor) => (monitor.id === id ? { ...monitor, paused: !monitor.paused } : monitor))
+  function setPaused(ids, paused) {
+    const changed = new Set(ids)
+    const monitors = state().monitors.map((monitor) => (changed.has(monitor.id) ? { ...monitor, paused } : monitor))
     commit(monitors)
-    schedule(monitors.find((monitor) => monitor.id === id))
+    monitors.filter((monitor) => changed.has(monitor.id)).forEach(schedule)
   }
+
+  const idsWhere = (paused) => state().monitors.filter((monitor) => monitor.paused === paused).map((monitor) => monitor.id)
+
+  const togglePause = (id) => setPaused([id], !state().monitors.find((monitor) => monitor.id === id)?.paused)
 
   function start() {
     adopt(loadDefinitions())
@@ -331,6 +336,8 @@ export function createMonitorActions(backend, { execute }) {
     save,
     confirmRemove,
     togglePause,
+    pauseAll: () => setPaused(idsWhere(false), true),
+    resumeAll: () => setPaused(idsWhere(true), false),
     runNow,
     hasWebhooks: Boolean(history.webhook),
   }

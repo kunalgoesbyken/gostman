@@ -1,6 +1,6 @@
 import { createContext, Suspense, useContext, useEffect, useId, useRef, useSyncExternalStore } from "react"
 import { createPortal } from "react-dom"
-import { GripVertical, X } from "lucide-react"
+import { GripVertical, Minus, X } from "lucide-react"
 import { IconButton } from "./button"
 import { Skeleton, SkeletonLines } from "./skeleton"
 import { RESIZE_EDGES, useFloatingWindow } from "../../hooks/useFloatingWindow"
@@ -8,7 +8,7 @@ import { useFocusTrap } from "../../hooks/useFocusTrap"
 import { DIALOG_TEXT } from "../../lib/dialogText"
 import { APP_TEXT } from "../../lib/appText"
 import { cn } from "../../lib/utils"
-import { dropWindow, hasModal, holdModal, isTopModal, openWindows, raiseWindow, subscribeToWindows, windowLayer, windowProps } from "../../lib/windowLayers"
+import { dropWindow, hasModal, holdModal, isTopModal, minimizedWindows, minimizeWindow, openWindows, raiseWindow, subscribeToWindows, windowLayer, windowProps } from "../../lib/windowLayers"
 
 const DIALOG_OVERLAY = "fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 max-sm:p-2"
 const FLOATING_LAYER = "fixed inset-0 z-50"
@@ -37,6 +37,8 @@ const FloatingContext = createContext(null)
 
 const WindowContext = createContext(false)
 
+const ToolWindowContext = createContext(null)
+
 const keepFocusInDialog = (event) => event.preventDefault()
 
 const stopMouseDown = (event) => event.stopPropagation()
@@ -49,14 +51,23 @@ function useOpenDialog(ref, isModal = true) {
   useEffect(() => (isModal ? holdModal(ref) : undefined), [ref, isModal])
 }
 
-function useWindowLayer(id, isModeless) {
+function useWindowLayer(id, isToolWindow, isModeless) {
   const order = useSyncExternalStore(subscribeToWindows, openWindows, openWindows)
+  const minimized = useSyncExternalStore(subscribeToWindows, minimizedWindows, minimizedWindows)
   useEffect(() => {
-    if (!isModeless) return undefined
-    raiseWindow(id)
+    if (!isToolWindow) return undefined
+    if (isModeless) raiseWindow(id)
     return () => dropWindow(id)
-  }, [id, isModeless])
-  return windowLayer(order, id)
+  }, [id, isToolWindow, isModeless])
+  return { layer: windowLayer(order, id), isMinimized: isToolWindow && minimized.includes(id) }
+}
+
+function useFocusOnRestore(ref, isMinimized) {
+  const wasMinimized = useRef(isMinimized)
+  useEffect(() => {
+    if (wasMinimized.current && !isMinimized && !ref.current.contains(document.activeElement)) ref.current.focus()
+    wasMinimized.current = isMinimized
+  }, [ref, isMinimized])
 }
 
 function closesOnEscape(event, dialog, isModeless) {
@@ -77,12 +88,14 @@ export function ResizeHandles({ frame }) {
 export function Dialog({ label, size = "sm", floating, closesFromEditor = false, onClose, className, children }) {
   const dialogRef = useRef(null)
   const frame = useFloatingWindow(floating)
-  const isModeless = Boolean(frame && floating.modeless)
-  const layer = useWindowLayer(floating?.id, isModeless)
+  const isToolWindow = Boolean(floating?.modeless)
+  const isModeless = Boolean(frame && isToolWindow)
+  const { layer, isMinimized } = useWindowLayer(floating?.id, isToolWindow, isModeless)
   const isInsideWindow = useContext(WindowContext)
-  useFocusTrap(dialogRef, !isModeless)
-
-  useOpenDialog(dialogRef, !isModeless)
+  const isBlocking = !isModeless && !isMinimized
+  useFocusTrap(dialogRef, isBlocking)
+  useOpenDialog(dialogRef, isBlocking)
+  useFocusOnRestore(dialogRef, isMinimized)
 
   useEffect(() => {
     const closeOnEscape = (event) => {
@@ -104,17 +117,20 @@ export function Dialog({ label, size = "sm", floating, closesFromEditor = false,
       aria-label={label}
       data-surface="dialog"
       style={frame?.style}
-      {...(isModeless ? windowProps(floating.id) : { onMouseDown: stopMouseDown })}
+      {...(isToolWindow && windowProps(floating.id))}
+      {...(!isModeless && { onMouseDown: stopMouseDown })}
       className={cn(DIALOG_PANEL, DIALOG_SIZES[size], className, frame && FLOATING_PANEL, isModeless && MODELESS_PANEL)}
     >
-      <FloatingContext.Provider value={frame}>{children}</FloatingContext.Provider>
+      <FloatingContext.Provider value={frame}>
+        <ToolWindowContext.Provider value={isToolWindow ? floating.id : null}>{children}</ToolWindowContext.Provider>
+      </FloatingContext.Provider>
     </div>
   )
 
   if (isModeless) {
     return (
       <WindowContext.Provider value>
-        <div className={MODELESS_LAYER} style={{ zIndex: layer }} onPointerDownCapture={() => raiseWindow(floating.id)}>
+        <div className={cn(MODELESS_LAYER, isMinimized && "hidden")} style={{ zIndex: layer }} onPointerDownCapture={() => raiseWindow(floating.id)}>
           {panel}
           <ResizeHandles frame={frame} />
         </div>
@@ -123,7 +139,7 @@ export function Dialog({ label, size = "sm", floating, closesFromEditor = false,
   }
 
   const modal = (
-    <div className={frame ? FLOATING_LAYER : DIALOG_OVERLAY} onMouseDown={frame ? keepFocusInDialog : onClose}>
+    <div className={cn(frame ? FLOATING_LAYER : DIALOG_OVERLAY, isMinimized && "hidden")} onMouseDown={frame ? keepFocusInDialog : onClose}>
       {panel}
       {frame && <ResizeHandles frame={frame} />}
     </div>
@@ -172,11 +188,13 @@ export function WindowGrip({ frame }) {
 
 export function DialogHeader({ onClose, children }) {
   const frame = useContext(FloatingContext)
+  const toolWindow = useContext(ToolWindowContext)
 
   return (
     <div className={cn("flex h-10 shrink-0 items-center gap-2 border-b border-border ps-4 pe-2 max-sm:h-auto max-sm:min-h-10 max-sm:items-start max-sm:py-1.5 max-sm:[&_h2]:leading-7", frame && "touch-none select-none")} {...frame?.headerProps}>
       {frame && <WindowGrip frame={frame} />}
       <div className="flex h-full min-w-0 flex-1 items-center gap-2 max-sm:h-auto max-sm:flex-wrap">{children}</div>
+      {toolWindow && <IconButton label={DIALOG_TEXT.minimize} title={DIALOG_TEXT.minimizeHint} icon={Minus} onClick={() => minimizeWindow(toolWindow)} />}
       {onClose && <IconButton label={DIALOG_TEXT.close} icon={X} onClick={onClose} />}
     </div>
   )

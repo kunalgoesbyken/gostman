@@ -61,7 +61,7 @@ function folderMenuItems(folder, context) {
       items: [
         { id: "new-subfolder", label: TREE_TEXT.newSubfolder, icon: FolderPlus, onSelect: () => actions.createFolder(folder.id) },
         { id: "dependencies", label: DEPENDENCIES_TEXT.menuFolder, icon: Workflow, onSelect: () => actions.openDependencyGraph(folder.id) },
-        { id: "negative", label: TREE_TEXT.negativeFolder, icon: Bug, onSelect: () => actions.openNegative(folder.id) },
+        { id: "negative", label: TREE_TEXT.negativeFolder, icon: Bug, onSelect: () => actions.negative.open(folder.id) },
         ...(isLinked ? specMenuItems(folder, actions, context) : [{ id: "spec-link", label: CONTRACT_TEXT.link, icon: FileCheck, onSelect: () => actions.openapi.linkFolder(folder) }]),
         { id: "labels", label: TREE_TEXT.editLabels, icon: Palette, onSelect: () => editLabels(source) },
         ...arrangeItems(source, { ...context, pasteRow: source }),

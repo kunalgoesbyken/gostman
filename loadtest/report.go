@@ -46,6 +46,7 @@ type Report struct {
 
 type Snapshot struct {
 	ElapsedMs         int64   `json:"elapsedMs"`
+	DurationMs        int64   `json:"durationMs,omitempty"`
 	Total             int64   `json:"total"`
 	Failed            int64   `json:"failed"`
 	RequestsPerSecond float64 `json:"requestsPerSecond"`

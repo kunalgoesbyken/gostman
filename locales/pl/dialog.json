@@ -2,6 +2,8 @@
   "dialog": {
     "moveWindow": "Przesuń okno",
     "moveHint": "Przeciągnij lub użyj klawiszy strzałek, aby przesunąć. Shift i strzałki zmieniają rozmiar. Kliknij dwukrotnie pasek tytułu lub naciśnij Home, aby przywrócić domyślny rozmiar i położenie.",
+    "minimize": "Minimalizuj",
+    "minimizeHint": "Minimalizuj do paska stanu",
     "close": "Zamknij",
     "cancel": "Anuluj",
     "save": "Zapisz",

@@ -88,7 +88,7 @@ export function sessionGiver(before) {
 }
 
 const STORE_SINK = {
-  start: () => store().startRun(),
+  start: (planned) => store().startRun(planned),
   add: (result) => store().addRunResult(result),
   finish: () => store().finishRun(),
 }
@@ -144,7 +144,7 @@ export function createRunner(backend, execute, sink = STORE_SINK) {
     const isIterating = rows.length > 0 || count > 1
     sizeSandboxPool(parallel)
     lastRun = { startedAt: new Date(), planned: requests.length * count, iterations: isIterating ? count : 0, parallel, finishedAt: null }
-    sink.start()
+    sink.start(lastRun.planned)
     store().completeOnboardingStep(STEP_RUN)
     for (let iteration = 0; iteration < count && !run.isStopped && !run.isHalted; iteration += 1) {
       if (isIterating) run.giveSession(iterationVariables(rows, iteration, count))

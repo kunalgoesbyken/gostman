@@ -14,4 +14,5 @@ export const MODELESS_WINDOWS = {
   monitors: modelessWindow("monitors"),
   runner: modelessWindow("runner"),
   loadTest: modelessWindow("load-test"),
+  negative: modelessWindow("negative-tests"),
 }

@@ -1,10 +1,6 @@
 {
   "monitors": {
     "title": "Moniteurs",
-    "statusLabel": "Moniteurs",
-    "statusLabelRunning_one": "{{count}} moniteur",
-    "statusLabelRunning_many": "{{count}} de moniteurs",
-    "statusLabelRunning_other": "{{count}} moniteurs",
     "menuFolder": "Surveiller ce dossier",
     "menuFlow": "Surveiller ce flux",
     "newMonitor": "Nouveau moniteur",

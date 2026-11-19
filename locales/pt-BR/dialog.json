@@ -2,6 +2,8 @@
   "dialog": {
     "moveWindow": "Mover janela",
     "moveHint": "Arraste ou use as teclas de seta para mover. Shift e as setas redimensionam. Clique duas vezes na barra de título ou pressione Home para restaurar o tamanho e a posição padrão.",
+    "minimize": "Minimizar",
+    "minimizeHint": "Minimizar para a barra de status",
     "close": "Fechar",
     "cancel": "Cancelar",
     "save": "Salvar",

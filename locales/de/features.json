@@ -232,6 +232,11 @@
       "blurb": "Jede gesendete Anfrage wird mit ihrem Antwortstatus behalten, damit Sie sie erneut öffnen können.",
       "synonyms": "verlauf history zuletzt gesendet vorherige"
     },
+    "toolTray": {
+      "title": "Werkzeugfenster in der Statusleiste minimieren",
+      "blurb": "Minimieren Sie Mock-Server, Mitschnitt, Monitore, einen Lauf, einen Lasttest oder Negativtests und behalten Sie sie in der Statusleiste im Blick: Fortschritt, Fehler und angehaltene Anfragen auf einen Blick, mit Starten, Stoppen und Pausieren neben jedem Eintrag und einem Hinweis, wenn ein ausgeblendeter Lauf fertig ist.",
+      "synonyms": "minimieren statusleiste hintergrund fortschritt benachrichtigung live-verbindungen stream pausieren fortsetzen stoppen minimize minimise tray taskbar dock background status bar progress notification live connections websocket sse stream pause resume stop"
+    },
     "collections": {
       "title": "Sammlungen und Ordner",
       "blurb": "Gruppieren Sie Anfragen in verschachtelten Ordnern, ziehen Sie sie an ihren Platz, durchsuchen, taggen und färben Sie sie.",

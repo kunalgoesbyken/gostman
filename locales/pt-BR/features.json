@@ -234,6 +234,11 @@
       "blurb": "Toda requisição que você envia é guardada, com o status da resposta, para que você possa abri-la de novo.",
       "synonyms": "histórico recentes enviadas anteriores history"
     },
+    "toolTray": {
+      "title": "Minimizar as janelas de ferramentas na barra de status",
+      "blurb": "Minimize o servidor mock, a captura, os monitores, uma execução, um teste de carga ou os testes negativos e acompanhe todos na barra de status: progresso, falhas e requisições retidas num relance, com iniciar, parar e pausar ao lado de cada um, e um aviso quando uma execução oculta termina.",
+      "synonyms": "minimizar barra de status bandeja segundo plano progresso notificação conexões ao vivo fluxo pausar retomar parar minimize minimise tray taskbar dock background status bar progress notification live connections websocket sse stream pause resume stop"
+    },
     "collections": {
       "title": "Coleções e pastas",
       "blurb": "Agrupe requisições em pastas aninhadas, arraste-as para o lugar, busque, marque com tags e dê cores a elas.",

@@ -2,6 +2,8 @@
   "dialog": {
     "moveWindow": "Mover ventana",
     "moveHint": "Arrastra o usa las teclas de flecha para mover. Shift y las flechas cambian el tamaño. Haz doble clic en la barra de título o pulsa Home para restaurar el tamaño y la posición predeterminados.",
+    "minimize": "Minimizar",
+    "minimizeHint": "Minimizar en la barra de estado",
     "close": "Cerrar",
     "cancel": "Cancelar",
     "save": "Guardar",

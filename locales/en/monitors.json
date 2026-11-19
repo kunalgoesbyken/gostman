@@ -1,9 +1,6 @@
 {
   "monitors": {
     "title": "Monitors",
-    "statusLabel": "Monitors",
-    "statusLabelRunning_one": "{{count}} monitor",
-    "statusLabelRunning_other": "{{count}} monitors",
     "menuFolder": "Monitor this folder",
     "menuFlow": "Monitor this flow",
     "newMonitor": "New monitor",

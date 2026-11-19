@@ -31,10 +31,12 @@ const toResult = (result) => ({
 
 const reached = (results) => new Set(results.map((result) => `${result.id} ${result.iteration || 0}`)).size
 
+export const isFailure = (result) => !result.skipped && !result.handled && result.hasFailed
+
 export function summarize(results, planned) {
   const skipped = results.filter((result) => result.skipped).length
   const handled = results.filter((result) => !result.skipped && result.handled).length
-  const failed = results.filter((result) => !result.skipped && !result.handled && result.hasFailed).length
+  const failed = results.filter(isFailure).length
   const tests = results.flatMap((result) => result.tests)
   return {
     requests: planned,

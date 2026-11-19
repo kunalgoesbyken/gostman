@@ -234,6 +234,11 @@
       "blurb": "Chaque requête envoyée est conservée avec le statut de sa réponse, pour que vous puissiez la rouvrir.",
       "synonyms": "historique récent envoyé précédent"
     },
+    "toolTray": {
+      "title": "Réduire les fenêtres d’outils dans la barre d’état",
+      "blurb": "Réduisez le serveur fictif, la capture, les moniteurs, une exécution, un test de charge ou des tests négatifs et gardez-les à l’œil dans la barre d’état : progression, échecs et requêtes retenues en un coup d’œil, avec démarrer, arrêter et pause à côté de chacun, et une notification quand une exécution masquée se termine.",
+      "synonyms": "réduire barre d’état plateau arrière-plan progression notification connexions en direct flux pause reprendre arrêter minimize minimise tray taskbar dock background status bar progress notification live connections websocket sse stream pause resume stop"
+    },
     "collections": {
       "title": "Collections et dossiers",
       "blurb": "Regroupez les requêtes dans des dossiers imbriqués, déplacez-les par glisser-déposer, recherchez, taguez et colorez-les.",

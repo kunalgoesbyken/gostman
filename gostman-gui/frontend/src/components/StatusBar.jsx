@@ -1,11 +1,7 @@
 import { memo } from "react"
-import { Activity, Cookie, GitBranch, Radio, Server, Settings, Wifi, Newspaper } from "lucide-react"
+import { Cookie, GitBranch, Settings, Wifi, Newspaper } from "lucide-react"
 import { cn } from "../lib/utils"
-import { useCaptureStore } from "../lib/captureSession"
 import { openGit, useGitStore } from "../lib/gitSession"
-import { useMockStore } from "../lib/mockServer"
-import { useMonitorStore } from "../lib/monitors/monitorSession"
-import { MONITORS_TEXT } from "../lib/monitorsText"
 import { ABOUT_TEXT } from "../lib/aboutText"
 import { APP_VERSION } from "../lib/appVersion"
 import { FEATURES_TEXT } from "../lib/featuresText"
@@ -16,38 +12,27 @@ import { useAppStore } from "../store/appStore"
 import { DataNotices } from "./DataNotices"
 import { ResizeGrip } from "./WindowResize"
 import { STATUS_ITEM_CLASS, StatusItem } from "./StatusItem"
+import { LiveTray } from "./LiveTray"
+import { ToolTray } from "./ToolTray"
 
 const gitLabel = (git) => (git.detached ? TEXT.detached : git.branch) + (git.changes.length > 0 ? ` (${git.changes.length})` : "")
 
-const portOf = (address) => {
-  try {
-    return new URL(address).port
-  } catch {
-    return ""
-  }
-}
-
-export const StatusBar = memo(function StatusBar({ showsResizeGrip, onOpenMock, onOpenCapture, onOpenMonitors, updates, remindsExport, onExport }) {
+export const StatusBar = memo(function StatusBar({ showsResizeGrip, tools, updates, remindsExport, onExport }) {
   const openCookies = useAppStore((s) => s.openCookiesDialog)
   const openSettings = useAppStore((s) => s.openSettingsDialog)
   const openPreferences = useAppStore((s) => s.openPreferencesDialog)
   const openAbout = useAppStore((s) => s.openAbout)
   const openWhatsNew = useAppStore((s) => s.openWhatsNew)
   const hasUnseenRelease = useAppStore((s) => releasesBetween(s.seenVersion, APP_VERSION).length > 0)
-  const isMockRunning = useMockStore((s) => s.isRunning)
-  const mockPort = useMockStore((s) => portOf(s.address))
-  const isCapturing = useCaptureStore((s) => s.isRunning)
   const git = useGitStore((s) => s.state)
-  const activeMonitors = useMonitorStore((s) => s.monitors.filter((monitor) => !monitor.paused).length)
 
   return (
     <footer className="flex h-6 max-sm:h-10 shrink-0 items-center justify-between overflow-hidden border-t border-border bg-background px-1 text-2xs text-muted-foreground">
       <div className="flex h-full items-center">
         <StatusItem icon={Wifi} label={TEXT.network} onClick={openSettings} />
-        {isMockRunning && <StatusItem icon={Server} label={TEXT.mock(true, mockPort)} active onClick={onOpenMock} />}
-        {isCapturing && <StatusItem icon={Radio} label={TEXT.capture(true)} active onClick={onOpenCapture} />}
-        {activeMonitors > 0 && <StatusItem icon={Activity} label={MONITORS_TEXT.statusLabelRunning(activeMonitors)} active onClick={onOpenMonitors} />}
         {git.hasFolder && <StatusItem icon={GitBranch} label={git.isRepo ? gitLabel(git) : TEXT.git} onClick={openGit} />}
+        <ToolTray actions={tools} />
+        <LiveTray actions={tools} />
       </div>
       <div className="flex h-full items-center">
         {hasUnseenRelease && <StatusItem icon={Newspaper} label={FEATURES_TEXT.whatsNewTitle} title={FEATURES_TEXT.whatsNewDot(APP_VERSION)} className="text-primary" onClick={openWhatsNew} />}

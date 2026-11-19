@@ -1,8 +1,6 @@
 {
   "monitors": {
     "title": "モニター",
-    "statusLabel": "モニター",
-    "statusLabelRunning_other": "{{count}}件のモニター",
     "menuFolder": "このフォルダーをモニター",
     "menuFlow": "このフローをモニター",
     "newMonitor": "新しいモニター",

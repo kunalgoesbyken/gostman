@@ -1,9 +1,15 @@
 {
-  "statusBar.mockStopped": "Status bar item that opens the mock server. The mock server answers requests from saved examples on this computer.",
-  "statusBar.mockRunning": "Same item while the server is running.",
-  "statusBar.mockRunningOn": "Same item while the server is running; {{port}} is the port number.",
-  "statusBar.captureStopped": "Status bar item that opens traffic capture, a proxy that records calls from another app.",
-  "statusBar.captureRunning": "Same item while the capture is running.",
   "statusBar.git": "Status bar item that opens the Git panel. Git is a product name.",
-  "statusBar.detached": "Git term: HEAD is not on a branch. Keep HEAD."
+  "statusBar.detached": "Git term: HEAD is not on a branch. Keep HEAD.",
+  "statusBar.tray": "Accessible name of the status bar group that lists tool windows (Mock server, Capture proxy, Run, Load test, Monitors, Negative tests) that are open, minimized or running in the background.",
+  "statusBar.showTool": "Tooltip of a tool window entry in the status bar. {{name}} is the tool's name, such as Mock server.",
+  "statusBar.port": "Port a mock server listens on, shown after a colon, as in :4010.",
+  "statusBar.held": "Number of captured requests held for the user to forward or drop.",
+  "statusBar.progress": "Requests finished out of planned in a collection run, as in 7 of 12.",
+  "statusBar.failingMonitors": "Number of monitors whose last check failed.",
+  "statusBar.findings": "Number of problems that negative tests found in the API.",
+  "statusBar.toolFinished": "Notice shown when a minimized tool finishes. {{name}} is the tool's name, {{detail}} its result, such as 7 of 12 or 340 requests.",
+  "statusBar.liveCount": "Status bar entry counting open WebSocket and SSE connections and running flows.",
+  "statusBar.liveFlow": "Kind of a live activity: a flow (a scripted sequence of requests) that is running.",
+  "statusBar.holdingNotice": "Notice shown when the hidden Capture proxy holds requests until the user forwards or drops them. {{name}} is the tool name."
 }

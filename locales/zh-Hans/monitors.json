@@ -1,8 +1,6 @@
 {
   "monitors": {
     "title": "监控",
-    "statusLabel": "监控",
-    "statusLabelRunning_other": "{{count}} 个监控",
     "menuFolder": "监控此文件夹",
     "menuFlow": "监控此流程",
     "newMonitor": "新建监控",

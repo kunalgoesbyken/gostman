@@ -1,13 +1,32 @@
 {
   "statusBar": {
     "network": "ネットワーク",
-    "mockStopped": "モックサーバー",
-    "mockRunning": "モックサーバー（実行中）",
-    "mockRunningOn": "モックサーバー（:{{port}}で実行中）",
-    "captureStopped": "キャプチャ",
-    "captureRunning": "キャプチャ（実行中）",
     "git": "Git",
     "detached": "Detached HEAD",
-    "cookies": "Cookie"
+    "cookies": "Cookie",
+    "tray": "ツールウィンドウ",
+    "showTool": "{{name}}を表示",
+    "minimizeTool": "{{name}}を最小化",
+    "startTool": "{{name}}を開始",
+    "stopTool": "{{name}}を停止",
+    "pauseTool": "{{name}}を一時停止",
+    "resumeTool": "{{name}}を再開",
+    "port": ":{{port}}",
+    "calls_other": "{{count}}件の呼び出し",
+    "held_other": "{{count}}件待機中",
+    "activeMonitors_other": "{{count}}件稼働中",
+    "failingMonitors_other": "{{count}}件失敗",
+    "progress": "{{done}} / {{total}}",
+    "requests_other": "{{count}}件のリクエスト",
+    "findings_other": "{{count}}件の検出結果",
+    "toolFinished": "{{name}}が完了しました：{{detail}}",
+    "toolEnded": "{{name}}が完了しました",
+    "holdingNotice_other": "{{name}}が{{count}}件のリクエストを保留しています",
+    "show": "表示",
+    "liveLabel": "ライブ接続",
+    "liveCount_other": "ライブ{{count}}件",
+    "liveFlow": "フロー",
+    "liveShow": "{{name}}を表示",
+    "liveStop": "{{name}}を停止"
   }
 }

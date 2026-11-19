@@ -1,8 +1,8 @@
-import { useMemo, useRef, useState } from "react"
+import { useMemo, useState } from "react"
 import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
 import { Checkbox } from "./ui/checkbox"
-import { toolWindow } from "../lib/dialogWindows"
+import { MODELESS_WINDOWS } from "../lib/dialogWindows"
 import { Dialog } from "./ui/dialog"
 import { ToolDialogHeader } from "./ToolDialogHeader"
 import { FeatureEmpty } from "./FeatureEmpty"
@@ -13,9 +13,10 @@ import { Select } from "./ui/select"
 import { ROOT_ID, buildCollectionTree, listFolders } from "../lib/collectionTree"
 import { DEFAULT_LIMIT, DEFAULT_RATE, hostsOfPlan, planNegative, variantCount } from "../lib/negativeRun"
 import { NEGATIVE_TEXT as TEXT } from "../lib/negativeText"
+import { DONE, RUNNING, useNegativeStore } from "../lib/negativeSession"
 import { useAppStore } from "../store/appStore"
 
-const NEGATIVE_WINDOW = toolWindow("negative")
+const NEGATIVE_WINDOW = MODELESS_WINDOWS.negative
 const PATH_SEPARATOR = " / "
 const SEVERITY_VARIANTS = { high: "destructive", medium: "warning", low: "secondary" }
 
@@ -87,63 +88,40 @@ function Findings({ findings }) {
   )
 }
 
-export function NegativeDialog({ folders, actions, initialFolderId }) {
+export function NegativeDialog({ folders, actions }) {
   const requests = useAppStore((s) => s.requests)
-  const [folderId, setFolderId] = useState(initialFolderId)
+  const { folderId, isConfirmed, phase, sent, findings } = useNegativeStore()
   const [rate, setRate] = useState(DEFAULT_RATE)
   const [limit, setLimit] = useState(DEFAULT_LIMIT)
-  const [isConfirmed, setIsConfirmed] = useState(false)
-  const [status, setStatus] = useState({ isRunning: false, sent: 0, isDone: false })
-  const [findings, setFindings] = useState([])
-  const stopped = useRef(false)
 
   const scopes = useMemo(() => listFolders(buildCollectionTree(folders, [])), [folders])
   const plan = useMemo(() => planNegative(useAppStore.getState(), folderId), [requests, folders, folderId])
   const hosts = useMemo(() => hostsOfPlan(useAppStore.getState(), plan), [plan])
   const total = Math.min(variantCount(plan), limit)
-  const canStart = total > 0 && isConfirmed && hosts.length > 0 && !status.isRunning
-
-  const start = async () => {
-    stopped.current = false
-    setFindings([])
-    setStatus({ isRunning: true, sent: 0, isDone: false })
-    await actions.negative.run(plan, {
-      rate,
-      limit,
-      isStopped: () => stopped.current,
-      onSent: (sent) => setStatus((current) => ({ ...current, sent })),
-      onFinding: (found) => setFindings((current) => [...current, found]),
-    })
-    setStatus((current) => ({ ...current, isRunning: false, isDone: true }))
-  }
-
-  const changeScope = (event) => {
-    setFolderId(event.target.value)
-    setIsConfirmed(false)
-    setStatus({ isRunning: false, sent: 0, isDone: false })
-    setFindings([])
-  }
+  const isRunning = phase === RUNNING
+  const isDone = phase === DONE
+  const canStart = total > 0 && isConfirmed && hosts.length > 0 && !isRunning
 
   return (
-    <Dialog label={TEXT.title} size="lg" floating={NEGATIVE_WINDOW} onClose={actions.negative.close}>
-      <ToolDialogHeader featureId="negative-tests" onClose={actions.negative.close}>
+    <Dialog label={TEXT.title} size="lg" floating={NEGATIVE_WINDOW} onClose={actions.close}>
+      <ToolDialogHeader featureId="negative-tests" onClose={actions.close}>
       </ToolDialogHeader>
       <p className="shrink-0 border-b border-border px-4 py-2 text-xs text-muted-foreground">{TEXT.intro}</p>
       <Toolbar className="h-auto flex-wrap py-1.5">
         <div className="w-48 shrink-0">
-          <Select value={folderId} disabled={status.isRunning} onChange={changeScope} aria-label={TEXT.scope}>
+          <Select value={folderId} disabled={isRunning} onChange={(event) => actions.setScope(event.target.value)} aria-label={TEXT.scope}>
             <option value={ROOT_ID}>{TEXT.allRequests}</option>
             {scopes.map(({ folder, path }) => (
               <option key={folder.id} value={folder.id}>{path.join(PATH_SEPARATOR)}</option>
             ))}
           </Select>
         </div>
-        <NumberField label={TEXT.rate} value={rate} disabled={status.isRunning} onChange={(event) => setRate(toPositive(event.target.value, DEFAULT_RATE))} />
-        <NumberField label={TEXT.limit} value={limit} disabled={status.isRunning} onChange={(event) => setLimit(toPositive(event.target.value, DEFAULT_LIMIT))} />
-        {status.isRunning ? (
-          <Button size="sm" variant="outline" className="ms-auto" onClick={() => { stopped.current = true }}>{TEXT.stop}</Button>
+        <NumberField label={TEXT.rate} value={rate} disabled={isRunning} onChange={(event) => setRate(toPositive(event.target.value, DEFAULT_RATE))} />
+        <NumberField label={TEXT.limit} value={limit} disabled={isRunning} onChange={(event) => setLimit(toPositive(event.target.value, DEFAULT_LIMIT))} />
+        {isRunning ? (
+          <Button size="sm" variant="outline" className="ms-auto" onClick={actions.stop}>{TEXT.stop}</Button>
         ) : (
-          <Button size="sm" className="ms-auto" disabled={!canStart} onClick={start}>{TEXT.start}</Button>
+          <Button size="sm" className="ms-auto" disabled={!canStart} onClick={() => actions.start(plan, { rate, limit }, total)}>{TEXT.start}</Button>
         )}
       </Toolbar>
       <div className="min-h-0 flex-1 overflow-y-auto">
@@ -154,22 +132,22 @@ export function NegativeDialog({ folders, actions, initialFolderId }) {
             <div className="flex flex-col gap-2 border-b border-border px-4 py-3">
               <p className="text-xs font-medium text-foreground">{TEXT.hostsTitle}</p>
               <p className="font-mono text-xs text-muted-foreground [overflow-wrap:anywhere]">{hosts.length > 0 ? hosts.join(", ") : TEXT.noHosts}</p>
-              <Checkbox checked={isConfirmed} disabled={status.isRunning || hosts.length === 0} onChange={(event) => setIsConfirmed(event.target.checked)} className="h-7 justify-start self-start">
+              <Checkbox checked={isConfirmed} disabled={isRunning || hosts.length === 0} onChange={(event) => actions.setConfirmed(event.target.checked)} className="h-7 justify-start self-start">
                 {TEXT.confirm}
               </Checkbox>
               <p role="status" className="text-xs text-muted-foreground">
-                {status.isRunning || status.isDone ? TEXT.progress({ sent: status.sent, total }) : TEXT.plan(total)}
+                {isRunning || isDone ? TEXT.progress({ sent, total }) : TEXT.plan(total)}
               </p>
             </div>
             <VariantList plan={plan} />
-            {status.isDone && findings.length === 0 && (
+            {isDone && findings.length === 0 && (
               <div className="px-4 py-3 text-xs text-muted-foreground">
                 <p className="text-foreground">{TEXT.noFindings}</p>
                 <p>{TEXT.noFindingsHint}</p>
               </div>
             )}
             {findings.length > 0 && <Findings findings={findings} />}
-            {status.isDone && <p className="px-4 py-2 text-xs text-muted-foreground">{TEXT.done({ sent: status.sent, count: findings.length })}</p>}
+            {isDone && <p className="px-4 py-2 text-xs text-muted-foreground">{TEXT.done({ sent, count: findings.length })}</p>}
           </>
         )}
       </div>

@@ -1,10 +1,12 @@
 import { useRef, useState, useSyncExternalStore } from "react"
 import { parseJSON } from "../lib/dataUtils"
 import { readStored, removeStored, writeStored } from "../lib/storage"
+import { openWindows } from "../lib/windowLayers"
 
 const STORAGE_PREFIX = "gostman.window."
 const MARGIN_PX = 8
 const DOCK_GAP_PX = 32
+const CASCADE_STEP_PX = 32
 const KEY_STEP_PX = 16
 const DEFAULT_MIN_WIDTH_PX = 360
 const DEFAULT_MIN_HEIGHT_PX = 240
@@ -72,8 +74,13 @@ const centred = ({ width, height, x, y }, viewport, limits) =>
 
 const isRightToLeft = () => document.documentElement.dir === "rtl"
 
-const docked = ({ width, height }, viewport, limits) =>
-  fitted({ width, height, x: isRightToLeft() ? 0 : viewport.width - width, y: viewport.height - height - DOCK_GAP_PX }, viewport, limits)
+function docked({ width, height, cascade }, viewport, limits) {
+  const offset = cascade * CASCADE_STEP_PX
+  const x = isRightToLeft() ? offset : viewport.width - width - offset
+  return fitted({ width, height, x, y: viewport.height - height - DOCK_GAP_PX - offset }, viewport, limits)
+}
+
+const windowsBefore = (id) => openWindows().filter((open) => open !== id).length
 
 const placed = (options, viewport, limits) => (options.docked ? docked : centred)(options, viewport, limits)
 
@@ -110,12 +117,13 @@ export function useFloatingWindow(options) {
   const width = useSyncExternalStore(isRequested ? subscribeToResize : ignoreChanges, viewportWidth, emptyViewport)
   const height = useSyncExternalStore(isRequested ? subscribeToResize : ignoreChanges, viewportHeight, emptyViewport)
   const [chosen, setChosen] = useState(() => (isRequested ? readRect(options.id) : null))
+  const [cascade] = useState(() => (options?.docked ? windowsBefore(options.id) : 0))
   const gesture = useRef(null)
   if (!isRequested || compact) return null
 
   const viewport = { width, height }
   const limits = { minWidth: options.minWidth ?? DEFAULT_MIN_WIDTH_PX, minHeight: options.minHeight ?? DEFAULT_MIN_HEIGHT_PX }
-  const rect = chosen ? fitted(chosen, viewport, limits) : placed(options, viewport, limits)
+  const rect = chosen ? fitted(chosen, viewport, limits) : placed({ ...options, cascade }, viewport, limits)
 
   const choose = (next) => {
     setChosen(next)

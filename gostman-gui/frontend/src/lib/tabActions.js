@@ -77,6 +77,7 @@ export function createTabActions(backend, attempt, cancelTab, flows, specs) {
     closeOthers: (tabId) => closeGroup(tabId, 'others'),
     closeRight: (tabId) => closeGroup(tabId, 'right'),
     closeSaved: () => closeGroup(store().activeTabId, 'saved'),
+    cancel: (tabId) => cancelTab(store().tabs.find((tab) => tab.id === tabId)),
     pin: (tabId) => store().pinTab(tabId),
     pinActive: () => store().pinTab(store().activeTabId),
     toggleBeside: (tabId) => store().setBesideTab(store().besideTabId === tabId ? '' : tabId),

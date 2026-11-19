@@ -14,7 +14,7 @@ const CI_INIT = 'gostman init --ci github'
 
 const store = () => useAppStore.getState()
 
-export function createFeatureActions({ backend, commands, monitors, mock, capture, loadTest, examples, flows, openRunner, hasStorage, openExport, saveRequests }) {
+export function createFeatureActions({ backend, commands, monitors, mock, capture, loadTest, negative, examples, flows, openRunner, hasStorage, openExport, saveRequests }) {
   async function ensureSampleCollection() {
     if (store().folders.some((folder) => folder.id === SAMPLE_FOLDER_ID)) return
     const { folder, requests } = sampleCollection()
@@ -60,7 +60,7 @@ export function createFeatureActions({ backend, commands, monitors, mock, captur
     loadTest: { run: loadTest.open, isAvailable: () => loadTest.isAvailable },
     runner: { run: () => openRunner() },
     scan: { run: () => store().openScanDialog() },
-    negative: { run: () => store().openNegativeDialog() },
+    negative: { run: () => negative.open() },
     import: { run: () => store().openImportDialog() },
     export: { run: openExport },
     share: { run: () => commands.share() },

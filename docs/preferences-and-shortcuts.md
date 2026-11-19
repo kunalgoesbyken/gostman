@@ -128,14 +128,26 @@ At the bottom of the window:
 
 ### Tool windows
 
-**Mock server**, **Capture**, **Monitors**, **Run requests** and **Load test** stay open beside your work. While one is open, the rest of the app keeps working: send requests, switch tabs and edit them, and watch a capture fill up or the mock server's log grow as you go.
+**Mock server**, **Capture**, **Monitors**, **Run requests**, **Load test** and **Negative tests** stay open beside your work. While one is open, the rest of the app keeps working: send requests, switch tabs and edit them, and watch a capture fill up or the mock server's log grow as you go.
 
 - Several can be open at once. Clicking a window brings it to the front.
 - Esc closes the window only while it has the focus. The app's keyboard shortcuts work everywhere outside it.
 - Opening a window that is already open brings it to the front and keeps what it shows. A run or a load test that is going keeps going. When none is going, **Run folder** on another folder, or **Load test** on another request, sets the window up for that one.
-- Closing the window of the mock server, a capture or the monitors leaves them running; the status bar shows each one, and clicking it opens the window again. Closing **Run requests** or **Load test** stops the run.
+- Closing the window of the mock server, a capture or the monitors leaves them running, and the status bar keeps showing each one. Closing **Run requests**, **Load test** or **Negative tests** stops the run.
 - A run keeps the environment each request had when it started, so choosing another environment during a run changes only the requests you send yourself.
 - On a phone these windows fill the screen, like every other window.
+
+### Minimized windows and the status bar
+
+The minimize button in a tool window's title bar hides the window and keeps its work going. Every tool window that is open, minimized or still working shows in the status bar:
+
+- The entry shows the tool's name and what it is doing: the mock server's port, the number of captured calls, active monitors, how far a run has got (*5 of 8*), or the requests a load test has sent.
+- Green means serving or running. A run, a load test and negative tests fill a thin bar under their entry; work without a known end pulses instead. Amber means Capture is holding requests for you to forward or drop. Red means a request in the run failed, a monitor's last check failed, the load test had errors or negative tests found problems.
+- Click an entry to bring its window back; click it again while the window is in front to minimize it.
+- The button beside an entry starts or stops the mock server, the capture and the load test, stops a run or negative tests, and pauses or resumes all monitors.
+- When a minimized run, load test or negative test finishes, a notice says how it ended, with **Show** to open its window. A notice also appears when a hidden capture starts holding a request.
+- **Live** lists the WebSocket connections, Server-Sent Events streams and flow runs that are open in any tab, with **Show** to switch to the tab and a stop button for each. Their tabs carry a small dot: green while open, amber while connecting or reconnecting.
+- On a phone, minimizing a window gives the screen back, and the status bar shows the icons only.
 
 ### Themes and colours
 

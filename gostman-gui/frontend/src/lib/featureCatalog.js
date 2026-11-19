@@ -50,6 +50,7 @@ export const FEATURES = [
   { id: 'open-tabs', group: 'data', since: '1.8.3', docs: 'collections-and-git#tabs', action: { type: 'tab', id: 'openTabs' }, icon: 'panel-left' },
   { id: 'history', group: 'data', docs: 'requests-and-responses#history', action: { type: 'tab', id: 'history' }, icon: 'history', empty: ['history'], sample: 'send' },
   { id: 'tool-windows', group: 'app', since: '1.22.0', docs: 'preferences-and-shortcuts#tool-windows', action: { type: 'dialog', id: 'monitors' }, icon: 'layers' },
+  { id: 'tool-tray', group: 'app', since: '1.23.0', docs: 'preferences-and-shortcuts#minimized-windows-and-the-status-bar', action: { type: 'dialog', id: 'mock' }, icon: 'activity' },
   { id: 'history-journal', group: 'data', since: '1.19.0', docs: 'requests-and-responses#journal', action: { type: 'tab', id: 'history' }, icon: 'history' },
   { id: 'call-history', group: 'data', since: '1.18.0', docs: 'requests-and-responses#calls', action: { type: 'tab', id: 'history' }, icon: 'activity' },
   { id: 'collections', group: 'data', docs: 'collections-and-git#collection-tree', action: { type: 'command', id: 'newFolder' }, icon: 'folder-plus' },

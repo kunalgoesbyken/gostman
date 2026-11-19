@@ -234,6 +234,11 @@
       "blurb": "Ogni richiesta che invii viene conservata con lo stato della risposta, così puoi riaprirla.",
       "synonyms": "cronologia recenti inviate precedenti history"
     },
+    "toolTray": {
+      "title": "Riduci a icona le finestre degli strumenti nella barra di stato",
+      "blurb": "Riduci a icona server mock, cattura, monitor, un’esecuzione, un test di carico o i test negativi e tienili d’occhio nella barra di stato: avanzamento, errori e richieste trattenute a colpo d’occhio, con avvia, ferma e pausa accanto a ciascuno, e una notifica quando un’esecuzione nascosta termina.",
+      "synonyms": "riduci a icona barra di stato vassoio sfondo avanzamento notifica connessioni attive flusso pausa riprendi ferma minimize minimise tray taskbar dock background status bar progress notification live connections websocket sse stream pause resume stop"
+    },
     "collections": {
       "title": "Raccolte e cartelle",
       "blurb": "Raggruppa le richieste in cartelle annidate, trascinale al loro posto, cercale, aggiungi tag e colori.",

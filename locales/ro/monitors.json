@@ -1,10 +1,6 @@
 {
   "monitors": {
     "title": "Monitoare",
-    "statusLabel": "Monitoare",
-    "statusLabelRunning_one": "{{count}} monitor",
-    "statusLabelRunning_few": "{{count}} monitoare",
-    "statusLabelRunning_other": "{{count}} de monitoare",
     "menuFolder": "Monitorizare dosar",
     "menuFlow": "Monitorizare flux",
     "newMonitor": "Monitor nou",

@@ -2,6 +2,8 @@
   "dialog": {
     "moveWindow": "Mutare fereastră",
     "moveHint": "Trageți sau folosiți tastele săgeți pentru a muta. Shift și tastele săgeți redimensionează. Faceți dublu clic pe bara de titlu sau apăsați Home pentru a reveni la dimensiunea și poziția implicite.",
+    "minimize": "Minimizare",
+    "minimizeHint": "Minimizare în bara de stare",
     "close": "Închidere",
     "cancel": "Anulare",
     "save": "Salvare",

@@ -1,13 +1,32 @@
 {
   "statusBar": {
     "network": "网络",
-    "mockStopped": "模拟服务器",
-    "mockRunning": "模拟服务器（运行中）",
-    "mockRunningOn": "模拟服务器（运行于 :{{port}}）",
-    "captureStopped": "捕获",
-    "captureRunning": "捕获（运行中）",
     "git": "Git",
     "detached": "HEAD 已分离",
-    "cookies": "Cookie"
+    "cookies": "Cookie",
+    "tray": "工具窗口",
+    "showTool": "显示 {{name}}",
+    "minimizeTool": "最小化 {{name}}",
+    "startTool": "启动 {{name}}",
+    "stopTool": "停止 {{name}}",
+    "pauseTool": "暂停 {{name}}",
+    "resumeTool": "恢复 {{name}}",
+    "port": ":{{port}}",
+    "calls_other": "{{count}} 次调用",
+    "held_other": "{{count}} 个等待中",
+    "activeMonitors_other": "{{count}} 个运行中",
+    "failingMonitors_other": "{{count}} 个失败",
+    "progress": "{{done}} / {{total}}",
+    "requests_other": "{{count}} 个请求",
+    "findings_other": "{{count}} 个发现项",
+    "toolFinished": "{{name}} 已完成：{{detail}}",
+    "toolEnded": "{{name}} 已完成",
+    "holdingNotice_other": "{{name}} 正在为你保留 {{count}} 个请求",
+    "show": "显示",
+    "liveLabel": "实时连接",
+    "liveCount_other": "{{count}} 个实时",
+    "liveFlow": "流程",
+    "liveShow": "显示 {{name}}",
+    "liveStop": "停止 {{name}}"
   }
 }

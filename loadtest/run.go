@@ -151,6 +151,7 @@ func (r *run) report(finished <-chan struct{}, observe func(Snapshot)) {
 			total, failed, p95 := r.collected.snapshot()
 			observe(Snapshot{
 				ElapsedMs:         now.Sub(r.started).Milliseconds(),
+				DurationMs:        int64(r.plan.Config.DurationMs),
 				Total:             total,
 				Failed:            failed,
 				RequestsPerSecond: float64(total-previousTotal) / now.Sub(previousAt).Seconds(),

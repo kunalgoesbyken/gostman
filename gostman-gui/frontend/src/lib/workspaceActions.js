@@ -5,6 +5,7 @@ import {
 } from './ai/tasks'
 import { createCaptureActions } from './captureSession'
 import { createLoadTestActions } from './loadTestSession'
+import { createNegativeActions } from './negativeSession'
 import { createMonitorActions } from './monitors/monitorSession'
 import { asSentence } from './dataUtils'
 import { localizedText } from './localized'
@@ -138,6 +139,7 @@ export function createWorkspaceActions(backend) {
   const mock = createMockActions(backend)
   const capture = createCaptureActions(backend, mock)
   const loadTest = createLoadTestActions(backend)
+  const negative = createNegativeActions(runNegative)
   const monitors = createMonitorActions(backend, { execute })
   monitors.start()
   const flows = createFlowActions(backend, { attempt, execute, promptForName })
@@ -828,6 +830,7 @@ export function createWorkspaceActions(backend) {
     mock,
     capture,
     loadTest,
+    negative,
     examples,
     flows,
     openRunner,
@@ -868,8 +871,7 @@ export function createWorkspaceActions(backend) {
     saveCollectionPassphrase: (host, certFile, passphrase) => backend.network.saveCollectionPassphrase(host, certFile, passphrase),
     openRunner,
     openDependencyGraph: (folderId) => store().openDependencyGraph(folderId),
-    openNegative: (folderId) => store().openNegativeDialog(folderId),
-    negative: { run: runNegative, close: () => store().closeNegativeDialog() },
+    negative,
     openFolderSettings: (folderId) => store().openFolderSettings(folderId),
     closeRunner,
     startRun: runner.start,

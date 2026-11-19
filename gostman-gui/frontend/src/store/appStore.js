@@ -45,7 +45,7 @@ const persistenceFailureMessage = (error) => (isStorageFull(error)
 
 const CLOSED_ALERT = { isOpen: false, title: '', message: '', confirmText: '', variant: 'default' }
 const CLOSED_CONFIRM = { isOpen: false, title: '', message: '', confirmText: '', variant: 'default', onConfirm: null, onCancel: null, alternative: null }
-const CLOSED_RUNNER = { isOpen: false, folderId: '', isRunning: false, results: [], openings: 0 }
+const CLOSED_RUNNER = { isOpen: false, folderId: '', isRunning: false, planned: 0, results: [], openings: 0 }
 const CLOSED_DEPENDENCY_GRAPH = { isOpen: false, folderId: '' }
 const keepsRunner = (runner, folderId) => runner.isOpen && (runner.isRunning || folderId === undefined)
 const CLOSED_VARIABLE_PROMPT = { isOpen: false, names: [], defaults: {}, isForRun: false, problemsOf: () => [], resolve: null }
@@ -421,7 +421,6 @@ export const useAppStore = create(
         closedTabs: [],
         cookiesDialogOpen: false,
         scanDialogOpen: false,
-        negativeDialog: null,
         settingsDialogOpen: false,
         examplesDialogOpen: false,
         mockDialogOpen: false,
@@ -825,8 +824,6 @@ export const useAppStore = create(
         closeCookiesDialog: () => set({ cookiesDialogOpen: false }),
         openScanDialog: () => set({ scanDialogOpen: true, commandPaletteOpen: false }),
         closeScanDialog: () => set({ scanDialogOpen: false }),
-        openNegativeDialog: (folderId = '') => set({ negativeDialog: { folderId }, commandPaletteOpen: false }),
-        closeNegativeDialog: () => set({ negativeDialog: null }),
         openSettingsDialog: () => set({ settingsDialogOpen: true }),
         closeSettingsDialog: () => set({ settingsDialogOpen: false }),
         openExamplesDialog: () => set({ examplesDialogOpen: true }),
@@ -842,7 +839,7 @@ export const useAppStore = create(
         openDependencyGraph: (folderId = '') => set({ dependencyGraph: { isOpen: true, folderId }, commandPaletteOpen: false }),
         closeDependencyGraph: () => set({ dependencyGraph: CLOSED_DEPENDENCY_GRAPH }),
         setRunExclusions: (folderId, ids) => set((state) => ({ runExclusions: { ...state.runExclusions, [folderId]: ids } })),
-        startRun: () => set((state) => ({ runner: { ...state.runner, isRunning: true, results: [] } })),
+        startRun: (planned) => set((state) => ({ runner: { ...state.runner, isRunning: true, planned, results: [] } })),
         addRunResult: (result) => set((state) => ({
           runner: { ...state.runner, results: [...state.runner.results, result] },
         })),
@@ -1005,7 +1002,6 @@ export const selectIsDialogOpen = (state) => (
   || state.preferencesDialogOpen
   || state.cookiesDialogOpen
   || state.scanDialogOpen
-  || state.negativeDialog !== null
   || state.settingsDialogOpen
   || state.examplesDialogOpen
   || state.environmentDialogOpen

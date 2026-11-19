@@ -234,6 +234,11 @@
       "blurb": "Se conserva cada solicitud que envías, con el estado de su respuesta, para que puedas abrirla de nuevo.",
       "synonyms": "historial recientes enviadas anteriores history"
     },
+    "toolTray": {
+      "title": "Minimizar las ventanas de herramientas en la barra de estado",
+      "blurb": "Minimiza el servidor simulado, la captura, los monitores, una ejecución, una prueba de carga o las pruebas negativas y síguelos en la barra de estado: progreso, errores y solicitudes retenidas de un vistazo, con iniciar, detener y pausar junto a cada uno, y un aviso cuando termina una ejecución oculta.",
+      "synonyms": "minimizar barra de estado bandeja segundo plano progreso notificación conexiones en vivo flujo pausar reanudar detener minimize minimise tray taskbar dock background status bar progress notification live connections websocket sse stream pause resume stop"
+    },
     "collections": {
       "title": "Colecciones y carpetas",
       "blurb": "Agrupa solicitudes en carpetas anidadas, arrástralas a su sitio, búscalas, etiquétalas y coloréalas.",

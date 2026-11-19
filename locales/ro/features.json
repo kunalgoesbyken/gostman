@@ -234,6 +234,11 @@
       "blurb": "Fiecare cerere trimisă este păstrată, cu starea răspunsului, ca să o puteți deschide din nou.",
       "synonyms": "istoric recente trimise anterioare history"
     },
+    "toolTray": {
+      "title": "Minimizarea ferestrelor de instrumente în bara de stare",
+      "blurb": "Minimizați serverul mock, captura, monitoarele, o rulare, un test de încărcare sau testele negative și urmăriți-le în bara de stare: progresul, eșecurile și cererile reținute dintr-o privire, cu pornire, oprire și pauză lângă fiecare, plus o notificare când se încheie o rulare ascunsă.",
+      "synonyms": "minimizare bara de stare fundal progres notificare conexiuni live flux pauză reluare oprire minimize minimise tray taskbar dock background status bar progress notification live connections websocket sse stream pause resume stop"
+    },
     "collections": {
       "title": "Colecții și dosare",
       "blurb": "Grupați cererile în dosare imbricate, trageți-le la locul lor, căutați, etichetați și colorați-le.",

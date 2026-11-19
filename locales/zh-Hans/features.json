@@ -230,6 +230,11 @@
       "blurb": "你发送的每个请求都会连同响应状态一起保留，方便再次打开。",
       "synonyms": "history recent sent previous 历史记录 最近 已发送"
     },
+    "toolTray": {
+      "title": "将工具窗口最小化到状态栏",
+      "blurb": "将模拟服务器、捕获、监控、运行、负载测试或负向测试最小化后，仍可在状态栏中查看：进度、失败和被保留的请求一目了然，每项旁边都有启动、停止和暂停，隐藏的运行结束时还会收到通知。",
+      "synonyms": "minimize minimise tray taskbar dock background status bar progress notification live connections websocket sse stream pause resume stop 最小化 状态栏 后台 进度 通知 实时连接 暂停 恢复 停止"
+    },
     "collections": {
       "title": "集合与文件夹",
       "blurb": "用嵌套文件夹组织请求，拖动排列，并可搜索、添加标签和设置颜色。",

@@ -236,6 +236,11 @@
       "blurb": "Każde wysłane żądanie jest zachowywane wraz ze statusem odpowiedzi, więc można je ponownie otworzyć.",
       "synonyms": "historia ostatnie wysłane poprzednie history recent sent previous"
     },
+    "toolTray": {
+      "title": "Minimalizowanie okien narzędzi do paska stanu",
+      "blurb": "Zminimalizuj serwer mock, przechwytywanie, monitory, uruchomienie, test obciążeniowy lub testy negatywne i obserwuj je na pasku stanu: postęp, błędy i wstrzymane żądania na pierwszy rzut oka, z przyciskami uruchamiania, zatrzymywania i wstrzymywania przy każdym oraz powiadomieniem, gdy ukryte uruchomienie się zakończy.",
+      "synonyms": "minimalizuj pasek stanu tło postęp powiadomienie połączenia na żywo strumień wstrzymaj wznów zatrzymaj minimize minimise tray taskbar dock background status bar progress notification live connections websocket sse stream pause resume stop"
+    },
     "collections": {
       "title": "Kolekcje i foldery",
       "blurb": "Grupuj żądania w zagnieżdżonych folderach, przeciągaj je na miejsce, wyszukuj, taguj i koloruj.",

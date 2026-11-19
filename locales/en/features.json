@@ -242,6 +242,11 @@
       "blurb": "Keep Mock server, Capture, Monitors, Run requests and Load test open while you send requests and edit, and watch a capture or a mock log fill up as you go.",
       "synonyms": "parallel modeless non-modal window side by side background mock capture monitor runner load test status bar"
     },
+    "toolTray": {
+      "title": "Minimize tool windows to the status bar",
+      "blurb": "Minimize Mock server, Capture, Monitors, a run, a load test or negative tests and keep an eye on them in the status bar: progress, failures and held requests at a glance, with start, stop and pause beside each, and a notice when a hidden run finishes.",
+      "synonyms": "minimize minimise tray taskbar dock background status bar progress notification live connections websocket sse stream pause resume stop"
+    },
     "historyJournal": {
       "title": "History journal and Calls tab",
       "blurb": "See every send in one timeline by day, follow a request's calls in the Calls tab with why a call got no response, and export them as CSV.",

@@ -1,9 +1,6 @@
 {
   "monitors": {
     "title": "Monitore",
-    "statusLabel": "Monitore",
-    "statusLabelRunning_one": "{{count}} Monitor",
-    "statusLabelRunning_other": "{{count}} Monitore",
     "menuFolder": "Diesen Ordner überwachen",
     "menuFlow": "Diesen Ablauf überwachen",
     "newMonitor": "Neuer Monitor",

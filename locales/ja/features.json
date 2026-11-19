@@ -230,6 +230,11 @@
       "blurb": "送信したリクエストはすべてレスポンスのステータスとともに保持され、もう一度開けます。",
       "synonyms": "history recent sent previous 履歴 最近 送信済み"
     },
+    "toolTray": {
+      "title": "ツールウィンドウをステータスバーに最小化",
+      "blurb": "モックサーバー、キャプチャ、モニター、実行、負荷テスト、ネガティブテストを最小化しても、ステータスバーで状況を確認できます。進捗、失敗、保留中のリクエストをひと目で把握でき、それぞれの横に開始、停止、一時停止のボタンがあり、非表示の実行が終わると通知が出ます。",
+      "synonyms": "minimize minimise tray taskbar dock background status bar progress notification live connections websocket sse stream pause resume stop 最小化 ステータスバー バックグラウンド 進捗 通知 ライブ接続 一時停止 再開 停止"
+    },
     "collections": {
       "title": "コレクションとフォルダー",
       "blurb": "リクエストを入れ子のフォルダーにまとめ、ドラッグで並べ替え、検索し、タグや色を付けます。",

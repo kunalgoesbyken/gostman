@@ -30,6 +30,7 @@ import { useSharedSecretConnections } from "../hooks/useSecretConnections"
 import { useCaptureStore } from "../lib/captureSession"
 import { usePreferences } from "../lib/preferences"
 import { isLoadTestable, useLoadTestStore } from "../lib/loadTestSession"
+import { useNegativeStore } from "../lib/negativeSession"
 import { useMonitorStore } from "../lib/monitors/monitorSession"
 import { useAiEnabled, useAiStore } from "../lib/ai/session"
 import { TASK_EXPLAIN, TASK_REQUEST } from "../lib/ai/tasks"
@@ -275,7 +276,6 @@ export function LoadedWorkspace({ backend, onBack }) {
   const cookiesDialogOpen = useAppStore((s) => s.cookiesDialogOpen)
   const scanDialogOpen = useAppStore((s) => s.scanDialogOpen)
   const closeScanDialog = useAppStore((s) => s.closeScanDialog)
-  const negativeDialog = useAppStore((s) => s.negativeDialog)
   const settingsDialogOpen = useAppStore((s) => s.settingsDialogOpen)
   const examplesDialogOpen = useAppStore((s) => s.examplesDialogOpen)
   const mockDialogOpen = useAppStore((s) => s.mockDialogOpen)
@@ -296,6 +296,7 @@ export function LoadedWorkspace({ backend, onBack }) {
   const closeFolderSettings = useAppStore((s) => s.closeFolderSettings)
   const captureDialogOpen = useCaptureStore((s) => s.isOpen)
   const loadTestDialogOpen = useLoadTestStore((s) => s.isOpen)
+  const negativeDialogOpen = useNegativeStore((s) => s.isOpen)
   const monitorsDialogOpen = useMonitorStore((s) => s.isOpen)
   const aiDialog = useAiStore((s) => s.dialog !== null)
   const isAiOn = useAiEnabled()
@@ -339,7 +340,6 @@ export function LoadedWorkspace({ backend, onBack }) {
   const showsResizeGrip = useAdjustableWindow(backend.windowFrame)
   const actions = useMemo(() => createWorkspaceActions(backend), [backend])
   const toggleSidebar = useCallback(() => actions.runCommand("toggleSidebar"), [actions])
-  const openMonitors = useCallback(() => actions.monitors.open(), [actions])
   const exportWorkspace = useCallback(() => actions.runCommand("export"), [actions])
   const gettingStarted = useMemo(() => (showsWelcome ? null : <GettingStartedButton onBegin={actions.beginOnboardingStep} />), [showsWelcome, actions])
   useEffect(() => {
@@ -555,7 +555,6 @@ export function LoadedWorkspace({ backend, onBack }) {
           <OpenLinkDialog link={openLink} fetchLink={backend.fetchLink} importer={actions.importer} onImport={actions.importShared} onClose={dismissOpenLink} />
         )}
         {cookiesDialogOpen && <CookiesDialog onClose={closeCookiesDialog} />}
-        {negativeDialog && <NegativeDialog folders={folders} actions={actions} initialFolderId={negativeDialog.folderId} />}
         {scanDialogOpen && <ScanDialog scan={actions.scan} collection={scannedCollection} onGoToRequest={goToRequest} onClose={closeScanDialog} />}
         {settingsDialogOpen && <NetworkDialog settings={settings} actions={actions} onClose={closeSettingsDialog} />}
         {examplesDialogOpen && <ExamplesDialog request={activeRequest} actions={actions.examples} EditorComponent={CodeEditor} />}
@@ -570,15 +569,14 @@ export function LoadedWorkspace({ backend, onBack }) {
       {mockDialogOpen && <DialogSuspense><MockServerDialog folders={folders} requests={requests} actions={actions.mock} /></DialogSuspense>}
       {captureDialogOpen && <DialogSuspense><CaptureDialog folders={folders} requests={requests} onTrust={actions.storage?.confirmTrust} actions={actions.capture} /></DialogSuspense>}
       {loadTestDialogOpen && <DialogSuspense><LoadTestDialog actions={actions.loadTest} /></DialogSuspense>}
+      {negativeDialogOpen && <DialogSuspense><NegativeDialog folders={folders} actions={actions.negative} /></DialogSuspense>}
       {monitorsDialogOpen && <DialogSuspense><MonitorsDialog actions={actions.monitors} /></DialogSuspense>}
       {isRunnerOpen && <DialogSuspense><RunnerDialog key={runnerOpenings} folders={folders} requests={requests} actions={actions} /></DialogSuspense>}
 
       {isFrameless && <WindowEdges />}
       <StatusBar
         showsResizeGrip={showsResizeGrip}
-        onOpenMock={actions.mock.open}
-        onOpenCapture={actions.capture.open}
-        onOpenMonitors={openMonitors}
+        tools={actions}
         updates={backend.updates}
         remindsExport={actions.backups?.remindsExport}
         onExport={exportWorkspace}
