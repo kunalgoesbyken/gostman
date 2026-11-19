@@ -1,6 +1,8 @@
 import { useSyncExternalStore } from 'react'
+import { whenIdle } from './idle'
 
 const WORKER_URL = '/sw.js'
+const WARM_MESSAGE = 'warm-later-assets'
 
 let deferredPrompt = null
 const listeners = new Set()
@@ -36,9 +38,11 @@ export function watchInstallPrompt() {
   })
 }
 
+const warmLaterAssets = () => navigator.serviceWorker.ready.then((registration) => registration.active?.postMessage(WARM_MESSAGE))
+
 export function registerServiceWorker() {
   if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return
-  const register = () => navigator.serviceWorker.register(WORKER_URL).catch(() => {})
+  const register = () => navigator.serviceWorker.register(WORKER_URL).then(() => whenIdle(warmLaterAssets)).catch(() => {})
   if (document.readyState === 'complete') register()
   else window.addEventListener('load', register, { once: true })
 }

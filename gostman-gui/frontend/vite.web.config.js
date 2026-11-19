@@ -4,7 +4,7 @@ import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { createHash } from 'crypto'
 import { readFileSync, writeFileSync } from 'fs'
-import { localesPlugin } from './i18n/plugin.js'
+import { LOCALE_CHUNK_PREFIX, localesPlugin } from './i18n/plugin.js'
 import { EDITOR_PREFETCH_ID, ROUTE_PREFETCH_ID } from './src/lib/routePrefetch.js'
 import { CLIENT_ROUTE, DOCS_ENTRY, PAGE_ENTRIES, SITE_ENTRY, chunkClosure, siteDefine, siteMeta } from './site.config.js'
 
@@ -132,34 +132,68 @@ const FIRST_SCREEN_MODULES = [
 const chunkFileName = (chunk) =>
   chunk.moduleIds.some((id) => id.includes(SHARED_RUNTIME_MODULE)) ? 'assets/react.[hash].js' : 'assets/[name].[hash].js'
 
+const LANDING_MODULE = 'src/components/LandingPage.jsx'
+
+const chunksOf = (bundle) => Object.values(bundle).filter((item) => item.type === 'chunk')
+
+const stylesOf = (bundle, scripts) => scripts.flatMap((fileName) => [...(bundle[fileName].viteMetadata?.importedCss ?? [])])
+
+const appEntries = (chunks) => chunks.filter((chunk) => chunk.isEntry && !PAGE_ENTRIES.includes(chunk.name))
+
 function firstScreenAssets(bundle) {
-  const chunks = Object.values(bundle).filter((item) => item.type === 'chunk')
+  const chunks = chunksOf(bundle)
   const lazyRoots = FIRST_SCREEN_MODULES.map((module) => {
     const chunk = dynamicEntryOf(chunks, module)
     if (!chunk) throw new Error(`${module} is not a lazy chunk, so the service worker cannot precache it`)
     return chunk
   })
-  const roots = [...chunks.filter((chunk) => chunk.isEntry && !PAGE_ENTRIES.includes(chunk.name)), ...lazyRoots]
-  const scripts = new Set(roots.flatMap((chunk) => [...chunkClosure(bundle, chunk.fileName)]))
-  const styles = [...scripts].flatMap((fileName) => [...(bundle[fileName].viteMetadata?.importedCss ?? [])])
-  return [...scripts, ...styles]
+  const scripts = [...new Set([...appEntries(chunks), ...lazyRoots].flatMap((chunk) => [...chunkClosure(bundle, chunk.fileName)]))]
+  return [...scripts, ...stylesOf(bundle, scripts)]
 }
 
+function reachableChunks(bundle, fileNames, isExcluded, seen = new Set()) {
+  fileNames.forEach((fileName) => {
+    if (seen.has(fileName) || isExcluded(fileName)) return
+    seen.add(fileName)
+    const { imports, dynamicImports } = bundle[fileName]
+    reachableChunks(bundle, [...imports, ...dynamicImports], isExcluded, seen)
+  })
+  return seen
+}
+
+function laterAssets(bundle, firstScreen) {
+  const chunks = chunksOf(bundle)
+  const landing = dynamicEntryOf(chunks, LANDING_MODULE)
+  const isLeftOut = (fileName) => bundle[fileName].name.startsWith(LOCALE_CHUNK_PREFIX) || fileName === landing?.fileName
+  const scripts = [...reachableChunks(bundle, appEntries(chunks).map((chunk) => chunk.fileName), isLeftOut)]
+  const workers = Object.values(bundle).filter((item) => item.type === 'asset' && item.fileName.endsWith('.js')).map((item) => item.fileName)
+  const known = new Set(firstScreen)
+  return [...scripts, ...workers, ...stylesOf(bundle, scripts)].filter((fileName) => !known.has(fileName))
+}
+
+const manifestOf = (fileNames) => [...new Set(fileNames)].map((fileName) => `/${fileName}`).sort()
+
 function stampServiceWorker() {
-  let assets = []
+  let precache = []
+  let later = []
   let outDir = ''
   return {
     name: 'stamp-service-worker',
     apply: 'build',
     writeBundle(options, bundle) {
       outDir = options.dir
-      assets = [...new Set(firstScreenAssets(bundle))].map((fileName) => `/${fileName}`).sort()
+      const firstScreen = firstScreenAssets(bundle)
+      precache = manifestOf(firstScreen)
+      later = manifestOf(laterAssets(bundle, firstScreen))
     },
     closeBundle() {
       if (!outDir) return
       const file = resolve(outDir, 'sw.js')
-      const buildId = createHash('sha1').update(assets.join(',')).digest('hex').slice(0, 10)
-      const source = readFileSync(file, 'utf8').replace('__BUILD_ID__', buildId).replace('__BUILD_ASSETS__', JSON.stringify(assets))
+      const buildId = createHash('sha1').update([...precache, ...later].join(',')).digest('hex').slice(0, 10)
+      const source = readFileSync(file, 'utf8')
+        .replace('__BUILD_ID__', buildId)
+        .replace('__BUILD_ASSETS__', JSON.stringify(precache))
+        .replace('__LATER_ASSETS__', JSON.stringify(later))
       writeFileSync(file, source)
     },
   }
