@@ -4,11 +4,26 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.22.0] - 2026-11-19
+
+### Added
+
+- Tool windows: **Mock server**, **Capture**, **Monitors**, **Run requests** and **Load test** open as windows beside the app instead of blocking it. They dock at the bottom end of the window, so you can keep sending requests, switch tabs and use the sidebar while a mock serves, a capture records or a run goes on. Several can be open at once; the last one you used is on top, Esc closes only the window that has focus, and opening one that is already open brings it forward with its state kept, so a running run or load test is never reset. On phones they still open full screen (#52).
+
 ### Changed
 
+- An alignment pass across the app: rows, toolbars, notices and tables in dialogs share one inset, forms use one column width, the welcome panel's two cards are the same size, and the response bar, request bar, spec toolbar, flow lanes, step editor, GraphQL editor and docs sidebar line up. The Settings tab's hint now matches the protocol of the request.
+- Scripts start faster: every script stage used to build all the app's text before running, and now builds only what it reads. A sandbox starts with about 10 MB instead of 26 MB, and `gostman run` on 400 requests with one post-response script each took 31 s instead of 85 s.
+- Sending a request that has scripts no longer works out the hosts of every saved request each time: with 5,000 saved requests the first send took 1.8 s instead of 6.9 s. Typing in a header row is about three times cheaper with 40 headers, and typing in a large body about twice.
+- The engine adds stored cookies to a request's cookie jar only for the sites the request reaches, and reads a response of known length into one buffer of the right size.
+- The web app's offline cache downloads 618 KB (compressed) when it installs instead of 1,035 KB: it holds the first workspace screen, and the rest is fetched in the background once the app is idle, so every panel still opens offline. The web build no longer bundles Node polyfills, and the documentation screenshots are lossless WebP.
 - Desktop: cookies are kept in their own file, `cookies.json`, next to `gostman.json`, as the history already is. A response that sets a cookie no longer rewrites your collections: saving the cookies takes about 2 ms instead of 400 ms next to 2,000 saved requests and about 1 ms instead of 1.4 s next to 10,000. The cookies move on the first start, backups still hold them and restoring a backup restores its cookies. Going back to 1.21 or earlier after this shows no cookies.
 - Desktop: starting the app no longer decodes your data file twice just to find the network settings and the history, and the automatic backup runs in the background. With 2,000 saved requests the work before the window can load its data takes 60 ms instead of 340 ms.
 - Desktop: a saved request no longer stores empty authentication and request options, which halves the data file (6.7 MB to 3.6 MB with 2,000 requests) and speeds up every save and load.
+
+### Security
+
+- The script sandbox is served with its Content-Security-Policy again, in the web app, the desktop app and `gostman serve`. The build had started naming the worker file `sandbox.worker-<hash>.js` while the policy matched `sandbox.worker.`, so scripts ran with the network globals removed but without the policy that also refuses network loads. Both builds now name every worker `<name>.<hash>.js`.
 
 ## [1.21.0] - 2026-11-19
 
