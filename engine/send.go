@@ -8,6 +8,7 @@ import (
 	"io"
 	"mime"
 	"net/http"
+	"strings"
 	"time"
 	"unicode/utf8"
 
@@ -110,7 +111,7 @@ func setupFailure(err error) Response {
 }
 
 func collect(ctx context.Context, incoming *http.Response, cookies *cookieLog, limit int64) Response {
-	body, err := io.ReadAll(io.LimitReader(incoming.Body, limit+1))
+	body, err := readResponseBody(incoming, limit)
 	if err != nil {
 		return classify(ctx, err)
 	}
@@ -126,6 +127,17 @@ func collect(ctx context.Context, incoming *http.Response, cookies *cookieLog, l
 	response.ContentType = MediaType(incoming.Header.Get(headerContentType), body)
 	response.Body, response.BodyEncoding = EncodeBody(body, truncated)
 	return response
+}
+
+func readResponseBody(incoming *http.Response, limit int64) ([]byte, error) {
+	source := io.LimitReader(incoming.Body, limit+1)
+	if incoming.Body == http.NoBody || incoming.ContentLength <= 0 {
+		return io.ReadAll(source)
+	}
+	var buffer bytes.Buffer
+	buffer.Grow(int(min(incoming.ContentLength, limit)) + bytes.MinRead)
+	_, err := buffer.ReadFrom(source)
+	return buffer.Bytes(), err
 }
 
 type exchangeSetup struct {
@@ -295,10 +307,23 @@ func EncodeBody(body []byte, truncated bool) (string, string) {
 	if truncated {
 		body = trimPartialRune(body)
 	}
-	if utf8.Valid(body) && !bytes.ContainsRune(body, 0) {
+	if isText(body) {
 		return string(body), EncodingUTF8
 	}
-	return base64.StdEncoding.EncodeToString(body), EncodingBase64
+	return encodeBase64(body), EncodingBase64
+}
+
+func isText(body []byte) bool {
+	return bytes.IndexByte(body, 0) < 0 && utf8.Valid(body)
+}
+
+func encodeBase64(body []byte) string {
+	var encoded strings.Builder
+	encoded.Grow(base64.StdEncoding.EncodedLen(len(body)))
+	encoder := base64.NewEncoder(base64.StdEncoding, &encoded)
+	encoder.Write(body)
+	encoder.Close()
+	return encoded.String()
 }
 
 func trimPartialRune(body []byte) []byte {
