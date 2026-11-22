@@ -11,6 +11,7 @@ export const DOCS_TEXT = {
   previous: "Previous",
   next: "Next",
   editPage: "Edit this page on GitHub",
+  guides: "Guides on this topic",
   openMenu: "Open the documentation menu",
   closeMenu: "Close the menu",
   showSections: (label) => `Sections of ${label}`,

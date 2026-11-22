@@ -29,31 +29,31 @@ function Cell({ product, claim }) {
   )
 }
 
-function Row({ row }) {
+function Row({ row, products }) {
   return (
     <tr className="block border-b border-border/40 py-4 md:table-row md:border-0 md:py-0">
       <th scope="row" className="block px-4 pb-3 text-left text-sm font-medium md:table-cell md:border-b md:border-border/30 md:py-5 md:align-top">
         {row.feature}
       </th>
-      {PRODUCTS.map((product) => (
+      {products.map((product) => (
         <Cell key={product.id} product={product} claim={row[product.id]} />
       ))}
     </tr>
   )
 }
 
-export function ComparisonTable() {
+const DEFAULT_CAPTION = "Gostman, Postman, Bruno and Insomnia compared feature by feature."
+
+export function ComparisonTable({ products = PRODUCTS, rows = COMPARISON_ROWS, caption = DEFAULT_CAPTION }) {
   return (
     <table className="block w-full border-separate border-spacing-0 md:table md:table-fixed">
-      <caption className="sr-only">
-        Gostman, Postman, Bruno and Insomnia compared feature by feature.
-      </caption>
+      <caption className="sr-only">{caption}</caption>
       <thead className="sr-only md:table-header-group md:not-sr-only">
         <tr>
           <th scope="col" className={cn(HEAD_CELL, "md:w-[22%]")}>
             Feature
           </th>
-          {PRODUCTS.map((product) => (
+          {products.map((product) => (
             <th key={product.id} scope="col" className={cn(HEAD_CELL, product.id === "gostman" && BAND)}>
               <ProductName product={product} />
             </th>
@@ -61,8 +61,8 @@ export function ComparisonTable() {
         </tr>
       </thead>
       <tbody className="block md:table-row-group">
-        {COMPARISON_ROWS.map((row) => (
-          <Row key={row.feature} row={row} />
+        {rows.map((row) => (
+          <Row key={row.feature} row={row} products={products} />
         ))}
       </tbody>
     </table>

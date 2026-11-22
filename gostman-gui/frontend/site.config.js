@@ -1,6 +1,6 @@
 import { build } from 'esbuild'
 import { createRequire } from 'module'
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs'
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs'
 import { createHash } from 'crypto'
 import { execFileSync } from 'child_process'
 import { tmpdir } from 'os'
@@ -8,10 +8,11 @@ import { join, relative, resolve, sep } from 'path'
 import { guidePages } from './src/guides/pages.js'
 import { productPages } from './src/guides/productPages.js'
 import { docFiles, docOutputFile, docPath, docSlug } from './src/docs/manifest.js'
-import { loadDocs } from './site-docs.js'
+import { loadDocs, loadImage } from './site-docs.js'
 import { CLIENT_METADATA_PATH, clientMetadata } from './src/lib/mcpClientMetadata.js'
 import { REPOSITORY } from './src/lib/siteLinks.js'
 import { FAQ } from './src/components/landing/faq.js'
+import { faqPage, jsonLd, socialImagePath, softwareApplication } from './src/guides/structuredData.js'
 import { DATA_LOCATION_KEY, FIRST_VISIT_ID, FIRST_VISIT_VARIANTS } from './src/lib/firstVisit.js'
 
 const DEFAULT_SITE_URL = 'https://gostman.com'
@@ -19,6 +20,7 @@ const SITE_URL_TOKEN = '__SITE_URL__'
 const APP_VERSION_TOKEN = '__APP_VERSION__'
 const GUIDE_ENTRY = resolve('src/guides/render.jsx')
 const DOCS_DIR = resolve('../../docs')
+const REPOSITORY_DIR = resolve('../..')
 const EMPTY_ROOT = '<div id="root"></div>'
 const IMAGE_FILES = /\.(png|jpe?g|webp|svg|mp4)$/
 const STARS_TIMEOUT_MS = 4000
@@ -95,12 +97,6 @@ function llmsTxt(url, docs) {
 
 const llmsFullTxt = () => docFiles.map((file) => readFileSync(join(DOCS_DIR, file), 'utf8').trim()).join('\n\n---\n\n') + '\n'
 
-const faqJsonLd = () => JSON.stringify({
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: FAQ.map(({ question, answer }) => ({ '@type': 'Question', name: question, acceptedAnswer: { '@type': 'Answer', text: answer } })),
-})
-
 const PRELOADED_FONTS = /^assets\/outfit-latin-(400|600)-normal\.[^.]+\.woff2$/
 
 const fontPreloads = (bundle) =>
@@ -150,18 +146,30 @@ ${stylesheets.map((href) => `<link rel="stylesheet" href="${href}">`).join('')}
 </html>
 `
 
-const docPaths = new Set(docFiles.map((file) => docPath(docSlug(file))))
+const landingPages = () => [...guidePages, ...productPages]
 
 const linkTargets = (node) =>
   node && typeof node === 'object'
     ? Object.entries(node).flatMap(([key, value]) => (key === 'href' && typeof value === 'string' ? [value] : linkTargets(value)))
     : []
 
-const missingGuideDocs = () =>
-  [...guidePages, ...productPages]
-    .flatMap(linkTargets)
-    .map((href) => href.split('#')[0])
-    .filter((href) => href.startsWith(docPath('')) && !docPaths.has(href))
+const docLinks = (page) => linkTargets(page).filter((href) => href.startsWith(docPath('')))
+
+function brokenDocLinks(docs) {
+  const targets = new Set([...docs.pages.map((page) => page.href), ...docs.search.map(([, , href]) => href)])
+  return landingPages().flatMap(docLinks).filter((href) => !targets.has(href))
+}
+
+const missingSocialImages = () => landingPages().map(socialImagePath).filter((path) => !existsSync(resolve(`public${path}`)))
+
+const withShot = (block, images) => (block.shot ? { ...block, shot: { ...block.shot, ...loadImage(block.shot.file, REPOSITORY_DIR, images) } } : block)
+
+const withShots = (page, images) => ({ ...page, sections: page.sections.map((block) => withShot(block, images)) })
+
+const guidesFor = (doc) =>
+  landingPages()
+    .filter((page) => docLinks(page).some((href) => href.split('#')[0] === doc.href))
+    .map((page) => ({ href: `/${page.path}`, label: page.heading }))
 
 const contentHash = (source) => createHash('sha256').update(source).digest('hex')
 
@@ -298,32 +306,36 @@ export function siteMeta() {
     enforce: 'post',
     transformIndexHtml: { order: 'pre', handler: (html) => html.replaceAll(SITE_URL_TOKEN, siteUrl).replaceAll(APP_VERSION_TOKEN, appVersion) },
     async generateBundle(_options, bundle) {
-      const missingDocs = missingGuideDocs()
-      if (missingDocs.length) this.error(`Guide pages link to docs that do not exist: ${missingDocs.join(', ')}`)
+      const docs = loadDocs(DOCS_DIR)
+      const brokenLinks = brokenDocLinks(docs)
+      if (brokenLinks.length) this.error(`Guide pages link to docs that do not exist: ${brokenLinks.join(', ')}`)
+      const missingImages = missingSocialImages()
+      if (missingImages.length) this.error(`Guide pages have no social image in public: ${missingImages.join(', ')}`)
       this.emitFile({ type: 'asset', fileName: 'sitemap.xml', source: sitemapXml(siteUrl) })
       this.emitFile({ type: 'asset', fileName: 'robots.txt', source: robotsTxt(siteUrl) })
       this.emitFile({ type: 'asset', fileName: CLIENT_METADATA_PATH.slice(1), source: JSON.stringify(clientMetadata(siteUrl), null, 2) })
 
       const { renderGuidePage, renderProductPage, renderDocsPage, renderLandingMarkup, renderAppSkeletonMarkup, assets } = await buildGuideRenderer(bundle)
-      const docs = loadDocs(DOCS_DIR)
       const stylesheets = stylesheetsOf(bundle)
       const emit = (fileName, source) => this.emitFile({ type: 'asset', fileName, source })
       emit('llms.txt', llmsTxt(siteUrl, docs))
       emit('llms-full.txt', llmsFullTxt())
       emit('404.html', notFoundHtml(siteUrl, stylesheets))
       assets.forEach((asset) => emit(asset.fileName, asset.source))
-      docs.images.forEach((image) => emit(image.fileName, image.source))
-      guidePages.forEach((page) => emit(`${page.path}/index.html`, renderGuidePage(page, { siteUrl, stylesheets })))
+      const images = new Map(docs.images.map((image) => [image.fileName, image.source]))
+      guidePages.forEach((page) => emit(`${page.path}/index.html`, renderGuidePage(withShots(page, images), { siteUrl, stylesheets })))
+      images.forEach((source, fileName) => emit(fileName, source))
       productPages.forEach((page) => emit(`${page.path}/index.html`, renderProductPage(page, { siteUrl, stylesheets, scripts: entryScripts(bundle, SITE_ENTRY) })))
       const searchRef = this.emitFile({ type: 'asset', name: 'docs-search.json', source: JSON.stringify(docs.search) })
       const searchUrl = `/${this.getFileName(searchRef)}`
       const scripts = entryScripts(bundle, DOCS_ENTRY)
       const shared = { siteUrl, stylesheets, scripts, nav: docs.nav, directory: docs.directory, searchUrl }
-      docs.pages.forEach((page) => emit(docOutputFile(page.slug), renderDocsPage(page, shared)))
+      docs.pages.forEach((page) => emit(docOutputFile(page.slug), renderDocsPage({ ...page, guides: guidesFor(page) }, shared)))
       const landing = bundle['index.html']
       if (!String(landing.source).includes(EMPTY_ROOT)) this.error('index.html has no empty root element to prerender into')
       const fonts = fontPreloads(bundle)
-      landing.source = withHeadScript(withHeadLinks(String(landing.source).replace(EMPTY_ROOT, `<div id="root">${renderLandingMarkup()}</div>`), fonts), faqJsonLd())
+      const prerendered = withHeadLinks(String(landing.source).replace(EMPTY_ROOT, `<div id="root">${renderLandingMarkup()}</div>`), fonts)
+      landing.source = [jsonLd(softwareApplication(siteUrl, appVersion)), jsonLd(faqPage(FAQ))].reduce(withHeadScript, prerendered)
       const client = bundle[`${CLIENT_ROUTE}/index.html`]
       if (!client || !String(client.source).includes(EMPTY_ROOT)) this.error(`${CLIENT_ROUTE}/index.html has no empty root element to prerender into`)
       client.source = String(client.source).replace(EMPTY_ROOT, firstVisitRoot(renderAppSkeletonMarkup(), await renderFirstVisit(bundle)))

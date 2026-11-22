@@ -9,14 +9,15 @@ import { LandingPage } from "../components/LandingPage"
 import { AppSkeletonFrame } from "../components/AppSkeletonFrame"
 import { SiteFooter } from "../components/landing/SiteFooter"
 import { docPath } from "../docs/manifest"
+import { faqPage, jsonLd, scriptJson, socialImagePath, softwareApplication, softwareApplicationId } from "./structuredData"
 
 const THEME_COLOR = "#050810"
 
 const webSite = (siteUrl) => ({ "@type": "WebSite", name: "Gostman", url: `${siteUrl}/` })
 
-const serialize = (data) => JSON.stringify(data).replace(/</g, "\\u003c")
+const SOCIAL_IMAGE_PATH = "/social.png"
 
-function PageDocument({ title, description, url, siteUrl, stylesheets, scripts = [], structuredData, children }) {
+function PageDocument({ title, description, url, siteUrl, image = SOCIAL_IMAGE_PATH, stylesheets, scripts = [], structuredData, children }) {
   return (
     <html lang="en" className="dark">
       <head>
@@ -36,7 +37,10 @@ function PageDocument({ title, description, url, siteUrl, stylesheets, scripts =
         <meta property="og:description" content={description} />
         <meta property="og:url" content={url} />
         <meta property="og:type" content="article" />
-        <meta property="og:image" content={`${siteUrl}/social.png`} />
+        <meta property="og:image" content={`${siteUrl}${image}`} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta name="twitter:image" content={`${siteUrl}${image}`} />
         <meta name="twitter:card" content="summary_large_image" />
         {stylesheets.map((href) => (
           <link key={href} rel="stylesheet" href={href} />
@@ -48,7 +52,7 @@ function PageDocument({ title, description, url, siteUrl, stylesheets, scripts =
             <script key={script.src} type="module" crossOrigin="" src={script.src} />
           ),
         )}
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serialize(structuredData) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(structuredData) }} />
       </head>
       <body>{children}</body>
     </html>
@@ -61,22 +65,24 @@ const PRODUCT_PAGES = { "ai-agents": AgentsPage, features: FeaturesPage }
 
 function renderWebPage(page, { siteUrl, stylesheets, scripts }, children) {
   const url = `${siteUrl}/${page.path}`
+  const webPage = {
+    "@type": "WebPage",
+    name: page.heading,
+    description: page.description,
+    url,
+    isPartOf: webSite(siteUrl),
+    about: { "@id": softwareApplicationId(siteUrl) },
+  }
 
   return renderDocument({
     title: page.title,
     description: page.description,
     url,
     siteUrl,
+    image: socialImagePath(page),
     stylesheets,
     scripts,
-    structuredData: {
-      "@context": "https://schema.org",
-      "@type": "WebPage",
-      name: page.heading,
-      description: page.description,
-      url,
-      isPartOf: webSite(siteUrl),
-    },
+    structuredData: { "@graph": [webPage, softwareApplication(siteUrl, __APP_VERSION__), ...(page.faq ? [faqPage(page.faq.entries)] : [])] },
     children,
   })
 }
@@ -113,7 +119,6 @@ export function renderDocsPage(page, { siteUrl, stylesheets, scripts, nav, direc
     stylesheets,
     scripts,
     structuredData: {
-      "@context": "https://schema.org",
       "@type": "TechArticle",
       headline: page.title,
       description: page.description,
@@ -124,7 +129,7 @@ export function renderDocsPage(page, { siteUrl, stylesheets, scripts, nav, direc
     children: (
       <>
         <div id="docs-root" dangerouslySetInnerHTML={{ __html: shell }} />
-        <script id="docs-data" type="application/json" dangerouslySetInnerHTML={{ __html: serialize(data) }} />
+        <script id="docs-data" type="application/json" dangerouslySetInnerHTML={{ __html: scriptJson(data) }} />
       </>
     ),
   })

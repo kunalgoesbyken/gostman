@@ -93,12 +93,12 @@ function resolveHref(href, file) {
   return `${REPOSITORY_URL}/blob/main/${posix.join('docs', target)}${suffix}`
 }
 
-function loadImage(href, docsDir, images) {
+export function loadImage(href, docsDir, images) {
   const source = resolve(docsDir, href)
   const extension = extname(source)
   const measure = IMAGE_SIZES[extension]
-  if (!measure) throw new Error(`Unsupported docs image type: ${href}`)
-  if (!existsSync(source)) throw new Error(`Missing docs image: ${href}`)
+  if (!measure) throw new Error(`Unsupported image type: ${href}`)
+  if (!existsSync(source)) throw new Error(`Missing image: ${href}`)
 
   const bytes = readFileSync(source)
   const hash = createHash('sha1').update(bytes).digest('hex').slice(0, 8)

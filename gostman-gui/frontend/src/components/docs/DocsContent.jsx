@@ -63,6 +63,22 @@ function Neighbour({ link, direction }) {
   )
 }
 
+function RelatedGuides({ guides }) {
+  if (!guides?.length) return null
+  return (
+    <nav aria-label={DOCS_TEXT.guides} className="mt-12">
+      <p className="text-sm font-medium text-foreground">{DOCS_TEXT.guides}</p>
+      <ul className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-sm">
+        {guides.map((guide) => (
+          <li key={guide.href}>
+            <a href={guide.href} className="text-primary underline-offset-4 hover:underline">{guide.label}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )
+}
+
 function PageFooter({ page }) {
   return (
     <footer className="mt-16 border-t border-border pt-6">
@@ -88,6 +104,7 @@ export function DocsContent({ page, directory }) {
       <article id="docs-article" className="docs-prose mt-5" dangerouslySetInnerHTML={{ __html: page.html }} />
       {page.comparison ? <div className="mt-8"><ComparisonTable /></div> : null}
       {page.home ? <DocsHome directory={directory} /> : null}
+      <RelatedGuides guides={page.guides} />
       <PageFooter page={page} />
     </>
   )
