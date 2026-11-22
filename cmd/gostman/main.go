@@ -85,6 +85,11 @@ run
                         variables iteration and iterationCount are set
   --iterations <n>      repeat the run n times, or use only the first n data rows
                         (at most 10000 iterations; more exits with status 2)
+  --row <n,m>           run only these data rows (from 1, comma list,
+                        repeatable), in file order and numbered as in a full
+                        run, to rerun the rows that failed
+  --row-label <column>  name each iteration in reports by this data column,
+                        as in "Login [iteration 3: expired token]"
   --stream-timeout <s>  time budget for each streaming (SSE) request in a run
                         (default 10 seconds, at most 100 events unless the
                         request sets its own); the report says how it ended

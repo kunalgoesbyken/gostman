@@ -96,7 +96,7 @@ func markdownFailures(results []runner.Result) string {
 
 func markdownFailure(result runner.Result) string {
 	var item strings.Builder
-	item.WriteString("- " + codeSpan(result.Method+" "+qualifiedName(result)))
+	item.WriteString("- " + codeSpan(result.Method+" "+result.ReportName()))
 	if result.Error == "" && result.Status != "" {
 		item.WriteString(" returned " + codeSpan(result.Status))
 	}

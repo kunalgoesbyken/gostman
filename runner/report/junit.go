@@ -165,7 +165,7 @@ func (s *junitSuite) add(described junitCase) {
 
 func suiteOf(result runner.Result, timestamp string) junitSuite {
 	suite := junitSuite{
-		Name:      qualifiedName(result),
+		Name:      result.ReportName(),
 		Time:      seconds(result.DurationMs),
 		Timestamp: timestamp,
 		Output:    suiteOutput(result),

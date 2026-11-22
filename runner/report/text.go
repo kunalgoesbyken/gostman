@@ -184,7 +184,7 @@ func (t *Text) nest(depth int) func() {
 func (t *Text) Request(received runner.Result) {
 	defer t.nest(received.Depth)()
 	result := printableResult(received)
-	fmt.Fprintf(t.output, "%s  %-*s  %s  %s\n", t.mark(result), methodWidth, result.Method, qualifiedName(result), t.paint(styleDim, outcomeOf(result)))
+	fmt.Fprintf(t.output, "%s  %-*s  %s  %s\n", t.mark(result), methodWidth, result.Method, result.ReportName(), t.paint(styleDim, outcomeOf(result)))
 	if result.ResolvedURL != "" {
 		fmt.Fprintln(t.output, t.paint(styleDim, detailIndent+result.ResolvedURL))
 	}

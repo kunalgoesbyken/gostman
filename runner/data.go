@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"unicode"
 )
 
 type Row map[string]json.RawMessage
@@ -121,13 +122,55 @@ func parseJSONRows(content []byte) ([]Row, error) {
 const MaxIterations = 10000
 
 func (o Options) CheckIterations() error {
+	if err := o.checkRows(); err != nil {
+		return err
+	}
+	if err := o.checkRowLabel(); err != nil {
+		return err
+	}
 	if requested := max(o.Iterations, o.iterationCount()); requested > MaxIterations {
 		return fmt.Errorf("a run is limited to %d iterations, this one asks for %d; lower the iteration count or use fewer data rows", MaxIterations, requested)
 	}
 	return nil
 }
 
+func (o Options) checkRows() error {
+	if len(o.Rows) == 0 {
+		return nil
+	}
+	if len(o.Data) == 0 {
+		return errors.New("rows can only be chosen from a data file")
+	}
+	if o.Iterations > 0 {
+		return errors.New("choose rows or an iteration count, not both")
+	}
+	for _, row := range o.Rows {
+		if row < 1 || row > len(o.Data) {
+			return fmt.Errorf("row %d is not in the data file, which has %d rows", row, len(o.Data))
+		}
+	}
+	return nil
+}
+
+func (o Options) checkRowLabel() error {
+	if o.RowLabel == "" {
+		return nil
+	}
+	if len(o.Data) == 0 {
+		return errors.New("iterations can only be labelled from a data file")
+	}
+	for _, row := range o.Data {
+		if _, found := row[o.RowLabel]; found {
+			return nil
+		}
+	}
+	return fmt.Errorf("the data file has no column %q to label iterations with", o.RowLabel)
+}
+
 func (o Options) iterationCount() int {
+	if len(o.Rows) > 0 {
+		return len(o.Rows)
+	}
 	count := len(o.Data)
 	if count == 0 {
 		count = 1
@@ -136,6 +179,43 @@ func (o Options) iterationCount() int {
 		count = o.Iterations
 	}
 	return count
+}
+
+func (o Options) rowIndex(iteration int) int {
+	if len(o.Rows) > 0 {
+		return o.Rows[iteration] - 1
+	}
+	return iteration
+}
+
+func (o Options) iterationNumber(iteration int) int {
+	if !o.isIterating() {
+		return 0
+	}
+	return o.rowIndex(iteration) + 1
+}
+
+func (o Options) labelFor(iteration int) string {
+	row := o.rowIndex(iteration)
+	if o.RowLabel == "" || row >= len(o.Data) {
+		return ""
+	}
+	raw, found := o.Data[row][o.RowLabel]
+	if !found || string(raw) == "null" {
+		return ""
+	}
+	return strings.Join(strings.FieldsFunc(plainText(raw), isLabelBreak), " ")
+}
+
+func isLabelBreak(character rune) bool {
+	return unicode.IsSpace(character) || unicode.IsControl(character)
+}
+
+func (o Options) scriptIterationCount() int {
+	if len(o.Rows) > 0 {
+		return len(o.Data)
+	}
+	return o.iterationCount()
 }
 
 func (o Options) isIterating() bool {
@@ -147,11 +227,11 @@ func (o Options) givenFor(iteration int) Row {
 		return nil
 	}
 	given := Row{}
-	if iteration < len(o.Data) {
-		maps.Copy(given, o.Data[iteration])
+	if row := o.rowIndex(iteration); row < len(o.Data) {
+		maps.Copy(given, o.Data[row])
 	}
-	given[iterationName] = json.RawMessage(fmt.Sprint(iteration + 1))
-	given[iterationCountName] = json.RawMessage(fmt.Sprint(o.iterationCount()))
+	given[iterationName] = json.RawMessage(fmt.Sprint(o.iterationNumber(iteration)))
+	given[iterationCountName] = json.RawMessage(fmt.Sprint(o.scriptIterationCount()))
 	return given
 }
 

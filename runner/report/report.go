@@ -47,17 +47,3 @@ func New(format string, output io.Writer) (Reporter, error) {
 func Supports(format string) bool {
 	return slices.Contains(Formats, format)
 }
-
-func qualifiedName(result runner.Result) string {
-	name := result.Name
-	if result.Folder != "" {
-		name = result.Folder + "/" + result.Name
-	}
-	if result.Iteration > 0 {
-		name = fmt.Sprintf("%s [iteration %d]", name, result.Iteration)
-	}
-	if result.Attempts > 1 {
-		name = fmt.Sprintf("%s [attempt %d of %d]", name, result.Attempt, result.Attempts)
-	}
-	return name
-}

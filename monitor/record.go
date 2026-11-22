@@ -112,7 +112,7 @@ func firstNonEmpty(values ...string) string {
 
 func (s Source) entry(result runner.Result) Entry {
 	entry := Entry{
-		Name:       result.QualifiedName(),
+		Name:       s.clean(result.QualifiedName()),
 		Method:     result.Method,
 		Status:     result.Status,
 		StatusCode: result.StatusCode,

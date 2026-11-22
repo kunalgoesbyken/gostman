@@ -42,6 +42,7 @@ type Result struct {
 	Logs        []LogLine        `json:"logs"`
 	Visual      string           `json:"visualization,omitempty"`
 	Iteration   int              `json:"iteration,omitempty"`
+	Label       string           `json:"label,omitempty"`
 	Step        string           `json:"step,omitempty"`
 	Attempt     int              `json:"attempt,omitempty"`
 	Attempts    int              `json:"attempts,omitempty"`
@@ -82,12 +83,34 @@ type Report struct {
 func (r Result) QualifiedName() string {
 	name := Listed{Folder: r.Folder, Request: Request{Name: r.Name}}.QualifiedName()
 	if r.Iteration > 0 {
-		return fmt.Sprintf("%s [iteration %d]", name, r.Iteration)
+		return name + r.iterationTag()
 	}
 	if r.Attempts > 1 {
-		return fmt.Sprintf("%s [attempt %d of %d]", name, r.Attempt, r.Attempts)
+		return name + r.attemptTag()
 	}
 	return name
+}
+
+func (r Result) ReportName() string {
+	name := Listed{Folder: r.Folder, Request: Request{Name: r.Name}}.QualifiedName()
+	if r.Iteration > 0 {
+		name += r.iterationTag()
+	}
+	if r.Attempts > 1 {
+		name += r.attemptTag()
+	}
+	return name
+}
+
+func (r Result) iterationTag() string {
+	if r.Label != "" {
+		return fmt.Sprintf(" [iteration %d: %s]", r.Iteration, r.Label)
+	}
+	return fmt.Sprintf(" [iteration %d]", r.Iteration)
+}
+
+func (r Result) attemptTag() string {
+	return fmt.Sprintf(" [attempt %d of %d]", r.Attempt, r.Attempts)
 }
 
 func (r Result) IsSkipped() bool {

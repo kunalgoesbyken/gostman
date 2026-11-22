@@ -91,7 +91,7 @@ func (c *schedule) work(ctx context.Context, worker *session, queue <-chan int) 
 			request := c.planned.requests[current.indexes[cursor]]
 			result := worker.attempt(ctx, request, c.planned.folderNames[request.FolderID], c.options.Capture)
 			worker.common.publish(worker.scoped(request).plain())
-			result.Iteration = c.iterationNumber(current)
+			c.number(&result, current)
 			sent++
 			following, problem := c.follow(current, cursor, result.flow, flowStep{name: request.Name, sent: sent, repeats: repeats})
 			reason := result.flow.passedOver(request.Name, result.Iteration)
@@ -147,11 +147,9 @@ func (c *schedule) hasEnded(current unit) bool {
 	return ended
 }
 
-func (c *schedule) iterationNumber(current unit) int {
-	if c.options.isIterating() {
-		return current.iteration + 1
-	}
-	return 0
+func (c *schedule) number(result *Result, current unit) {
+	result.Iteration = c.options.iterationNumber(current.iteration)
+	result.Label = c.options.labelFor(current.iteration)
 }
 
 func (c *schedule) recordPassedOver(position int, current unit, progress unitProgress) {
@@ -162,7 +160,7 @@ func (c *schedule) recordPassedOver(position int, current unit, progress unitPro
 		request := c.planned.requests[index]
 		result := identify(request, c.planned.folderNames[request.FolderID])
 		result.Skipped = progress.passed[cursor]
-		result.Iteration = c.iterationNumber(current)
+		c.number(&result, current)
 		c.record(position, result)
 	}
 }

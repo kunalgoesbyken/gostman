@@ -4,6 +4,15 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Added
+
+- `gostman run --row-label <column>` names each iteration of a data-driven run by a column of its row, so a failed check in the text, JUnit, Markdown and HTML reports reads `Login [iteration 3: expired token]` instead of only the number; the JSON report adds `label`.
+- `gostman run --row 3,7` reruns only those rows of the data file, in file order, each with the iteration number, `iteration` and `iterationCount` it had in the full run, so the names in the report match the run that failed.
+
+### Fixed
+
+- `gostman run` reports a failed check with the value it found again, such as `The value was 401`, in every report, JUnit included, instead of `Value is not an object: The value was {{value}}`. The command line's script engine leaves a global regular expression where `replace` stopped, so once one message had been filled in, the next message with a value lost its placeholder; messages now look for placeholders with a fresh pattern each time.
+
 ## [1.23.0] - 2026-11-19
 
 ### Added

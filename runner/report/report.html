@@ -137,7 +137,7 @@ li small { display: block; color: var(--muted); margin-left: 42px; white-space: 
     var name = el('span', 'name', result.name || '');
     var where = [];
     if (result.folder) where.push(result.folder);
-    if (result.iteration) where.push('iteration ' + result.iteration);
+    if (result.iteration) where.push('iteration ' + result.iteration + (result.label ? ': ' + result.label : ''));
     if (result.attempts > 1) where.push('attempt ' + result.attempt + ' of ' + result.attempts);
     if (where.length) name.appendChild(el('small', '', '  ' + where.join(' / ')));
     head.appendChild(name);

@@ -21,6 +21,8 @@ type Options struct {
 	Insecure        bool
 	UpdateSnapshots bool
 	Data            []Row
+	Rows            []int
+	RowLabel        string
 	Iterations      int
 	Parallel        int
 	Only            []string

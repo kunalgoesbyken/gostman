@@ -5,6 +5,8 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -41,6 +43,29 @@ func (t *tagFlag) Set(value string) error {
 	return nil
 }
 
+type rowFlag []int
+
+func (r *rowFlag) String() string {
+	numbers := make([]string, len(*r))
+	for index, row := range *r {
+		numbers[index] = strconv.Itoa(row)
+	}
+	return strings.Join(numbers, ",")
+}
+
+func (r *rowFlag) Set(value string) error {
+	for part := range strings.SplitSeq(value, ",") {
+		row, err := strconv.Atoi(strings.TrimSpace(part))
+		if err != nil || row < 1 {
+			return errors.New("give row numbers from 1, such as 3 or 3,7")
+		}
+		*r = append(*r, row)
+	}
+	slices.Sort(*r)
+	*r = slices.Compact(*r)
+	return nil
+}
+
 type originFlags []string
 
 func (o *originFlags) String() string {
@@ -64,6 +89,8 @@ type runExtras struct {
 func (e *runExtras) register(flags *flag.FlagSet, options *runner.Options) {
 	flags.StringVar(&e.dataFile, "data", "", "")
 	flags.IntVar(&options.Iterations, "iterations", 0, "")
+	flags.Var((*rowFlag)(&options.Rows), "row", "")
+	flags.StringVar(&options.RowLabel, "row-label", "", "")
 	flags.IntVar(&options.Parallel, "parallel", 0, "")
 	flags.IntVar(&e.streamSeconds, "stream-timeout", 0, "")
 	flags.StringVar(&e.envFile, "env-file", "", "")

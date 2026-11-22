@@ -102,7 +102,7 @@ func newRunFlags(name string) (*flag.FlagSet, *runFlags) {
 
 func (r *runFlags) usesRunOnlyFlags() bool {
 	options := r.parsed.options
-	return options.Folder != "" || r.parsed.extras.dataFile != "" || options.Iterations > 0 || options.Parallel > 0 ||
+	return options.Folder != "" || r.parsed.extras.dataFile != "" || options.Iterations > 0 || len(options.Rows) > 0 || options.RowLabel != "" || options.Parallel > 0 ||
 		len(options.Only) > 0 || len(options.Tags) > 0 || len(options.ExcludeTags) > 0 || options.Bail || r.delayMs > 0
 }
 
@@ -113,7 +113,7 @@ func (r *runFlags) finish(path string) (invocation, error) {
 	case r.delayMs < 0 || r.timeoutMs < 0:
 		return parsed, errors.New("--delay and --timeout take a number of milliseconds, zero or more")
 	case parsed.flow != "" && r.usesRunOnlyFlags():
-		return parsed, errors.New("--folder, --data, --iterations, --parallel, --only, --tags, --exclude-tags, --bail and --delay do not apply to a flow")
+		return parsed, errors.New("--folder, --data, --iterations, --row, --row-label, --parallel, --only, --tags, --exclude-tags, --bail and --delay do not apply to a flow")
 	case (parsed.coverage || parsed.minCoverage != 0) && parsed.contract == "":
 		return parsed, errors.New("--coverage and --min-coverage need --contract <spec>, the OpenAPI spec whose operations are counted")
 	case parsed.options.UpdateSnapshots && !isFolder(path):
