@@ -20,7 +20,7 @@ export const MAX_SUGGESTIONS = 50
 export const looksSecret = isSensitiveName
 
 export function findReferences(text) {
-  return Array.from(text.matchAll(TOKEN), (match) => ({
+  return Array.from(text.matchAll(new RegExp(TOKEN)), (match) => ({
     name: match[1],
     start: match.index,
     end: match.index + match[0].length,
@@ -38,7 +38,7 @@ function parsedJSON(text) {
   }
 }
 
-const callsFileDirectly = (text) => Array.from(text.matchAll(ENGINE_PLACEHOLDER), ([, inner]) => inner).some(callsFile)
+const callsFileDirectly = (text) => Array.from(text.matchAll(new RegExp(ENGINE_PLACEHOLDER)), ([, inner]) => inner).some(callsFile)
 
 export const holdsOnlyReferences = (text) => text.replace(TOKEN, '').replace(OPEN_REFERENCE, '').trim() === ''
 
@@ -49,7 +49,7 @@ export function hasFileReference(text) {
 }
 
 export function fileReferencesIn(text) {
-  const direct = Array.from(text.matchAll(ENGINE_PLACEHOLDER), ([, inner]) => inner.trim()).filter(callsFile)
+  const direct = Array.from(text.matchAll(new RegExp(ENGINE_PLACEHOLDER)), ([, inner]) => inner.trim()).filter(callsFile)
   const parsed = parsedJSON(text)
   return parsed ? [...direct, ...textsIn(parsed.value).flatMap(fileReferencesIn)] : direct
 }

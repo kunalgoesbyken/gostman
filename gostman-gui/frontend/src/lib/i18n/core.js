@@ -109,7 +109,7 @@ export function registerEnglish(namespace, tree) {
   state.english[namespace] = tree
 }
 
-const placeholdersOf = (text) => [...text.matchAll(PLACEHOLDER)].map((match) => match[1])
+const placeholdersOf = (text) => [...text.matchAll(new RegExp(PLACEHOLDER))].map((match) => match[1])
 
 function pluralBase(key) {
   const cut = key.lastIndexOf('_')
