@@ -45,42 +45,18 @@ function AskAssistants() {
   )
 }
 
-function AlternativeToBadge() {
-  return (
-    <a href={ALTERNATIVETO_URL} target="_blank" rel="noopener noreferrer" className="inline-block">
-      <img src={ALTERNATIVETO_BADGE_URL} alt="Gostman | AlternativeTo" width="284" height="54" loading="lazy" className="h-[54px] w-[284px] max-w-full" />
-    </a>
-  )
-}
+const LAUNCH_BADGES = [
+  { href: EASYLAUNCH_URL, src: EASYLAUNCH_BADGE_DARK_URL, alt: "Featured on EasyLaunch", width: 188, height: 56 },
+  { href: NICKLAUNCHES_URL, src: NICKLAUNCHES_BADGE_DARK_URL, alt: "Gostman on Nick Launches", width: 244, height: 56 },
+  { href: FAZIER_URL, src: FAZIER_BADGE_DARK_URL, alt: "Fazier badge", width: 237, height: 56 },
+  { href: CAPYLAUNCH_URL, src: CAPYLAUNCH_BADGE_DARK_URL, alt: "Featured on CapyLaunch", width: 200, height: 48 },
+  { href: ALTERNATIVETO_URL, src: ALTERNATIVETO_BADGE_URL, alt: "Gostman | AlternativeTo", width: 284, height: 54 },
+]
 
-function EasyLaunchBadge() {
+function LaunchBadge({ badge }) {
   return (
-    <a href={EASYLAUNCH_URL} target="_blank" rel="noopener" className="inline-block">
-      <img src={EASYLAUNCH_BADGE_DARK_URL} alt="Featured on EasyLaunch" width="188" height="56" loading="lazy" className="h-14 w-[188px] max-w-full" />
-    </a>
-  )
-}
-
-function NickLaunchesBadge() {
-  return (
-    <a href={NICKLAUNCHES_URL} target="_blank" rel="noopener" className="inline-block">
-      <img src={NICKLAUNCHES_BADGE_DARK_URL} alt="Gostman on Nick Launches" width="244" height="56" loading="lazy" className="h-14 w-[244px] max-w-full" />
-    </a>
-  )
-}
-
-function FazierBadge() {
-  return (
-    <a href={FAZIER_URL} target="_blank" rel="noopener" className="inline-block">
-      <img src={FAZIER_BADGE_DARK_URL} alt="Fazier badge" width="237" height="56" loading="lazy" className="h-14 w-[237px] max-w-full" />
-    </a>
-  )
-}
-
-function CapyLaunchBadge() {
-  return (
-    <a href={CAPYLAUNCH_URL} target="_blank" rel="noopener" className="inline-block">
-      <img src={CAPYLAUNCH_BADGE_DARK_URL} alt="Featured on CapyLaunch" width="200" height="48" loading="lazy" className="h-12 w-[200px] max-w-full" />
+    <a href={badge.href} target="_blank" rel="noopener" className="inline-block">
+      <img src={badge.src} alt={badge.alt} width={badge.width} height={badge.height} loading="lazy" className="h-8 w-auto max-w-full" />
     </a>
   )
 }
@@ -108,12 +84,10 @@ export function SiteFooter() {
           <Brand tagline="API client for REST, GraphQL, gRPC and WebSocket" />
           <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">Free and open source. No account, and your collections stay on your machine.</p>
         </div>
-        <div className="flex flex-wrap items-center gap-4">
-          <EasyLaunchBadge />
-          <NickLaunchesBadge />
-          <FazierBadge />
-          <CapyLaunchBadge />
-          <AlternativeToBadge />
+        <div className="flex flex-wrap items-center gap-3">
+          {LAUNCH_BADGES.map((badge) => (
+            <LaunchBadge key={badge.href} badge={badge} />
+          ))}
         </div>
       </div>
       <div className="mx-auto mt-8 grid max-w-6xl grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-3 lg:grid-cols-5">
