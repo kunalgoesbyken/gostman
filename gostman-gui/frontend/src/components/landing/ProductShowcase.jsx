@@ -86,7 +86,7 @@ function ViewTab({ view, isActive, onSelect }) {
       tabIndex={isActive ? 0 : -1}
       onClick={onSelect}
       className={cn(
-        "relative shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors sm:px-4",
+        "relative shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors max-sm:px-1.5 max-sm:text-[13px] sm:px-4",
         isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
       )}
     >
@@ -127,7 +127,7 @@ export function ProductShowcase() {
           role="tablist"
           aria-label="Protocols"
           onKeyDown={handleKeyDown}
-          className="isolate inline-flex max-w-full shrink-0 items-center gap-1 self-start overflow-x-auto rounded-lg border border-border/40 bg-muted/20 p-1 scrollbar-none sm:self-auto"
+          className="isolate inline-flex max-w-full shrink-0 items-center gap-1 self-start max-sm:gap-0.5 overflow-x-auto rounded-lg border border-border/40 bg-muted/20 p-1 scrollbar-none sm:self-auto"
         >
           {VIEWS.map((view) => (
             <ViewTab key={view.id} view={view} isActive={view.id === activeId} onSelect={() => setActiveId(view.id)} />

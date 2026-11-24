@@ -87,7 +87,7 @@ const activeFirst = (environments, activeId) => [
   ...environments.filter((environment) => environment.id !== activeId),
 ]
 const REQUEST_AREA_STYLE = { minHeight: MIN_REQUEST_HEIGHT_PX }
-const CORNER_STACK = "pointer-events-none fixed inset-x-4 bottom-10 z-40 flex flex-col gap-2 sm:inset-x-auto sm:end-4 sm:items-end [&>*]:pointer-events-auto"
+const CORNER_STACK = "pointer-events-none fixed inset-x-4 bottom-10 z-40 flex flex-col gap-2 max-sm:contents sm:inset-x-auto sm:end-4 sm:items-end [&>*]:pointer-events-auto"
 
 const store = () => useAppStore.getState()
 

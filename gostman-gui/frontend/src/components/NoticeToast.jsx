@@ -22,7 +22,7 @@ export const NoticeToast = memo(function NoticeToast() {
   const release = () => setHeldId(null)
 
   return (
-    <div role="status" aria-live="polite" onMouseEnter={hold} onMouseLeave={release} onFocus={hold} onBlur={release}>
+    <div role="status" aria-live="polite" className="max-sm:fixed max-sm:inset-x-4 max-sm:bottom-10 max-sm:z-40" onMouseEnter={hold} onMouseLeave={release} onFocus={hold} onBlur={release}>
       {notice && (
         <div className="flex items-center gap-2 rounded-md border border-border bg-background py-1.5 ps-3 pe-1.5 text-xs text-foreground sm:max-w-sm">
           <span className="min-w-0 flex-1 [overflow-wrap:anywhere]">{notice.message}</span>

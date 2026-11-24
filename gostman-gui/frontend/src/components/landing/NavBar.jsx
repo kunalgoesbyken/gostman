@@ -1,3 +1,5 @@
+export const PHONE_TOUCH_TARGET = "relative max-sm:after:absolute max-sm:after:inset-x-0 max-sm:after:-inset-y-1.5"
+
 export function NavBar({ children }) {
   return (
     <nav aria-label="Gostman" className="fixed inset-x-0 top-0 z-50 border-b border-border/40 bg-background/90 px-4 backdrop-blur sm:px-6">

@@ -51,11 +51,11 @@ export const TourCard = memo(function TourCard() {
   const body = id === "variables" ? TEXT.steps.variables.body({ example: VARIABLE_EXAMPLE }) : id === "explore" ? TEXT.steps.explore.body({ shortcut: paletteShortcut }) : TEXT.steps[id].body
 
   return (
-    <section aria-label={TEXT.label} className="flex flex-col gap-2 rounded-md border border-border bg-background p-3 text-xs sm:w-80">
-      <p className="text-2xs text-muted-foreground">{TEXT.progress({ current: step + 1, total: TOUR_FINISHED })}</p>
-      <h2 className="text-sm font-semibold">{TEXT.steps[id].title}</h2>
-      <p className="text-muted-foreground">{body}</p>
-      <div className="flex justify-end gap-2">
+    <section aria-label={TEXT.label} className="flex flex-col gap-2 rounded-md border border-border bg-background p-3 text-xs max-sm:flex-row max-sm:flex-wrap max-sm:items-center max-sm:gap-y-0 max-sm:rounded-none max-sm:border-x-0 max-sm:border-b-0 max-sm:px-3 max-sm:py-1 max-sm:shrink-0 sm:w-80">
+      <p className="text-2xs text-muted-foreground max-sm:shrink-0">{TEXT.progress({ current: step + 1, total: TOUR_FINISHED })}</p>
+      <h2 className="text-sm font-semibold max-sm:min-w-0 max-sm:flex-1 max-sm:truncate">{TEXT.steps[id].title}</h2>
+      <p className="text-muted-foreground max-sm:order-last max-sm:line-clamp-2 max-sm:basis-full">{body}</p>
+      <div className="flex justify-end gap-2 max-sm:shrink-0">
         <Button size="sm" variant="ghost" onClick={finish}>{TEXT.skip}</Button>
         <Button size="sm" onClick={advance}>{step + 1 >= TOUR_FINISHED ? TEXT.done : TEXT.next}</Button>
       </div>

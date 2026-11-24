@@ -1,5 +1,6 @@
 import github from "@iconify-icons/simple-icons/github"
 import { Brand } from "../landing/Brand"
+import { PHONE_TOUCH_TARGET } from "../landing/NavBar"
 import { SvgIcon } from "../ui/svgIcon"
 import { Menu, Search } from "../landing/icons"
 import { DOCS_TEXT } from "../../lib/docsText"
@@ -17,7 +18,7 @@ export function DocsHeader({ onSearch, onMenu }) {
           <Brand />
         </a>
         <span aria-hidden="true" className="text-muted-foreground/50">/</span>
-        <a href={docPath("")} className="text-sm font-medium text-foreground">
+        <a href={docPath("")} className={`${PHONE_TOUCH_TARGET} inline-flex h-8 items-center text-sm font-medium text-foreground`}>
           {DOCS_TEXT.docs}
         </a>
         <nav aria-label={DOCS_TEXT.siteNav} className="ml-auto flex items-center gap-1">

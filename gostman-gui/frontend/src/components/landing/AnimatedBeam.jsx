@@ -36,7 +36,9 @@ export function AnimatedBeam({ containerRef, fromRef, toRef, className, delay = 
 
   useEffect(() => {
     const container = containerRef.current
-    const observer = new ResizeObserver(() => setGeometry(measure(container, fromRef.current, toRef.current)))
+    const observer = new ResizeObserver(() => {
+      if (fromRef.current && toRef.current) setGeometry(measure(container, fromRef.current, toRef.current))
+    })
     observer.observe(container)
     return () => observer.disconnect()
   }, [containerRef, fromRef, toRef])

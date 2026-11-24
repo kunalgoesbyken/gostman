@@ -45,9 +45,11 @@ function FeatureText({ feature }) {
     <>
       <SplitHeading text={feature.title} size="feature" />
       <p className="landing-lead reveal-on-scroll mt-4 max-w-md" style={revealStep(1)}>{feature.description}</p>
-      <div className="reveal-on-scroll mt-5" style={revealStep(2)}>
-        <BrandStrip brands={feature.brands} />
-      </div>
+      {feature.brands && (
+        <div className="reveal-on-scroll mt-5" style={revealStep(2)}>
+          <BrandStrip brands={feature.brands} />
+        </div>
+      )}
     </>
   )
 }

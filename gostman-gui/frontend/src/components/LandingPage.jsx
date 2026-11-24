@@ -16,7 +16,7 @@ import { InstallCommands } from "./landing/InstallCommands"
 import { AgentStart } from "./landing/AgentStart"
 import { formatList } from "./landing/content"
 import { Brand } from "./landing/Brand"
-import { NavBar } from "./landing/NavBar"
+import { NavBar, PHONE_TOUCH_TARGET } from "./landing/NavBar"
 import { FeatureSection } from "./landing/FeatureSection"
 import { SiteFooter } from "./landing/SiteFooter"
 import { SplitHeading } from "./landing/SplitHeading"
@@ -52,7 +52,7 @@ const AVAILABILITY = `Open source · ${formatList(PLATFORMS)}`
 
 const introStep = (step) => ({ "--intro-step": step })
 
-const NAV_LINK = cn(buttonVariants({ variant: "ghost", size: "sm" }), "gap-2 text-sm hover:bg-muted/50")
+const NAV_LINK = cn(buttonVariants({ variant: "ghost", size: "sm" }), "gap-2 text-sm hover:bg-muted/50", PHONE_TOUCH_TARGET)
 
 const isJsonResponse = (response) => response.ok && (response.headers.get("content-type") ?? "").includes("application/json")
 
@@ -149,7 +149,7 @@ export function LandingPage({ onGetStarted }) {
               Web app
             </button>
             <GitHubStarLink stars={stars} />
-            <a href="#download" className={buttonVariants({ size: "sm", className: "gap-2" })}>
+            <a href="#download" className={buttonVariants({ size: "sm", className: cn("gap-2", PHONE_TOUCH_TARGET) })}>
               <Download className="h-4 w-4" />
               <span className="max-[379px]:sr-only">Download</span>
             </a>

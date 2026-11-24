@@ -2,16 +2,16 @@ import { BrandIcon } from "../ui/brandIcon"
 import { buttonVariants } from "../ui/button"
 import { cn } from "../../lib/utils"
 import { Brand } from "./Brand"
-import { NavBar } from "./NavBar"
+import { NavBar, PHONE_TOUCH_TARGET } from "./NavBar"
 import { docPath } from "../../docs/manifest"
 import { RELEASES_URL, REPOSITORY_URL } from "../../lib/siteLinks"
 
-const NAV_LINK = cn(buttonVariants({ variant: "ghost", size: "sm" }), "gap-2 text-sm hover:bg-muted/50")
+const NAV_LINK = cn(buttonVariants({ variant: "ghost", size: "sm" }), "gap-2 text-sm hover:bg-muted/50", PHONE_TOUCH_TARGET)
 
 export function SiteHeader() {
   return (
     <NavBar>
-      <a href="/" aria-label="Gostman home" className="shrink-0">
+      <a href="/" aria-label="Gostman home" className={cn("shrink-0", PHONE_TOUCH_TARGET)}>
         <Brand />
       </a>
       <div className="flex items-center gap-1 sm:gap-2">
