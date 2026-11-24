@@ -59,7 +59,7 @@ import { WORKSPACE_TEXT } from "../lib/workspaceText"
 import { historyIdentityOf } from "../lib/historyIdentity"
 import { selectTabHistoryEntry, useAppStore } from "../store/appStore"
 import {
-  DEFAULT_RESPONSE_SHARE, MIN_REQUEST_HEIGHT_PX, MIN_RESPONSE_HEIGHT_PX, rememberResponseShare, rememberedResponseShare,
+  DEFAULT_RESPONSE_SHARE, MIN_RESPONSE_HEIGHT_PX, rememberResponseShare, rememberedResponseShare,
 } from "../lib/layout"
 import {
   BODY_KINDS, ERROR_TITLES, bodyBytes, bodyKind, dataUrl, isScriptableImage, looksLikeJson, mimeType, parseJsonBody, statusVariant, textBody,
@@ -381,35 +381,43 @@ const clamp = (value, lowest, highest) => Math.max(lowest, Math.min(highest, val
 
 const KEY_SHARE_STEPS = { ArrowUp: 5, ArrowDown: -5 }
 
+const PRIMARY_BUTTON = 0
+
+const requestFloor = (split) => parseFloat(getComputedStyle(split.firstElementChild).minHeight) || 0
+
 function usePanelResize() {
   const [panelShare, setPanelShare] = useState(rememberedResponseShare)
   const [isDragging, setIsDragging] = useState(false)
   const containerRef = useRef(null)
 
   const startDrag = useCallback((event) => {
+    if (event.button !== PRIMARY_BUTTON) return
     event.preventDefault()
-    const available = containerRef.current.parentElement.getBoundingClientRect().height
+    const handle = event.currentTarget
+    handle.setPointerCapture(event.pointerId)
+    const split = containerRef.current.parentElement
+    const available = split.getBoundingClientRect().height
     const startY = event.clientY
     const startHeight = containerRef.current.getBoundingClientRect().height
-    const highest = Math.max(MIN_RESPONSE_HEIGHT_PX, available - MIN_REQUEST_HEIGHT_PX)
+    const highest = Math.max(MIN_RESPONSE_HEIGHT_PX, available - requestFloor(split))
     let share = (startHeight / available) * 100
     setIsDragging(true)
 
-    const handleMouseMove = (moveEvent) => {
+    const handleMove = (moveEvent) => {
       const height = clamp(startHeight + startY - moveEvent.clientY, MIN_RESPONSE_HEIGHT_PX, highest)
       share = (height / available) * 100
       setPanelShare(share)
     }
 
-    const handleMouseUp = () => {
+    const handleEnd = () => {
       setIsDragging(false)
       rememberResponseShare(share)
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
+      handle.removeEventListener('pointermove', handleMove)
+      handle.removeEventListener('lostpointercapture', handleEnd)
     }
 
-    document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseup', handleMouseUp)
+    handle.addEventListener('pointermove', handleMove)
+    handle.addEventListener('lostpointercapture', handleEnd)
   }, [])
 
   const resetHeight = useCallback(() => {
@@ -421,9 +429,10 @@ function usePanelResize() {
     const step = KEY_SHARE_STEPS[event.key]
     if (!step) return
     event.preventDefault()
-    const available = containerRef.current.parentElement.getBoundingClientRect().height
+    const split = containerRef.current.parentElement
+    const available = split.getBoundingClientRect().height
     const lowest = (MIN_RESPONSE_HEIGHT_PX / available) * 100
-    const highest = Math.max(lowest, ((available - MIN_REQUEST_HEIGHT_PX) / available) * 100)
+    const highest = Math.max(lowest, ((available - requestFloor(split)) / available) * 100)
     const next = clamp(panelShare + step, lowest, highest)
     setPanelShare(next)
     rememberResponseShare(next)
@@ -620,10 +629,10 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
           aria-valuemax={100}
           aria-valuenow={Math.round(panelShare)}
           title={RESPONSE_TEXT.resizeHint}
-          onMouseDown={startDrag}
+          onPointerDown={startDrag}
           onKeyDown={nudgeHeight}
           onDoubleClick={resetHeight}
-          className={`h-1 shrink-0 cursor-row-resize border-t border-border ${isDragging ? 'bg-border' : 'hover:bg-border'}`}
+          className={`relative h-1 shrink-0 cursor-row-resize touch-none border-t border-border max-sm:after:absolute max-sm:after:inset-x-0 max-sm:after:-inset-y-2.5 ${isDragging ? 'bg-border' : 'hover:bg-border'}`}
         />
       )}
 

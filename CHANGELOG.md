@@ -11,7 +11,6 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ### Fixed
 
-- On phones the quick tour no longer covers the response after your first send: it is a slim strip under the status bar, so the status and response tabs stay in view.
 - `gostman run` reports a failed check with the value it found again, such as `The value was 401`, in every report, JUnit included, instead of `Value is not an object: The value was {{value}}`. The command line's script engine leaves a global regular expression where `replace` stopped, so once one message had been filled in, the next message with a value lost its placeholder; messages now look for placeholders with a fresh pattern each time.
 
 ## [1.23.0] - 2026-11-19

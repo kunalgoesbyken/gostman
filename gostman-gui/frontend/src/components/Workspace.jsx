@@ -34,7 +34,7 @@ import { useNegativeStore } from "../lib/negativeSession"
 import { useMonitorStore } from "../lib/monitors/monitorSession"
 import { useAiEnabled, useAiStore } from "../lib/ai/session"
 import { TASK_EXPLAIN, TASK_REQUEST } from "../lib/ai/tasks"
-import { MIN_REQUEST_HEIGHT_PX, isNarrowViewport } from "../lib/layout"
+import { isNarrowViewport } from "../lib/layout"
 import { isBlankRequest } from "../lib/requestChanges"
 import { VIEW_FULL, VIEW_VARIABLES, viewOf } from "../lib/requestView"
 import { VARS_PANEL } from "../lib/requestSections"
@@ -86,7 +86,6 @@ const activeFirst = (environments, activeId) => [
   ...environments.filter((environment) => environment.id === activeId),
   ...environments.filter((environment) => environment.id !== activeId),
 ]
-const REQUEST_AREA_STYLE = { minHeight: MIN_REQUEST_HEIGHT_PX }
 const CORNER_STACK = "pointer-events-none fixed inset-x-4 bottom-10 z-40 flex flex-col gap-2 max-sm:contents sm:inset-x-auto sm:end-4 sm:items-end [&>*]:pointer-events-auto"
 
 const store = () => useAppStore.getState()
@@ -474,7 +473,7 @@ export function LoadedWorkspace({ backend, onBack }) {
 
               {showsWelcome ? <WelcomePanel actions={actions} relay={backend.relay} onDismiss={hideWelcome} /> : <div className="flex min-h-0 flex-1">
                 <div className="response-split flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden">
-                  <section aria-label={APP_TEXT.requestSection} data-pane="request" className="flex min-h-0 flex-1 flex-col" style={REQUEST_AREA_STYLE}>
+                  <section aria-label={APP_TEXT.requestSection} data-pane="request" className="flex min-h-[232px] flex-1 flex-col max-sm:min-h-36">
                     {view === VIEW_VARIABLES ? (
                       <VariablesView tab={activeTab} onChange={changeFormValue} onReset={resetForm} onSend={actions.send} onOpenEditor={openFullEditor} onOpenVars={openVarsTab} />
                     ) : <RequestTabs

@@ -22,9 +22,9 @@ export const NoticeToast = memo(function NoticeToast() {
   const release = () => setHeldId(null)
 
   return (
-    <div role="status" aria-live="polite" className="max-sm:fixed max-sm:inset-x-4 max-sm:bottom-10 max-sm:z-40" onMouseEnter={hold} onMouseLeave={release} onFocus={hold} onBlur={release}>
+    <div role="status" aria-live="polite" className="max-sm:relative max-sm:z-40 max-sm:h-0" onMouseEnter={hold} onMouseLeave={release} onFocus={hold} onBlur={release}>
       {notice && (
-        <div className="flex items-center gap-2 rounded-md border border-border bg-background py-1.5 ps-3 pe-1.5 text-xs text-foreground sm:max-w-sm">
+        <div className="flex items-center gap-2 rounded-md border border-border bg-background py-1.5 ps-3 pe-1.5 text-xs text-foreground max-sm:absolute max-sm:inset-x-4 max-sm:bottom-12 sm:max-w-sm">
           <span className="min-w-0 flex-1 [overflow-wrap:anywhere]">{notice.message}</span>
           {notice.undo && <Button size="sm" variant="outline" onClick={notice.undo}>{TREE_TEXT.undo}</Button>}
           {notice.action && <Button size="sm" variant="outline" onClick={() => { notice.action.run(); dismiss() }}>{notice.action.label}</Button>}

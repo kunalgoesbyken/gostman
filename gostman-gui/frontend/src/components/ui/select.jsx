@@ -197,7 +197,11 @@ const Select = React.forwardRef(function Select(
         aria-controls={isOpen ? listId : undefined}
         aria-activedescendant={isOpen && activeIndex >= 0 ? optionId(activeIndex) : undefined}
         title={title || selected?.label}
-        onClick={() => (isOpen ? close() : open())}
+        onClick={(event) => {
+          event.currentTarget.focus({ preventScroll: true })
+          if (isOpen) close()
+          else open()
+        }}
         onKeyDown={handleKeyDown}
         className={cn(CONTROL_BASE, CONTROL_SIZES[controlSize], "relative flex max-w-full items-center gap-2 pe-7 text-start", className)}
         {...props}

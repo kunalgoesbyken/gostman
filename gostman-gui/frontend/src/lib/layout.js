@@ -1,6 +1,5 @@
 import { readStored, writeStored } from "./storage"
 
-export const MIN_REQUEST_HEIGHT_PX = 232
 export const MIN_RESPONSE_HEIGHT_PX = 120
 export const DEFAULT_RESPONSE_SHARE = 55
 const NARROW_VIEWPORT_QUERY = "(max-width: 767px)"
