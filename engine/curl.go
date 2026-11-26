@@ -709,7 +709,7 @@ func ansiNumber(runes []rune, start, base, digits int) (string, int, bool) {
 		return "", start, false
 	}
 	if value > unicode.MaxRune {
-		value = unicode.ReplacementChar
+		return string(unicode.ReplacementChar), end - 1, true
 	}
 	return string(rune(value)), end - 1, true
 }
