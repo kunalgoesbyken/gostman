@@ -116,6 +116,7 @@
     "collapse": "Réduire la réponse",
     "resize": "Redimensionner le panneau de réponse",
     "resizeHint": "Faites glisser ou utilisez les flèches haut et bas pour redimensionner. Double-cliquez pour réinitialiser.",
+    "resizeHintBeside": "Faites glisser ou utilisez les flèches gauche et droite pour redimensionner. Double-cliquez pour réinitialiser.",
     "sending": "Envoi de la requête",
     "noResponseTitle": "Aucune réponse pour l’instant",
     "noResponseDescription": "Envoyez une requête pour voir la réponse ici.",

@@ -1,6 +1,6 @@
 import { memo, useRef, useState } from "react"
 import { ArrowLeft, CircleHelp, Compass, Download, Hand, Import, Info, Keyboard, Route, PanelLeft, Search, Newspaper } from "lucide-react"
-import { Button, IconButton } from "./ui/button"
+import { Button, ICON_ONLY_BELOW_LG, ICON_ONLY_BELOW_XL, IconButton } from "./ui/button"
 import { EnvironmentSwitcher } from "./EnvironmentSwitcher"
 import { StorageMenu } from "./StorageMenu"
 import { ToolsMenu } from "./ToolsMenu"
@@ -9,6 +9,7 @@ import { WindowControls } from "./WindowControls"
 import { isDesktopShell, isDragRegion, windowControls } from "../lib/windowControls"
 import { promptInstall, useInstallable } from "../lib/pwa"
 import { INSTALL_TEXT } from "../lib/installText"
+import { cn } from "../lib/utils"
 import { SIDEBAR_TEXT } from "../lib/sidebarText"
 import { APP_TEXT } from "../lib/appText"
 import { COMMAND_TEXT } from "../lib/commandText"
@@ -72,7 +73,7 @@ export const AppHeader = memo(function AppHeader({ storage, windowFrame, onImpor
       {onBack || isDesktop ? (
         <div className="flex shrink-0 items-center gap-2">
           <Logo className="h-6 w-6 max-sm:hidden" />
-          <h1 className="font-brand text-sm font-semibold max-sm:sr-only">Gostman</h1>
+          <h1 className="font-brand text-sm font-semibold max-md:sr-only">Gostman</h1>
         </div>
       ) : (
         <h1 className="sr-only">Gostman</h1>
@@ -94,14 +95,14 @@ export const AppHeader = memo(function AppHeader({ storage, windowFrame, onImpor
         <HelpMenu style={drawsTitleBar ? NO_DRAG : undefined} />
         <EnvironmentSwitcher />
         {canInstall && (
-          <Button variant="ghost" onClick={promptInstall} title={INSTALL_TEXT.description}>
+          <Button variant="ghost" onClick={promptInstall} title={INSTALL_TEXT.description} className={ICON_ONLY_BELOW_XL}>
             <Download />
-            <span className="hidden sm:inline">{INSTALL_TEXT.label}</span>
+            <span className="max-xl:sr-only">{INSTALL_TEXT.label}</span>
           </Button>
         )}
-        <Button variant="outline" onClick={onImport} className="max-sm:hidden">
+        <Button variant="outline" onClick={onImport} className={cn("max-sm:hidden", ICON_ONLY_BELOW_LG)}>
           <Import />
-          {IMPORT_TEXT.importButton}
+          <span className="max-lg:sr-only">{IMPORT_TEXT.importButton}</span>
         </Button>
       </div>
       {drawsTitleBar && <WindowControls />}

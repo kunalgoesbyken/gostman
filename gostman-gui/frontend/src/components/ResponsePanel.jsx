@@ -2,7 +2,7 @@ import { Suspense, lazy, memo, useState, useMemo, useEffect, useRef, useCallback
 import { JsonView, darkStyles } from 'react-json-view-lite'
 import 'react-json-view-lite/dist/index.css'
 import {
-  AlertTriangle, BarChart3, BookmarkPlus, Check, ChevronDown, ChevronUp, ChevronsDownUp, ChevronsUpDown, Cookie, Copy, Download, FileDigit, FileText, FileX, History, List, ListPlus,
+  AlertTriangle, BarChart3, BookmarkPlus, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ChevronsDownUp, ChevronsUpDown, Cookie, Copy, Download, FileDigit, FileText, FileX, History, List, ListPlus,
   Maximize2, MessageCircleQuestion, Minimize2, Pin, Scissors, Search, ShieldCheck,
 } from "lucide-react"
 import { ConsolePanel } from "./ConsolePanel"
@@ -59,8 +59,9 @@ import { WORKSPACE_TEXT } from "../lib/workspaceText"
 import { historyIdentityOf } from "../lib/historyIdentity"
 import { selectTabHistoryEntry, useAppStore } from "../store/appStore"
 import {
-  DEFAULT_RESPONSE_SHARE, MIN_RESPONSE_HEIGHT_PX, rememberResponseShare, rememberedResponseShare,
+  BLOCK_AXIS, DEFAULT_RESPONSE_SHARE, INLINE_AXIS, MIN_RESPONSE_HEIGHT_PX, rememberResponseShare, rememberedResponseShare,
 } from "../lib/layout"
+import { isRtl } from "../hooks/direction"
 import {
   BODY_KINDS, ERROR_TITLES, bodyBytes, bodyKind, dataUrl, isScriptableImage, looksLikeJson, mimeType, parseJsonBody, statusVariant, textBody,
 } from "../lib/response"
@@ -379,66 +380,111 @@ function responseTabs({ hasResult, hasTimeline, hasSent, showsTests, headers, co
 
 const clamp = (value, lowest, highest) => Math.max(lowest, Math.min(highest, value))
 
-const KEY_SHARE_STEPS = { ArrowUp: 5, ArrowDown: -5 }
+const KEY_SHARE_STEP = 5
+
+const KEY_SHARE_SIGNS = { [BLOCK_AXIS]: { ArrowUp: 1, ArrowDown: -1 }, [INLINE_AXIS]: { ArrowLeft: 1, ArrowRight: -1 } }
 
 const PRIMARY_BUTTON = 0
 
-const requestFloor = (split) => parseFloat(getComputedStyle(split.firstElementChild).minHeight) || 0
+const isInline = (axis) => axis === INLINE_AXIS
 
-function usePanelResize() {
-  const [panelShare, setPanelShare] = useState(rememberedResponseShare)
+const growthSign = (axis) => (isInline(axis) && isRtl() ? -1 : 1)
+
+const sizeOf = (axis, element) => element.getBoundingClientRect()[isInline(axis) ? 'width' : 'height']
+
+const pointerOffset = (axis, event) => (isInline(axis) ? event.clientX : event.clientY)
+
+const minimumOf = (axis, element) => parseFloat(getComputedStyle(element)[isInline(axis) ? 'minWidth' : 'minHeight']) || 0
+
+const requestFloor = (axis, split) => minimumOf(axis, split.firstElementChild)
+
+function sizeLimits(axis, panel) {
+  const split = panel.parentElement
+  const available = sizeOf(axis, split)
+  const lowest = minimumOf(axis, panel)
+  const handle = sizeOf(axis, panel.previousElementSibling)
+  return { available, lowest, highest: Math.max(lowest, available - handle - requestFloor(axis, split)) }
+}
+
+const rememberedShares = () => ({ [BLOCK_AXIS]: rememberedResponseShare(BLOCK_AXIS), [INLINE_AXIS]: rememberedResponseShare(INLINE_AXIS) })
+
+const isSideBySide = (panel) => getComputedStyle(panel.parentElement).flexDirection.startsWith('row')
+
+function useSplitAxis(panelRef, docked) {
+  const [axis, setAxis] = useState(BLOCK_AXIS)
+
+  useEffect(() => {
+    const panel = panelRef.current
+    if (docked || !panel) return undefined
+    const update = () => setAxis(isSideBySide(panel) ? INLINE_AXIS : BLOCK_AXIS)
+    const observer = new ResizeObserver(update)
+    observer.observe(panel)
+    update()
+    return () => observer.disconnect()
+  }, [panelRef, docked])
+
+  return axis
+}
+
+function usePanelResize(docked) {
+  const [shares, setShares] = useState(rememberedShares)
   const [isDragging, setIsDragging] = useState(false)
   const containerRef = useRef(null)
+  const axis = useSplitAxis(containerRef, docked)
+  const panelShare = shares[axis]
+
+  const showShare = useCallback((share) => setShares((current) => ({ ...current, [axis]: share })), [axis])
+
+  const keepShare = useCallback((share) => {
+    showShare(share)
+    rememberResponseShare(axis, share)
+  }, [axis, showShare])
 
   const startDrag = useCallback((event) => {
     if (event.button !== PRIMARY_BUTTON) return
     event.preventDefault()
     const handle = event.currentTarget
     handle.setPointerCapture(event.pointerId)
-    const split = containerRef.current.parentElement
-    const available = split.getBoundingClientRect().height
-    const startY = event.clientY
-    const startHeight = containerRef.current.getBoundingClientRect().height
-    const highest = Math.max(MIN_RESPONSE_HEIGHT_PX, available - requestFloor(split))
-    let share = (startHeight / available) * 100
+    const { available, lowest, highest } = sizeLimits(axis, containerRef.current)
+    const start = pointerOffset(axis, event)
+    const startSize = sizeOf(axis, containerRef.current)
+    const sign = growthSign(axis)
+    let share = (startSize / available) * 100
     setIsDragging(true)
 
     const handleMove = (moveEvent) => {
-      const height = clamp(startHeight + startY - moveEvent.clientY, MIN_RESPONSE_HEIGHT_PX, highest)
-      share = (height / available) * 100
-      setPanelShare(share)
+      const size = clamp(startSize + sign * (start - pointerOffset(axis, moveEvent)), lowest, highest)
+      share = (size / available) * 100
+      showShare(share)
     }
 
     const handleEnd = () => {
       setIsDragging(false)
-      rememberResponseShare(share)
+      rememberResponseShare(axis, share)
       handle.removeEventListener('pointermove', handleMove)
       handle.removeEventListener('lostpointercapture', handleEnd)
     }
 
     handle.addEventListener('pointermove', handleMove)
     handle.addEventListener('lostpointercapture', handleEnd)
-  }, [])
+  }, [axis, showShare])
 
-  const resetHeight = useCallback(() => {
-    setPanelShare(DEFAULT_RESPONSE_SHARE)
-    rememberResponseShare(DEFAULT_RESPONSE_SHARE)
-  }, [])
+  const resetSize = useCallback(() => keepShare(DEFAULT_RESPONSE_SHARE), [keepShare])
 
-  const nudgeHeight = (event) => {
-    const step = KEY_SHARE_STEPS[event.key]
-    if (!step) return
+  const nudgeSize = (event) => {
+    const sign = KEY_SHARE_SIGNS[axis][event.key]
+    if (!sign) return
     event.preventDefault()
-    const split = containerRef.current.parentElement
-    const available = split.getBoundingClientRect().height
-    const lowest = (MIN_RESPONSE_HEIGHT_PX / available) * 100
-    const highest = Math.max(lowest, ((available - requestFloor(split)) / available) * 100)
-    const next = clamp(panelShare + step, lowest, highest)
-    setPanelShare(next)
-    rememberResponseShare(next)
+    const { available, lowest, highest } = sizeLimits(axis, containerRef.current)
+    keepShare(clamp(panelShare + sign * growthSign(axis) * KEY_SHARE_STEP, (lowest / available) * 100, (highest / available) * 100))
   }
 
-  return { containerRef, panelShare, isDragging, startDrag, resetHeight, nudgeHeight }
+  return { containerRef, axis, panelShare, isDragging, startDrag, resetSize, nudgeSize }
+}
+
+function collapseIcon(isBeside, isCollapsed) {
+  if (isBeside) return isCollapsed ? ChevronLeft : ChevronRight
+  return isCollapsed ? ChevronUp : ChevronDown
 }
 
 function panelStyleFor(isFullscreen, isCollapsed, panelShare, docked) {
@@ -481,7 +527,8 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
   const [isAddingChecks, setIsAddingChecks] = useState(false)
   const historyEntry = useAppStore((state) => selectTabHistoryEntry(state, tabId))
   const calls = useMemo(() => callsOf(historyEntry), [historyEntry])
-  const { containerRef, panelShare, isDragging, startDrag, resetHeight, nudgeHeight } = usePanelResize()
+  const { containerRef, axis, panelShare, isDragging, startDrag, resetSize, nudgeSize } = usePanelResize(docked)
+  const isBeside = isInline(axis)
 
   const earlier = useMemo(() => history.filter((entry) => entry.response !== response), [history, response])
   const latestEntry = history.find((entry) => entry.response === response)
@@ -623,16 +670,20 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
         <div
           role="separator"
           tabIndex={0}
-          aria-orientation="horizontal"
+          aria-orientation={isBeside ? 'vertical' : 'horizontal'}
           aria-label={RESPONSE_TEXT.resize}
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={Math.round(panelShare)}
-          title={RESPONSE_TEXT.resizeHint}
+          title={isBeside ? RESPONSE_TEXT.resizeHintBeside : RESPONSE_TEXT.resizeHint}
           onPointerDown={startDrag}
-          onKeyDown={nudgeHeight}
-          onDoubleClick={resetHeight}
-          className={`relative h-1 shrink-0 cursor-row-resize touch-none border-t border-border max-sm:after:absolute max-sm:after:inset-x-0 max-sm:after:-inset-y-2.5 ${isDragging ? 'bg-border' : 'hover:bg-border'}`}
+          onKeyDown={nudgeSize}
+          onDoubleClick={resetSize}
+          className={cn(
+            'relative shrink-0 touch-none border-border',
+            isBeside ? 'z-10 w-1 cursor-col-resize border-s after:absolute after:inset-y-0 after:-inset-x-1' : 'h-1 cursor-row-resize border-t max-sm:after:absolute max-sm:after:inset-x-0 max-sm:after:-inset-y-2.5',
+            isDragging ? 'bg-border' : 'hover:bg-border',
+          )}
         />
       )}
 
@@ -640,9 +691,10 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
         ref={containerRef}
         aria-label={RESPONSE_TEXT.panel}
         data-pane="response"
+        data-collapsed={isCollapsed && !isFullscreen ? '' : undefined}
         tabIndex={-1}
         onKeyDown={handleKeyDown}
-        className={`flex min-h-0 flex-col bg-background outline-none ${isOpen && !isFullscreen ? '' : 'border-t border-border'}`}
+        className={cn('flex min-h-0 flex-col bg-background outline-none', (isFullscreen || (isCollapsed && !isBeside)) && 'border-t border-border')}
         style={panelStyleFor(isFullscreen, isCollapsed, panelShare, docked)}
       >
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col">
@@ -651,7 +703,8 @@ export const ResponsePanel = memo(function ResponsePanel({ tabId, response, hist
               {!isFullscreen && !docked && (
                 <IconButton
                   label={isCollapsed ? RESPONSE_TEXT.expand : RESPONSE_TEXT.collapse}
-                  icon={isCollapsed ? ChevronUp : ChevronDown}
+                  icon={collapseIcon(isBeside, isCollapsed)}
+                  mirrored={isBeside}
                   onClick={toggleCollapse}
                 />
               )}

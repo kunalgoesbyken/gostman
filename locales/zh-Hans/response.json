@@ -116,6 +116,7 @@
     "collapse": "折叠响应",
     "resize": "调整响应面板大小",
     "resizeHint": "拖动或使用上下方向键调整大小。双击可重置。",
+    "resizeHintBeside": "拖动或使用左右方向键调整大小。双击可重置。",
     "sending": "正在发送请求",
     "noResponseTitle": "还没有响应",
     "noResponseDescription": "发送请求后，响应会显示在这里。",

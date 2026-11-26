@@ -11,6 +11,10 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ### Fixed
 
+- The response panel can be resized in the **Right** layout (#53): drag the line between request and response, use the left and right arrow keys on it, or double-click it to reset. The width is remembered separately from the height in the **Below** layout. When the window or the open sidebar leaves too little room for both panes, the response moves below the request instead of squeezing it, and collapsing the response in the Right layout shrinks it to a slim column.
+- The top bar no longer overlaps itself in narrow windows: the environment picker stays inside its space, and Tools, Import and Install app show only their icons when there is no room for their labels.
+- Flow files with a step kind such as `constructor` or `__proto__` no longer break opening the flow, and a header name with a quote in a Thunder Client or Hurl import no longer breaks its check.
+- A gRPC-Web server that sends a `grpc-status` outside the valid range is reported as Unknown instead of being read as a different status.
 - `gostman run` reports a failed check with the value it found again, such as `The value was 401`, in every report, JUnit included, instead of `Value is not an object: The value was {{value}}`. The command line's script engine leaves a global regular expression where `replace` stopped, so once one message had been filled in, the next message with a value lost its placeholder; messages now look for placeholders with a fresh pattern each time.
 
 ## [1.23.0] - 2026-11-19

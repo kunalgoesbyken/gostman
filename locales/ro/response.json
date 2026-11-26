@@ -116,6 +116,7 @@
     "collapse": "Restrângere răspuns",
     "resize": "Redimensionare panou de răspuns",
     "resizeHint": "Trageți sau folosiți tastele săgeată sus și jos pentru a redimensiona. Faceți dublu clic pentru resetare.",
+    "resizeHintBeside": "Trageți sau folosiți tastele săgeată stânga și dreapta pentru a redimensiona. Faceți dublu clic pentru resetare.",
     "sending": "Se trimite cererea",
     "noResponseTitle": "Încă nu există răspuns",
     "noResponseDescription": "Trimiteți o cerere pentru a vedea aici răspunsul.",

@@ -116,6 +116,7 @@
     "collapse": "Zwiń odpowiedź",
     "resize": "Zmień rozmiar panelu odpowiedzi",
     "resizeHint": "Przeciągnij lub użyj klawiszy strzałek w górę i w dół, aby zmienić rozmiar. Kliknij dwukrotnie, aby zresetować.",
+    "resizeHintBeside": "Przeciągnij lub użyj klawiszy strzałek w lewo i w prawo, aby zmienić rozmiar. Kliknij dwukrotnie, aby zresetować.",
     "sending": "Wysyłanie żądania",
     "noResponseTitle": "Brak odpowiedzi",
     "noResponseDescription": "Wyślij żądanie, aby zobaczyć tutaj odpowiedź.",

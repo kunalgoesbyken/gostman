@@ -34,7 +34,9 @@ const Button = React.forwardRef(({ className, variant, size, type = "button", ..
 ))
 Button.displayName = "Button"
 
-export const ICON_ONLY_ON_PHONE = "max-sm:w-8 max-sm:shrink-0 max-sm:px-0"
+export const ICON_ONLY_BELOW_MD = "max-md:w-8 max-md:shrink-0 max-md:px-0"
+export const ICON_ONLY_BELOW_LG = "max-lg:w-8 max-lg:shrink-0 max-lg:px-0"
+export const ICON_ONLY_BELOW_XL = "max-xl:w-8 max-xl:shrink-0 max-xl:px-0"
 
 const MIRRORED = "rtl:[&_svg]:-scale-x-100"
 

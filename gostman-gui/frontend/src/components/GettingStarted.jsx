@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import { Check, ExternalLink, ListChecks } from "lucide-react"
-import { Button, ICON_ONLY_ON_PHONE } from "./ui/button"
+import { Button, ICON_ONLY_BELOW_MD } from "./ui/button"
 import { openExternal } from "../lib/about"
 import { WEB_APP_URL } from "../lib/constants"
 import { rememberWelcomeDismissed } from "../lib/welcome"
@@ -227,12 +227,12 @@ export function GettingStartedButton({ onBegin }) {
         aria-expanded={Boolean(anchor)}
         title={APP_TEXT.labelled(TEXT.next, nextTitle)}
         onClick={toggle}
-        className={cn("min-w-0 shrink", ICON_ONLY_ON_PHONE)}
+        className={cn("min-w-0 shrink", ICON_ONLY_BELOW_MD)}
       >
         <ListChecks />
         <span className="hidden truncate xl:inline">{APP_TEXT.labelled(TEXT.next, nextTitle)}</span>
-        <span className="max-sm:sr-only xl:hidden">{TEXT.title}</span>
-        <span className="text-muted-foreground max-sm:hidden">{progress.doneCount}/{progress.steps.length}</span>
+        <span className="max-lg:sr-only xl:hidden">{TEXT.title}</span>
+        <span className="text-muted-foreground max-md:hidden">{progress.doneCount}/{progress.steps.length}</span>
       </Button>
       {anchor && (
         <Popover anchor={anchor} buttonRef={buttonRef} onClose={close}>

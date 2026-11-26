@@ -1,6 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useRef } from "react"
 import { AlertTriangle, ChevronDown, Folder, HardDrive, ShieldAlert } from "lucide-react"
-import { Button, ICON_ONLY_ON_PHONE } from "./ui/button"
+import { Button, ICON_ONLY_BELOW_MD } from "./ui/button"
 import { DialogPending } from "./ui/dialog"
 import { WorkspaceMenu } from "./WorkspaceMenu"
 import { inlineStart } from "../hooks/direction"
@@ -35,9 +35,9 @@ function useGitState(git, path) {
 function BrowserStorage() {
   const showAlert = useAppStore((s) => s.showAlert)
   return (
-    <Button variant="ghost" title={TEXT.browserHint} onClick={() => showAlert(TEXT.browserLabel, TEXT.browserHint)} className={cn(BUTTON_CLASS, ICON_ONLY_ON_PHONE)}>
+    <Button variant="ghost" title={TEXT.browserHint} onClick={() => showAlert(TEXT.browserLabel, TEXT.browserHint)} className={cn(BUTTON_CLASS, ICON_ONLY_BELOW_MD)}>
       <HardDrive />
-      <span className="truncate max-sm:sr-only">{TEXT.browserLabel}</span>
+      <span className="truncate max-md:sr-only">{TEXT.browserLabel}</span>
     </Button>
   )
 }

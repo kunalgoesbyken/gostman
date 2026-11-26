@@ -116,6 +116,7 @@
     "collapse": "Recolher resposta",
     "resize": "Redimensionar o painel de resposta",
     "resizeHint": "Arraste ou use as setas para cima e para baixo para redimensionar. Clique duas vezes para restaurar.",
+    "resizeHintBeside": "Arraste ou use as setas para a esquerda e para a direita para redimensionar. Clique duas vezes para restaurar.",
     "sending": "Enviando requisição",
     "noResponseTitle": "Ainda não há resposta",
     "noResponseDescription": "Envie uma requisição para ver a resposta aqui.",

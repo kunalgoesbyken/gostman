@@ -116,6 +116,7 @@
     "collapse": "Comprimi risposta",
     "resize": "Ridimensiona il pannello della risposta",
     "resizeHint": "Trascina o usa le frecce su e giù per ridimensionare. Fai doppio clic per ripristinare.",
+    "resizeHintBeside": "Trascina o usa le frecce sinistra e destra per ridimensionare. Fai doppio clic per ripristinare.",
     "sending": "Invio della richiesta",
     "noResponseTitle": "Ancora nessuna risposta",
     "noResponseDescription": "Invia una richiesta per vedere qui la risposta.",

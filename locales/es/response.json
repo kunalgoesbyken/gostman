@@ -116,6 +116,7 @@
     "collapse": "Contraer respuesta",
     "resize": "Cambiar el tamaño del panel de respuesta",
     "resizeHint": "Arrastra o usa las flechas arriba y abajo para cambiar el tamaño. Haz doble clic para restablecerlo.",
+    "resizeHintBeside": "Arrastra o usa las flechas izquierda y derecha para cambiar el tamaño. Haz doble clic para restablecerlo.",
     "sending": "Enviando solicitud",
     "noResponseTitle": "Aún no hay respuesta",
     "noResponseDescription": "Envía una solicitud para ver aquí la respuesta.",

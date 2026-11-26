@@ -472,6 +472,7 @@ export function LoadedWorkspace({ backend, onBack }) {
               />
 
               {showsWelcome ? <WelcomePanel actions={actions} relay={backend.relay} onDismiss={hideWelcome} /> : <div className="flex min-h-0 flex-1">
+                <div className="response-area flex min-h-0 min-w-0 flex-1">
                 <div className="response-split flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden">
                   <section aria-label={APP_TEXT.requestSection} data-pane="request" className="flex min-h-[232px] flex-1 flex-col max-sm:min-h-36">
                     {view === VIEW_VARIABLES ? (
@@ -510,6 +511,7 @@ export function LoadedWorkspace({ backend, onBack }) {
                     onExplain={isAiOn ? () => actions.ai.start(TASK_EXPLAIN) : null}
                     onTrust={actions.storage?.confirmTrust}
                   />}
+                </div>
                 </div>
                 {besideTab && <BesideResponse tab={besideTab} onClose={() => setBesideTab('')} onExportCalls={actions.exportCalls} />}
               </div>}

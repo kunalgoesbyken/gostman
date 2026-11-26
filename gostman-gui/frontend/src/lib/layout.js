@@ -1,9 +1,12 @@
 import { readStored, writeStored } from "./storage"
 
+export const INLINE_AXIS = "inline"
+export const BLOCK_AXIS = "block"
+
 export const MIN_RESPONSE_HEIGHT_PX = 120
 export const DEFAULT_RESPONSE_SHARE = 55
 const NARROW_VIEWPORT_QUERY = "(max-width: 767px)"
-const RESPONSE_SHARE_KEY = "gostman.responseShare"
+const RESPONSE_SHARE_KEYS = { [BLOCK_AXIS]: "gostman.responseShare", [INLINE_AXIS]: "gostman.responseWidthShare" }
 const SIDEBAR_OPEN_KEY = "gostman.sidebarOpen"
 const MIN_SHARE = 5
 const MAX_SHARE = 95
@@ -17,9 +20,9 @@ function storedNumber(key, lowest, highest, fallback) {
   return value >= lowest && value <= highest ? value : fallback
 }
 
-export const rememberedResponseShare = () => storedNumber(RESPONSE_SHARE_KEY, MIN_SHARE, MAX_SHARE, DEFAULT_RESPONSE_SHARE)
+export const rememberedResponseShare = (axis) => storedNumber(RESPONSE_SHARE_KEYS[axis], MIN_SHARE, MAX_SHARE, DEFAULT_RESPONSE_SHARE)
 
-export const rememberResponseShare = (share) => writeStored(RESPONSE_SHARE_KEY, String(Math.round(share)))
+export const rememberResponseShare = (axis, share) => writeStored(RESPONSE_SHARE_KEYS[axis], String(Math.round(share)))
 
 export const rememberedSidebarOpen = () => !isNarrowViewport() && readStored(SIDEBAR_OPEN_KEY) !== "false"
 
@@ -28,9 +31,6 @@ export function rememberSidebarOpen(isOpen) {
 }
 
 const PANE_WIDTH_VAR = "--pane-width"
-
-export const INLINE_AXIS = "inline"
-export const BLOCK_AXIS = "block"
 
 const paneSpec = (storageKey, min, fallback, max, minMain, widthVar = PANE_WIDTH_VAR, axis = INLINE_AXIS) => ({ storageKey, min, fallback, max, minMain, widthVar, axis })
 
