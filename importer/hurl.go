@@ -196,7 +196,7 @@ func (c *collector) hurlChecks(entry hurlEntry, name string) (string, string) {
 		rows = append(rows, responseRow("res.status", "eq", entry.status))
 	}
 	for _, header := range entry.responseHeaders {
-		rows = append(rows, responseRow(`res.headers["`+strings.ToLower(header.key)+`"]`, "eq", hurlText(header.value)))
+		rows = append(rows, responseRow("res.headers["+jsString(strings.ToLower(header.key))+"]", "eq", hurlText(header.value)))
 	}
 	for _, line := range entry.asserts {
 		if row, ok := hurlAssert(line); ok {
@@ -276,7 +276,7 @@ func hurlExpression(query hurlQuery) (string, bool) {
 	case "body":
 		return "res.body", true
 	case "header":
-		return `res.headers["` + strings.ToLower(query.arg) + `"]`, true
+		return "res.headers[" + jsString(strings.ToLower(query.arg)) + "]", true
 	case "jsonpath":
 		if !strings.HasPrefix(query.arg, "$") {
 			return "", false

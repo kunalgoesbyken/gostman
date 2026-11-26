@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"unicode"
 
 	"github.com/kunalgoesbyken/gostman/locales"
 )
@@ -706,6 +707,9 @@ func ansiNumber(runes []rune, start, base, digits int) (string, int, bool) {
 	value, err := strconv.ParseUint(string(runes[start:end]), base, 32)
 	if err != nil {
 		return "", start, false
+	}
+	if value > unicode.MaxRune {
+		value = unicode.ReplacementChar
 	}
 	return string(rune(value)), end - 1, true
 }

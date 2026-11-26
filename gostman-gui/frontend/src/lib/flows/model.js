@@ -1,4 +1,4 @@
-import { isPlainObject } from '../dataUtils'
+import { isPlainObject, lookup } from '../dataUtils'
 import { normalizeAssertions } from '../scripting/assertions'
 import { MATCHES, MATCH_ALL, hasActiveCondition, normalizeConditions } from './conditions'
 import { normalizeDeclared } from './declared'
@@ -168,7 +168,7 @@ const FIELDS = {
   [STEP_END]: (raw) => ({ outcome: oneOf(raw.outcome, OUTCOMES, OUTCOME_PASSED), message: text(raw.message) }),
 }
 
-const fieldsOf = (kind) => FIELDS[kind] || (() => ({}))
+const fieldsOf = (kind) => lookup(FIELDS, kind) || (() => ({}))
 
 const normalizeStep = (raw, depth) => {
   const kind = trimmed(raw.kind) || STEP_REQUEST

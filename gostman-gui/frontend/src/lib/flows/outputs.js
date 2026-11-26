@@ -1,3 +1,4 @@
+import { lookup } from '../dataUtils'
 import { SCOPE_SESSION } from '../scripting/scopes'
 import { DEFAULT_INDEX_NAME, DEFAULT_ITEM_NAME, STEP_FLOW, STEP_FOR_EACH, STEP_REPEAT, STEP_REQUEST, STEP_SET, walkSteps } from './model'
 import { sentVariableNames } from './inputs'
@@ -22,8 +23,8 @@ const LOOP_NAMES = {
 function stepOutputs(step, requests, current) {
   const owner = stepTitle(step, requests)
   if (step.kind === STEP_SET) return namedOnly(step.values.map((value) => value.name)).map((name) => entry(name, SCOPE_SESSION, owner))
-  if (LOOP_NAMES[step.kind]) return LOOP_NAMES[step.kind](step).map((name) => entry(name, SOURCE_LOOP, owner))
-  if (GIVEN_SOURCES[step.kind] && step.id === current?.id) return namedOnly(sentVariableNames(step)).map((name) => entry(name, GIVEN_SOURCES[step.kind], owner))
+  if (lookup(LOOP_NAMES, step.kind)) return LOOP_NAMES[step.kind](step).map((name) => entry(name, SOURCE_LOOP, owner))
+  if (lookup(GIVEN_SOURCES, step.kind) && step.id === current?.id) return namedOnly(sentVariableNames(step)).map((name) => entry(name, GIVEN_SOURCES[step.kind], owner))
   return []
 }
 

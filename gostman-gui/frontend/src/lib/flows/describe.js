@@ -1,3 +1,4 @@
+import { lookup } from '../dataUtils'
 import { FLOW_CANVAS_TEXT as TEXT } from '../flowsText'
 import { isActiveAssertion, titleOf } from '../scripting/assertions'
 import { activeLeaves, hasActiveCondition, hasGroups, isGroup } from './conditions'
@@ -100,7 +101,7 @@ const LINES = {
   [STEP_END]: (step) => [{ text: TEXT.outcomes[step.outcome] }, ...(step.message ? [{ text: step.message, muted: true }] : [])],
 }
 
-export const stepLines = (step, context) => LINES[step.kind]?.(step, context) ?? []
+export const stepLines = (step, context) => lookup(LINES, step.kind)?.(step, context) ?? []
 
 function edgeWord(step, field) {
   if (field === 'next' && step.onFailure) return 'passes'

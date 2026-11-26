@@ -169,7 +169,7 @@ func thunderCheck(test map[string]any) (assertion, bool) {
 	case "res-body":
 		expression = "res.body"
 	case "res-header":
-		expression = `res.headers["` + strings.ToLower(custom) + `"]`
+		expression = "res.headers[" + jsString(strings.ToLower(custom)) + "]"
 	case "json-query":
 		query := strings.TrimPrefix(custom, "json")
 		query = strings.TrimPrefix(query, ".")

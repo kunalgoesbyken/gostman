@@ -374,7 +374,7 @@ func webStatus(header http.Header, httpStatus int) *status.Status {
 		}
 		return status.New(httpCode(httpStatus), http.StatusText(httpStatus))
 	}
-	number, err := strconv.Atoi(value)
+	number, err := strconv.ParseUint(value, 10, 32)
 	if err != nil {
 		return status.New(codes.Unknown, "grpc-status is not a number: "+value)
 	}
