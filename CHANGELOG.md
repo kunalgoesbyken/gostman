@@ -4,6 +4,8 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.24.0] - 2026-11-27
+
 ### Added
 
 - `gostman run --row-label <column>` names each iteration of a data-driven run by a column of its row, so a failed check in the text, JUnit, Markdown and HTML reports reads `Login [iteration 3: expired token]` instead of only the number; the JSON report adds `label`.
