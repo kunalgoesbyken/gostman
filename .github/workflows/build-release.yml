@@ -155,12 +155,16 @@ jobs:
 
       # The installer adds Start menu and desktop shortcuts, an uninstaller and
       # the WebView2 runtime when it is missing. The bare executable is shipped
-      # alongside it as a portable build.
+      # alongside it as a portable build. The same script is built a second
+      # time at user level: it installs into the user profile and needs no
+      # administrator rights.
       - name: Build and package (Windows)
         if: matrix.name == 'windows'
         run: |
           export PATH="$PATH:/c/Program Files (x86)/NSIS"
           wails build -clean -platform windows/amd64 -nsis -tags grpcnotrace
+          (cd build/windows/installer && makensis -DARG_WAILS_AMD64_BINARY=../../bin/Gostman.exe -DREQUEST_EXECUTION_LEVEL=user project.nsi)
+          mv build/bin/Gostman-amd64-user-installer.exe build/bin/Gostman-windows-amd64-user.exe
           mv build/bin/Gostman.exe build/bin/Gostman-windows-amd64-portable.exe
           mv build/bin/Gostman-amd64-installer.exe build/bin/Gostman-windows-amd64.exe
 

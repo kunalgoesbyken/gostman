@@ -113,8 +113,10 @@ Download the latest build from the [releases page](https://github.com/kunalgoesb
 
 | Platform | File | Notes |
 | --- | --- | --- |
-| Windows | [`Gostman-windows-amd64.exe`](https://github.com/kunalgoesbyken/gostman/releases/latest/download/Gostman-windows-amd64.exe) | Installer. Adds Start menu and desktop shortcuts and an uninstaller. |
+| Windows | [`Gostman-windows-amd64.exe`](https://github.com/kunalgoesbyken/gostman/releases/latest/download/Gostman-windows-amd64.exe) | Installer for all users. Needs administrator rights. Adds Start menu and desktop shortcuts and an uninstaller. |
+| Windows | [`Gostman-windows-amd64-user.exe`](https://github.com/kunalgoesbyken/gostman/releases/latest/download/Gostman-windows-amd64-user.exe) | Installer for you only. No administrator rights needed. Installs into your user profile with the same shortcuts and uninstaller, and updates itself without a prompt. |
 | Windows | [`Gostman-windows-amd64-portable.exe`](https://github.com/kunalgoesbyken/gostman/releases/latest/download/Gostman-windows-amd64-portable.exe) | Single executable, no installation. |
+| Windows | [`gostman-cli-windows-amd64.zip`](https://github.com/kunalgoesbyken/gostman/releases/latest/download/gostman-cli-windows-amd64.zip) | The `gostman` command line only. Also `gostman-cli-darwin-arm64.tar.gz`, `gostman-cli-darwin-amd64.tar.gz` and `gostman-cli-linux-amd64.tar.gz` on the releases page. |
 | macOS | [`Gostman-darwin-universal.dmg`](https://github.com/kunalgoesbyken/gostman/releases/latest/download/Gostman-darwin-universal.dmg) | Intel and Apple Silicon. Drag Gostman to Applications. |
 | Linux | [`Gostman-linux-amd64.deb`](https://github.com/kunalgoesbyken/gostman/releases/latest/download/Gostman-linux-amd64.deb) | Debian and Ubuntu. `sudo apt install ./Gostman-linux-amd64.deb` |
 | Linux | [`Gostman-linux-x86_64.AppImage`](https://github.com/kunalgoesbyken/gostman/releases/latest/download/Gostman-linux-x86_64.AppImage) | Any distribution. `chmod +x Gostman-linux-x86_64.AppImage` and run it. AppImage managers keep it up to date. |

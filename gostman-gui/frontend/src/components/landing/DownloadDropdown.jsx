@@ -52,7 +52,7 @@ function DownloadGroup({ group, onClose }) {
         <div className="font-semibold">{group.name}</div>
       </div>
       {group.downloads.map((download) => (
-        <DownloadLink key={download.kind} download={download} onClose={onClose} className="py-2 pl-12">
+        <DownloadLink key={downloadUrl(download)} download={download} onClose={onClose} className="py-2 pl-12">
           <span className="min-w-0 flex-1 text-sm text-muted-foreground">{download.note}</span>
         </DownloadLink>
       ))}

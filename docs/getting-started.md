@@ -14,8 +14,10 @@ Download the latest build from the [releases page](https://github.com/kunalgoesb
 
 | Platform | File | Notes |
 | --- | --- | --- |
-| Windows | `Gostman-windows-amd64.exe` | Installer with Start menu and desktop shortcuts and an uninstaller. |
+| Windows | `Gostman-windows-amd64.exe` | Installer for all users. Needs administrator rights. Start menu and desktop shortcuts and an uninstaller. |
+| Windows | `Gostman-windows-amd64-user.exe` | Installer for you only. No administrator rights needed. Installs into your user profile with the same shortcuts and uninstaller, and updates itself without a prompt. |
 | Windows | `Gostman-windows-amd64-portable.exe` | Single executable, no installation. |
+| Windows | `gostman-cli-windows-amd64.zip` | The `gostman` command line only. macOS and Linux archives are `gostman-cli-darwin-arm64.tar.gz`, `gostman-cli-darwin-amd64.tar.gz` and `gostman-cli-linux-amd64.tar.gz`. |
 | macOS | `Gostman-darwin-universal.dmg` | Intel and Apple Silicon. Drag Gostman to Applications. |
 | Linux | `Gostman-linux-amd64.deb` | Debian and Ubuntu. Run `sudo apt install ./Gostman-linux-amd64.deb`. |
 | Linux | `Gostman-linux-x86_64.AppImage` | Any distribution. Run `chmod +x Gostman-linux-x86_64.AppImage`, then start it. AppImage managers keep it up to date. |

@@ -72,9 +72,44 @@ ManifestDPIAware true
 #!finalize 'signtool --file "%1"'
 
 Name "${INFO_PRODUCTNAME}"
-OutFile "..\..\bin\${INFO_PROJECTNAME}-${ARCH}-installer.exe" # Name of the installer's file.
-InstallDir "$PROGRAMFILES64\${INFO_COMPANYNAME}\${INFO_PRODUCTNAME}" # Default installing folder ($PROGRAMFILES is Program Files folder).
+!if "${REQUEST_EXECUTION_LEVEL}" == "user"
+    !define UNINST_ROOT HKCU
+    OutFile "..\..\bin\${INFO_PROJECTNAME}-${ARCH}-user-installer.exe"
+    InstallDir "$LOCALAPPDATA\Programs\${INFO_PRODUCTNAME}"
+!else
+    !define UNINST_ROOT HKLM
+    OutFile "..\..\bin\${INFO_PROJECTNAME}-${ARCH}-installer.exe" # Name of the installer's file.
+    InstallDir "$PROGRAMFILES64\${INFO_COMPANYNAME}\${INFO_PRODUCTNAME}" # Default installing folder ($PROGRAMFILES is Program Files folder).
+!endif
 ShowInstDetails show # This will always show the installation details.
+
+!macro gostman.writeUninstaller
+    WriteUninstaller "$INSTDIR\uninstall.exe"
+
+    SetRegView 64
+    WriteRegStr ${UNINST_ROOT} "${UNINST_KEY}" "Publisher" "${INFO_COMPANYNAME}"
+    WriteRegStr ${UNINST_ROOT} "${UNINST_KEY}" "DisplayName" "${INFO_PRODUCTNAME}"
+    WriteRegStr ${UNINST_ROOT} "${UNINST_KEY}" "DisplayVersion" "${INFO_PRODUCTVERSION}"
+    WriteRegStr ${UNINST_ROOT} "${UNINST_KEY}" "DisplayIcon" "$INSTDIR\${PRODUCT_EXECUTABLE}"
+    WriteRegStr ${UNINST_ROOT} "${UNINST_KEY}" "UninstallString" "$\"$INSTDIR\uninstall.exe$\""
+    WriteRegStr ${UNINST_ROOT} "${UNINST_KEY}" "QuietUninstallString" "$\"$INSTDIR\uninstall.exe$\" /S"
+
+    ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
+    IntFmt $0 "0x%08X" $0
+    WriteRegDWORD ${UNINST_ROOT} "${UNINST_KEY}" "EstimatedSize" "$0"
+
+    !if "${REQUEST_EXECUTION_LEVEL}" == "user"
+        FileOpen $0 "$INSTDIR\per-user" w
+        FileClose $0
+    !endif
+!macroend
+
+!macro gostman.deleteUninstaller
+    Delete "$INSTDIR\uninstall.exe"
+
+    SetRegView 64
+    DeleteRegKey ${UNINST_ROOT} "${UNINST_KEY}"
+!macroend
 
 Function .onInit
    !insertmacro wails.checkArchitecture
@@ -95,7 +130,7 @@ Section
     !insertmacro wails.associateFiles
     !insertmacro wails.associateCustomProtocols
 
-    !insertmacro wails.writeUninstaller
+    !insertmacro gostman.writeUninstaller
 SectionEnd
 
 Section "uninstall"
@@ -111,5 +146,5 @@ Section "uninstall"
     !insertmacro wails.unassociateFiles
     !insertmacro wails.unassociateCustomProtocols
 
-    !insertmacro wails.deleteUninstaller
+    !insertmacro gostman.deleteUninstaller
 SectionEnd

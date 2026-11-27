@@ -7,6 +7,7 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 ### Added
 
 - `gostman run --row-label <column>` names each iteration of a data-driven run by a column of its row, so a failed check in the text, JUnit, Markdown and HTML reports reads `Login [iteration 3: expired token]` instead of only the number; the JSON report adds `label`.
+- A Windows installer that needs no administrator rights (#54): `Gostman-windows-amd64-user.exe` installs into your user profile with its own shortcuts and uninstaller, and updates itself without a prompt. The download menu on the site now also lists it, the portable build and the command line archives for every system.
 - `gostman run --row 3,7` reruns only those rows of the data file, in file order, each with the iteration number, `iteration` and `iterationCount` it had in the full run, so the names in the report match the run that failed.
 
 ### Fixed

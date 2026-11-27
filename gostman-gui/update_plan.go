@@ -19,17 +19,19 @@ const (
 	managerHomebrew = "homebrew"
 	managerSystem   = "system"
 
-	windowsInstallerAsset = "Gostman-windows-amd64.exe"
-	windowsPortableAsset  = "Gostman-windows-amd64-portable.exe"
-	macBundleAsset        = "Gostman-darwin-universal.zip"
-	linuxAppImageAsset    = "Gostman-linux-x86_64.AppImage"
-	linuxPackageAsset     = "Gostman-linux-amd64.deb"
+	windowsInstallerAsset     = "Gostman-windows-amd64.exe"
+	windowsUserInstallerAsset = "Gostman-windows-amd64-user.exe"
+	windowsPortableAsset      = "Gostman-windows-amd64-portable.exe"
+	macBundleAsset            = "Gostman-darwin-universal.zip"
+	linuxAppImageAsset        = "Gostman-linux-x86_64.AppImage"
+	linuxPackageAsset         = "Gostman-linux-amd64.deb"
 
-	nsisUninstaller  = "uninstall.exe"
-	bundleStaging    = ".Gostman-update"
-	replacedSuffix   = ".old"
-	incomingSuffix   = ".new"
-	writeProbePrefix = ".gostman-write-"
+	nsisUninstaller   = "uninstall.exe"
+	userInstallMarker = "per-user"
+	bundleStaging     = ".Gostman-update"
+	replacedSuffix    = ".old"
+	incomingSuffix    = ".new"
+	writeProbePrefix  = ".gostman-write-"
 )
 
 var homebrewCasks = []string{"/opt/homebrew/Caskroom/gostman", "/usr/local/Caskroom/gostman"}
@@ -47,7 +49,7 @@ func (p installPlan) installs() bool {
 }
 
 func (p installPlan) asksPermission() bool {
-	return p.Method == methodInstaller
+	return p.Method == methodInstaller && p.Asset == windowsInstallerAsset
 }
 
 func (p installPlan) appliesOnQuit() bool {
@@ -117,6 +119,8 @@ func windowsInstall(exe string) installPlan {
 		return manualInstall("", "")
 	case strings.Contains(strings.ToLower(exe), `\scoop\apps\`):
 		return manualInstall(managerScoop, "")
+	case exists(filepath.Join(dir, nsisUninstaller)) && exists(filepath.Join(dir, userInstallMarker)):
+		return installPlan{Method: methodInstaller, Asset: windowsUserInstallerAsset, Target: exe}
 	case exists(filepath.Join(dir, nsisUninstaller)):
 		return installPlan{Method: methodInstaller, Asset: windowsInstallerAsset, Target: exe}
 	case writable(dir):

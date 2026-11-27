@@ -2,11 +2,17 @@ export const RELEASE_URL = "https://github.com/kunalgoesbyken/gostman/releases/l
 
 export const DOWNLOADS = [
   { os: "macos", name: "macOS", note: "Intel and Apple Silicon", kind: ".dmg", file: "Gostman-darwin-universal.dmg" },
-  { os: "windows", name: "Windows", note: "64-bit installer", kind: ".exe", file: "Gostman-windows-amd64.exe" },
+  { os: "macos", name: "macOS", note: "Command line, Apple Silicon", kind: "CLI", file: "gostman-cli-darwin-arm64.tar.gz" },
+  { os: "macos", name: "macOS", note: "Command line, Intel", kind: "CLI", file: "gostman-cli-darwin-amd64.tar.gz" },
+  { os: "windows", name: "Windows", note: "64-bit installer, all users", kind: ".exe", file: "Gostman-windows-amd64.exe" },
+  { os: "windows", name: "Windows", note: "Installer for you only, no admin rights", kind: ".exe", file: "Gostman-windows-amd64-user.exe" },
+  { os: "windows", name: "Windows", note: "Portable, nothing to install", kind: ".exe", file: "Gostman-windows-amd64-portable.exe" },
+  { os: "windows", name: "Windows", note: "Command line", kind: "CLI", file: "gostman-cli-windows-amd64.zip" },
   { os: "linux", name: "Linux", note: "Debian, Ubuntu", kind: ".deb", file: "Gostman-linux-amd64.deb" },
   { os: "linux", name: "Linux", note: "Arch, community package", kind: "AUR", url: "https://aur.archlinux.org/packages/gostman-bin" },
   { os: "linux", name: "Linux", note: "Any distribution", kind: "AppImage", file: "Gostman-linux-x86_64.AppImage" },
   { os: "linux", name: "Linux", note: "System libraries", kind: ".tar.gz", file: "Gostman-linux-amd64.tar.gz" },
+  { os: "linux", name: "Linux", note: "Command line", kind: "CLI", file: "gostman-cli-linux-amd64.tar.gz" },
 ]
 
 export const downloadUrl = (download) => download.url ?? `${RELEASE_URL}/${download.file}`
