@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.24.0.schema.json
+PackageIdentifier: kunalgoesbyken.Gostman
+PackageVersion: 1.24.0
+InstallerType: nullsoft
+InstallModes:
+  - interactive
+  - silent
+InstallerSwitches:
+  Silent: /S
+  SilentWithProgress: /S
+Installers:
+  - Architecture: x64
+    Scope: user
+    InstallerUrl: https://github.com/kunalgoesbyken/gostman/releases/download/v1.24.0/Gostman-windows-amd64-user.exe
+    InstallerSha256: 874255819FF074E7E1D4C8C9143E7FEEA02B7722BD94C086627C1A43BDF82DC3
+  - Architecture: x64
+    Scope: machine
+    InstallerUrl: https://github.com/kunalgoesbyken/gostman/releases/download/v1.24.0/Gostman-windows-amd64.exe
+    InstallerSha256: AFA396B7DB6DA6E63538AA5E579DEE0A7BB59C662E75BFCCFD5D8889FDCF8D2D
+ManifestType: installer
+ManifestVersion: 1.6.0
