@@ -267,7 +267,7 @@ The desktop app has an **Updates** section; the web version is always current, s
 | Installed from | How it updates |
 | --- | --- |
 | Windows installer | Runs the new installer silently into the same folder after Gostman closes; Windows asks for permission |
-| Windows portable `.exe` | Replaces the file in place, when its folder can be written |
+| Windows portable `.exe` or `.zip` | Replaces the file in place, when its folder can be written; a `cli` folder beside it (the zip) gets the new command line too |
 | macOS `.app` | Replaces the app with the one in the release's `.zip`, when its folder can be written. A copy opened from the disk image or not yet moved to a folder opens the release page instead |
 | Linux AppImage | Replaces the AppImage file |
 | Linux `.deb` | **Download** opens the new package on GitHub to install with your package manager |

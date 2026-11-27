@@ -76,6 +76,9 @@ type stagedUpdate struct {
 	Asset   string `json:"asset"`
 	Method  string `json:"method"`
 	Sha256  string `json:"sha256"`
+
+	Companion       string `json:"companion,omitempty"`
+	CompanionSha256 string `json:"companionSha256,omitempty"`
 }
 
 type updater struct {
@@ -202,9 +205,10 @@ func (a *App) CancelUpdate() {
 
 type updateTarget struct {
 	version string
-	asset   githubAsset
-	sums    releaseChecksums
-	plan    installPlan
+	asset     githubAsset
+	companion githubAsset
+	sums      releaseChecksums
+	plan      installPlan
 	client  *http.Client
 	key     ed25519.PublicKey
 }
@@ -231,6 +235,7 @@ func (a *App) resolveUpdate(ctx context.Context) (updateTarget, *updateFailure) 
 	asset, sums, usable := installableAsset(release, source, target.plan)
 	if usable {
 		target.asset, target.sums = asset, sums
+		target.companion = companionAsset(release, source, target.plan)
 		return target, nil
 	}
 	if _, found := release.asset(target.plan.Asset); found && target.plan.installs() {
@@ -248,6 +253,11 @@ func (a *App) stageUpdate(ctx context.Context, target updateTarget) (stagedUpdat
 	path := stagedPath(staged)
 	if err := os.MkdirAll(filepath.Dir(path), updateFolderMode); err != nil {
 		return staged, failed(failureStorage, err)
+	}
+	if target.companion.Name != "" {
+		if failure := a.stageCompanion(ctx, target, &staged); failure != nil {
+			return staged, failure
+		}
 	}
 	received, err := a.fetchAsset(ctx, target.client, target.asset, path+partialSuffix, target.version)
 	if err != nil {
@@ -420,7 +430,7 @@ func readStaged() (stagedUpdate, bool) {
 	if err != nil || json.Unmarshal(encoded, &staged) != nil {
 		return staged, false
 	}
-	if staged.Asset != filepath.Base(staged.Asset) || staged.Version != filepath.Base(staged.Version) {
+	if staged.Asset != filepath.Base(staged.Asset) || staged.Version != filepath.Base(staged.Version) || staged.Companion != filepath.Base(staged.Companion) {
 		return staged, false
 	}
 	return staged, true
@@ -452,7 +462,7 @@ func (a *App) restoreUpdate() {
 		return
 	}
 	digest, err := fileDigest(stagedPath(staged))
-	if err != nil || digest != staged.Sha256 {
+	if err != nil || digest != staged.Sha256 || !companionIntact(staged) {
 		os.RemoveAll(updatesFolder())
 		return
 	}
@@ -472,6 +482,10 @@ func clearReplaced(plan installPlan) {
 	case methodPortable, methodAppImage:
 		os.Remove(plan.Target + replacedSuffix)
 		os.Remove(plan.Target + incomingSuffix)
+		if plan.CompanionTarget != "" {
+			os.Remove(plan.CompanionTarget + replacedSuffix)
+			os.Remove(plan.CompanionTarget + incomingSuffix)
+		}
 	case methodBundle:
 		os.RemoveAll(filepath.Join(filepath.Dir(plan.Target), bundleStaging))
 	}
@@ -495,6 +509,9 @@ func applyStaged(staged stagedUpdate, plan installPlan) error {
 	}
 	if digest != staged.Sha256 {
 		return fmt.Errorf(sumMismatch, staged.Sha256, digest)
+	}
+	if err := applyCompanion(staged, plan); err != nil {
+		return err
 	}
 	switch plan.Method {
 	case methodPortable, methodAppImage:

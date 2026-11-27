@@ -16,7 +16,8 @@ Download the latest build from the [releases page](https://github.com/kunalgoesb
 | --- | --- | --- |
 | Windows | `Gostman-windows-amd64.exe` | Installer for all users. Needs administrator rights. Start menu and desktop shortcuts and an uninstaller. It also installs the `gostman` command line, and can add it to the system PATH. |
 | Windows | `Gostman-windows-amd64-user.exe` | Installer for you only. No administrator rights needed. Installs into your user profile with the same shortcuts and uninstaller, and updates itself without a prompt. It also installs the `gostman` command line, and can add it to your PATH. |
-| Windows | `Gostman-windows-amd64-portable.exe` | Single executable, no installation. |
+| Windows | `Gostman-windows-amd64-portable.zip` | Portable, no installation: `Gostman.exe` and the `gostman` command line in a `cli` folder beside it. Unzip it anywhere you can write. |
+| Windows | `Gostman-windows-amd64-portable.exe` | The app alone as a single executable, no installation. |
 | Windows | `gostman-cli-windows-amd64.zip` | The `gostman` command line only. macOS and Linux archives are `gostman-cli-darwin-arm64.tar.gz`, `gostman-cli-darwin-amd64.tar.gz` and `gostman-cli-linux-amd64.tar.gz`. |
 | macOS | `Gostman-darwin-universal.dmg` | Intel and Apple Silicon. Drag Gostman to Applications. |
 | Linux | `Gostman-linux-amd64.deb` | Debian and Ubuntu. Run `sudo apt install ./Gostman-linux-amd64.deb`. |
@@ -33,7 +34,20 @@ Windows needs the WebView2 runtime, which ships with Windows 10 and 11. The inst
 
 ## Install the command line
 
-On Windows, both installers include the command line in a `cli` folder inside the install folder, next to the app. The components page lets you leave it out and choose whether the folder is added to the PATH; open a new terminal after installing to use `gostman`. When the PATH is too long for the installer to change safely, it leaves it alone and tells you the folder to add yourself. A silent install (`/S`) installs both; a silent update keeps what the installed copy had.
+On Windows, both installers include the command line in a `cli` folder inside the install folder, next to the app. The components page lets you leave it out and choose whether the folder is added to the PATH; open a new terminal after installing to use `gostman`. A PATH too long for the installer to read is changed through PowerShell; if that does not work, or the install folder has a `;` or `%` in its name, the installer leaves the PATH alone and tells you the folder to add yourself.
+
+For a silent install or update (`/S`), these switches choose the parts. Put `/D=<folder>` last, without quotes.
+
+| Switch | Effect |
+| --- | --- |
+| `/PATH=0` | Install the command line but leave the PATH alone. |
+| `/PATH=1` | Install the command line and add it to the PATH, also on an update of a copy that did not have it there. |
+| `/CLI=0` | Leave out the command line, and with it the PATH entry. |
+| `/CLI=1` | Install the command line, also on an update of a copy that left it out. |
+
+Without switches a silent install installs the command line and adds it to the PATH, and a silent update keeps what the installed copy had. A copy installed before the command line existed gets the command line on its next update, but not the PATH entry.
+
+The portable zip needs none of this: the app updates the `cli` folder beside it together with itself.
 
 Each release also includes `gostman-cli-<os>-<arch>` archives with a single `gostman` binary. With Go installed, you can also build it from source:
 

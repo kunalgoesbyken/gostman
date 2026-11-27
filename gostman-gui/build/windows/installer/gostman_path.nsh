@@ -4,7 +4,61 @@
 !define GOSTMAN_PATH_LIMIT 1023
 
 !macro gostman.pathFunctions PREFIX ROOT KEY
+    Function ${PREFIX}gostmanPathLong
+        InitPluginsDir
+        FileOpen $0 "$PLUGINSDIR\gostman_path.ps1" w
+        FileWrite $0 "param($$Mode,$$Dir,$$Hive,$$Key)$\r$\n"
+        FileWrite $0 "$$ErrorActionPreference='Stop'$\r$\n"
+        FileWrite $0 "$$root=if($$Hive -eq 'HKLM'){[Microsoft.Win32.Registry]::LocalMachine}else{[Microsoft.Win32.Registry]::CurrentUser}$\r$\n"
+        FileWrite $0 "$$k=$$root.OpenSubKey($$Key,$$true)$\r$\n"
+        FileWrite $0 "$$v=[string]$$k.GetValue('Path','',[Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames)$\r$\n"
+        FileWrite $0 "$$parts=if($$v -eq ''){@()}else{$$v.Split(';')}$\r$\n"
+        FileWrite $0 "$$hit=@($$parts|Where-Object{$$_ -ieq $$Dir}).Count -gt 0$\r$\n"
+        FileWrite $0 "if($$Mode -eq 'add'){if($$hit){'present';exit 0}$\r$\n"
+        FileWrite $0 "$$new=if($$v -eq ''){$$Dir}elseif($$v.EndsWith(';')){$$v+$$Dir}else{$$v+';'+$$Dir}$\r$\n"
+        FileWrite $0 "$$k.SetValue('Path',$$new,[Microsoft.Win32.RegistryValueKind]::ExpandString);'added';exit 0}$\r$\n"
+        FileWrite $0 "if(-not $$hit){'absent';exit 0}$\r$\n"
+        FileWrite $0 "$$left=($$parts|Where-Object{$$_ -ine $$Dir}) -join ';'$\r$\n"
+        FileWrite $0 "if($$left -eq ''){$$k.DeleteValue('Path')}else{$$k.SetValue('Path',$$left,[Microsoft.Win32.RegistryValueKind]::ExpandString)}$\r$\n"
+        FileWrite $0 "'removed'$\r$\n"
+        FileClose $0
+        nsExec::ExecToStack '"powershell.exe" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$PLUGINSDIR\gostman_path.ps1" $R8 "$R9" ${ROOT} "${KEY}"'
+        Pop $0
+        Pop $1
+        Delete "$PLUGINSDIR\gostman_path.ps1"
+        StrCpy $R8 "toolong"
+        StrCmp $0 0 0 done
+        StrCpy $2 $1 5
+        StrCmp $2 "added" 0 +3
+        StrCpy $R8 "added"
+        Goto done
+        StrCpy $2 $1 7
+        StrCmp $2 "present" 0 +3
+        StrCpy $R8 "present"
+        Goto done
+        StrCmp $2 "removed" 0 +3
+        StrCpy $R8 "removed"
+        Goto done
+        StrCpy $2 $1 6
+        StrCmp $2 "absent" 0 done
+        StrCpy $R8 "absent"
+        done:
+    FunctionEnd
+
     Function ${PREFIX}gostmanPathEdit
+        StrCmp $R8 "add" 0 dirChecked
+        StrCpy $6 0
+        checkDir:
+            StrCpy $7 $R9 1 $6
+            StrCmp $7 "" dirChecked
+            StrCmp $7 ";" badName
+            StrCmp $7 "%" badName
+            IntOp $6 $6 + 1
+            Goto checkDir
+        badName:
+        StrCpy $R8 "badname"
+        Return
+        dirChecked:
         SetRegView 64
         ClearErrors
         ReadRegStr $1 ${ROOT} "${KEY}" "Path"
@@ -107,7 +161,7 @@
         Return
 
         tooLong:
-        StrCpy $R8 "toolong"
+        Call ${PREFIX}gostmanPathLong
     FunctionEnd
 !macroend
 

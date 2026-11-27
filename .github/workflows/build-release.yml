@@ -175,7 +175,8 @@ jobs:
       # runtime when it is missing. The bare executable is shipped alongside it
       # as a portable build. The same script is built a second time at user
       # level: it installs into the user profile and needs no administrator
-      # rights.
+      # rights. The portable zip holds the app and the command line (cli folder);
+      # the desktop updater refreshes both when the cli folder is present.
       - name: Build and package (Windows)
         if: matrix.name == 'windows'
         run: |
@@ -185,6 +186,11 @@ jobs:
           mv build/bin/Gostman-amd64-user-installer.exe build/bin/Gostman-windows-amd64-user.exe
           mv build/bin/Gostman.exe build/bin/Gostman-windows-amd64-portable.exe
           mv build/bin/Gostman-amd64-installer.exe build/bin/Gostman-windows-amd64.exe
+          staging=portable-staging
+          mkdir -p "$staging/cli"
+          cp build/bin/Gostman-windows-amd64-portable.exe "$staging/Gostman.exe"
+          cp ../cli-staging/windows-amd64/gostman.exe "$staging/cli/gostman.exe"
+          (cd "$staging" && 7z a -tzip ../build/bin/Gostman-windows-amd64-portable.zip Gostman.exe cli)
 
       # The bundle is ad-hoc signed so it launches on Apple Silicon. It is not
       # notarized, so the first launch still needs right-click > Open.

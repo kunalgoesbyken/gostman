@@ -22,6 +22,9 @@ const (
 	windowsInstallerAsset     = "Gostman-windows-amd64.exe"
 	windowsUserInstallerAsset = "Gostman-windows-amd64-user.exe"
 	windowsPortableAsset      = "Gostman-windows-amd64-portable.exe"
+	windowsCliAsset           = "gostman-cli-windows-amd64.zip"
+	cliFolder                 = "cli"
+	cliExecutable             = "gostman.exe"
 	macBundleAsset            = "Gostman-darwin-universal.zip"
 	linuxAppImageAsset        = "Gostman-linux-x86_64.AppImage"
 	linuxPackageAsset         = "Gostman-linux-amd64.deb"
@@ -42,6 +45,9 @@ type installPlan struct {
 	Asset    string
 	Download string
 	Target   string
+
+	Companion       string
+	CompanionTarget string
 }
 
 func (p installPlan) installs() bool {
@@ -124,9 +130,17 @@ func windowsInstall(exe string) installPlan {
 	case exists(filepath.Join(dir, nsisUninstaller)):
 		return installPlan{Method: methodInstaller, Asset: windowsInstallerAsset, Target: exe}
 	case writable(dir):
-		return installPlan{Method: methodPortable, Asset: windowsPortableAsset, Target: exe}
+		return portablePlan(exe, dir)
 	}
 	return manualInstall("", "")
+}
+
+func portablePlan(exe, dir string) installPlan {
+	plan := installPlan{Method: methodPortable, Asset: windowsPortableAsset, Target: exe}
+	if cli := filepath.Join(dir, cliFolder, cliExecutable); exists(cli) {
+		plan.Companion, plan.CompanionTarget = windowsCliAsset, cli
+	}
+	return plan
 }
 
 func macBundle(exe string) string {

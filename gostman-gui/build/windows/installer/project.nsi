@@ -160,8 +160,18 @@ Section "Command line tool" SecCli
     ${If} ${FileExists} "$INSTDIR\cli\gostman.exe"
         Rename "$INSTDIR\cli\gostman.exe" "$INSTDIR\cli\gostman.old"
     ${EndIf}
+    ClearErrors
+    SetOverwrite try
     File "/oname=gostman.exe" "${ARG_CLI_BINARY}"
-    Delete "$INSTDIR\cli\gostman.old"
+    SetOverwrite on
+    ${If} ${Errors}
+        ${IfNot} ${FileExists} "$INSTDIR\cli\gostman.exe"
+            Rename "$INSTDIR\cli\gostman.old" "$INSTDIR\cli\gostman.exe"
+        ${EndIf}
+        DetailPrint "The command line tool is in use, so it was left as it was. Close it and run the installer again to update it."
+    ${Else}
+        Delete "$INSTDIR\cli\gostman.old"
+    ${EndIf}
 SectionEnd
 
 Section "${PATH_SECTION_NAME}" SecPath
@@ -182,6 +192,9 @@ Section "${PATH_SECTION_NAME}" SecPath
         DetailPrint "Added $INSTDIR\cli to the PATH. Open a new terminal to use it."
     ${ElseIf} $R8 == "unsafe"
         DetailPrint "Not adding $INSTDIR\cli to the system PATH: the install folder is outside Program Files, where any user could change it."
+    ${ElseIf} $R8 == "badname"
+        DetailPrint "Not adding $INSTDIR\cli to the PATH: the folder name has a ; or a % in it."
+        MessageBox MB_OK|MB_ICONINFORMATION "The install folder has a ; or a % in its name, which the PATH cannot hold safely, so the PATH was left as it is.$\r$\n$\r$\nInstall to another folder to use gostman from a terminal, or run it by its full path:$\r$\n$INSTDIR\cli\gostman.exe" /SD IDOK
     ${ElseIf} $R8 == "toolong"
         DetailPrint "The PATH is too long to change safely. Add $INSTDIR\cli to it yourself."
         MessageBox MB_OK|MB_ICONINFORMATION "The PATH is too long for the installer to change safely, so it was left as it is.$\r$\n$\r$\nTo type gostman in a terminal, add this folder to the PATH yourself:$\r$\n$INSTDIR\cli" /SD IDOK
@@ -190,6 +203,13 @@ SectionEnd
 
 Section "-Finish"
     !insertmacro gostman.writeUninstaller
+    SetRegView 64
+    ${If} ${SectionIsSelected} ${SecCli}
+    ${OrIf} ${FileExists} "$INSTDIR\cli\gostman.exe"
+        WriteRegDWORD ${UNINST_ROOT} "${UNINST_KEY}" "GostmanCli" 1
+    ${Else}
+        WriteRegDWORD ${UNINST_ROOT} "${UNINST_KEY}" "GostmanCli" 0
+    ${EndIf}
 SectionEnd
 
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
@@ -210,7 +230,10 @@ Function .onInit
 
     ${If} ${Silent}
     ${AndIf} ${FileExists} "$INSTDIR\uninstall.exe"
-        ${IfNot} ${FileExists} "$INSTDIR\cli\gostman.exe"
+        ClearErrors
+        ReadRegDWORD $0 ${UNINST_ROOT} "${UNINST_KEY}" "GostmanCli"
+        ${IfNot} ${Errors}
+        ${AndIf} $0 == 0
             !insertmacro UnselectSection ${SecCli}
         ${EndIf}
         StrCpy $R8 "has"
@@ -219,6 +242,24 @@ Function .onInit
         ${If} $R8 != "yes"
             !insertmacro UnselectSection ${SecPath}
         ${EndIf}
+    ${EndIf}
+
+    ${GetParameters} $R0
+    StrCpy $R1 ""
+    ${GetOptions} $R0 "/PATH=" $R1
+    ${If} $R1 == "0"
+        !insertmacro UnselectSection ${SecPath}
+    ${ElseIf} $R1 == "1"
+        !insertmacro SelectSection ${SecCli}
+        !insertmacro SelectSection ${SecPath}
+    ${EndIf}
+    StrCpy $R1 ""
+    ${GetOptions} $R0 "/CLI=" $R1
+    ${If} $R1 == "0"
+        !insertmacro UnselectSection ${SecCli}
+        !insertmacro UnselectSection ${SecPath}
+    ${ElseIf} $R1 == "1"
+        !insertmacro SelectSection ${SecCli}
     ${EndIf}
 FunctionEnd
 
