@@ -10,7 +10,7 @@ The extension calls the Gostman command line, so a request or a run in VS Code g
 
 ## Requirements
 
-Install the Gostman CLI. The extension starts `gostman` from the PATH, or from `GOBIN`, `GOPATH/bin` or `~/go/bin` where `go install` puts it (and `/opt/homebrew/bin`, `/usr/local/bin` or `~/.local/bin` on macOS and Linux); anywhere else, set `gostman.path` to the full path. Downloads: https://github.com/kunalgoesbyken/gostman/releases
+Install the Gostman CLI. The extension starts `gostman` from the PATH, or from `GOBIN`, `GOPATH/bin` or `~/go/bin` where `go install` puts it (and `/opt/homebrew/bin`, `/usr/local/bin` or `~/.local/bin` on macOS and Linux, or the `cli` folder of the Gostman installer on Windows); anywhere else, set `gostman.path` to the full path. Downloads: https://github.com/kunalgoesbyken/gostman/releases
 
 ## Collections
 

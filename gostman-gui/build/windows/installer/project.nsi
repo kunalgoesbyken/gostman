@@ -34,6 +34,16 @@ SetCompressor /SOLID lzma
 ## Include the wails tools
 ####
 !include "wails_tools.nsh"
+!include "Sections.nsh"
+!include "gostman_path.nsh"
+
+!ifndef ARG_CLI_BINARY
+    !define ARG_CLI_BINARY "..\..\..\..\cli-staging\windows-amd64\gostman.exe"
+!endif
+!if /FileExists "${ARG_CLI_BINARY}"
+!else
+    !error "The command line build is missing: ${ARG_CLI_BINARY}. Build ./cmd/gostman for windows/amd64 into that path first."
+!endif
 
 # The version information for this two must consist of 4 parts
 VIProductVersion "${INFO_PRODUCTVERSION}.0"
@@ -59,6 +69,7 @@ ManifestDPIAware true
 
 !insertmacro MUI_PAGE_WELCOME # Welcome to the installer page.
 # !insertmacro MUI_PAGE_LICENSE "resources\eula.txt" # Adds a EULA page to the installer
+!insertmacro MUI_PAGE_COMPONENTS # Which parts to install.
 !insertmacro MUI_PAGE_DIRECTORY # In which folder install page.
 !insertmacro MUI_PAGE_INSTFILES # Installing page.
 !insertmacro MUI_PAGE_FINISH # Finished installation page.
@@ -74,14 +85,27 @@ ManifestDPIAware true
 Name "${INFO_PRODUCTNAME}"
 !if "${REQUEST_EXECUTION_LEVEL}" == "user"
     !define UNINST_ROOT HKCU
+    !define OTHER_ROOT HKLM
+    !define OTHER_SCOPE_WARNING "Gostman is already installed for all users. Installing it for your account only gives you two copies. Continue?"
+    !define ENV_ROOT HKCU
+    !define ENV_KEY "Environment"
+    !define PATH_SECTION_NAME "Add the command line tool to your PATH"
     OutFile "..\..\bin\${INFO_PROJECTNAME}-${ARCH}-user-installer.exe"
     InstallDir "$LOCALAPPDATA\Programs\${INFO_PRODUCTNAME}"
 !else
     !define UNINST_ROOT HKLM
+    !define OTHER_ROOT HKCU
+    !define OTHER_SCOPE_WARNING "Gostman is already installed for your account only. Installing it for all users gives you two copies. Continue?"
+    !define ENV_ROOT HKLM
+    !define ENV_KEY "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
+    !define PATH_SECTION_NAME "Add the command line tool to the system PATH"
     OutFile "..\..\bin\${INFO_PROJECTNAME}-${ARCH}-installer.exe" # Name of the installer's file.
     InstallDir "$PROGRAMFILES64\${INFO_COMPANYNAME}\${INFO_PRODUCTNAME}" # Default installing folder ($PROGRAMFILES is Program Files folder).
 !endif
 ShowInstDetails show # This will always show the installation details.
+
+!insertmacro gostman.pathFunctions "" ${ENV_ROOT} "${ENV_KEY}"
+!insertmacro gostman.pathFunctions "un." ${ENV_ROOT} "${ENV_KEY}"
 
 !macro gostman.writeUninstaller
     WriteUninstaller "$INSTDIR\uninstall.exe"
@@ -111,11 +135,8 @@ ShowInstDetails show # This will always show the installation details.
     DeleteRegKey ${UNINST_ROOT} "${UNINST_KEY}"
 !macroend
 
-Function .onInit
-   !insertmacro wails.checkArchitecture
-FunctionEnd
-
-Section
+Section "Gostman" SecApp
+    SectionIn RO
     !insertmacro wails.setShellContext
 
     !insertmacro wails.webview2runtime
@@ -130,15 +151,100 @@ Section
     !insertmacro wails.associateFiles
     !insertmacro wails.associateCustomProtocols
 
+SectionEnd
+
+Section "Command line tool" SecCli
+    SetOutPath "$INSTDIR\cli"
+
+    Delete "$INSTDIR\cli\gostman.old"
+    ${If} ${FileExists} "$INSTDIR\cli\gostman.exe"
+        Rename "$INSTDIR\cli\gostman.exe" "$INSTDIR\cli\gostman.old"
+    ${EndIf}
+    File "/oname=gostman.exe" "${ARG_CLI_BINARY}"
+    Delete "$INSTDIR\cli\gostman.old"
+SectionEnd
+
+Section "${PATH_SECTION_NAME}" SecPath
+    StrCpy $R8 "add"
+    StrCpy $R9 "$INSTDIR\cli"
+    !if "${REQUEST_EXECUTION_LEVEL}" != "user"
+        StrLen $0 "$PROGRAMFILES64"
+        StrCpy $1 "$INSTDIR" $0
+        ${If} $1 != "$PROGRAMFILES64"
+            StrCpy $R8 "unsafe"
+        ${EndIf}
+    !endif
+    ${If} $R8 == "add"
+        Call gostmanPathEdit
+    ${EndIf}
+    ${If} $R8 == "added"
+        !insertmacro gostman.broadcastEnvironment
+        DetailPrint "Added $INSTDIR\cli to the PATH. Open a new terminal to use it."
+    ${ElseIf} $R8 == "unsafe"
+        DetailPrint "Not adding $INSTDIR\cli to the system PATH: the install folder is outside Program Files, where any user could change it."
+    ${ElseIf} $R8 == "toolong"
+        DetailPrint "The PATH is too long to change safely. Add $INSTDIR\cli to it yourself."
+        MessageBox MB_OK|MB_ICONINFORMATION "The PATH is too long for the installer to change safely, so it was left as it is.$\r$\n$\r$\nTo type gostman in a terminal, add this folder to the PATH yourself:$\r$\n$INSTDIR\cli" /SD IDOK
+    ${EndIf}
+SectionEnd
+
+Section "-Finish"
     !insertmacro gostman.writeUninstaller
 SectionEnd
+
+!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecApp} "The Gostman desktop app."
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecCli} "The gostman command for terminals, CI and coding agents, installed next to the app."
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecPath} "Lets you type gostman in any new terminal."
+!insertmacro MUI_FUNCTION_DESCRIPTION_END
+
+Function .onInit
+    !insertmacro wails.checkArchitecture
+
+    SetRegView 64
+    ReadRegStr $0 ${OTHER_ROOT} "${UNINST_KEY}" "UninstallString"
+    ${If} $0 != ""
+        MessageBox MB_YESNO|MB_ICONEXCLAMATION "${OTHER_SCOPE_WARNING}" /SD IDYES IDYES +2
+        Abort
+    ${EndIf}
+
+    ${If} ${Silent}
+    ${AndIf} ${FileExists} "$INSTDIR\uninstall.exe"
+        ${IfNot} ${FileExists} "$INSTDIR\cli\gostman.exe"
+            !insertmacro UnselectSection ${SecCli}
+        ${EndIf}
+        StrCpy $R8 "has"
+        StrCpy $R9 "$INSTDIR\cli"
+        Call gostmanPathEdit
+        ${If} $R8 != "yes"
+            !insertmacro UnselectSection ${SecPath}
+        ${EndIf}
+    ${EndIf}
+FunctionEnd
+
+Function .onSelChange
+    ${IfNot} ${SectionIsSelected} ${SecCli}
+        !insertmacro UnselectSection ${SecPath}
+    ${EndIf}
+FunctionEnd
 
 Section "uninstall"
     !insertmacro wails.setShellContext
 
     RMDir /r "$AppData\${PRODUCT_EXECUTABLE}" # Remove the WebView2 DataPath
 
-    RMDir /r $INSTDIR
+    StrCpy $R8 "remove"
+    StrCpy $R9 "$INSTDIR\cli"
+    Call un.gostmanPathEdit
+    ${If} $R8 == "removed"
+        !insertmacro gostman.broadcastEnvironment
+    ${EndIf}
+
+    Delete "$INSTDIR\${PRODUCT_EXECUTABLE}"
+    Delete "$INSTDIR\cli\gostman.exe"
+    Delete "$INSTDIR\cli\gostman.old"
+    RMDir "$INSTDIR\cli"
+    Delete "$INSTDIR\per-user"
 
     Delete "$SMPROGRAMS\${INFO_PRODUCTNAME}.lnk"
     Delete "$DESKTOP\${INFO_PRODUCTNAME}.lnk"
@@ -147,4 +253,5 @@ Section "uninstall"
     !insertmacro wails.unassociateCustomProtocols
 
     !insertmacro gostman.deleteUninstaller
+    RMDir "$INSTDIR"
 SectionEnd

@@ -95,6 +95,23 @@ jobs:
         if: matrix.name == 'windows'
         run: command -v makensis || choco install nsis -y --no-progress
 
+      # The command line is built first because the Windows installers carry
+      # it (in a cli folder, next to the app) and `wails build -clean` empties
+      # build/bin, so it is staged outside of it.
+      - name: Build the CLI
+        working-directory: .
+        env:
+          CGO_ENABLED: '0'
+          CLI_TARGETS: ${{ matrix.cli_targets }}
+        run: |
+          for target in $CLI_TARGETS; do
+            export GOOS="${target%/*}" GOARCH="${target#*/}"
+            out="cli-staging/$GOOS-$GOARCH/gostman"
+            if [ "$GOOS" = windows ]; then out="$out.exe"; fi
+            mkdir -p "$(dirname "$out")"
+            go build -tags grpcnotrace -trimpath -ldflags "-s -w -X main.version=$VERSION" -o "$out" ./cmd/gostman
+          done
+
       - name: Install Wails
         run: go install github.com/wailsapp/wails/v2/cmd/wails@${{ env.WAILS_VERSION }}
 
@@ -153,11 +170,12 @@ jobs:
             --plugin gtk --output appimage
           mv "${LDAI_OUTPUT##*/}.zsync" "$(dirname "$LDAI_OUTPUT")/"
 
-      # The installer adds Start menu and desktop shortcuts, an uninstaller and
-      # the WebView2 runtime when it is missing. The bare executable is shipped
-      # alongside it as a portable build. The same script is built a second
-      # time at user level: it installs into the user profile and needs no
-      # administrator rights.
+      # The installer adds Start menu and desktop shortcuts, an uninstaller, the
+      # command line (cli-staging, optionally added to the PATH) and the WebView2
+      # runtime when it is missing. The bare executable is shipped alongside it
+      # as a portable build. The same script is built a second time at user
+      # level: it installs into the user profile and needs no administrator
+      # rights.
       - name: Build and package (Windows)
         if: matrix.name == 'windows'
         run: |
@@ -192,22 +210,18 @@ jobs:
           hdiutil create -volname Gostman -srcfolder "$staging" -size "$(( $(du -sm "$staging" | cut -f1) * 2 + 64 ))m" -ov -format UDZO build/bin/Gostman-darwin-universal.dmg
           ditto -c -k --keepParent build/bin/Gostman.app build/bin/Gostman-darwin-universal.zip
 
-      - name: Build and package the CLI
+      - name: Package the CLI
         working-directory: .
         env:
-          CGO_ENABLED: '0'
           CLI_TARGETS: ${{ matrix.cli_targets }}
         run: |
           for target in $CLI_TARGETS; do
-            export GOOS="${target%/*}" GOARCH="${target#*/}"
-            staging="cli-staging/$GOOS-$GOARCH"
-            archive="gostman-gui/build/bin/gostman-cli-$GOOS-$GOARCH"
-            mkdir -p "$staging"
-            if [ "$GOOS" = windows ]; then
-              go build -tags grpcnotrace -trimpath -ldflags "-s -w -X main.version=$VERSION" -o "$staging/gostman.exe" ./cmd/gostman
+            goos="${target%/*}" goarch="${target#*/}"
+            staging="cli-staging/$goos-$goarch"
+            archive="gostman-gui/build/bin/gostman-cli-$goos-$goarch"
+            if [ "$goos" = windows ]; then
               (cd "$staging" && 7z a -tzip "../../$archive.zip" gostman.exe)
             else
-              go build -tags grpcnotrace -trimpath -ldflags "-s -w -X main.version=$VERSION" -o "$staging/gostman" ./cmd/gostman
               tar -czf "$archive.tar.gz" -C "$staging" gostman
             fi
           done

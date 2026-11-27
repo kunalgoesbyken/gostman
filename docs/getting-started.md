@@ -14,8 +14,8 @@ Download the latest build from the [releases page](https://github.com/kunalgoesb
 
 | Platform | File | Notes |
 | --- | --- | --- |
-| Windows | `Gostman-windows-amd64.exe` | Installer for all users. Needs administrator rights. Start menu and desktop shortcuts and an uninstaller. |
-| Windows | `Gostman-windows-amd64-user.exe` | Installer for you only. No administrator rights needed. Installs into your user profile with the same shortcuts and uninstaller, and updates itself without a prompt. |
+| Windows | `Gostman-windows-amd64.exe` | Installer for all users. Needs administrator rights. Start menu and desktop shortcuts and an uninstaller. It also installs the `gostman` command line, and can add it to the system PATH. |
+| Windows | `Gostman-windows-amd64-user.exe` | Installer for you only. No administrator rights needed. Installs into your user profile with the same shortcuts and uninstaller, and updates itself without a prompt. It also installs the `gostman` command line, and can add it to your PATH. |
 | Windows | `Gostman-windows-amd64-portable.exe` | Single executable, no installation. |
 | Windows | `gostman-cli-windows-amd64.zip` | The `gostman` command line only. macOS and Linux archives are `gostman-cli-darwin-arm64.tar.gz`, `gostman-cli-darwin-amd64.tar.gz` and `gostman-cli-linux-amd64.tar.gz`. |
 | macOS | `Gostman-darwin-universal.dmg` | Intel and Apple Silicon. Drag Gostman to Applications. |
@@ -33,7 +33,9 @@ Windows needs the WebView2 runtime, which ships with Windows 10 and 11. The inst
 
 ## Install the command line
 
-Each release includes `gostman-cli-<os>-<arch>` archives with a single `gostman` binary. With Go installed, you can also build it from source:
+On Windows, both installers include the command line in a `cli` folder inside the install folder, next to the app. The components page lets you leave it out and choose whether the folder is added to the PATH; open a new terminal after installing to use `gostman`. When the PATH is too long for the installer to change safely, it leaves it alone and tells you the folder to add yourself. A silent install (`/S`) installs both; a silent update keeps what the installed copy had.
+
+Each release also includes `gostman-cli-<os>-<arch>` archives with a single `gostman` binary. With Go installed, you can also build it from source:
 
 ```bash
 go install github.com/kunalgoesbyken/gostman/cmd/gostman@latest

@@ -32,10 +32,19 @@ function onPath() {
   return listed(process.env.PATH ?? process.env.Path).some((directory) => names.some((name) => isExecutable(path.join(directory, name))));
 }
 
+function installerPlaces() {
+  const { LOCALAPPDATA, ProgramW6432, ProgramFiles } = process.env;
+  const programs = ProgramW6432 ?? ProgramFiles;
+  return [
+    LOCALAPPDATA && path.join(LOCALAPPDATA, "Programs", "Gostman", "cli"),
+    programs && path.join(programs, "Gostman", "Gostman", "cli"),
+  ];
+}
+
 function installPlaces() {
   const home = os.homedir();
   const goPaths = listed(process.env.GOPATH).map((directory) => path.join(directory, "bin"));
-  const common = WINDOWS ? [] : ["/opt/homebrew/bin", "/usr/local/bin", path.join(home, ".local", "bin")];
+  const common = WINDOWS ? installerPlaces() : ["/opt/homebrew/bin", "/usr/local/bin", path.join(home, ".local", "bin")];
   return [process.env.GOBIN, ...goPaths, path.join(home, "go", "bin"), ...common].filter(Boolean);
 }
 

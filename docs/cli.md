@@ -1,6 +1,6 @@
 # Command line
 
-Each release includes `gostman-cli-<os>-<arch>` archives with a single `gostman` binary. With Go installed, `go install github.com/kunalgoesbyken/gostman/cmd/gostman@latest` installs it, and `go build ./cmd/gostman` builds it from a checkout.
+The Windows installers put it in a `cli` folder inside the install folder and can add that folder to the PATH. Each release also includes `gostman-cli-<os>-<arch>` archives with a single `gostman` binary. With Go installed, `go install github.com/kunalgoesbyken/gostman/cmd/gostman@latest` installs it, and `go build ./cmd/gostman` builds it from a checkout.
 
 On macOS the binary is not notarized: run `xattr -d com.apple.quarantine gostman` once.
 

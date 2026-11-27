@@ -7,11 +7,13 @@ All notable changes to Gostman are listed here, following [Keep a Changelog](htt
 ### Added
 
 - `gostman run --row-label <column>` names each iteration of a data-driven run by a column of its row, so a failed check in the text, JUnit, Markdown and HTML reports reads `Login [iteration 3: expired token]` instead of only the number; the JSON report adds `label`.
-- A Windows installer that needs no administrator rights (#54): `Gostman-windows-amd64-user.exe` installs into your user profile with its own shortcuts and uninstaller, and updates itself without a prompt. The download menu on the site now also lists it, the portable build and the command line archives for every system.
+- A Windows installer that needs no administrator rights (#54): `Gostman-windows-amd64-user.exe` installs into your user profile with its own shortcuts and uninstaller, and updates itself without a prompt. The download menu on the site now also lists it, the portable build and the command line archives for every system, and offers the no-admin installer first.
+- Both Windows installers include the `gostman` command line (#54), in a `cli` folder next to the app, with a components page to leave it out and to add it to the PATH. The PATH is left alone when it is too long to change safely, and the installer says which folder to add. A silent update keeps what the installed copy had, an update works while `gostman` is running (for example under the VS Code extension), and the VS Code extension finds the installed command without a PATH entry.
 - `gostman run --row 3,7` reruns only those rows of the data file, in file order, each with the iteration number, `iteration` and `iterationCount` it had in the full run, so the names in the report match the run that failed.
 
 ### Fixed
 
+- Uninstalling Gostman on Windows removes only the files the installer wrote, so a folder you chose that holds other files keeps them. Installing the all-users and the current-user installer on the same machine now asks first.
 - The response panel can be resized in the **Right** layout (#53): drag the line between request and response, use the left and right arrow keys on it, or double-click it to reset. The width is remembered separately from the height in the **Below** layout. When the window or the open sidebar leaves too little room for both panes, the response moves below the request instead of squeezing it, and collapsing the response in the Right layout shrinks it to a slim column.
 - The top bar no longer overlaps itself in narrow windows: the environment picker stays inside its space, and Tools, Import and Install app show only their icons when there is no room for their labels.
 - Flow files with a step kind such as `constructor` or `__proto__` no longer break opening the flow, and a header name with a quote in a Thunder Client or Hurl import no longer breaks its check.
