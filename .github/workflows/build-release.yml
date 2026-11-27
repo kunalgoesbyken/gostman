@@ -163,7 +163,7 @@ jobs:
         run: |
           export PATH="$PATH:/c/Program Files (x86)/NSIS"
           wails build -clean -platform windows/amd64 -nsis -tags grpcnotrace
-          (cd build/windows/installer && makensis -DARG_WAILS_AMD64_BINARY=../../bin/Gostman.exe -DREQUEST_EXECUTION_LEVEL=user project.nsi)
+          (cd build/windows/installer && makensis '-DARG_WAILS_AMD64_BINARY=..\..\bin\Gostman.exe' -DREQUEST_EXECUTION_LEVEL=user project.nsi)
           mv build/bin/Gostman-amd64-user-installer.exe build/bin/Gostman-windows-amd64-user.exe
           mv build/bin/Gostman.exe build/bin/Gostman-windows-amd64-portable.exe
           mv build/bin/Gostman-amd64-installer.exe build/bin/Gostman-windows-amd64.exe
