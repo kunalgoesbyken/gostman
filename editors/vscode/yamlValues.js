@@ -23,9 +23,8 @@ function closingQuote(text, quote) {
   return text.length;
 }
 
-function unquoted(text) {
+function unquoted(text, end = closingQuote(text, text[0])) {
   const quote = text[0];
-  const end = closingQuote(text, quote);
   const inner = text.slice(1, end);
   if (quote === "'") return inner.replaceAll("''", "'");
   try {
@@ -48,11 +47,14 @@ function readValues(text, keys) {
   for (const raw of body.split("\n")) {
     const line = raw.endsWith("\r") ? raw.slice(0, -1) : raw;
     if (line === "" || NOT_A_KEY_START.has(line[0])) continue;
-    const colon = line.indexOf(":");
-    const key = line.slice(0, colon);
+    const quote = line[0];
+    const endQuote = quote === '"' || quote === "'" ? closingQuote(line, quote) : -1;
+    const colon = line.indexOf(":", endQuote + 1);
+    if (colon < 1 || (endQuote >= 0 && /[^ \t]/.test(line.slice(endQuote + 1, colon)))) continue;
+    const key = endQuote >= 0 ? unquoted(line, endQuote) : line.slice(0, colon);
     const rest = line.slice(colon + 1);
     const endsKey = rest === "" || rest[0] === " " || rest[0] === "\t";
-    if (colon < 1 || !endsKey || !keys.includes(key) || found.has(key)) continue;
+    if (!endsKey || !keys.includes(key) || found.has(key)) continue;
     found.set(key, scalar(rest.trim()));
   }
   return found;
